@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html  lang="zh">
+
+<head>
+    <meta charset="utf-8" />
+
+<meta name="generator" content="Hexo 3.9.0" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<title>Flutter深入之插件新API——Embedding-V2 - 富贵山庄</title>
+
+
+    <meta name="description" content="在Flutter1.12版本中正式将Embedding-V2API在Android平台默认开启，所有官方插件都迁移到了新的API。Embedding-V2APi的优势在于针对混合开发提供了更好的支持。 版本配置GeneratedPluginRegistrant生成内容配置，通过在AndroidManifest.xml中配置Embedding的版本来确定工具生成的GeneratedPluginReg">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flutter深入之插件新API——Embedding-V2">
+<meta property="og:url" content="https://witgao.com/Flutter深入之插件新API-Embedding-V2/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:description" content="在Flutter1.12版本中正式将Embedding-V2API在Android平台默认开启，所有官方插件都迁移到了新的API。Embedding-V2APi的优势在于针对混合开发提供了更好的支持。 版本配置GeneratedPluginRegistrant生成内容配置，通过在AndroidManifest.xml中配置Embedding的版本来确定工具生成的GeneratedPluginReg">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://witgao.com/images/og_image.png">
+<meta property="og:updated_time" content="2020-07-13T13:45:25.847Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Flutter深入之插件新API——Embedding-V2">
+<meta name="twitter:description" content="在Flutter1.12版本中正式将Embedding-V2API在Android平台默认开启，所有官方插件都迁移到了新的API。Embedding-V2APi的优势在于针对混合开发提供了更好的支持。 版本配置GeneratedPluginRegistrant生成内容配置，通过在AndroidManifest.xml中配置Embedding的版本来确定工具生成的GeneratedPluginReg">
+<meta name="twitter:image" content="https://witgao.com/images/og_image.png">
+
+
+
+
+
+
+
+<link rel="icon" href="/images/favicon1.svg">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/default.css">
+
+
+    
+    
+<style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+    
+    
+    
+    
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+    
+    
+    
+    
+    
+    
+    
+    <link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+    
+    
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body class="is-3-column">
+    <nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="/images/logo2.png" alt="Flutter深入之插件新API——Embedding-V2" height="28">
+            
+            </a>
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item"
+                href="/">燕子坞</a>
+                
+                <a class="navbar-item"
+                href="/archives">听香水榭</a>
+                
+                <a class="navbar-item"
+                href="/categories">还施水阁</a>
+                
+                <a class="navbar-item"
+                href="/about">思过崖</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    <a class="navbar-item" target="_blank" title="Download on GitHub" href="https://github.com/witgao/blog">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                <a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;">
+                    <i class="fas fa-list-ul"></i>
+                </a>
+                
+                
+                <a class="navbar-item search" title="搜索" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-9-widescreen has-order-2 column-main">
+<div class="card">
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2019-12-30T13:42:46.000Z">2019-12-30</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/">刀枪棍棒（Android）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/伏魔杖法（Flutter）/">伏魔杖法（Flutter）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    10 分钟 读完 (大约 1568 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            Flutter深入之插件新API——Embedding-V2
+            
+        </h1>
+        <div class="content">
+            <p>在Flutter1.12版本中正式将Embedding-V2API在Android平台默认开启，所有官方插件都迁移到了新的API。Embedding-V2APi的优势在于针对混合开发提供了更好的支持。</p>
+<h2 id="版本配置"><a href="#版本配置" class="headerlink" title="版本配置"></a>版本配置</h2><p>GeneratedPluginRegistrant生成内容配置，通过在AndroidManifest.xml中配置Embedding的版本来确定工具生成的GeneratedPluginRegistrant类的内容。<br><figure class="highlight xml hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">&lt;!-- Don't delete the meta-data below.</span></span><br><span class="line"><span class="hljs-comment">     It is used by the Flutter tool to generate GeneratedPluginRegistrant.java --&gt;</span></span><br><span class="line"><span class="hljs-tag">&lt;<span class="hljs-name">meta-data</span></span></span><br><span class="line"><span class="hljs-tag">    <span class="hljs-attr">android:name</span>=<span class="hljs-string">"flutterEmbedding"</span></span></span><br><span class="line"><span class="hljs-tag">    <span class="hljs-attr">android:value</span>=<span class="hljs-string">"2"</span> /&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>具体判定逻辑在flutter_tools项目中<br><figure class="highlight dart hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">  AndroidEmbeddingVersion getEmbeddingVersion() &#123;</span><br><span class="line">    <span class="hljs-keyword">if</span> (isModule) &#123;</span><br><span class="line">      <span class="hljs-comment">// A module type's Android project is used in add-to-app scenarios and</span></span><br><span class="line">      <span class="hljs-comment">// only supports the V2 embedding.</span></span><br><span class="line">      <span class="hljs-keyword">return</span> AndroidEmbeddingVersion.v2;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">if</span> (appManifestFile == <span class="hljs-keyword">null</span> || !appManifestFile.existsSync()) &#123;</span><br><span class="line">      <span class="hljs-keyword">return</span> AndroidEmbeddingVersion.v1;</span><br><span class="line">    &#125;</span><br><span class="line">    xml.XmlDocument <span class="hljs-built_in">document</span>;</span><br><span class="line">    <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">      <span class="hljs-built_in">document</span> = xml.parse(appManifestFile.readAsStringSync());</span><br><span class="line">    &#125; on xml.XmlParserException &#123;</span><br><span class="line">      throwToolExit(<span class="hljs-string">'Error parsing $appManifestFile '</span></span><br><span class="line">                    <span class="hljs-string">'Please ensure that the android manifest is a valid XML document and try again.'</span>);</span><br><span class="line">    &#125; on FileSystemException &#123;</span><br><span class="line">      throwToolExit(<span class="hljs-string">'Error reading $appManifestFile even though it exists. '</span></span><br><span class="line">                    <span class="hljs-string">'Please ensure that you have read permission to this file and try again.'</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">for</span> (xml.XmlElement metaData <span class="hljs-keyword">in</span> <span class="hljs-built_in">document</span>.findAllElements(<span class="hljs-string">'meta-data'</span>)) &#123;</span><br><span class="line">      <span class="hljs-keyword">final</span> <span class="hljs-built_in">String</span> name = metaData.getAttribute(<span class="hljs-string">'android:name'</span>);</span><br><span class="line">      <span class="hljs-keyword">if</span> (name == <span class="hljs-string">'flutterEmbedding'</span>) &#123;</span><br><span class="line">        <span class="hljs-keyword">final</span> <span class="hljs-built_in">String</span> embeddingVersionString = metaData.getAttribute(<span class="hljs-string">'android:value'</span>);</span><br><span class="line">        <span class="hljs-keyword">if</span> (embeddingVersionString == <span class="hljs-string">'1'</span>) &#123;</span><br><span class="line">          <span class="hljs-keyword">return</span> AndroidEmbeddingVersion.v1;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="hljs-keyword">if</span> (embeddingVersionString == <span class="hljs-string">'2'</span>) &#123;</span><br><span class="line">          <span class="hljs-keyword">return</span> AndroidEmbeddingVersion.v2;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">return</span> AndroidEmbeddingVersion.v1;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="创建时机变更"><a href="#创建时机变更" class="headerlink" title="创建时机变更"></a>创建时机变更</h2><h3 id="旧API"><a href="#旧API" class="headerlink" title="旧API"></a>旧API</h3><p>旧的创建插件的时机一般是在FlutterActivity的子类onCreate()回调时，手动调用下面的方法来创建所有的插件。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GeneratedPluginRegistrant.registerWith(PluginRegistry registry);</span><br></pre></td></tr></table></figure>
+<h3 id="新API"><a href="#新API" class="headerlink" title="新API"></a>新API</h3><p>新的API将插件与视图进行解绑，将插件与引擎进行绑定，并且在引擎创建的时候提供了自动创建插件的功能。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">FlutterEngine</span><span class="hljs-params">(</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    @NonNull Context context,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    @NonNull FlutterLoader flutterLoader,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    @NonNull FlutterJNI flutterJNI,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    @Nullable String[] dartVmArgs,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    <span class="hljs-keyword">boolean</span> automaticallyRegisterPlugins</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">)</span> </span>&#123;</span><br><span class="line"> </span><br><span class="line">  <span class="hljs-keyword">this</span>.pluginRegistry = <span class="hljs-keyword">new</span> FlutterEnginePluginRegistry(</span><br><span class="line">    context.getApplicationContext(),</span><br><span class="line">    <span class="hljs-keyword">this</span>,</span><br><span class="line">    flutterLoader</span><br><span class="line">  );</span><br><span class="line">  <span class="hljs-comment">// 默认为true，自动创建插件</span></span><br><span class="line">  <span class="hljs-keyword">if</span> (automaticallyRegisterPlugins) &#123;</span><br><span class="line">    registerPlugins();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">// 通过反射调用GeneratedPluginRegistrant.registerWith(FlutterEngine engine)方法</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">registerPlugins</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">    Class&lt;?&gt; generatedPluginRegistrant = Class.forName(<span class="hljs-string">"io.flutter.plugins.GeneratedPluginRegistrant"</span>);</span><br><span class="line">    Method registrationMethod = generatedPluginRegistrant.getDeclaredMethod(<span class="hljs-string">"registerWith"</span>, FlutterEngine.class);</span><br><span class="line">    registrationMethod.invoke(<span class="hljs-keyword">null</span>, <span class="hljs-keyword">this</span>);</span><br><span class="line">  &#125; <span class="hljs-keyword">catch</span> (Exception e) &#123;</span><br><span class="line">    Log.w(TAG, <span class="hljs-string">"Tried to automatically register plugins with FlutterEngine ("</span></span><br><span class="line">        + <span class="hljs-keyword">this</span> + <span class="hljs-string">") but could not find and invoke the GeneratedPluginRegistrant."</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+ <a id="more"></a>
+<h2 id="注册对象变更"><a href="#注册对象变更" class="headerlink" title="注册对象变更"></a>注册对象变更</h2><h3 id="旧API-1"><a href="#旧API-1" class="headerlink" title="旧API"></a>旧API</h3><p>在旧的API中，registerWith方法接收的参数类型是PluginRegistry。PluginRegistry（io.flutter.plugin.common包）维护所有的插件，每一个想注册的插件都通过pluginKey在PluginRegistry这里创建一个Registrar对象（内部类对象，提供外部类私有属性的公有方法），通过该对象，每个插件可以获取到全局的BinaryMessenger对象（也就是NativeView），通过该对象可以在插件中创建一个MethodChannel来进行插件通信。</p>
+<h4 id="Registrant"><a href="#Registrant" class="headerlink" title="Registrant"></a>Registrant</h4><p>插件注册者，所有在pubspec.yaml中配置的插件都会自动在下面方法中生成。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">GeneratedPluginRegistrant</span> </span>&#123;</span><br><span class="line">  <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">registerWith</span><span class="hljs-params">(PluginRegistry registry)</span> </span>&#123;</span><br><span class="line">    <span class="hljs-keyword">if</span> (alreadyRegisteredWith(registry)) &#123;</span><br><span class="line">      <span class="hljs-keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    MartletVideoEditorPlugin.registerWith(registry.registrarFor(<span class="hljs-string">"com.zhenyu.martlet/videoEditor"</span>));</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="Registry"><a href="#Registry" class="headerlink" title="Registry"></a>Registry</h4><p>PluginRegistry对外的实现类是FlutterActivity（io.flutter.app包），最终的实现类是FlutterPluginRegistry。</p>
+<p>FlutterPluginRegistry对象是由NativeView创建的，创建时机在FlutterActivity（io.flutter.app包）的onCreate时。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">FlutterNativeView</span><span class="hljs-params">(@NonNull Context context, <span class="hljs-keyword">boolean</span> isBackgroundView)</span> </span>&#123;</span><br><span class="line">    mContext = context;</span><br><span class="line">    mPluginRegistry = <span class="hljs-keyword">new</span> FlutterPluginRegistry(<span class="hljs-keyword">this</span>, context);</span><br><span class="line">    mFlutterJNI = <span class="hljs-keyword">new</span> FlutterJNI();</span><br><span class="line">    mFlutterJNI.addIsDisplayingFlutterUiListener(flutterUiDisplayListener);</span><br><span class="line">    <span class="hljs-keyword">this</span>.dartExecutor = <span class="hljs-keyword">new</span> DartExecutor(mFlutterJNI, context.getAssets());</span><br><span class="line">    mFlutterJNI.addEngineLifecycleListener(<span class="hljs-keyword">new</span> EngineLifecycleListenerImpl());</span><br><span class="line">    attach(<span class="hljs-keyword">this</span>, isBackgroundView);</span><br><span class="line">    assertAttached();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>在Registry中维护了一个插件map，里面包含了所有注册的插件。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Map&lt;String, Object&gt; mPluginMap = <span class="hljs-keyword">new</span> LinkedHashMap&lt;&gt;(<span class="hljs-number">0</span>);</span><br></pre></td></tr></table></figure></p>
+<p>注册pluginKey，获取Registrar<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta">@Override</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> Registrar <span class="hljs-title">registrarFor</span><span class="hljs-params">(String pluginKey)</span> </span>&#123;</span><br><span class="line">    <span class="hljs-keyword">if</span> (mPluginMap.containsKey(pluginKey)) &#123;</span><br><span class="line">        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalStateException(<span class="hljs-string">"Plugin key "</span> + pluginKey + <span class="hljs-string">" is already in use"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    mPluginMap.put(pluginKey, <span class="hljs-keyword">null</span>);</span><br><span class="line">    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> FlutterRegistrar(pluginKey);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="Registrar"><a href="#Registrar" class="headerlink" title="Registrar"></a>Registrar</h4><p>Registrar只是一个内部类对象，提供Registry的一些私有属性暴露给外部使用，其中最重要的就是暴露BinaryMessenger对象给插件对象使用。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">private</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">FlutterRegistrar</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Registrar</span> </span>&#123;</span><br><span class="line">    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> String pluginKey;</span><br><span class="line"></span><br><span class="line">    FlutterRegistrar(String pluginKey) &#123;</span><br><span class="line">        <span class="hljs-keyword">this</span>.pluginKey = pluginKey;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-meta">@Override</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">public</span> Activity <span class="hljs-title">activity</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">        <span class="hljs-keyword">return</span> mActivity;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-meta">@Override</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">public</span> BinaryMessenger <span class="hljs-title">messenger</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">        <span class="hljs-keyword">return</span> mNativeView;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-meta">@Override</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">public</span> TextureRegistry <span class="hljs-title">textures</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">        <span class="hljs-keyword">return</span> mFlutterView;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="新API-1"><a href="#新API-1" class="headerlink" title="新API"></a>新API</h3><p>在新API中，registerWith方法接收的参数是FlutterEngine。PluginRegistry（io.flutter.embedding.engine.plugins包）维护所有的插件，每一个想注册的插件都必须实现FlutterPlugin接口，并将自身对象添加到PluginRegistry（io.flutter.embedding.engine.plugins包）中。由PluginRegistry（io.flutter.embedding.engine.plugins包）统一操控所有插件的生命周期。</p>
+<h4 id="Registrant-1"><a href="#Registrant-1" class="headerlink" title="Registrant"></a>Registrant</h4><p>插件注册者，所有在pubspec.yaml中配置的插件都会自动在下面方法中生成。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">GeneratedPluginRegistrant</span> </span>&#123;</span><br><span class="line">  <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">registerWith</span><span class="hljs-params">(@NonNull FlutterEngine flutterEngine)</span> </span>&#123;</span><br><span class="line">    flutterEngine.getPlugins().add(<span class="hljs-keyword">new</span> com.zhenyu.martlet.core_flutter.MartletVideoEditorPlugin());</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="Registry-1"><a href="#Registry-1" class="headerlink" title="Registry"></a>Registry</h4><p>在FlutterEngine创建的时候，就会创建一个FlutterEnginePluginRegistry对象，来维护所有的插件，flutterEngine.getPlugins()获取的就是FlutterEnginePluginRegistry对象。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">FlutterEngine</span><span class="hljs-params">(</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    @NonNull Context context,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    @NonNull FlutterLoader flutterLoader,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    @NonNull FlutterJNI flutterJNI,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    @Nullable String[] dartVmArgs,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    <span class="hljs-keyword">boolean</span> automaticallyRegisterPlugins</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">)</span> </span>&#123;</span><br><span class="line"> </span><br><span class="line">  <span class="hljs-keyword">this</span>.pluginRegistry = <span class="hljs-keyword">new</span> FlutterEnginePluginRegistry(</span><br><span class="line">    context.getApplicationContext(),</span><br><span class="line">    <span class="hljs-keyword">this</span>,</span><br><span class="line">    flutterLoader</span><br><span class="line">  );</span><br><span class="line">  <span class="hljs-comment">// 默认为true，自动创建插件</span></span><br><span class="line">  <span class="hljs-keyword">if</span> (automaticallyRegisterPlugins) &#123;</span><br><span class="line">    registerPlugins();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>在Registry中维护了一个插件map，里面包含了所有注册的插件对象的实例。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Map&lt;Class&lt;? extends FlutterPlugin&gt;, FlutterPlugin&gt; plugins = <span class="hljs-keyword">new</span> HashMap&lt;&gt;();</span><br></pre></td></tr></table></figure></p>
+<p>添加插件对象实例，触发插件的各种生命周期方法，并将插件需要的BinaryMessenger对象通过生命周期方法传递给插件。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta">@Override</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">add</span><span class="hljs-params">(@NonNull FlutterPlugin plugin)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-comment">// 将插件实例添加到map中维护</span></span><br><span class="line">  plugins.put(plugin.getClass(), plugin);</span><br><span class="line">  <span class="hljs-comment">// 调用插件的onAttachedToEngine方法，pluginBinding参数中包含了需要的BinaryMessenger对象。</span></span><br><span class="line">  plugin.onAttachedToEngine(pluginBinding);</span><br><span class="line"></span><br><span class="line">  <span class="hljs-comment">// 如果插件实现了ActivityAware接口，触发Activity生命周期方法</span></span><br><span class="line">  <span class="hljs-keyword">if</span> (plugin <span class="hljs-keyword">instanceof</span> ActivityAware) &#123;</span><br><span class="line">    ActivityAware activityAware = (ActivityAware) plugin;</span><br><span class="line">    activityAwarePlugins.put(plugin.getClass(), activityAware);</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (isAttachedToActivity()) &#123;</span><br><span class="line">      activityAware.onAttachedToActivity(activityPluginBinding);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="hljs-comment">// 如果插件实现了ServiceAware接口，触发Service生命周期方法</span></span><br><span class="line">  <span class="hljs-keyword">if</span> (plugin <span class="hljs-keyword">instanceof</span> ServiceAware) &#123;</span><br><span class="line">    ServiceAware serviceAware = (ServiceAware) plugin;</span><br><span class="line">    serviceAwarePlugins.put(plugin.getClass(), serviceAware);</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (isAttachedToService()) &#123;</span><br><span class="line">      serviceAware.onAttachedToService(servicePluginBinding);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="hljs-comment">// 如果插件实现了BroadcastReceiverAware接口，触发BroadcastReceiver生命周期方法</span></span><br><span class="line">  <span class="hljs-keyword">if</span> (plugin <span class="hljs-keyword">instanceof</span> BroadcastReceiverAware) &#123;</span><br><span class="line">    BroadcastReceiverAware broadcastReceiverAware = (BroadcastReceiverAware) plugin;</span><br><span class="line">    broadcastReceiverAwarePlugins.put(plugin.getClass(), broadcastReceiverAware);</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (isAttachedToBroadcastReceiver()) &#123;</span><br><span class="line">      broadcastReceiverAware.onAttachedToBroadcastReceiver(broadcastReceiverPluginBinding);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="hljs-comment">// 如果插件实现了ContentProviderAware接口，触发ContentProvider生命周期方法</span></span><br><span class="line">  <span class="hljs-keyword">if</span> (plugin <span class="hljs-keyword">instanceof</span> ContentProviderAware) &#123;</span><br><span class="line">    ContentProviderAware contentProviderAware = (ContentProviderAware) plugin;</span><br><span class="line">    contentProviderAwarePlugins.put(plugin.getClass(), contentProviderAware);</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (isAttachedToContentProvider()) &#123;</span><br><span class="line">      contentProviderAware.onAttachedToContentProvider(contentProviderPluginBinding);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="插件实现变更"><a href="#插件实现变更" class="headerlink" title="插件实现变更"></a>插件实现变更</h2><h3 id="旧API-2"><a href="#旧API-2" class="headerlink" title="旧API"></a>旧API</h3><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MartletVideoEditorPlugin</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">MethodChannel</span>.<span class="hljs-title">MethodCallHandler</span> </span>&#123;</span><br><span class="line">    <span class="hljs-keyword">static</span> MethodChannel mChannel;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">registerWith</span><span class="hljs-params">(PluginRegistry.Registrar registrar)</span> </span>&#123;</span><br><span class="line">        mChannel = <span class="hljs-keyword">new</span> MethodChannel(registrar.messenger(), <span class="hljs-string">"com.zhenyu.martlet/videoEditor"</span>);</span><br><span class="line">        mChannel.setMethodCallHandler(<span class="hljs-keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-meta">@Override</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onMethodCall</span><span class="hljs-params">(MethodCall call, MethodChannel.Result result)</span> </span>&#123;</span><br><span class="line">       </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="新API-2"><a href="#新API-2" class="headerlink" title="新API"></a>新API</h3><p>插件只需实现FlutterPlugin接口，然后在onAttachedToEngine方法中创建MethodChannel，并设置MethodCallHandler，在onDetachedFromEngine方法中将释放MethodChannel。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MartletVideoEditorPlugin</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">FlutterPlugin</span>, <span class="hljs-title">MethodCallHandler</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">private</span> MethodChannel mChannel;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-meta">@Override</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onAttachedToEngine</span><span class="hljs-params">(@NonNull FlutterPluginBinding flutterPluginBinding)</span> </span>&#123;</span><br><span class="line">        mChannel = <span class="hljs-keyword">new</span> MethodChannel(flutterPluginBinding.getBinaryMessenger(), <span class="hljs-string">"com.zhenyu.martlet/videoEditor"</span>);</span><br><span class="line">        mChannel.setMethodCallHandler(<span class="hljs-keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// 如果插件不兼容旧API，可以忽略该方法的现实</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">registerWith</span><span class="hljs-params">(Registrar registrar)</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-meta">@Override</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onMethodCall</span><span class="hljs-params">(@NonNull MethodCall call, @NonNull Result result)</span> </span>&#123;</span><br><span class="line">       </span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-meta">@Override</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onDetachedFromEngine</span><span class="hljs-params">(@NonNull FlutterPluginBinding binding)</span> </span>&#123;</span><br><span class="line">        mChannel.setMethodCallHandler(<span class="hljs-keyword">null</span>);</span><br><span class="line">        mChannel = <span class="hljs-keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+
+        </div>
+        
+        <ul class="post-copyright">
+            <li><strong>本文标题：</strong><a href="https://witgao.com/Flutter深入之插件新API-Embedding-V2/">Flutter深入之插件新API——Embedding-V2</a></li>
+            <li><strong>本文作者：</strong><a href="https://witgao.com">zhenyu</a></li>
+            <li><strong>本文链接：</strong><a href="https://witgao.com/Flutter深入之插件新API-Embedding-V2/">https://witgao.com/Flutter深入之插件新API-Embedding-V2/</a></li>
+            <li><strong>发布时间：</strong>2019-12-30</li>
+            <li><strong>版权声明：</strong>本博客所有文章除特别声明外，均采用 <a
+                    href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="external nofollow"
+                    target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明出处！
+            </li>
+        </ul>
+        
+        
+        
+        
+    </div>
+</div>
+
+
+
+
+
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        <div class="level-start">
+            <a class="level level-item has-link-grey  article-nav-prev"
+                href="/FFmpeg深入之ffmpeg-parse-options/">
+                <i class="level-item fas fa-chevron-left"></i>
+                <span class="level-item">FFmpeg深入之ffmpeg_parse_options</span>
+            </a>
+        </div>
+        
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next"
+                href="/SurfaceFlinger深入之Layer创建与渲染/">
+                <span class="level-item">SurfaceFlinger深入之Layer创建与渲染</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+    </div>
+</div>
+
+
+</div>
+                
+
+
+
+
+<div
+    class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left ">
+    
+    
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered" style="flex-shrink: 1">
+                <div>
+                    
+                    <figure class="image is-128x128 has-mb-6">
+                        <img class="" src="/images/avatar1.png" alt="zhenyu">
+                    </figure>
+                    
+                    <p class="is-size-4 is-block">
+                        zhenyu
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        富贵山庄无富贵，只留欢乐在此间
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>杭州</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        文章
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        38
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        分类
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        9
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        标签
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        0
+                    </p>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="level">
+            <a class="level-item button is-link is-rounded" href="https://github.com/witgao" target="_blank">
+                关注我</a>
+        </div>
+        
+        
+        
+    </div>
+</div>
+    
+    
+<div class="card widget column-left is-sticky" id="toc">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                目录
+            </h3>
+            <ul class="menu-list"><li>
+        <a class="is-flex" href="#版本配置">
+        <span class="has-mr-6">1</span>
+        <span>版本配置</span>
+        </a></li><li>
+        <a class="is-flex" href="#创建时机变更">
+        <span class="has-mr-6">2</span>
+        <span>创建时机变更</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#旧API">
+        <span class="has-mr-6">2.1</span>
+        <span>旧API</span>
+        </a></li><li>
+        <a class="is-flex" href="#新API">
+        <span class="has-mr-6">2.2</span>
+        <span>新API</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#注册对象变更">
+        <span class="has-mr-6">3</span>
+        <span>注册对象变更</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#旧API-1">
+        <span class="has-mr-6">3.1</span>
+        <span>旧API</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#Registrant">
+        <span class="has-mr-6">3.1.1</span>
+        <span>Registrant</span>
+        </a></li><li>
+        <a class="is-flex" href="#Registry">
+        <span class="has-mr-6">3.1.2</span>
+        <span>Registry</span>
+        </a></li><li>
+        <a class="is-flex" href="#Registrar">
+        <span class="has-mr-6">3.1.3</span>
+        <span>Registrar</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#新API-1">
+        <span class="has-mr-6">3.2</span>
+        <span>新API</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#Registrant-1">
+        <span class="has-mr-6">3.2.1</span>
+        <span>Registrant</span>
+        </a></li><li>
+        <a class="is-flex" href="#Registry-1">
+        <span class="has-mr-6">3.2.2</span>
+        <span>Registry</span>
+        </a></li></ul></li></ul></li><li>
+        <a class="is-flex" href="#插件实现变更">
+        <span class="has-mr-6">4</span>
+        <span>插件实现变更</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#旧API-2">
+        <span class="has-mr-6">4.1</span>
+        <span>旧API</span>
+        </a></li><li>
+        <a class="is-flex" href="#新API-2">
+        <span class="has-mr-6">4.2</span>
+        <span>新API</span>
+        </a></li></ul></li></ul>
+        </div>
+    </div>
+</div>
+    
+    
+    <div class="column-right-shadow is-hidden-widescreen ">
+        
+    </div>
+    
+</div>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <!-- <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="/images/logo2.png" alt="Flutter深入之插件新API——Embedding-V2" height="28">
+                
+                </a> -->
+                <p class="is-size-7">
+                    &copy; 2020 zhenyu&nbsp;
+                    Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a
+                        href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank">Icarus</a>
+                    
+                </p>
+            </div>
+            <div class="level-end">
+                
+            </div>
+        </div>
+    </div>
+</footer>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("zh-CN");</script>
+
+<script>
+var IcarusThemeSettings = {
+    article: {
+        highlight: {
+            clipboard: true,
+            fold: 'unfolded'
+        }
+    }
+};
+</script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+
+
+
+    
+    
+<script src="/js/animation.js"></script>
+
+    
+    
+<script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+<script src="/js/gallery.js" defer></script>
+
+    
+    
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    MathJax.Hub.Config({
+        'HTML-CSS': {
+            matchFontHeight: false
+        },
+        SVG: {
+            matchFontHeight: false
+        },
+        CommonHTML: {
+            matchFontHeight: false
+        },
+        tex2jax: {
+            inlineMath: [
+                ['$','$'],
+                ['\\(','\\)']
+            ]
+        }
+    });
+});
+</script>
+    
+    
+<a id="back-to-top" title="回到顶端" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="想要查找什么..." />
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: '文章',
+                PAGES: '页面',
+                CATEGORIES: '分类',
+                TAGS: '标签',
+                UNTITLED: '(无标题)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+</body>
+
+</html>

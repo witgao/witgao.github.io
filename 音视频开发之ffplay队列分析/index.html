@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html  lang="zh">
+
+<head>
+    <meta charset="utf-8" />
+
+<meta name="generator" content="Hexo 3.9.0" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<title>音视频开发之ffplay队列分析 - 富贵山庄</title>
+
+
+    <meta name="description" content="ffplay的整体结构是由5个线程和4个队列组成、运转的（不分析字幕）。 整体结构 5个线程 解复用线程 : read_thread，由主线程创建，负责媒体文件的解复用和读取，读取的数据根据流类型放入到对应的编码数据队列中。 音频解码线程 : audio_thread，由read_thread创建，负责将编码数据队列中的数据解码，放入到原始数据队列中。 视频解码线程 : video_thread，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="音视频开发之ffplay队列分析">
+<meta property="og:url" content="https://witgao.com/音视频开发之ffplay队列分析/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:description" content="ffplay的整体结构是由5个线程和4个队列组成、运转的（不分析字幕）。 整体结构 5个线程 解复用线程 : read_thread，由主线程创建，负责媒体文件的解复用和读取，读取的数据根据流类型放入到对应的编码数据队列中。 音频解码线程 : audio_thread，由read_thread创建，负责将编码数据队列中的数据解码，放入到原始数据队列中。 视频解码线程 : video_thread，">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://witgao.com/images/15.jpg">
+<meta property="og:updated_time" content="2020-08-04T06:05:00.937Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="音视频开发之ffplay队列分析">
+<meta name="twitter:description" content="ffplay的整体结构是由5个线程和4个队列组成、运转的（不分析字幕）。 整体结构 5个线程 解复用线程 : read_thread，由主线程创建，负责媒体文件的解复用和读取，读取的数据根据流类型放入到对应的编码数据队列中。 音频解码线程 : audio_thread，由read_thread创建，负责将编码数据队列中的数据解码，放入到原始数据队列中。 视频解码线程 : video_thread，">
+<meta name="twitter:image" content="https://witgao.com/images/15.jpg">
+
+
+
+
+
+
+
+<link rel="icon" href="/images/favicon1.svg">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/default.css">
+
+
+    
+    
+<style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+    
+    
+    
+    
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+    
+    
+    
+    
+    
+    
+    
+    <link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+    
+    
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body class="is-3-column">
+    <nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="/images/logo2.png" alt="音视频开发之ffplay队列分析" height="28">
+            
+            </a>
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item"
+                href="/">燕子坞</a>
+                
+                <a class="navbar-item"
+                href="/archives">听香水榭</a>
+                
+                <a class="navbar-item"
+                href="/categories">还施水阁</a>
+                
+                <a class="navbar-item"
+                href="/about">思过崖</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    <a class="navbar-item" target="_blank" title="Download on GitHub" href="https://github.com/witgao/blog">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                <a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;">
+                    <i class="fas fa-list-ul"></i>
+                </a>
+                
+                
+                <a class="navbar-item search" title="搜索" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-9-widescreen has-order-2 column-main">
+<div class="card">
+    
+    <div class="card-image">
+        <span  class="image is-7by1">
+        <img class="thumbnail" src="/images/15.jpg" alt="音视频开发之ffplay队列分析">
+        </span>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-08-01T16:00:00.000Z">2020-08-02</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    21 分钟 读完 (大约 3160 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            音视频开发之ffplay队列分析
+            
+        </h1>
+        <div class="content">
+            <p>ffplay的整体结构是由5个线程和4个队列组成、运转的（不分析字幕）。</p>
+<h3 id="整体结构"><a href="#整体结构" class="headerlink" title="整体结构"></a>整体结构</h3><p><img src="/images/音视频开发之ffplay队列分析.resources/ffplay.png" alt="音视频开发之ffplay队列分析"></p>
+<h4 id="5个线程"><a href="#5个线程" class="headerlink" title="5个线程"></a>5个线程</h4><ul>
+<li>解复用线程 : read_thread，由主线程创建，负责媒体文件的解复用和读取，读取的数据根据流类型放入到对应的编码数据队列中。</li>
+<li>音频解码线程 : audio_thread，由read_thread创建，负责将编码数据队列中的数据解码，放入到原始数据队列中。</li>
+<li>视频解码线程 : video_thread，由read_thread创建，负责将编码数据队列中的数据解码，放入到原始数据队列中。</li>
+<li>音频渲染线程 : 由SDL创建，负责将音频原始数据队列中的数据发送给音频播放设备。</li>
+<li>视频渲染线程 : main线程，负责用视频原始数据队列中的数据不断的更新纹理内容，并刷新显示器进行显示。</li>
+</ul>
+<h4 id="4个队列"><a href="#4个队列" class="headerlink" title="4个队列"></a>4个队列</h4><ul>
+<li>FrameQueue pictq : 视频原始数据队列</li>
+<li>FrameQueue sampq : 音频原始数据队列</li>
+<li>PacketQueue audioq : 音频编码数据队列</li>
+<li>PacketQueue videoq : 视频编码数据队列</li>
+</ul>
+<h5 id="PacketQueue"><a href="#PacketQueue" class="headerlink" title="PacketQueue"></a>PacketQueue</h5><p>Packet队列是基于链表实现的普通队列，由于编码数据帧比较小，所以这是个无限队列。<br><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">PacketQueue</span> &#123;</span></span><br><span class="line">  <span class="hljs-comment">// Packet队列采用的是链表结构</span></span><br><span class="line">  MyAVPacketList *first_pkt, *last_pkt;  <span class="hljs-comment">// 第一个节点和最后一个节点</span></span><br><span class="line">  <span class="hljs-keyword">int</span> nb_packets;                        <span class="hljs-comment">// 队列中节点个数</span></span><br><span class="line">  <span class="hljs-keyword">int</span> size;                              <span class="hljs-comment">// 队列中所有节点的字节总数</span></span><br><span class="line">  <span class="hljs-keyword">int64_t</span> duration;                      <span class="hljs-comment">// 队列中所有节点的总时长</span></span><br><span class="line">  <span class="hljs-keyword">int</span> abort_request;  <span class="hljs-comment">// 是否退出标记 1 退出，0 不退出</span></span><br><span class="line">  <span class="hljs-keyword">int</span> serial;         <span class="hljs-comment">// 序号</span></span><br><span class="line">  SDL_mutex *mutex;   <span class="hljs-comment">// 锁</span></span><br><span class="line">  SDL_cond *cond;     <span class="hljs-comment">// 互斥量</span></span><br><span class="line">&#125; PacketQueue;</span><br></pre></td></tr></table></figure></p>
+ <a id="more"></a>
+<h6 id="packet-queue-init"><a href="#packet-queue-init" class="headerlink" title="packet_queue_init"></a>packet_queue_init</h6><p>初始化队列<br><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">int</span> <span class="hljs-title">packet_queue_init</span><span class="hljs-params">(PacketQueue *q)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-comment">// 将编码数据队列初始化，清零</span></span><br><span class="line">  <span class="hljs-built_in">memset</span>(q, <span class="hljs-number">0</span>, <span class="hljs-keyword">sizeof</span>(PacketQueue));</span><br><span class="line">  <span class="hljs-comment">// 为队列创建锁</span></span><br><span class="line">  q-&gt;mutex = SDL_CreateMutex();</span><br><span class="line">  <span class="hljs-keyword">if</span> (!q-&gt;mutex) &#123;</span><br><span class="line">    av_log(<span class="hljs-literal">NULL</span>, AV_LOG_FATAL, <span class="hljs-string">"SDL_CreateMutex(): %s\n"</span>, SDL_GetError());</span><br><span class="line">    <span class="hljs-keyword">return</span> AVERROR(ENOMEM);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// 为队列创建锁的互斥量</span></span><br><span class="line">  q-&gt;cond = SDL_CreateCond();</span><br><span class="line">  <span class="hljs-keyword">if</span> (!q-&gt;cond) &#123;</span><br><span class="line">    av_log(<span class="hljs-literal">NULL</span>, AV_LOG_FATAL, <span class="hljs-string">"SDL_CreateCond(): %s\n"</span>, SDL_GetError());</span><br><span class="line">    <span class="hljs-keyword">return</span> AVERROR(ENOMEM);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// 队列设置为退出状态</span></span><br><span class="line">  q-&gt;abort_request = <span class="hljs-number">1</span>;</span><br><span class="line">  <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h6 id="packet-queue-start"><a href="#packet-queue-start" class="headerlink" title="packet_queue_start"></a>packet_queue_start</h6><p>启动队列，每次启动都会在队列中插入一个分割标记，并将队列序号+1<br><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">packet_queue_start</span><span class="hljs-params">(PacketQueue *q)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-comment">// 加锁</span></span><br><span class="line">  SDL_LockMutex(q-&gt;mutex);</span><br><span class="line">  <span class="hljs-comment">// 设置启动标记</span></span><br><span class="line">  q-&gt;abort_request = <span class="hljs-number">0</span>;</span><br><span class="line">  <span class="hljs-comment">// 队列中放入一个特殊的flush_pkt，用来做不连续的两段数据的分割标记</span></span><br><span class="line">  packet_queue_put_private(q, &amp;flush_pkt);</span><br><span class="line">  <span class="hljs-comment">// 解锁</span></span><br><span class="line">  SDL_UnlockMutex(q-&gt;mutex);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h6 id="packet-queue-destroy"><a href="#packet-queue-destroy" class="headerlink" title="packet_queue_destroy"></a>packet_queue_destroy</h6><p>销毁队列<br><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">packet_queue_flush</span><span class="hljs-params">(PacketQueue *q)</span> </span>&#123;</span><br><span class="line">  MyAVPacketList *pkt, *pkt1;</span><br><span class="line">  <span class="hljs-comment">// 加锁</span></span><br><span class="line">  SDL_LockMutex(q-&gt;mutex);</span><br><span class="line">  <span class="hljs-comment">// 遍历整个链表，将每个节点的AVPacket对象进行销毁</span></span><br><span class="line">  <span class="hljs-keyword">for</span> (pkt = q-&gt;first_pkt; pkt; pkt = pkt1) &#123;</span><br><span class="line">    pkt1 = pkt-&gt;next;</span><br><span class="line">    av_packet_unref(&amp;pkt-&gt;pkt);</span><br><span class="line">    av_freep(&amp;pkt);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// 将队列重置</span></span><br><span class="line">  q-&gt;last_pkt = <span class="hljs-literal">NULL</span>;</span><br><span class="line">  q-&gt;first_pkt = <span class="hljs-literal">NULL</span>;</span><br><span class="line">  q-&gt;nb_packets = <span class="hljs-number">0</span>;</span><br><span class="line">  q-&gt;size = <span class="hljs-number">0</span>;</span><br><span class="line">  q-&gt;duration = <span class="hljs-number">0</span>;</span><br><span class="line">  <span class="hljs-comment">// 解锁</span></span><br><span class="line">  SDL_UnlockMutex(q-&gt;mutex);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">packet_queue_destroy</span><span class="hljs-params">(PacketQueue *q)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-comment">// 销毁队列</span></span><br><span class="line">  packet_queue_flush(q);</span><br><span class="line">  <span class="hljs-comment">// 销毁锁</span></span><br><span class="line">  SDL_DestroyMutex(q-&gt;mutex);</span><br><span class="line">  SDL_DestroyCond(q-&gt;cond);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h6 id="packet-queue-get"><a href="#packet-queue-get" class="headerlink" title="packet_queue_get"></a>packet_queue_get</h6><p>从队列中取出头节点，block参数表明当队列为空时是否需要阻塞<br><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">int</span> <span class="hljs-title">packet_queue_get</span><span class="hljs-params">(PacketQueue *q, AVPacket *pkt, <span class="hljs-keyword">int</span> block,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">                            <span class="hljs-keyword">int</span> *serial)</span> </span>&#123;</span><br><span class="line">  MyAVPacketList *pkt1;</span><br><span class="line">  <span class="hljs-keyword">int</span> ret;</span><br><span class="line">  <span class="hljs-comment">// 加锁</span></span><br><span class="line">  SDL_LockMutex(q-&gt;mutex);</span><br><span class="line"></span><br><span class="line">  <span class="hljs-keyword">for</span> (;;) &#123;</span><br><span class="line">    <span class="hljs-comment">// 如果退出标记，则退出</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (q-&gt;abort_request) &#123;</span><br><span class="line">      ret = <span class="hljs-number">-1</span>;</span><br><span class="line">      <span class="hljs-keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-comment">// 获取队列的头节点</span></span><br><span class="line">    pkt1 = q-&gt;first_pkt;</span><br><span class="line">    <span class="hljs-keyword">if</span> (pkt1) &#123;</span><br><span class="line">      <span class="hljs-comment">// 将头结点的下一个节点作为新的头结点</span></span><br><span class="line">      q-&gt;first_pkt = pkt1-&gt;next;</span><br><span class="line">      <span class="hljs-comment">// 如果新头结点为空，则说明当前队列空了，将尾节点也设为空</span></span><br><span class="line">      <span class="hljs-keyword">if</span> (!q-&gt;first_pkt) q-&gt;last_pkt = <span class="hljs-literal">NULL</span>;</span><br><span class="line">      <span class="hljs-comment">// 节点数量-1</span></span><br><span class="line">      q-&gt;nb_packets--;</span><br><span class="line">      <span class="hljs-comment">// 队列中总字节数减少</span></span><br><span class="line">      q-&gt;size -= pkt1-&gt;pkt.size + <span class="hljs-keyword">sizeof</span>(*pkt1);</span><br><span class="line">      <span class="hljs-comment">// 队列中总时长减少</span></span><br><span class="line">      q-&gt;duration -= pkt1-&gt;pkt.duration;</span><br><span class="line">      <span class="hljs-comment">// 获取节点中的AVPacket，赋值给参数中的pkt指针</span></span><br><span class="line">      *pkt = pkt1-&gt;pkt;</span><br><span class="line">      <span class="hljs-comment">// 将节点的序号赋值给参数中的serial指针</span></span><br><span class="line">      <span class="hljs-keyword">if</span> (serial) *serial = pkt1-&gt;serial;</span><br><span class="line">      <span class="hljs-comment">// 释放节点</span></span><br><span class="line">      av_free(pkt1);</span><br><span class="line">      ret = <span class="hljs-number">1</span>;</span><br><span class="line">      <span class="hljs-keyword">break</span>;</span><br><span class="line">    &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (!block) &#123;</span><br><span class="line">      <span class="hljs-comment">// 如果头结点为空，而block为0，则不阻塞，直接返回</span></span><br><span class="line">      ret = <span class="hljs-number">0</span>;</span><br><span class="line">      <span class="hljs-keyword">break</span>;</span><br><span class="line">    &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">      <span class="hljs-comment">// 如果头结点为空，block为1，则wait等待</span></span><br><span class="line">      SDL_CondWait(q-&gt;cond, q-&gt;mutex);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// 解锁</span></span><br><span class="line">  SDL_UnlockMutex(q-&gt;mutex);</span><br><span class="line">  <span class="hljs-keyword">return</span> ret;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h6 id="packet-queue-put"><a href="#packet-queue-put" class="headerlink" title="packet_queue_put"></a>packet_queue_put</h6><p>在队列尾部插入新节点<br><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">int</span> <span class="hljs-title">packet_queue_put_private</span><span class="hljs-params">(PacketQueue *q, AVPacket *pkt)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-comment">// 创建节点</span></span><br><span class="line">  MyAVPacketList *pkt1;</span><br><span class="line">  <span class="hljs-comment">// 如果退出，则返回</span></span><br><span class="line">  <span class="hljs-keyword">if</span> (q-&gt;abort_request) <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;</span><br><span class="line"></span><br><span class="line">  pkt1 = av_malloc(<span class="hljs-keyword">sizeof</span>(MyAVPacketList));</span><br><span class="line">  <span class="hljs-keyword">if</span> (!pkt1) <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;</span><br><span class="line">  <span class="hljs-comment">// 将AVPacket保存到节点中</span></span><br><span class="line">  pkt1-&gt;pkt = *pkt;</span><br><span class="line">  pkt1-&gt;next = <span class="hljs-literal">NULL</span>;</span><br><span class="line">  <span class="hljs-comment">// 如果加入的数据是flush_pkt标记，则序号+1</span></span><br><span class="line">  <span class="hljs-keyword">if</span> (pkt == &amp;flush_pkt) q-&gt;serial++;</span><br><span class="line">  pkt1-&gt;serial = q-&gt;serial;</span><br><span class="line">  <span class="hljs-comment">// 如果队列中尾节点为空，则将当前节点作为头结点，否则，将当前节点作为尾节点的下一个节点</span></span><br><span class="line">  <span class="hljs-keyword">if</span> (!q-&gt;last_pkt)</span><br><span class="line">    q-&gt;first_pkt = pkt1;</span><br><span class="line">  <span class="hljs-keyword">else</span></span><br><span class="line">    q-&gt;last_pkt-&gt;next = pkt1;</span><br><span class="line">  <span class="hljs-comment">// 将当前节点作为队列新的尾节点</span></span><br><span class="line">  q-&gt;last_pkt = pkt1;</span><br><span class="line">  <span class="hljs-comment">// 节点数量+1</span></span><br><span class="line">  q-&gt;nb_packets++;</span><br><span class="line">  <span class="hljs-comment">// 队列中总字节数增加</span></span><br><span class="line">  q-&gt;size += pkt1-&gt;pkt.size + <span class="hljs-keyword">sizeof</span>(*pkt1);</span><br><span class="line">  <span class="hljs-comment">// 队列中总时长增加</span></span><br><span class="line">  q-&gt;duration += pkt1-&gt;pkt.duration;</span><br><span class="line">  <span class="hljs-comment">/* <span class="hljs-doctag">XXX:</span> should duplicate packet data in DV case */</span></span><br><span class="line">  <span class="hljs-comment">// 唤醒wait线程</span></span><br><span class="line">  SDL_CondSignal(q-&gt;cond);</span><br><span class="line">  <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">int</span> <span class="hljs-title">packet_queue_put</span><span class="hljs-params">(PacketQueue *q, AVPacket *pkt)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">int</span> ret;</span><br><span class="line">  <span class="hljs-comment">// 加锁</span></span><br><span class="line">  SDL_LockMutex(q-&gt;mutex);</span><br><span class="line">  <span class="hljs-comment">// 入队列</span></span><br><span class="line">  ret = packet_queue_put_private(q, pkt);</span><br><span class="line">  <span class="hljs-comment">// 解锁</span></span><br><span class="line">  SDL_UnlockMutex(q-&gt;mutex);</span><br><span class="line">  <span class="hljs-comment">// 如果失败，则释放AVPacket</span></span><br><span class="line">  <span class="hljs-keyword">if</span> (pkt != &amp;flush_pkt &amp;&amp; ret &lt; <span class="hljs-number">0</span>) av_packet_unref(pkt);</span><br><span class="line"></span><br><span class="line">  <span class="hljs-keyword">return</span> ret;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h5 id="FrameQueue"><a href="#FrameQueue" class="headerlink" title="FrameQueue"></a>FrameQueue</h5><p>Frame队列与Packet队列不同，因为Frame中存储的是原始数据，是非常庞大的，所以需要设置成有限队列，这里采用的是滚动数组的方式来实现，分别用读写两个索引来记录位置。</p>
+<p>由于将数组进行了读写分离，所以在线程加锁时有了优化，不再需要锁住整个函数，可以局部加锁。<br><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">FrameQueue</span> &#123;</span></span><br><span class="line">  <span class="hljs-comment">// 使用滚动数组来实现的Frame队列</span></span><br><span class="line">  Frame <span class="hljs-built_in">queue</span></span><br><span class="line">      [FRAME_QUEUE_SIZE];  <span class="hljs-comment">// 数据帧数组，使用数组来实现的队列，默认大小为FRAME_QUEUE_SIZE</span></span><br><span class="line">  <span class="hljs-keyword">int</span> rindex;              <span class="hljs-comment">// 读索引</span></span><br><span class="line">  <span class="hljs-keyword">int</span> windex;              <span class="hljs-comment">// 写索引</span></span><br><span class="line">  <span class="hljs-keyword">int</span> size;                <span class="hljs-comment">// 当前写入的数据大小</span></span><br><span class="line">  <span class="hljs-keyword">int</span> max_size;  <span class="hljs-comment">// 外部设置的队列最大允许存储的大小，该值不超过FRAME_QUEUE_SIZE</span></span><br><span class="line">  <span class="hljs-keyword">int</span> keep_last;  <span class="hljs-comment">// 是否保留最后一个读数据，如果是1，则rindex_shown的值就为1。并且后面rindex所指向的位置实际上是上个次读的索引，而rindex+rindex_shown才是当前读的索引</span></span><br><span class="line">  <span class="hljs-keyword">int</span> rindex_shown;  <span class="hljs-comment">// 用来配合keep_last，如果keep_last为1，则再第一次next后，rindex_shown也会为1</span></span><br><span class="line">  SDL_mutex *mutex;  <span class="hljs-comment">// 队列锁</span></span><br><span class="line">  SDL_cond *cond;    <span class="hljs-comment">// 队列锁互斥量</span></span><br><span class="line">  PacketQueue *pktq;  <span class="hljs-comment">// 关联的Packet队列</span></span><br><span class="line">&#125; FrameQueue;</span><br></pre></td></tr></table></figure></p>
+<h6 id="frame-queue-init"><a href="#frame-queue-init" class="headerlink" title="frame_queue_init"></a>frame_queue_init</h6><p>初始化队列，并设置队列的最大大小，根据最大大小提前创建好每一个Frame对象。<br><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">int</span> <span class="hljs-title">frame_queue_init</span><span class="hljs-params">(FrameQueue *f, PacketQueue *pktq, <span class="hljs-keyword">int</span> max_size,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">                            <span class="hljs-keyword">int</span> keep_last)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">int</span> i;</span><br><span class="line">  <span class="hljs-comment">// 初始化原始数据队列，清零</span></span><br><span class="line">  <span class="hljs-built_in">memset</span>(f, <span class="hljs-number">0</span>, <span class="hljs-keyword">sizeof</span>(FrameQueue));</span><br><span class="line">  <span class="hljs-comment">// 创建原始数据队列的锁</span></span><br><span class="line">  <span class="hljs-keyword">if</span> (!(f-&gt;mutex = SDL_CreateMutex())) &#123;</span><br><span class="line">    av_log(<span class="hljs-literal">NULL</span>, AV_LOG_FATAL, <span class="hljs-string">"SDL_CreateMutex(): %s\n"</span>, SDL_GetError());</span><br><span class="line">    <span class="hljs-keyword">return</span> AVERROR(ENOMEM);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// 创建原始数据队列的互斥量</span></span><br><span class="line">  <span class="hljs-keyword">if</span> (!(f-&gt;cond = SDL_CreateCond())) &#123;</span><br><span class="line">    av_log(<span class="hljs-literal">NULL</span>, AV_LOG_FATAL, <span class="hljs-string">"SDL_CreateCond(): %s\n"</span>, SDL_GetError());</span><br><span class="line">    <span class="hljs-keyword">return</span> AVERROR(ENOMEM);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// 关联原始数据队列和编码数据队列</span></span><br><span class="line">  f-&gt;pktq = pktq;</span><br><span class="line">  <span class="hljs-comment">// 设置原始数据队列的最大大小</span></span><br><span class="line">  f-&gt;max_size = FFMIN(max_size, FRAME_QUEUE_SIZE);</span><br><span class="line">  <span class="hljs-comment">// 是否保留最后一个读的数据</span></span><br><span class="line">  f-&gt;keep_last = !!keep_last;</span><br><span class="line">  <span class="hljs-comment">// 提前分配好所有的Frame</span></span><br><span class="line">  <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; f-&gt;max_size; i++)</span><br><span class="line">    <span class="hljs-keyword">if</span> (!(f-&gt;<span class="hljs-built_in">queue</span>[i].frame = av_frame_alloc())) <span class="hljs-keyword">return</span> AVERROR(ENOMEM);</span><br><span class="line">  <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h6 id="frame-queue-destory"><a href="#frame-queue-destory" class="headerlink" title="frame_queue_destory"></a>frame_queue_destory</h6><p>销毁队列<br><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">frame_queue_destory</span><span class="hljs-params">(FrameQueue *f)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">int</span> i;</span><br><span class="line">  <span class="hljs-comment">// 释放所有的原始数据帧</span></span><br><span class="line">  <span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; f-&gt;max_size; i++) &#123;</span><br><span class="line">    Frame *vp = &amp;f-&gt;<span class="hljs-built_in">queue</span>[i];</span><br><span class="line">    <span class="hljs-comment">// 主要是销毁AVFrame和AVSubtitle</span></span><br><span class="line">    frame_queue_unref_item(vp);</span><br><span class="line">    av_frame_free(&amp;vp-&gt;frame);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// 销毁锁和互斥量</span></span><br><span class="line">  SDL_DestroyMutex(f-&gt;mutex);</span><br><span class="line">  SDL_DestroyCond(f-&gt;cond);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h6 id="frame-queue-peek-readable"><a href="#frame-queue-peek-readable" class="headerlink" title="frame_queue_peek_readable"></a>frame_queue_peek_readable</h6><p>读取这里也和Packet队列不同，首先通过frame_queue_peek_readable获取到读索引位置的节点，想要获取下一个节点，需要调用frame_queue_next将读索引移动到下一个位置。</p>
+<p>读取时如果当前队列为空，则进行阻塞等待。</p>
+<figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">/**</span></span><br><span class="line"><span class="hljs-comment"> * 从队列中取出一个可读的帧</span></span><br><span class="line"><span class="hljs-comment"> * @param 队列</span></span><br><span class="line"><span class="hljs-comment"> * @return 队列中可读的帧</span></span><br><span class="line"><span class="hljs-comment"> */</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> Frame *<span class="hljs-title">frame_queue_peek_readable</span><span class="hljs-params">(FrameQueue *f)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-comment">/* wait until we have a readable a new frame */</span></span><br><span class="line">  <span class="hljs-comment">// 同写入，size是读写线程都需要操作的，所以需要加锁</span></span><br><span class="line">  SDL_LockMutex(f-&gt;mutex);</span><br><span class="line">  <span class="hljs-comment">// 如果设置了keep_last，则在next后，rindex_shown为1，</span></span><br><span class="line">  <span class="hljs-comment">// rindex_shown为1其实就是标记rindex少走了一步，也等于size少减了1，所以这里计算size时需要减去1</span></span><br><span class="line">  <span class="hljs-comment">// 如果队列为空</span></span><br><span class="line">  <span class="hljs-keyword">while</span> (f-&gt;size - f-&gt;rindex_shown &lt;= <span class="hljs-number">0</span> &amp;&amp; !f-&gt;pktq-&gt;abort_request) &#123;</span><br><span class="line">    <span class="hljs-comment">// 等待写线程notify</span></span><br><span class="line">    SDL_CondWait(f-&gt;cond, f-&gt;mutex);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// 队列解锁</span></span><br><span class="line">  SDL_UnlockMutex(f-&gt;mutex);</span><br><span class="line">  <span class="hljs-comment">// 如果关联的Packet队列退出，则返回null</span></span><br><span class="line">  <span class="hljs-keyword">if</span> (f-&gt;pktq-&gt;abort_request) <span class="hljs-keyword">return</span> <span class="hljs-literal">NULL</span>;</span><br><span class="line">  <span class="hljs-comment">// rindex + rindex_shown</span></span><br><span class="line">  <span class="hljs-comment">// （当rindex_shown为1时，rindex少了一次+1，所以需要加上1）</span></span><br><span class="line">  <span class="hljs-keyword">return</span> &amp;f-&gt;<span class="hljs-built_in">queue</span>[(f-&gt;rindex + f-&gt;rindex_shown) % f-&gt;max_size];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>frame_queue_next中并没有对队列进行判空，所以调用该方法的时候需要先用frame_queue_nb_remaining判断一下<br><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="hljs-comment">/**</span></span><br><span class="line"><span class="hljs-comment"> * 通知队列数据已经读取，rindex位置的帧已经被外部使用</span></span><br><span class="line"><span class="hljs-comment"> * rindex需要向后移动，以便frame_queue_peek_readable获取后续的数据</span></span><br><span class="line"><span class="hljs-comment"> * @param f</span></span><br><span class="line"><span class="hljs-comment"> */</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">frame_queue_next</span><span class="hljs-params">(FrameQueue *f)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-comment">// 如果当前队列设置了保留最后一帧，则rindex少走一步，size少减1</span></span><br><span class="line">  <span class="hljs-keyword">if</span> (f-&gt;keep_last &amp;&amp; !f-&gt;rindex_shown) &#123;</span><br><span class="line">    <span class="hljs-comment">// 标记rindex_shown来弥补这1步</span></span><br><span class="line">    f-&gt;rindex_shown = <span class="hljs-number">1</span>;</span><br><span class="line">    <span class="hljs-keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// 如果队列设置了keep_last，则这里的删除操作针对的都是上一帧，而不是当前帧</span></span><br><span class="line">  <span class="hljs-comment">// 删除rindex位置的帧数据，AVFrame和AVSubtitle</span></span><br><span class="line">  frame_queue_unref_item(&amp;f-&gt;<span class="hljs-built_in">queue</span>[f-&gt;rindex]);</span><br><span class="line">  <span class="hljs-comment">// rindex+1,向后移动一位，如果超出，则从头开始</span></span><br><span class="line">  <span class="hljs-keyword">if</span> (++f-&gt;rindex == f-&gt;max_size) f-&gt;rindex = <span class="hljs-number">0</span>;</span><br><span class="line">  <span class="hljs-comment">// 加锁</span></span><br><span class="line">  SDL_LockMutex(f-&gt;mutex);</span><br><span class="line">  <span class="hljs-comment">// size减1</span></span><br><span class="line">  f-&gt;size--;</span><br><span class="line">  <span class="hljs-comment">// 通知写线程有空位写入，唤醒wait</span></span><br><span class="line">  SDL_CondSignal(f-&gt;cond);</span><br><span class="line">  <span class="hljs-comment">// 解锁</span></span><br><span class="line">  SDL_UnlockMutex(f-&gt;mutex);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>获取当前队列中可读的节点数量<br><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">int</span> <span class="hljs-title">frame_queue_nb_remaining</span><span class="hljs-params">(FrameQueue *f)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-comment">// 返回当前队列中已有的帧数量</span></span><br><span class="line">  <span class="hljs-keyword">return</span> f-&gt;size - f-&gt;rindex_shown;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h6 id="frame-queue-peek-writable"><a href="#frame-queue-peek-writable" class="headerlink" title="frame_queue_peek_writable"></a>frame_queue_peek_writable</h6><p>写入的话和读取一样，先通过frame_queue_peek_writable获取当前写索引位置的节点，写入完毕后，调用frame_queue_push通知队列写入完毕，写索引向后移动一位。</p>
+<p>写入时如果当前队列已满，那么会进行阻塞等待。</p>
+<figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">/**</span></span><br><span class="line"><span class="hljs-comment"> * 从队列中取出一个可写入的帧</span></span><br><span class="line"><span class="hljs-comment"> * @param 队列</span></span><br><span class="line"><span class="hljs-comment"> * @return 队列中可写入的帧</span></span><br><span class="line"><span class="hljs-comment"> */</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> Frame *<span class="hljs-title">frame_queue_peek_writable</span><span class="hljs-params">(FrameQueue *f)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-comment">/* wait until we have space to put a new frame */</span></span><br><span class="line">  <span class="hljs-comment">// 队列加锁（因为读线程和写线程都会对队列的size进行修改，所以需要加锁）</span></span><br><span class="line">  SDL_LockMutex(f-&gt;mutex);</span><br><span class="line">  <span class="hljs-comment">// 如果队列已满，并且关联的Packet队列并没有退出(避免死循环)，则循环wait</span></span><br><span class="line">  <span class="hljs-keyword">while</span> (f-&gt;size &gt;= f-&gt;max_size &amp;&amp; !f-&gt;pktq-&gt;abort_request) &#123;</span><br><span class="line">    <span class="hljs-comment">// wait，等待notify</span></span><br><span class="line">    SDL_CondWait(f-&gt;cond, f-&gt;mutex);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// 队列解锁</span></span><br><span class="line">  SDL_UnlockMutex(f-&gt;mutex);</span><br><span class="line">  <span class="hljs-comment">// 只有写线程才需要进行写入，才会改变windex的值，所以获取写入的帧操作并不需要加锁</span></span><br><span class="line">  <span class="hljs-comment">// 如果关联的Packet队列退出，则返回null</span></span><br><span class="line">  <span class="hljs-keyword">if</span> (f-&gt;pktq-&gt;abort_request) <span class="hljs-keyword">return</span> <span class="hljs-literal">NULL</span>;</span><br><span class="line">  <span class="hljs-comment">// 返回windex位置的Frame供外部写入</span></span><br><span class="line">  <span class="hljs-keyword">return</span> &amp;f-&gt;<span class="hljs-built_in">queue</span>[f-&gt;windex];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">/**</span></span><br><span class="line"><span class="hljs-comment"> * 通知队列数据已经写入，windex位置的帧已经写入了数据</span></span><br><span class="line"><span class="hljs-comment"> * 数据写入的帧是通过frame_queue_peek_writable获取的</span></span><br><span class="line"><span class="hljs-comment"> * @param 队列</span></span><br><span class="line"><span class="hljs-comment"> */</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">frame_queue_push</span><span class="hljs-params">(FrameQueue *f)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-comment">// 将windex+1，往后移一位，如果后面已经到底了，则从头开始（环状）</span></span><br><span class="line">  <span class="hljs-keyword">if</span> (++f-&gt;windex == f-&gt;max_size) f-&gt;windex = <span class="hljs-number">0</span>;</span><br><span class="line">  <span class="hljs-comment">// 同上，windex只有写线程操作，所以不需要加锁，但是下面的size的操作是读线程和写线程都需要操作的，所以需要加锁</span></span><br><span class="line">  <span class="hljs-comment">// 加锁</span></span><br><span class="line">  SDL_LockMutex(f-&gt;mutex);</span><br><span class="line">  <span class="hljs-comment">// 队列的size+1</span></span><br><span class="line">  f-&gt;size++;</span><br><span class="line">  <span class="hljs-comment">// notify通知读线程，唤醒wait</span></span><br><span class="line">  SDL_CondSignal(f-&gt;cond);</span><br><span class="line">  <span class="hljs-comment">// 释放锁</span></span><br><span class="line">  SDL_UnlockMutex(f-&gt;mutex);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="结构体"><a href="#结构体" class="headerlink" title="结构体"></a>结构体</h4><h5 id="MyAVPacketList"><a href="#MyAVPacketList" class="headerlink" title="MyAVPacketList"></a>MyAVPacketList</h5><p>Packet队列中的节点<br><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">MyAVPacketList</span> &#123;</span></span><br><span class="line">  AVPacket pkt;                 <span class="hljs-comment">// 编码数据</span></span><br><span class="line">  <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">MyAVPacketList</span> *<span class="hljs-title">next</span>;</span>  <span class="hljs-comment">// 下一个节点</span></span><br><span class="line">  <span class="hljs-keyword">int</span> serial;                   <span class="hljs-comment">// 序号</span></span><br><span class="line">&#125; MyAVPacketList;</span><br></pre></td></tr></table></figure></p>
+<h5 id="Frame"><a href="#Frame" class="headerlink" title="Frame"></a>Frame</h5><p>Frame队列中的节点<br><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Frame</span> &#123;</span></span><br><span class="line">  <span class="hljs-comment">// 对数据帧的统一抽象，包含音频帧、视频帧、字幕帧</span></span><br><span class="line">  AVFrame *frame;  <span class="hljs-comment">// 音视频帧</span></span><br><span class="line">  AVSubtitle sub;  <span class="hljs-comment">// 字幕帧</span></span><br><span class="line">  <span class="hljs-keyword">int</span> serial; <span class="hljs-comment">// 序号</span></span><br><span class="line">  <span class="hljs-keyword">double</span> pts; <span class="hljs-comment">// pts</span></span><br><span class="line">  <span class="hljs-keyword">double</span> duration; <span class="hljs-comment">// 显示时长</span></span><br><span class="line">  <span class="hljs-keyword">int64_t</span> pos; <span class="hljs-comment">// 在流中的位置</span></span><br><span class="line">  <span class="hljs-keyword">int</span> width; <span class="hljs-comment">// 宽</span></span><br><span class="line">  <span class="hljs-keyword">int</span> height; <span class="hljs-comment">// 高</span></span><br><span class="line">  <span class="hljs-keyword">int</span> format; <span class="hljs-comment">// 格式</span></span><br><span class="line">  AVRational sar; <span class="hljs-comment">// 横纵比</span></span><br><span class="line">  <span class="hljs-keyword">int</span> uploaded; <span class="hljs-comment">// 是否上传到纹理上</span></span><br><span class="line">  <span class="hljs-keyword">int</span> flip_v; <span class="hljs-comment">// 是否需要翻转</span></span><br><span class="line">&#125; Frame;</span><br></pre></td></tr></table></figure></p>
+
+        </div>
+        
+        <ul class="post-copyright">
+            <li><strong>本文标题：</strong><a href="https://witgao.com/音视频开发之ffplay队列分析/">音视频开发之ffplay队列分析</a></li>
+            <li><strong>本文作者：</strong><a href="https://witgao.com">zhenyu</a></li>
+            <li><strong>本文链接：</strong><a href="https://witgao.com/音视频开发之ffplay队列分析/">https://witgao.com/音视频开发之ffplay队列分析/</a></li>
+            <li><strong>发布时间：</strong>2020-08-02</li>
+            <li><strong>版权声明：</strong>本博客所有文章除特别声明外，均采用 <a
+                    href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="external nofollow"
+                    target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明出处！
+            </li>
+        </ul>
+        
+        
+        
+        
+    </div>
+</div>
+
+
+
+
+
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        <div class="level-start">
+            <a class="level level-item has-link-grey  article-nav-prev"
+                href="/音视频开发之ffplay解复用线程分析/">
+                <i class="level-item fas fa-chevron-left"></i>
+                <span class="level-item">音视频开发之ffplay解复用线程分析</span>
+            </a>
+        </div>
+        
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next"
+                href="/音视频开发之SDL2播放视频/">
+                <span class="level-item">音视频开发之SDL2播放视频</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+    </div>
+</div>
+
+
+</div>
+                
+
+
+
+
+<div
+    class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left ">
+    
+    
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered" style="flex-shrink: 1">
+                <div>
+                    
+                    <figure class="image is-128x128 has-mb-6">
+                        <img class="" src="/images/avatar1.png" alt="zhenyu">
+                    </figure>
+                    
+                    <p class="is-size-4 is-block">
+                        zhenyu
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        富贵山庄无富贵，只留欢乐在此间
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>杭州</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        文章
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        38
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        分类
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        9
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        标签
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        0
+                    </p>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="level">
+            <a class="level-item button is-link is-rounded" href="https://github.com/witgao" target="_blank">
+                关注我</a>
+        </div>
+        
+        
+        
+    </div>
+</div>
+    
+    
+<div class="card widget column-left is-sticky" id="toc">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                目录
+            </h3>
+            <ul class="menu-list"><li>
+        <a class="is-flex" href="#整体结构">
+        <span class="has-mr-6">1</span>
+        <span>整体结构</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#5个线程">
+        <span class="has-mr-6">1.1</span>
+        <span>5个线程</span>
+        </a></li><li>
+        <a class="is-flex" href="#4个队列">
+        <span class="has-mr-6">1.2</span>
+        <span>4个队列</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#PacketQueue">
+        <span class="has-mr-6">1.2.1</span>
+        <span>PacketQueue</span>
+        </a></li><li>
+        <a class="is-flex" href="#FrameQueue">
+        <span class="has-mr-6">1.2.2</span>
+        <span>FrameQueue</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#结构体">
+        <span class="has-mr-6">1.3</span>
+        <span>结构体</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#MyAVPacketList">
+        <span class="has-mr-6">1.3.1</span>
+        <span>MyAVPacketList</span>
+        </a></li><li>
+        <a class="is-flex" href="#Frame">
+        <span class="has-mr-6">1.3.2</span>
+        <span>Frame</span>
+        </a></li></ul></li></ul></li></ul>
+        </div>
+    </div>
+</div>
+    
+    
+    <div class="column-right-shadow is-hidden-widescreen ">
+        
+    </div>
+    
+</div>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <!-- <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="/images/logo2.png" alt="音视频开发之ffplay队列分析" height="28">
+                
+                </a> -->
+                <p class="is-size-7">
+                    &copy; 2020 zhenyu&nbsp;
+                    Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a
+                        href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank">Icarus</a>
+                    
+                </p>
+            </div>
+            <div class="level-end">
+                
+            </div>
+        </div>
+    </div>
+</footer>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("zh-CN");</script>
+
+<script>
+var IcarusThemeSettings = {
+    article: {
+        highlight: {
+            clipboard: true,
+            fold: 'unfolded'
+        }
+    }
+};
+</script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+
+
+
+    
+    
+<script src="/js/animation.js"></script>
+
+    
+    
+<script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+<script src="/js/gallery.js" defer></script>
+
+    
+    
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    MathJax.Hub.Config({
+        'HTML-CSS': {
+            matchFontHeight: false
+        },
+        SVG: {
+            matchFontHeight: false
+        },
+        CommonHTML: {
+            matchFontHeight: false
+        },
+        tex2jax: {
+            inlineMath: [
+                ['$','$'],
+                ['\\(','\\)']
+            ]
+        }
+    });
+});
+</script>
+    
+    
+<a id="back-to-top" title="回到顶端" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="想要查找什么..." />
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: '文章',
+                PAGES: '页面',
+                CATEGORIES: '分类',
+                TAGS: '标签',
+                UNTITLED: '(无标题)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+</body>
+
+</html>

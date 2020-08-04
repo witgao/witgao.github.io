@@ -1,0 +1,1520 @@
+<!DOCTYPE html>
+<html  lang="zh">
+
+<head>
+    <meta charset="utf-8" />
+
+<meta name="generator" content="Hexo 3.9.0" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<title>富贵山庄</title>
+
+
+    <meta property="og:type" content="website">
+<meta property="og:title" content="富贵山庄">
+<meta property="og:url" content="https://witgao.com/page/3/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://witgao.com/images/og_image.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="富贵山庄">
+<meta name="twitter:image" content="https://witgao.com/images/og_image.png">
+
+
+
+
+
+
+
+<link rel="icon" href="/images/favicon1.svg">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/default.css">
+
+
+    
+    
+<style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+    
+    
+    
+    
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+    
+    
+    
+    
+    
+    
+    
+    <link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+    
+    
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body class="is-3-column">
+    <nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="/images/logo2.png" alt="富贵山庄" height="28">
+            
+            </a>
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item"
+                href="/">燕子坞</a>
+                
+                <a class="navbar-item"
+                href="/archives">听香水榭</a>
+                
+                <a class="navbar-item"
+                href="/categories">还施水阁</a>
+                
+                <a class="navbar-item"
+                href="/about">思过崖</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    <a class="navbar-item" target="_blank" title="Download on GitHub" href="https://github.com/witgao/blog">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                
+                <a class="navbar-item search" title="搜索" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-6-widescreen has-order-2 column-main">
+    
+<div class="card">
+    
+    <div class="card-image">
+        <a href="/音视频开发之Android硬件解封装/" class="image is-7by1">
+        <img class="thumbnail" src="/images/5.jpeg" alt="音视频开发之Android硬件解封装">
+        </a>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-04-11T16:00:00.000Z">2020-04-12</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    21 分钟 读完 (大约 3198 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/音视频开发之Android硬件解封装/">音视频开发之Android硬件解封装</a>
+            
+        </h1>
+        <div class="content">
+            <h3 id="硬件解封装"><a href="#硬件解封装" class="headerlink" title="硬件解封装"></a>硬件解封装</h3><p>Android平台针对音视频封装提供了<strong>MediaMuxer API</strong>，支持.mp4格式的封装；针对解封装提供了<strong>MediaExtractor API</strong>，支持.mp4等格式。</p>
+<h3 id="API架构"><a href="#API架构" class="headerlink" title="API架构"></a>API架构</h3><p>在 <strong>frameworks/base/media</strong> 文件夹中提供了所有音视频相关的Java层API，本文中讲述的解封装API都定义在该处。而具体的服务实现都在 <strong>frameworks/av</strong> 文件夹中</p>
+<p><img src="/images/android_muxer_demuxer.jpg" alt="android_muxer_demuxer" style="zoom: 70%;"></p>
+<p>自7.0开始，MediaService被拆分成多个服务，每个服务都运行在各自的进程中。</p>
+<h3 id="MediaExtractor-解封装"><a href="#MediaExtractor-解封装" class="headerlink" title="MediaExtractor 解封装"></a>MediaExtractor 解封装</h3><p>MediaExtractor类是官方提供的音视频解封装类。其官方使用Demo如下所示：</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 创建解封装器 </span></span><br><span class="line">MediaExtractor extractor = <span class="hljs-keyword">new</span> MediaExtractor();</span><br><span class="line"><span class="hljs-comment">// 设置数据源</span></span><br><span class="line"> extractor.setDataSource(...);</span><br><span class="line"><span class="hljs-comment">// 遍历所有轨道</span></span><br><span class="line"> <span class="hljs-keyword">int</span> numTracks = extractor.getTrackCount();</span><br><span class="line"> <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; numTracks; ++i) &#123;</span><br><span class="line">   MediaFormat format = extractor.getTrackFormat(i);</span><br><span class="line">   String mime = format.getString(MediaFormat.KEY_MIME);</span><br><span class="line">   <span class="hljs-comment">// 根据轨道类型选择想要的轨道</span></span><br><span class="line">   <span class="hljs-keyword">if</span> (weAreInterestedInThisTrack) &#123;</span><br><span class="line">     extractor.selectTrack(i);</span><br><span class="line">   &#125;</span><br><span class="line"> &#125;</span><br><span class="line"> ByteBuffer inputBuffer = ByteBuffer.allocate(...)</span><br><span class="line"> <span class="hljs-comment">// 读取选中轨道的样本数据</span></span><br><span class="line"> <span class="hljs-keyword">while</span> (extractor.readSampleData(inputBuffer, ...) &gt;= <span class="hljs-number">0</span>) &#123;</span><br><span class="line">   <span class="hljs-keyword">int</span> trackIndex = extractor.getSampleTrackIndex();</span><br><span class="line">   <span class="hljs-keyword">long</span> presentationTimeUs = extractor.getSampleTime();</span><br><span class="line">   ...</span><br><span class="line">   <span class="hljs-comment">// 下一个样本</span></span><br><span class="line">   extractor.advance();</span><br><span class="line"> &#125;</span><br><span class="line"> extractor.release();</span><br><span class="line"> extractor = <span class="hljs-keyword">null</span>;</span><br></pre></td></tr></table></figure>
+<h4 id="支持的格式"><a href="#支持的格式" class="headerlink" title="支持的格式"></a>支持的格式</h4><p><img src="/images/media_extractor_support.png" alt="android_muxer_demuxer" style="zoom:67%;"></p>
+<h4 id="注册解封装器"><a href="#注册解封装器" class="headerlink" title="注册解封装器"></a>注册解封装器</h4><p>在<strong>MediaExtractorService</strong>被创建的时候，会注册所有的Extractor实现。</p>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/音视频开发之Android硬件解封装/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-image">
+        <a href="/音视频开发之基础篇/" class="image is-7by1">
+        <img class="thumbnail" src="/images/7.jpeg" alt="音视频开发之基础篇">
+        </a>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-02-29T16:00:00.000Z">2020-03-01</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    36 分钟 读完 (大约 5326 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/音视频开发之基础篇/">音视频开发之基础篇</a>
+            
+        </h1>
+        <div class="content">
+            <h3 id="本篇重点"><a href="#本篇重点" class="headerlink" title="本篇重点"></a>本篇重点</h3><blockquote>
+<p>音视频基础概念与相关术语的讲解</p>
+</blockquote>
+<h3 id="什么是视频"><a href="#什么是视频" class="headerlink" title="什么是视频"></a>什么是视频</h3><h4 id="图像的组成"><a href="#图像的组成" class="headerlink" title="图像的组成"></a>图像的组成</h4><p>在说视频之前，我们来聊一下图像，<strong>图像是人对视觉感知的物质再现</strong>。图像是使用像素点阵来表示的，每个像素点都分配有特定的颜色和位置值。像素也是图像显示的基本单位，通常一幅1080x1920的图片，就是长度1920个像素点，宽度1080个像素点组成的矩阵。</p>
+<h4 id="颜色空间"><a href="#颜色空间" class="headerlink" title="颜色空间"></a>颜色空间</h4><p>像素点除了有位置外还需要有颜色信息，那么颜色在计算机中是如何表示呢？</p>
+<p>在计算机中颜色空间有很多，这里我们介绍下常用的两种颜色空间，RGB颜色空间和YUV颜色空间。</p>
+<h5 id="RGB颜色空间"><a href="#RGB颜色空间" class="headerlink" title="RGB颜色空间"></a>RGB颜色空间</h5><p>RGB颜色空间是由红绿蓝三原色来定义，通过三原色混合成所有的颜色，这应该是我们最熟悉的一种颜色空间。</p>
+<h5 id="YUV颜色空间"><a href="#YUV颜色空间" class="headerlink" title="YUV颜色空间"></a>YUV颜色空间</h5><p>Y表示亮度，U和V表示色度和浓度。早期的YUV实际上是用在彩色电视和黑白电视的交替上，感兴趣历史的同学可以点击<a href="https://zh.wikipedia.org/wiki/YUV" target="_blank" rel="noopener">YUV</a>查看相关资料。YUV颜色空间在数字媒体中广泛使用是由于人类对亮度的的敏感度高于对色度的敏感度，但是在数字媒体中使用的是个变体，叫YCbCr，其中Cb是指蓝色色度，Cr就是红色色度。像JPEG、MPEG都是采用此格式，后续一般讲的YUV都是指YCbCr。(Y的值是根据RGB值计算出来的，所以Cg的值可以通过CbCr计算出来，所以在传输的时候只需要传输YCbCr)</p>
+<figure class="highlight plain hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">计算公式: </span><br><span class="line">    Y = KrR+KgG+Kb*B（k为权重值,ITU-R推荐的BT.601中定义Kb=0.114,Kr=0.299,Kb+Kr+Kg=1）</span><br><span class="line">    Cb=B-Y</span><br><span class="line">    Cr=R-Y</span><br><span class="line">    Cg=G-Y</span><br></pre></td></tr></table></figure>
+<p>YCbCr会按照一定的采样比对色度数据进行采样，采样比通常表示为 <strong>J​ : a : ​b</strong>，表示在一个宽为J像素、高为2像素的采样区域中进行采样，J表示采样的宽度，通常是4，a表示第一行色度采样数，b表示第二行色度采样数与第一行色度采样的不同样点数。</p>
+<p><img src="/images/ycbcr.png" alt="YCbCr采样比"></p>
+<p>最常见的采样比是 4:2:0 ，表示宽为4，第一行有两个色度采样点，第二行与第一行完全相同。所以总共有八个亮度采样点和两个色度采样点，每个亮度采样点需要记录一个值Y，而每个色度采样点都需要记录两个值Cb和Cr。最终需要记录的值为 8Y+2Cr+2Cb = 12，而如果使用RGB来记录则会需要3x8=24。</p>
+<blockquote>
+<p>YCbCr的优势就在于，在达到最大压缩率的情况下，能够保证对人眼感知的失真度最小。拿4:2:0来说足足压缩了一半。</p>
+</blockquote>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/音视频开发之基础篇/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-image">
+        <a href="/FFmpeg深入之ffmpeg-parse-options/" class="image is-7by1">
+        <img class="thumbnail" src="/images/3.jpeg" alt="FFmpeg深入之ffmpeg_parse_options">
+        </a>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-02-11T06:38:17.000Z">2020-02-11</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    26 分钟 读完 (大约 3840 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/FFmpeg深入之ffmpeg-parse-options/">FFmpeg深入之ffmpeg_parse_options</a>
+            
+        </h1>
+        <div class="content">
+            <h3 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h3><figure class="highlight shell hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ffmpeg [global_options] &#123;[input_file_options] -i input_url&#125; ... &#123;[output_file_options] output_url&#125; ...</span><br></pre></td></tr></table></figure>
+<p>根据FFmpeg官方文档定义，FFmpeg命令由 全局参数+{输入参数+输入源}+{输出参数+输出流} 组成。其中全局参数可放在任何地方，输入参数必须放在输入源之前。</p>
+<p>例：</p>
+<figure class="highlight shell hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ffmpeg -i video.mp4 -i 1.png -i 1.mp3 -filter_complex "[0:v]scale=750:1334,pad=750:1334:0:0:black[source];[source][1:v]overlay=x=0:y=0[result]" -map "[result]" -map 2:a -s 540x960 -t 7 -shortest -movflags faststart -y output.mp4</span><br></pre></td></tr></table></figure>
+<p>那么当FFmpeg接收到上面这样一串字符命令时，是如何解析和处理的？</p>
+<figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-keyword">int</span> argc, <span class="hljs-keyword">char</span> **argv)</span></span></span><br><span class="line"><span class="hljs-function"></span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="hljs-comment">/* parse options and open all input/output files */</span></span><br><span class="line">    ret = ffmpeg_parse_options(argc, argv);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在FFmpeg的main方法中可以看到，所有的解析逻辑都在ffmpeg_parse_options函数中，下面我们来一起分析下该函数</p>
+<figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">ffmpeg_parse_options</span><span class="hljs-params">(<span class="hljs-keyword">int</span> argc, <span class="hljs-keyword">char</span> **argv)</span></span></span><br><span class="line"><span class="hljs-function"></span>&#123;</span><br><span class="line">    OptionParseContext octx;</span><br><span class="line">    <span class="hljs-keyword">uint8_t</span> error[<span class="hljs-number">128</span>];</span><br><span class="line">    <span class="hljs-keyword">int</span> ret;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-built_in">memset</span>(&amp;octx, <span class="hljs-number">0</span>, <span class="hljs-keyword">sizeof</span>(octx));</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">/* 解析输入的字符命令 */</span></span><br><span class="line">    ret = split_commandline(&amp;octx, argc, argv, options, groups,</span><br><span class="line">                            FF_ARRAY_ELEMS(groups));</span><br><span class="line">    <span class="hljs-keyword">if</span> (ret &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        av_log(<span class="hljs-literal">NULL</span>, AV_LOG_FATAL, <span class="hljs-string">"Error splitting the argument list: "</span>);</span><br><span class="line">        <span class="hljs-keyword">goto</span> fail;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">/* 应用全局参数 */</span></span><br><span class="line">    ret = parse_optgroup(<span class="hljs-literal">NULL</span>, &amp;octx.global_opts);</span><br><span class="line">    <span class="hljs-keyword">if</span> (ret &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        av_log(<span class="hljs-literal">NULL</span>, AV_LOG_FATAL, <span class="hljs-string">"Error parsing global options: "</span>);</span><br><span class="line">        <span class="hljs-keyword">goto</span> fail;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">/* configure terminal and setup signal handlers */</span></span><br><span class="line">    term_init();</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">/* 打开输入文件流 */</span></span><br><span class="line">    ret = open_files(&amp;octx.groups[GROUP_INFILE], <span class="hljs-string">"input"</span>, open_input_file);</span><br><span class="line">    <span class="hljs-keyword">if</span> (ret &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        av_log(<span class="hljs-literal">NULL</span>, AV_LOG_FATAL, <span class="hljs-string">"Error opening input files: "</span>);</span><br><span class="line">        <span class="hljs-keyword">goto</span> fail;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">/* 初始化滤镜图 */</span></span><br><span class="line">    ret = init_complex_filters();</span><br><span class="line">    <span class="hljs-keyword">if</span> (ret &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        av_log(<span class="hljs-literal">NULL</span>, AV_LOG_FATAL, <span class="hljs-string">"Error initializing complex filters.\n"</span>);</span><br><span class="line">        <span class="hljs-keyword">goto</span> fail;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">/* 打开输出文件流 */</span></span><br><span class="line">    ret = open_files(&amp;octx.groups[GROUP_OUTFILE], <span class="hljs-string">"output"</span>, open_output_file);</span><br><span class="line">    <span class="hljs-keyword">if</span> (ret &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        av_log(<span class="hljs-literal">NULL</span>, AV_LOG_FATAL, <span class="hljs-string">"Error opening output files: "</span>);</span><br><span class="line">        <span class="hljs-keyword">goto</span> fail;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    check_filter_outputs();</span><br><span class="line"></span><br><span class="line">fail:</span><br><span class="line">    uninit_parse_context(&amp;octx);</span><br><span class="line">    <span class="hljs-keyword">if</span> (ret &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        av_strerror(ret, error, <span class="hljs-keyword">sizeof</span>(error));</span><br><span class="line">        av_log(<span class="hljs-literal">NULL</span>, AV_LOG_FATAL, <span class="hljs-string">"%s\n"</span>, error);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">return</span> ret;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/FFmpeg深入之ffmpeg-parse-options/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2019-12-30T13:42:46.000Z">2019-12-30</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/">刀枪棍棒（Android）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/伏魔杖法（Flutter）/">伏魔杖法（Flutter）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    10 分钟 读完 (大约 1568 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/Flutter深入之插件新API-Embedding-V2/">Flutter深入之插件新API——Embedding-V2</a>
+            
+        </h1>
+        <div class="content">
+            <p>在Flutter1.12版本中正式将Embedding-V2API在Android平台默认开启，所有官方插件都迁移到了新的API。Embedding-V2APi的优势在于针对混合开发提供了更好的支持。</p>
+<h2 id="版本配置"><a href="#版本配置" class="headerlink" title="版本配置"></a>版本配置</h2><p>GeneratedPluginRegistrant生成内容配置，通过在AndroidManifest.xml中配置Embedding的版本来确定工具生成的GeneratedPluginRegistrant类的内容。<br><figure class="highlight xml hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">&lt;!-- Don't delete the meta-data below.</span></span><br><span class="line"><span class="hljs-comment">     It is used by the Flutter tool to generate GeneratedPluginRegistrant.java --&gt;</span></span><br><span class="line"><span class="hljs-tag">&lt;<span class="hljs-name">meta-data</span></span></span><br><span class="line"><span class="hljs-tag">    <span class="hljs-attr">android:name</span>=<span class="hljs-string">"flutterEmbedding"</span></span></span><br><span class="line"><span class="hljs-tag">    <span class="hljs-attr">android:value</span>=<span class="hljs-string">"2"</span> /&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>具体判定逻辑在flutter_tools项目中<br><figure class="highlight dart hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">  AndroidEmbeddingVersion getEmbeddingVersion() &#123;</span><br><span class="line">    <span class="hljs-keyword">if</span> (isModule) &#123;</span><br><span class="line">      <span class="hljs-comment">// A module type's Android project is used in add-to-app scenarios and</span></span><br><span class="line">      <span class="hljs-comment">// only supports the V2 embedding.</span></span><br><span class="line">      <span class="hljs-keyword">return</span> AndroidEmbeddingVersion.v2;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">if</span> (appManifestFile == <span class="hljs-keyword">null</span> || !appManifestFile.existsSync()) &#123;</span><br><span class="line">      <span class="hljs-keyword">return</span> AndroidEmbeddingVersion.v1;</span><br><span class="line">    &#125;</span><br><span class="line">    xml.XmlDocument <span class="hljs-built_in">document</span>;</span><br><span class="line">    <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">      <span class="hljs-built_in">document</span> = xml.parse(appManifestFile.readAsStringSync());</span><br><span class="line">    &#125; on xml.XmlParserException &#123;</span><br><span class="line">      throwToolExit(<span class="hljs-string">'Error parsing $appManifestFile '</span></span><br><span class="line">                    <span class="hljs-string">'Please ensure that the android manifest is a valid XML document and try again.'</span>);</span><br><span class="line">    &#125; on FileSystemException &#123;</span><br><span class="line">      throwToolExit(<span class="hljs-string">'Error reading $appManifestFile even though it exists. '</span></span><br><span class="line">                    <span class="hljs-string">'Please ensure that you have read permission to this file and try again.'</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">for</span> (xml.XmlElement metaData <span class="hljs-keyword">in</span> <span class="hljs-built_in">document</span>.findAllElements(<span class="hljs-string">'meta-data'</span>)) &#123;</span><br><span class="line">      <span class="hljs-keyword">final</span> <span class="hljs-built_in">String</span> name = metaData.getAttribute(<span class="hljs-string">'android:name'</span>);</span><br><span class="line">      <span class="hljs-keyword">if</span> (name == <span class="hljs-string">'flutterEmbedding'</span>) &#123;</span><br><span class="line">        <span class="hljs-keyword">final</span> <span class="hljs-built_in">String</span> embeddingVersionString = metaData.getAttribute(<span class="hljs-string">'android:value'</span>);</span><br><span class="line">        <span class="hljs-keyword">if</span> (embeddingVersionString == <span class="hljs-string">'1'</span>) &#123;</span><br><span class="line">          <span class="hljs-keyword">return</span> AndroidEmbeddingVersion.v1;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="hljs-keyword">if</span> (embeddingVersionString == <span class="hljs-string">'2'</span>) &#123;</span><br><span class="line">          <span class="hljs-keyword">return</span> AndroidEmbeddingVersion.v2;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">return</span> AndroidEmbeddingVersion.v1;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="创建时机变更"><a href="#创建时机变更" class="headerlink" title="创建时机变更"></a>创建时机变更</h2><h3 id="旧API"><a href="#旧API" class="headerlink" title="旧API"></a>旧API</h3><p>旧的创建插件的时机一般是在FlutterActivity的子类onCreate()回调时，手动调用下面的方法来创建所有的插件。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GeneratedPluginRegistrant.registerWith(PluginRegistry registry);</span><br></pre></td></tr></table></figure>
+<h3 id="新API"><a href="#新API" class="headerlink" title="新API"></a>新API</h3><p>新的API将插件与视图进行解绑，将插件与引擎进行绑定，并且在引擎创建的时候提供了自动创建插件的功能。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">FlutterEngine</span><span class="hljs-params">(</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    @NonNull Context context,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    @NonNull FlutterLoader flutterLoader,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    @NonNull FlutterJNI flutterJNI,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    @Nullable String[] dartVmArgs,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    <span class="hljs-keyword">boolean</span> automaticallyRegisterPlugins</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">)</span> </span>&#123;</span><br><span class="line"> </span><br><span class="line">  <span class="hljs-keyword">this</span>.pluginRegistry = <span class="hljs-keyword">new</span> FlutterEnginePluginRegistry(</span><br><span class="line">    context.getApplicationContext(),</span><br><span class="line">    <span class="hljs-keyword">this</span>,</span><br><span class="line">    flutterLoader</span><br><span class="line">  );</span><br><span class="line">  <span class="hljs-comment">// 默认为true，自动创建插件</span></span><br><span class="line">  <span class="hljs-keyword">if</span> (automaticallyRegisterPlugins) &#123;</span><br><span class="line">    registerPlugins();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">// 通过反射调用GeneratedPluginRegistrant.registerWith(FlutterEngine engine)方法</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">registerPlugins</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">    Class&lt;?&gt; generatedPluginRegistrant = Class.forName(<span class="hljs-string">"io.flutter.plugins.GeneratedPluginRegistrant"</span>);</span><br><span class="line">    Method registrationMethod = generatedPluginRegistrant.getDeclaredMethod(<span class="hljs-string">"registerWith"</span>, FlutterEngine.class);</span><br><span class="line">    registrationMethod.invoke(<span class="hljs-keyword">null</span>, <span class="hljs-keyword">this</span>);</span><br><span class="line">  &#125; <span class="hljs-keyword">catch</span> (Exception e) &#123;</span><br><span class="line">    Log.w(TAG, <span class="hljs-string">"Tried to automatically register plugins with FlutterEngine ("</span></span><br><span class="line">        + <span class="hljs-keyword">this</span> + <span class="hljs-string">") but could not find and invoke the GeneratedPluginRegistrant."</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/Flutter深入之插件新API-Embedding-V2/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2019-12-14T16:00:00.000Z">2019-12-15</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/">刀枪棍棒（Android）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/五虎断门刀（Android原生）/">五虎断门刀（Android原生）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    21 分钟 读完 (大约 3161 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/SurfaceFlinger深入之Layer创建与渲染/">SurfaceFlinger深入之Layer创建与渲染</a>
+            
+        </h1>
+        <div class="content">
+            <h3 id="一切的开始resumeActivity"><a href="#一切的开始resumeActivity" class="headerlink" title="一切的开始resumeActivity"></a>一切的开始resumeActivity</h3><p>在Activity第一次执行resume的时候，会将DecorView添加到WindowManager中，由此开始了Activity视图显示的第一步。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">final</span> <span class="hljs-keyword">void</span> <span class="hljs-title">handleResumeActivity</span><span class="hljs-params">(IBinder token,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">        <span class="hljs-keyword">boolean</span> clearHide, <span class="hljs-keyword">boolean</span> isForward, <span class="hljs-keyword">boolean</span> reallyResume, <span class="hljs-keyword">int</span> seq, String reason)</span> </span>&#123;</span><br><span class="line">        ...</span><br><span class="line">        <span class="hljs-keyword">final</span> Activity a = r.activity;</span><br><span class="line">		...</span><br><span class="line">        <span class="hljs-keyword">if</span> (r.window == <span class="hljs-keyword">null</span> &amp;&amp; !a.mFinished &amp;&amp; willBeVisible) &#123;</span><br><span class="line">            r.window = r.activity.getWindow();</span><br><span class="line">            View decor = r.window.getDecorView();</span><br><span class="line">            decor.setVisibility(View.INVISIBLE);</span><br><span class="line">            ViewManager wm = a.getWindowManager();</span><br><span class="line">            ...</span><br><span class="line">            <span class="hljs-keyword">if</span> (a.mVisibleFromClient) &#123;</span><br><span class="line">                <span class="hljs-keyword">if</span> (!a.mWindowAdded) &#123;</span><br><span class="line">                    a.mWindowAdded = <span class="hljs-keyword">true</span>;</span><br><span class="line">                    wm.addView(decor, l);</span><br><span class="line">                &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">                  ...</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">          ...</span><br><span class="line">        &#125;</span><br><span class="line">        ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="WindowManager-addView"><a href="#WindowManager-addView" class="headerlink" title="WindowManager.addView"></a>WindowManager.addView</h4><p>WindowManagerImpl最终会调用到WindowManagerGlobal中，在WindowManagerGlobal中会创建一个ViewRootImpl对象，每个DecorView都会有对应的ViewRootImpl对象，而一个Window中可以有多个DecorView。</p>
+<p>ViewRootImpl负责与WMS通信，通过其维护的IWindowSession对象来与WMS进行通信。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">addView</span><span class="hljs-params">(View view, ViewGroup.LayoutParams params,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">        Display display, Window parentWindow)</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    ViewRootImpl root;</span><br><span class="line">    View panelParentView = <span class="hljs-keyword">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">synchronized</span> (mLock) &#123;</span><br><span class="line">        ...</span><br><span class="line">        root = <span class="hljs-keyword">new</span> ViewRootImpl(view.getContext(), display);</span><br><span class="line"></span><br><span class="line">        view.setLayoutParams(wparams);</span><br><span class="line"></span><br><span class="line">        mViews.add(view);</span><br><span class="line">        mRoots.add(root);</span><br><span class="line">        mParams.add(wparams);</span><br><span class="line"></span><br><span class="line">        <span class="hljs-comment">// do this last because it fires off messages to start doing things</span></span><br><span class="line">        <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">            root.setView(view, wparams, panelParentView);</span><br><span class="line">        &#125; <span class="hljs-keyword">catch</span> (RuntimeException e) &#123;</span><br><span class="line">            ...</span><br><span class="line">            <span class="hljs-keyword">throw</span> e;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/SurfaceFlinger深入之Layer创建与渲染/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2019-10-14T16:00:00.000Z">2019-10-15</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/">刀枪棍棒（Android）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/五虎断门刀（Android原生）/">五虎断门刀（Android原生）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    16 分钟 读完 (大约 2391 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/Android图形架构总览/">Android图形架构总览</a>
+            
+        </h1>
+        <div class="content">
+            <h3 id="图形渲染流程"><a href="#图形渲染流程" class="headerlink" title="图形渲染流程"></a>图形渲染流程</h3><p>​    在Android中，所有的渲染都是将内容绘制到对应的Surface上，Surface作为BufferQueue的生产方，每当发生入队操作时，都会通知BufferQueue创建者进行消费，也就是SurfaceFlinger，由SurfaceFlinger进行合并，然后发送到显示器进行显示。</p>
+<p>下面这张图描述了关键组件的工作流程:</p>
+<p><img src="/images/ape_fwk_graphics.png" alt="工作流程"></p>
+<ol>
+<li><p>当前一个可见的界面被创建时，会通过WindowManager去创建一个Window对象，而每一个Window对象中都会包含一个Surface对象，该对象由WindowManager向SurfaceFlinger请求创建。Surface中包含一个BufferQueue，它由SurfaceFlinger向HAL层调用Gralloc对其进行内存分配。</p></li></ol>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/Android图形架构总览/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-image">
+        <a href="/FFmpeg深入之avformat-open-input/" class="image is-7by1">
+        <img class="thumbnail" src="/images/2.jpeg" alt="FFmpeg深入之avformat_open_input">
+        </a>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2019-09-30T01:48:04.000Z">2019-09-30</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    37 分钟 读完 (大约 5523 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/FFmpeg深入之avformat-open-input/">FFmpeg深入之avformat_open_input</a>
+            
+        </h1>
+        <div class="content">
+            <figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta"># libavformat/avformat.h</span></span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">/**</span></span><br><span class="line"><span class="hljs-comment"> * 读取多媒体文件头信息</span></span><br><span class="line"><span class="hljs-comment"> * 此时并未开始解码，开启的流通过avformat_close_input()关闭。</span></span><br><span class="line"><span class="hljs-comment"> *</span></span><br><span class="line"><span class="hljs-comment"> * @param ps AVFormatContext (通过avformat_alloc_context创建)，可以传NULL。    </span></span><br><span class="line"><span class="hljs-comment"> * @param url 多媒体URL</span></span><br><span class="line"><span class="hljs-comment"> * @param fmt 指定解封装的格式，传NULL时将自动检测.</span></span><br><span class="line"><span class="hljs-comment"> * @param options  解封装参数自定义，可以传NULL</span></span><br><span class="line"><span class="hljs-comment"> *</span></span><br><span class="line"><span class="hljs-comment"> * @return 0 成功</span></span><br><span class="line"><span class="hljs-comment"> */</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">avformat_open_input</span><span class="hljs-params">(AVFormatContext **ps, <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *url, AVInputFormat *fmt, AVDictionary **options)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>方法调用流程图</p>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/FFmpeg深入之avformat-open-input/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+    
+<div class="card card-transparent">
+    <nav class="pagination is-centered" role="navigation" aria-label="pagination">
+        <div class="pagination-previous">
+            <a class="is-flex-grow has-text-black-ter" href="/page/2/">上一页</a>
+        </div>
+        <div class="pagination-next">
+            <a class="is-flex-grow has-text-black-ter" href="/page/4/">下一页</a>
+        </div>
+        <ul class="pagination-list is-hidden-mobile">
+            
+            <li><a class="pagination-link has-text-black-ter" href="/">1</a></li>
+            
+            <li><a class="pagination-link has-text-black-ter" href="/page/2/">2</a></li>
+            
+            <li><a class="pagination-link is-current" href="/page/3/">3</a></li>
+            
+            <li><a class="pagination-link has-text-black-ter" href="/page/4/">4</a></li>
+            
+            <li><a class="pagination-link has-text-black-ter" href="/page/5/">5</a></li>
+            
+            <li><a class="pagination-link has-text-black-ter" href="/page/6/">6</a></li>
+            
+        </ul>
+    </nav>
+</div>
+</div>
+                
+
+
+
+
+<div
+    class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left ">
+    
+    
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered" style="flex-shrink: 1">
+                <div>
+                    
+                    <figure class="image is-128x128 has-mb-6">
+                        <img class="" src="/images/avatar1.png" alt="zhenyu">
+                    </figure>
+                    
+                    <p class="is-size-4 is-block">
+                        zhenyu
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        富贵山庄无富贵，只留欢乐在此间
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>杭州</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        文章
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        38
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        分类
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        9
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        标签
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        0
+                    </p>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="level">
+            <a class="level-item button is-link is-rounded" href="https://github.com/witgao" target="_blank">
+                关注我</a>
+        </div>
+        
+        
+        
+    </div>
+</div>
+    
+    
+    
+    
+<div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                分类
+            </h3>
+            <ul class="menu-list">
+            <li>
+        <a class="level is-marginless" href="/categories/内功心法（CS基础）/">
+            <span class="level-start">
+                <span class="level-item">内功心法（CS基础）</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">9</span>
+            </span>
+        </a><ul><li>
+        <a class="level is-marginless" href="/categories/内功心法（CS基础）/北冥神功（编程语言）/">
+            <span class="level-start">
+                <span class="level-item">北冥神功（编程语言）</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">2</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/内功心法（CS基础）/神照功（网络协议）/">
+            <span class="level-start">
+                <span class="level-item">神照功（网络协议）</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">7</span>
+            </span>
+        </a></li></ul></li><li>
+        <a class="level is-marginless" href="/categories/刀枪棍棒（Android）/">
+            <span class="level-start">
+                <span class="level-item">刀枪棍棒（Android）</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">11</span>
+            </span>
+        </a><ul><li>
+        <a class="level is-marginless" href="/categories/刀枪棍棒（Android）/五虎断门刀（Android原生）/">
+            <span class="level-start">
+                <span class="level-item">五虎断门刀（Android原生）</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">7</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/刀枪棍棒（Android）/伏魔杖法（Flutter）/">
+            <span class="level-start">
+                <span class="level-item">伏魔杖法（Flutter）</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">4</span>
+            </span>
+        </a></li></ul></li><li>
+        <a class="level is-marginless" href="/categories/拳掌指腿（音视频）/">
+            <span class="level-start">
+                <span class="level-item">拳掌指腿（音视频）</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">18</span>
+            </span>
+        </a><ul><li>
+        <a class="level is-marginless" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">
+            <span class="level-start">
+                <span class="level-item">七伤拳（音视频基础）</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">10</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">
+            <span class="level-start">
+                <span class="level-item">降龙十八掌（FFmpeg）</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">8</span>
+            </span>
+        </a></li></ul></li>
+            </ul>
+        </div>
+    </div>
+</div>
+    
+    
+    <div class="column-right-shadow is-hidden-widescreen ">
+        
+        <div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            最新文章
+        </h3>
+        
+        <article class="media">
+            
+            <a href="/音视频开发之ffplay渲染线程分析/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/18.jpg" alt="音视频开发之ffplay渲染线程分析">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-04T16:00:00.000Z">2020-08-05</time></div>
+                    <a href="/音视频开发之ffplay渲染线程分析/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之ffplay渲染线程分析</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/音视频开发之ffplay解码线程分析/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/17.jpg" alt="音视频开发之ffplay解码线程分析">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-03T16:00:00.000Z">2020-08-04</time></div>
+                    <a href="/音视频开发之ffplay解码线程分析/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之ffplay解码线程分析</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/音视频开发之ffplay解复用线程分析/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/16.jpg" alt="音视频开发之ffplay解复用线程分析">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-02T16:00:00.000Z">2020-08-03</time></div>
+                    <a href="/音视频开发之ffplay解复用线程分析/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之ffplay解复用线程分析</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/音视频开发之ffplay队列分析/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/15.jpg" alt="音视频开发之ffplay队列分析">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-01T16:00:00.000Z">2020-08-02</time></div>
+                    <a href="/音视频开发之ffplay队列分析/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之ffplay队列分析</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/音视频开发之SDL2播放视频/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/14.jpg" alt="音视频开发之SDL2播放视频">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-07-31T16:00:00.000Z">2020-08-01</time></div>
+                    <a href="/音视频开发之SDL2播放视频/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之SDL2播放视频</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+    </div>
+</div>
+        
+        <div class="card widget is-hidden-mobile">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                归档
+            </h3>
+            <ul class="menu-list">
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/08/">
+                        <span class="level-start">
+                            <span class="level-item">八月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">6</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/07/">
+                        <span class="level-start">
+                            <span class="level-item">七月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">7</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/04/">
+                        <span class="level-start">
+                            <span class="level-item">四月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">2</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/03/">
+                        <span class="level-start">
+                            <span class="level-item">三月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/02/">
+                        <span class="level-start">
+                            <span class="level-item">二月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2019/12/">
+                        <span class="level-start">
+                            <span class="level-item">十二月 2019</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">2</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2019/10/">
+                        <span class="level-start">
+                            <span class="level-item">十月 2019</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2019/09/">
+                        <span class="level-start">
+                            <span class="level-item">九月 2019</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2019/02/">
+                        <span class="level-start">
+                            <span class="level-item">二月 2019</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2018/11/">
+                        <span class="level-start">
+                            <span class="level-item">十一月 2018</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">3</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2018/07/">
+                        <span class="level-start">
+                            <span class="level-item">七月 2018</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">2</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2018/06/">
+                        <span class="level-start">
+                            <span class="level-item">六月 2018</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2018/05/">
+                        <span class="level-start">
+                            <span class="level-item">五月 2018</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">3</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2017/12/">
+                        <span class="level-start">
+                            <span class="level-item">十二月 2017</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">7</span>
+                        </span>
+                    </a>
+                </li>
+                
+            </ul>
+        </div>
+    </div>
+</div>
+        
+        <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                标签
+            </h3>
+            <div class="field is-grouped is-grouped-multiline">
+                
+            </div>
+        </div>
+    </div>
+</div>
+        
+    </div>
+    
+</div>
+
+                
+
+
+
+
+<div
+    class="column is-4-tablet is-4-desktop is-3-widescreen is-hidden-touch is-hidden-desktop-only has-order-3 column-right ">
+    
+    <div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            最新文章
+        </h3>
+        
+        <article class="media">
+            
+            <a href="/音视频开发之ffplay渲染线程分析/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/18.jpg" alt="音视频开发之ffplay渲染线程分析">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-04T16:00:00.000Z">2020-08-05</time></div>
+                    <a href="/音视频开发之ffplay渲染线程分析/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之ffplay渲染线程分析</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/音视频开发之ffplay解码线程分析/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/17.jpg" alt="音视频开发之ffplay解码线程分析">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-03T16:00:00.000Z">2020-08-04</time></div>
+                    <a href="/音视频开发之ffplay解码线程分析/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之ffplay解码线程分析</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/音视频开发之ffplay解复用线程分析/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/16.jpg" alt="音视频开发之ffplay解复用线程分析">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-02T16:00:00.000Z">2020-08-03</time></div>
+                    <a href="/音视频开发之ffplay解复用线程分析/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之ffplay解复用线程分析</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/音视频开发之ffplay队列分析/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/15.jpg" alt="音视频开发之ffplay队列分析">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-01T16:00:00.000Z">2020-08-02</time></div>
+                    <a href="/音视频开发之ffplay队列分析/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之ffplay队列分析</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/音视频开发之SDL2播放视频/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/14.jpg" alt="音视频开发之SDL2播放视频">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-07-31T16:00:00.000Z">2020-08-01</time></div>
+                    <a href="/音视频开发之SDL2播放视频/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之SDL2播放视频</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+    </div>
+</div>
+    
+    <div class="card widget is-hidden-mobile">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                归档
+            </h3>
+            <ul class="menu-list">
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/08/">
+                        <span class="level-start">
+                            <span class="level-item">八月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">6</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/07/">
+                        <span class="level-start">
+                            <span class="level-item">七月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">7</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/04/">
+                        <span class="level-start">
+                            <span class="level-item">四月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">2</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/03/">
+                        <span class="level-start">
+                            <span class="level-item">三月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/02/">
+                        <span class="level-start">
+                            <span class="level-item">二月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2019/12/">
+                        <span class="level-start">
+                            <span class="level-item">十二月 2019</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">2</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2019/10/">
+                        <span class="level-start">
+                            <span class="level-item">十月 2019</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2019/09/">
+                        <span class="level-start">
+                            <span class="level-item">九月 2019</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2019/02/">
+                        <span class="level-start">
+                            <span class="level-item">二月 2019</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2018/11/">
+                        <span class="level-start">
+                            <span class="level-item">十一月 2018</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">3</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2018/07/">
+                        <span class="level-start">
+                            <span class="level-item">七月 2018</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">2</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2018/06/">
+                        <span class="level-start">
+                            <span class="level-item">六月 2018</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2018/05/">
+                        <span class="level-start">
+                            <span class="level-item">五月 2018</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">3</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2017/12/">
+                        <span class="level-start">
+                            <span class="level-item">十二月 2017</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">7</span>
+                        </span>
+                    </a>
+                </li>
+                
+            </ul>
+        </div>
+    </div>
+</div>
+    
+    <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                标签
+            </h3>
+            <div class="field is-grouped is-grouped-multiline">
+                
+            </div>
+        </div>
+    </div>
+</div>
+    
+    
+</div>
+
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <!-- <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="/images/logo2.png" alt="富贵山庄" height="28">
+                
+                </a> -->
+                <p class="is-size-7">
+                    &copy; 2020 zhenyu&nbsp;
+                    Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a
+                        href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank">Icarus</a>
+                    
+                </p>
+            </div>
+            <div class="level-end">
+                
+            </div>
+        </div>
+    </div>
+</footer>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("zh-CN");</script>
+
+<script>
+var IcarusThemeSettings = {
+    article: {
+        highlight: {
+            clipboard: true,
+            fold: 'unfolded'
+        }
+    }
+};
+</script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+
+
+
+    
+    
+<script src="/js/animation.js"></script>
+
+    
+    
+<script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+<script src="/js/gallery.js" defer></script>
+
+    
+    
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    MathJax.Hub.Config({
+        'HTML-CSS': {
+            matchFontHeight: false
+        },
+        SVG: {
+            matchFontHeight: false
+        },
+        CommonHTML: {
+            matchFontHeight: false
+        },
+        tex2jax: {
+            inlineMath: [
+                ['$','$'],
+                ['\\(','\\)']
+            ]
+        }
+    });
+});
+</script>
+    
+    
+<a id="back-to-top" title="回到顶端" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="想要查找什么..." />
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: '文章',
+                PAGES: '页面',
+                CATEGORIES: '分类',
+                TAGS: '标签',
+                UNTITLED: '(无标题)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+</body>
+
+</html>

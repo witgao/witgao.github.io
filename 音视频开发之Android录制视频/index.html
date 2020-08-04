@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html  lang="zh">
+
+<head>
+    <meta charset="utf-8" />
+
+<meta name="generator" content="Hexo 3.9.0" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<title>音视频开发之Android录制视频 - 富贵山庄</title>
+
+
+    <meta name="description" content="FFmpeg对于Android平台的视频输入设备API有一定的支持，但是比较局限，只支持Android N以上的版本，低版本无法使用。 其原因是因为FFmpeg采用的是Android N推出的native层camera API来实现的(NDK中的libcamera2ndk.so），而并非采用JNI的方式来调用Java层camera API。 Android平台视频录制API对于视频录制API，An">
+<meta property="og:type" content="article">
+<meta property="og:title" content="音视频开发之Android录制视频">
+<meta property="og:url" content="https://witgao.com/音视频开发之Android录制视频/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:description" content="FFmpeg对于Android平台的视频输入设备API有一定的支持，但是比较局限，只支持Android N以上的版本，低版本无法使用。 其原因是因为FFmpeg采用的是Android N推出的native层camera API来实现的(NDK中的libcamera2ndk.so），而并非采用JNI的方式来调用Java层camera API。 Android平台视频录制API对于视频录制API，An">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://witgao.com/images/10.jpeg">
+<meta property="og:updated_time" content="2020-07-21T09:07:00.810Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="音视频开发之Android录制视频">
+<meta name="twitter:description" content="FFmpeg对于Android平台的视频输入设备API有一定的支持，但是比较局限，只支持Android N以上的版本，低版本无法使用。 其原因是因为FFmpeg采用的是Android N推出的native层camera API来实现的(NDK中的libcamera2ndk.so），而并非采用JNI的方式来调用Java层camera API。 Android平台视频录制API对于视频录制API，An">
+<meta name="twitter:image" content="https://witgao.com/images/10.jpeg">
+
+
+
+
+
+
+
+<link rel="icon" href="/images/favicon1.svg">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/default.css">
+
+
+    
+    
+<style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+    
+    
+    
+    
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+    
+    
+    
+    
+    
+    
+    
+    <link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+    
+    
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body class="is-3-column">
+    <nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="/images/logo2.png" alt="音视频开发之Android录制视频" height="28">
+            
+            </a>
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item"
+                href="/">燕子坞</a>
+                
+                <a class="navbar-item"
+                href="/archives">听香水榭</a>
+                
+                <a class="navbar-item"
+                href="/categories">还施水阁</a>
+                
+                <a class="navbar-item"
+                href="/about">思过崖</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    <a class="navbar-item" target="_blank" title="Download on GitHub" href="https://github.com/witgao/blog">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                <a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;">
+                    <i class="fas fa-list-ul"></i>
+                </a>
+                
+                
+                <a class="navbar-item search" title="搜索" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-9-widescreen has-order-2 column-main">
+<div class="card">
+    
+    <div class="card-image">
+        <span  class="image is-7by1">
+        <img class="thumbnail" src="/images/10.jpeg" alt="音视频开发之Android录制视频">
+        </span>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-07-20T16:00:00.000Z">2020-07-21</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    19 分钟 读完 (大约 2803 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            音视频开发之Android录制视频
+            
+        </h1>
+        <div class="content">
+            <p>FFmpeg对于Android平台的视频输入设备API有一定的支持，但是比较局限，只支持Android N以上的版本，低版本无法使用。</p>
+<p>其原因是因为FFmpeg采用的是Android N推出的native层camera API来实现的(NDK中的libcamera2ndk.so），而并非采用JNI的方式来调用Java层camera API。</p>
+<h3 id="Android平台视频录制API"><a href="#Android平台视频录制API" class="headerlink" title="Android平台视频录制API"></a>Android平台视频录制API</h3><p>对于视频录制API，Android平台上有两套API实现，一套是老版的Camera1，另一套是Android L之后推出的Camera2。</p>
+<p>Camera1使用起来较为简单，但是功能相对较少，不支持多纹理输出。Camera2的API功能上虽然更加强大，但是API设计的非常底层化，不利于理解，并且YUV_420_888的数据格式，国内各大产商在实现上留下的坑太多。</p>
+<p>Jetpack组件中，Google推出了全新的CameraX组件，对Camera1和Camera2进行了统一的封装，使得API更加简单易用。</p>
+<h4 id="Camera1"><a href="#Camera1" class="headerlink" title="Camera1"></a>Camera1</h4><h5 id="获取Camera设备信息"><a href="#获取Camera设备信息" class="headerlink" title="获取Camera设备信息"></a>获取Camera设备信息</h5><ul>
+<li>Camera.getNumberOfCameras() : 获取Camera设备数量 </li>
+<li>index : 索引就是后续会使用的CameraID</li>
+<li>Camera.CameraInfo : Camera设备信息  </li>
+<li>Camera.getCameraInfo(index, info) : 获取指定索引的Camera设备信息，存储到info对象中</li>
+<li>Camera.CameraInfo.facing : 相机面对的方向，前置还是后置 CAMERA_FACING_BACK or CAMERA_FACING_FRONT.</li>
+<li>Camera.CameraInfo.orientation : 相机图像的方向，获取到的图像需要顺时针旋转该角度才能正常显示。值为0、90、180、270。（因为我们拿手机一般是竖着拿，但是摄像头可能是向左横着或向右横着被安装的）</li>
+<li>Camera.open : 获取指定索引位置的Camera设备实例。</li>
+</ul>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 遍历所有的camera设备</span></span><br><span class="line"><span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> index = <span class="hljs-number">0</span>; index &lt; android.hardware.Camera.getNumberOfCameras(); ++index) &#123;</span><br><span class="line">  <span class="hljs-comment">// 获取camera设备信息</span></span><br><span class="line">  android.hardware.Camera.CameraInfo info = <span class="hljs-keyword">new</span> android.hardware.Camera.CameraInfo();</span><br><span class="line">  android.hardware.Camera.getCameraInfo(index, info);</span><br><span class="line">  String facing =</span><br><span class="line">        (info.facing == android.hardware.Camera.CameraInfo.CAMERA_FACING_FRONT) ? <span class="hljs-string">"front"</span> : <span class="hljs-string">"back"</span>; </span><br><span class="line">  <span class="hljs-keyword">final</span> android.hardware.Camera camera;</span><br><span class="line">  <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">      <span class="hljs-comment">// 开启camera设备，获取camera实例</span></span><br><span class="line">      camera = android.hardware.Camera.open(cameraId);</span><br><span class="line">  &#125; <span class="hljs-keyword">catch</span> (RuntimeException e) &#123;</span><br><span class="line">      callback.onFailure(FailureType.ERROR, e.getMessage());</span><br><span class="line">      <span class="hljs-keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+ <a id="more"></a>
+<h5 id="设置采集参数"><a href="#设置采集参数" class="headerlink" title="设置采集参数"></a>设置采集参数</h5><p>设置采集的尺寸、格式、对焦、闪光灯、白平衡等</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 获取相机设备的参数集</span></span><br><span class="line"><span class="hljs-keyword">final</span> android.hardware.Camera.Parameters parameters = camera.getParameters();</span><br><span class="line"><span class="hljs-comment">// 获取手机支持的对焦模式（为了应对各手机厂商的差异，一般在设置某个功能时，先判断当前手机是否支持该功能）</span></span><br><span class="line"><span class="hljs-keyword">final</span> List&lt;String&gt; focusModes = parameters.getSupportedFocusModes();</span><br><span class="line"><span class="hljs-comment">// 设置FPS的区间</span></span><br><span class="line">parameters.setPreviewFpsRange(framerate.min, framerate.max);</span><br><span class="line"><span class="hljs-comment">// 设置预览尺寸</span></span><br><span class="line">parameters.setPreviewSize(width, height);</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">// 设置预览数据的像素格式，一般设置NV21</span></span><br><span class="line">parameters.setPreviewFormat(ImageFormat.NV21);</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">// 视频稳像</span></span><br><span class="line"><span class="hljs-keyword">if</span> (parameters.isVideoStabilizationSupported()) &#123;</span><br><span class="line">  parameters.setVideoStabilization(<span class="hljs-keyword">true</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="hljs-comment">// 如果当前手机支持，则设置对焦模式为 FOCUS_MODE_CONTINUOUS_VIDEO</span></span><br><span class="line"><span class="hljs-keyword">if</span> (focusModes.contains(android.hardware.Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO)) &#123;</span><br><span class="line">  parameters.setFocusMode(android.hardware.Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);</span><br><span class="line">&#125;</span><br><span class="line"><span class="hljs-comment">// 设置参数，重启相机才生效</span></span><br><span class="line">camera.setParameters(parameters);</span><br><span class="line"><span class="hljs-comment">// 设置相机预览显示的图像方向</span></span><br><span class="line">camera.setDisplayOrientation(<span class="hljs-number">0</span> <span class="hljs-comment">/* degrees */</span>);</span><br></pre></td></tr></table></figure>
+<p>下面的代码就是设置相机预览显示的图像角度根据activity显示的方向来调整<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">setCameraDisplayOrientation</span><span class="hljs-params">(Activity activity,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">      <span class="hljs-keyword">int</span> cameraId, android.hardware.Camera camera)</span> </span>&#123;</span><br><span class="line">  android.hardware.Camera.CameraInfo info =</span><br><span class="line">          <span class="hljs-keyword">new</span> android.hardware.Camera.CameraInfo();</span><br><span class="line">  android.hardware.Camera.getCameraInfo(cameraId, info);</span><br><span class="line"> <span class="hljs-keyword">int</span> rotation = activity.getWindowManager().getDefaultDisplay()</span><br><span class="line">          .getRotation();</span><br><span class="line">  <span class="hljs-keyword">int</span> degrees = <span class="hljs-number">0</span>;</span><br><span class="line">  <span class="hljs-keyword">switch</span> (rotation) &#123;</span><br><span class="line">      <span class="hljs-keyword">case</span> Surface.ROTATION_0: degrees = <span class="hljs-number">0</span>; <span class="hljs-keyword">break</span>;</span><br><span class="line">      <span class="hljs-keyword">case</span> Surface.ROTATION_90: degrees = <span class="hljs-number">90</span>; <span class="hljs-keyword">break</span>;</span><br><span class="line">      <span class="hljs-keyword">case</span> Surface.ROTATION_180: degrees = <span class="hljs-number">180</span>; <span class="hljs-keyword">break</span>;</span><br><span class="line">      <span class="hljs-keyword">case</span> Surface.ROTATION_270: degrees = <span class="hljs-number">270</span>; <span class="hljs-keyword">break</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="hljs-keyword">int</span> result;</span><br><span class="line">  <span class="hljs-keyword">if</span> (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) &#123;</span><br><span class="line">      <span class="hljs-comment">// 前置相机是镜像的</span></span><br><span class="line">      result = (info.orientation + degrees) % <span class="hljs-number">360</span>;</span><br><span class="line">      result = (<span class="hljs-number">360</span> - result) % <span class="hljs-number">360</span>;  </span><br><span class="line">  &#125; <span class="hljs-keyword">else</span> &#123;  </span><br><span class="line">      <span class="hljs-comment">// 后置相机</span></span><br><span class="line">      result = (info.orientation - degrees + <span class="hljs-number">360</span>) % <span class="hljs-number">360</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  camera.setDisplayOrientation(result);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h5 id="设置输出"><a href="#设置输出" class="headerlink" title="设置输出"></a>设置输出</h5><p>获取输出数据有两种方式，一种是设置一个SurfaceTexture采用纹理进行接收；另一种是通过设置回调直接接收byte array数据。</p>
+<h6 id="Texture格式"><a href="#Texture格式" class="headerlink" title="Texture格式"></a>Texture格式</h6><p>SurfaceTexture有两种方式获取，一种是通过系统的SurfaceView或者TextureView来获取，另一种就是自建OES纹理，通过构造函数new。</p>
+<ul>
+<li>通过系统的View来获取的SurfaceTexture，相机设备将数据写入后，系统View会自动取出数据更新显示。</li>
+<li>自己创建的SurfaceTexture可以通过设置OnFrameAvailableListener来监听数据的变更，当相机设备写入数据时，会触发回调，在回调中使用updateTexImage从队列中取出一个数据绑定到OES纹理中，使用OES纹理来进行绘制显示或者编码输入等操作。<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">try</span> &#123;</span><br><span class="line">  camera.setPreviewTexture(getSurfaceTexture());</span><br><span class="line">&#125; <span class="hljs-keyword">catch</span> (IOException | RuntimeException e) &#123;</span><br><span class="line">  camera.release();</span><br><span class="line">  callback.onFailure(FailureType.ERROR, e.getMessage());</span><br><span class="line">  <span class="hljs-keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h6 id="ByteArray格式"><a href="#ByteArray格式" class="headerlink" title="ByteArray格式"></a>ByteArray格式</h6><p>对于ByteArray格式的回调设置，又有两种方式，一种是setPreviewCallback方法，另一种是setPreviewCallbackWithBuffer方法。</p>
+<ul>
+<li>第一种onPreviewFrame回调方法会在每一帧数据准备好了就调用，回调时机是不可控的。</li>
+<li>第二种方式是在需要在前一帧的onPreviewFrame方法中调用addCallbackBuffer方法，下一帧的onPreviewFrame才会调用，同时addCallbackBuffer方法的参数的byte数据就是每一帧的原数据。</li>
+</ul>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 设置回调</span></span><br><span class="line">camera.setPreviewCallback(<span class="hljs-keyword">new</span> Camera.PreviewCallback() &#123;</span><br><span class="line">    <span class="hljs-meta">@Override</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onPreviewFrame</span><span class="hljs-params">(<span class="hljs-keyword">byte</span>[] data, Camera camera)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> frameSize = captureFormat.frameSize();</span><br><span class="line"><span class="hljs-keyword">final</span> ByteBuffer buffer = ByteBuffer.allocateDirect(frameSize);</span><br><span class="line"><span class="hljs-comment">// 设置数据回调的buffer</span></span><br><span class="line">camera.addCallbackBuffer(buffer.array());</span><br><span class="line"><span class="hljs-comment">// 设置回调</span></span><br><span class="line">camera.setPreviewCallbackWithBuffer(<span class="hljs-keyword">new</span> android.hardware.Camera.PreviewCallback() &#123;</span><br><span class="line"> <span class="hljs-meta">@Override</span></span><br><span class="line"> <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onPreviewFrame</span><span class="hljs-params">(<span class="hljs-keyword">final</span> <span class="hljs-keyword">byte</span>[] data, android.hardware.Camera callbackCamera)</span> </span>&#123;</span><br><span class="line">    <span class="hljs-comment">// 获取下一个回调</span></span><br><span class="line">    camera.addCallbackBuffer(data);</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="采集"><a href="#采集" class="headerlink" title="采集"></a>采集</h5><ul>
+<li>startPreview : 开启预览，数据开始回调，更改采集参数后需要重新开启预览才生效</li>
+<li>stopPreview : 停止预览<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">try</span> &#123;</span><br><span class="line">  camera.startPreview();</span><br><span class="line">&#125; <span class="hljs-keyword">catch</span> (RuntimeException e) &#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">camera.stopPreview();</span><br><span class="line">camera.release();</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h4 id="Camera2"><a href="#Camera2" class="headerlink" title="Camera2"></a>Camera2</h4><h5 id="获取Camera设备信息-1"><a href="#获取Camera设备信息-1" class="headerlink" title="获取Camera设备信息"></a>获取Camera设备信息</h5><p>Camera设备的获取需要通过系统服务来操作。</p>
+<ul>
+<li>getCameraIdList : 获取camera设备列表</li>
+<li>getCameraCharacteristics : 获取指定camera设备参数集，通过对应的KEY从参数集中获取到各种参数值</li>
+<li><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">this</span>.cameraManager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);</span><br><span class="line"></span><br><span class="line">String[] cameraIdList = cameraManager.getCameraIdList();</span><br><span class="line"><span class="hljs-keyword">for</span> (String cameraId : cameraIdList) &#123;</span><br><span class="line">    CameraCharacteristics characteristics = cameraManager.getCameraCharacteristics(cameraId);</span><br><span class="line">    <span class="hljs-comment">// 获取相机面对的方向，CameraMetadata.LENS_FACING_BACK or CameraMetadata.LENS_FACING_FRONT</span></span><br><span class="line">    String facing = characteristics.get(CameraCharacteristics.LENS_FACING) == CameraMetadata.LENS_FACING_BACK;</span><br><span class="line">    </span><br><span class="line">    <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">      <span class="hljs-comment">// 开启camera设备，设置开启回调，以及指定camera回调执行的线程</span></span><br><span class="line">      cameraManager.openCamera(cameraId, <span class="hljs-keyword">new</span> CameraStateCallback(), cameraThreadHandler);</span><br><span class="line">    &#125; <span class="hljs-keyword">catch</span> (CameraAccessException e) &#123;</span><br><span class="line">      <span class="hljs-keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>camera设备状态回调，在回调中可以开启一次会话，在会话中可以进行数据的请求<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">private</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CameraStateCallback</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">CameraDevice</span>.<span class="hljs-title">StateCallback</span> </span>&#123;</span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">private</span> String <span class="hljs-title">getErrorDescription</span><span class="hljs-params">(<span class="hljs-keyword">int</span> errorCode)</span> </span>&#123;</span><br><span class="line">      <span class="hljs-keyword">switch</span> (errorCode) &#123;</span><br><span class="line">        <span class="hljs-keyword">case</span> CameraDevice.StateCallback.ERROR_CAMERA_DEVICE:</span><br><span class="line">          <span class="hljs-keyword">return</span> <span class="hljs-string">"Camera device has encountered a fatal error."</span>;</span><br><span class="line">        <span class="hljs-keyword">case</span> CameraDevice.StateCallback.ERROR_CAMERA_DISABLED:</span><br><span class="line">          <span class="hljs-keyword">return</span> <span class="hljs-string">"Camera device could not be opened due to a device policy."</span>;</span><br><span class="line">        <span class="hljs-keyword">case</span> CameraDevice.StateCallback.ERROR_CAMERA_IN_USE:</span><br><span class="line">          <span class="hljs-keyword">return</span> <span class="hljs-string">"Camera device is in use already."</span>;</span><br><span class="line">        <span class="hljs-keyword">case</span> CameraDevice.StateCallback.ERROR_CAMERA_SERVICE:</span><br><span class="line">          <span class="hljs-keyword">return</span> <span class="hljs-string">"Camera service has encountered a fatal error."</span>;</span><br><span class="line">        <span class="hljs-keyword">case</span> CameraDevice.StateCallback.ERROR_MAX_CAMERAS_IN_USE:</span><br><span class="line">          <span class="hljs-keyword">return</span> <span class="hljs-string">"Camera device could not be opened because"</span></span><br><span class="line">              + <span class="hljs-string">" there are too many other open camera devices."</span>;</span><br><span class="line">        <span class="hljs-keyword">default</span>:</span><br><span class="line">          <span class="hljs-keyword">return</span> <span class="hljs-string">"Unknown camera error: "</span> + errorCode;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-meta">@Override</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onDisconnected</span><span class="hljs-params">(CameraDevice camera)</span> </span>&#123;</span><br><span class="line">      <span class="hljs-comment">// camera设备断开连接</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-meta">@Override</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onError</span><span class="hljs-params">(CameraDevice camera, <span class="hljs-keyword">int</span> errorCode)</span> </span>&#123;</span><br><span class="line">      <span class="hljs-comment">// 发生错误</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-meta">@Override</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onOpened</span><span class="hljs-params">(CameraDevice camera)</span> </span>&#123;</span><br><span class="line">      <span class="hljs-comment">// camera设备成功开启</span></span><br><span class="line">      cameraDevice = camera;</span><br><span class="line"></span><br><span class="line">      <span class="hljs-comment">// 创建采集会话，设置采集输出的Surface集合，可同时输出到多个Surface中</span></span><br><span class="line">      <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">        camera.createCaptureSession(</span><br><span class="line">            Arrays.asList(surface), <span class="hljs-keyword">new</span> CaptureSessionCallback(), cameraThreadHandler);</span><br><span class="line">      &#125; <span class="hljs-keyword">catch</span> (CameraAccessException e) &#123;</span><br><span class="line">        <span class="hljs-keyword">return</span>;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-meta">@Override</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onClosed</span><span class="hljs-params">(CameraDevice camera)</span> </span>&#123;</span><br><span class="line">      <span class="hljs-comment">// camera设备关闭</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></p>
+<h5 id="设置采集参数-1"><a href="#设置采集参数-1" class="headerlink" title="设置采集参数"></a>设置采集参数</h5><p>采集会话创建成功后，可以设置采集的参数，然后创建采集请求，进行数据的采集<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">private</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CaptureSessionCallback</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">CameraCaptureSession</span>.<span class="hljs-title">StateCallback</span> </span>&#123;</span><br><span class="line">    <span class="hljs-meta">@Override</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onConfigureFailed</span><span class="hljs-params">(CameraCaptureSession session)</span> </span>&#123;</span><br><span class="line">      <span class="hljs-comment">// 配置失败</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-meta">@Override</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onConfigured</span><span class="hljs-params">(CameraCaptureSession session)</span> </span>&#123;</span><br><span class="line">      <span class="hljs-comment">// 设置采集参数</span></span><br><span class="line">      captureSession = session;</span><br><span class="line">      <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">        <span class="hljs-comment">// 创建视频采集请求构建器，设置采集的参数</span></span><br><span class="line">        <span class="hljs-keyword">final</span> CaptureRequest.Builder captureRequestBuilder =</span><br><span class="line">            cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);</span><br><span class="line">        <span class="hljs-comment">// 设置FPS的区间</span></span><br><span class="line">        captureRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE,</span><br><span class="line">            <span class="hljs-keyword">new</span> Range&lt;Integer&gt;(framerate.min,framerate.max));</span><br><span class="line">        <span class="hljs-comment">// 设置闪光灯模式</span></span><br><span class="line">        captureRequestBuilder.set(</span><br><span class="line">            CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);</span><br><span class="line">        captureRequestBuilder.set(CaptureRequest.CONTROL_AE_LOCK, <span class="hljs-keyword">false</span>);</span><br><span class="line">        <span class="hljs-comment">// 设置视频稳像</span></span><br><span class="line">        chooseStabilizationMode(captureRequestBuilder);</span><br><span class="line">        <span class="hljs-comment">// 设置对焦模式</span></span><br><span class="line">        chooseFocusMode(captureRequestBuilder);</span><br><span class="line">        </span><br><span class="line">        <span class="hljs-comment">// 添加采集输出目标，可添加多个，添加的目标必须在createCaptureSession的集合中</span></span><br><span class="line">        captureRequestBuilder.addTarget(surface);</span><br><span class="line">        </span><br><span class="line">        <span class="hljs-comment">// 重复发送请求，开始采集</span></span><br><span class="line">        session.setRepeatingRequest(</span><br><span class="line">            captureRequestBuilder.build(), <span class="hljs-keyword">new</span> CameraCaptureCallback(), cameraThreadHandler);</span><br><span class="line">      &#125; <span class="hljs-keyword">catch</span> (CameraAccessException e) &#123;</span><br><span class="line">        reportError(<span class="hljs-string">"Failed to start capture request. "</span> + e);</span><br><span class="line">        <span class="hljs-keyword">return</span>;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// 优先采用光学稳像，其次采用软件稳像</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">chooseStabilizationMode</span><span class="hljs-params">(CaptureRequest.Builder captureRequestBuilder)</span> </span>&#123;</span><br><span class="line">      <span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span>[] availableOpticalStabilization = cameraCharacteristics.get(</span><br><span class="line">          CameraCharacteristics.LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION);</span><br><span class="line">      <span class="hljs-keyword">if</span> (availableOpticalStabilization != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> mode : availableOpticalStabilization) &#123;</span><br><span class="line">          <span class="hljs-keyword">if</span> (mode == CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE_ON) &#123;</span><br><span class="line">            captureRequestBuilder.set(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE,</span><br><span class="line">                CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE_ON);</span><br><span class="line">            captureRequestBuilder.set(CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE,</span><br><span class="line">                CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE_OFF);</span><br><span class="line">            Logging.d(TAG, <span class="hljs-string">"Using optical stabilization."</span>);</span><br><span class="line">            <span class="hljs-keyword">return</span>;</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="hljs-comment">// If no optical mode is available, try software.</span></span><br><span class="line">      <span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span>[] availableVideoStabilization = cameraCharacteristics.get(</span><br><span class="line">          CameraCharacteristics.CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES);</span><br><span class="line">      <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> mode : availableVideoStabilization) &#123;</span><br><span class="line">        <span class="hljs-keyword">if</span> (mode == CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE_ON) &#123;</span><br><span class="line">          captureRequestBuilder.set(CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE,</span><br><span class="line">              CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE_ON);</span><br><span class="line">          captureRequestBuilder.set(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE,</span><br><span class="line">              CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE_OFF);</span><br><span class="line">          Logging.d(TAG, <span class="hljs-string">"Using video stabilization."</span>);</span><br><span class="line">          <span class="hljs-keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      Logging.d(TAG, <span class="hljs-string">"Stabilization not available."</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-comment">// 设置对焦模式</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">chooseFocusMode</span><span class="hljs-params">(CaptureRequest.Builder captureRequestBuilder)</span> </span>&#123;</span><br><span class="line">      <span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span>[] availableFocusModes =</span><br><span class="line">          cameraCharacteristics.get(CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES);</span><br><span class="line">      <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> mode : availableFocusModes) &#123;</span><br><span class="line">        <span class="hljs-keyword">if</span> (mode == CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO) &#123;</span><br><span class="line">          captureRequestBuilder.set(</span><br><span class="line">              CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO);</span><br><span class="line">          Logging.d(TAG, <span class="hljs-string">"Using continuous video auto-focus."</span>);</span><br><span class="line">          <span class="hljs-keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      Logging.d(TAG, <span class="hljs-string">"Auto-focus is not available."</span>);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></p>
+<h5 id="设置输出-1"><a href="#设置输出-1" class="headerlink" title="设置输出"></a>设置输出</h5><p>Camera2中数据的输出都是通过设置Surface来接收，可以同时设置多个Surface，Surface可以通过SurfaceTexture来创建。</p>
+<ul>
+<li>采用系统的SurfaceView、TextureView生成的Surface，设置给Camera，对相机采集的数据进行预览显示</li>
+<li>采用系统的ImageReader生成的Surface来接收指定格式的图像数据</li>
+<li>采用自己创建的SurfaceTexture来接收数据，通过设置OnFrameAvailableListener来监听数据的变更，当相机设备写入数据时，会触发回调，在回调中使用updateTexImage从队列中取出一个数据绑定到OES纹理中，使用OES纹理来进行绘制显示或者编码输入等操作。</li>
+</ul>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 创建采集会话，设置采集输出的Surface集合，可同时输出到多个Surface中</span></span><br><span class="line"><span class="hljs-keyword">try</span> &#123;</span><br><span class="line">  camera.createCaptureSession(</span><br><span class="line">      Arrays.asList(surface), <span class="hljs-keyword">new</span> CaptureSessionCallback(), cameraThreadHandler);</span><br><span class="line">&#125; <span class="hljs-keyword">catch</span> (CameraAccessException e) &#123;</span><br><span class="line">  <span class="hljs-keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">// 会话创建成功后，在创建采集请求时，添加对应的输出目标就可以将采集请求到的数据传入到目标中</span></span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">// 添加采集输出目标，可添加多个，添加的目标必须在createCaptureSession的集合中</span></span><br><span class="line">captureRequestBuilder.addTarget(surface);</span><br><span class="line"><span class="hljs-comment">// 重复请求，开始采集</span></span><br><span class="line">session.setRepeatingRequest(</span><br><span class="line">      captureRequestBuilder.build(), <span class="hljs-keyword">new</span> CameraCaptureCallback(), cameraThreadHandler);</span><br></pre></td></tr></table></figure>
+<h6 id="ImageReader"><a href="#ImageReader" class="headerlink" title="ImageReader"></a>ImageReader</h6><p>ImageReader是跟随Camera2出来的，用来接收相机采集的数据，在拍照时可以设置ImageFormat.JPEG格式，如果想要获取原始数据，则需要设置成ImageFormat.YUV_420_888。</p>
+<p>ImageFormat.YUV_420_888格式，是指YUV_420格式，其内部具体格式可以是NV12、NV21、YV12、I420中的任何一种，也就是说如果设置的是YUV_420_888格式，则设备返回的数据格式需要根据其返回的具体数据去判断。（这点在国内手机上各不相同，有些个别低端手机给的数据不符合官方文档上的要求）</p>
+<p>对于ImageReader来说，最最重要的就是理解好YUV_420_888格式。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 创建ImageReader对象，指定接收的数据尺寸和数据格式以及缓冲区大小</span></span><br><span class="line">ImageReader imageReader = ImageReader.newInstance(width, height, ImageFormat.JPEG, <span class="hljs-number">2</span>);</span><br><span class="line"><span class="hljs-comment">// 获取Surface，添加到会话请求的目标中作为输出</span></span><br><span class="line">Surface surface = imageReader.getSurface();</span><br><span class="line"><span class="hljs-comment">// 设置数据回调</span></span><br><span class="line">imageReader.setOnImageAvailableListener(<span class="hljs-keyword">new</span> ImageReader.OnImageAvailableListener() &#123;</span><br><span class="line">    <span class="hljs-meta">@Override</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onImageAvailable</span><span class="hljs-params">(ImageReader reader)</span> </span>&#123;</span><br><span class="line">        <span class="hljs-comment">// 获取采集到的数据</span></span><br><span class="line">        Image image = reader.acquireNextImage();</span><br><span class="line">        </span><br><span class="line">        <span class="hljs-comment">// 操作</span></span><br><span class="line">        </span><br><span class="line">        <span class="hljs-comment">// 释放</span></span><br><span class="line">        image.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;, mCameraHandler);</span><br></pre></td></tr></table></figure>
+
+        </div>
+        
+        <ul class="post-copyright">
+            <li><strong>本文标题：</strong><a href="https://witgao.com/音视频开发之Android录制视频/">音视频开发之Android录制视频</a></li>
+            <li><strong>本文作者：</strong><a href="https://witgao.com">zhenyu</a></li>
+            <li><strong>本文链接：</strong><a href="https://witgao.com/音视频开发之Android录制视频/">https://witgao.com/音视频开发之Android录制视频/</a></li>
+            <li><strong>发布时间：</strong>2020-07-21</li>
+            <li><strong>版权声明：</strong>本博客所有文章除特别声明外，均采用 <a
+                    href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="external nofollow"
+                    target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明出处！
+            </li>
+        </ul>
+        
+        
+        
+        
+    </div>
+</div>
+
+
+
+
+
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        <div class="level-start">
+            <a class="level level-item has-link-grey  article-nav-prev"
+                href="/音视频开发之Android播放音频/">
+                <i class="level-item fas fa-chevron-left"></i>
+                <span class="level-item">音视频开发之Android播放音频</span>
+            </a>
+        </div>
+        
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next"
+                href="/音视频开发之Android录制音频/">
+                <span class="level-item">音视频开发之Android录制音频</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+    </div>
+</div>
+
+
+</div>
+                
+
+
+
+
+<div
+    class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left ">
+    
+    
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered" style="flex-shrink: 1">
+                <div>
+                    
+                    <figure class="image is-128x128 has-mb-6">
+                        <img class="" src="/images/avatar1.png" alt="zhenyu">
+                    </figure>
+                    
+                    <p class="is-size-4 is-block">
+                        zhenyu
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        富贵山庄无富贵，只留欢乐在此间
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>杭州</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        文章
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        38
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        分类
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        9
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        标签
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        0
+                    </p>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="level">
+            <a class="level-item button is-link is-rounded" href="https://github.com/witgao" target="_blank">
+                关注我</a>
+        </div>
+        
+        
+        
+    </div>
+</div>
+    
+    
+<div class="card widget column-left is-sticky" id="toc">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                目录
+            </h3>
+            <ul class="menu-list"><li>
+        <a class="is-flex" href="#Android平台视频录制API">
+        <span class="has-mr-6">1</span>
+        <span>Android平台视频录制API</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#Camera1">
+        <span class="has-mr-6">1.1</span>
+        <span>Camera1</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#获取Camera设备信息">
+        <span class="has-mr-6">1.1.1</span>
+        <span>获取Camera设备信息</span>
+        </a></li><li>
+        <a class="is-flex" href="#设置采集参数">
+        <span class="has-mr-6">1.1.2</span>
+        <span>设置采集参数</span>
+        </a></li><li>
+        <a class="is-flex" href="#设置输出">
+        <span class="has-mr-6">1.1.3</span>
+        <span>设置输出</span>
+        </a></li><li>
+        <a class="is-flex" href="#采集">
+        <span class="has-mr-6">1.1.4</span>
+        <span>采集</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#Camera2">
+        <span class="has-mr-6">1.2</span>
+        <span>Camera2</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#获取Camera设备信息-1">
+        <span class="has-mr-6">1.2.1</span>
+        <span>获取Camera设备信息</span>
+        </a></li><li>
+        <a class="is-flex" href="#设置采集参数-1">
+        <span class="has-mr-6">1.2.2</span>
+        <span>设置采集参数</span>
+        </a></li><li>
+        <a class="is-flex" href="#设置输出-1">
+        <span class="has-mr-6">1.2.3</span>
+        <span>设置输出</span>
+        </a></li></ul></li></ul></li></ul>
+        </div>
+    </div>
+</div>
+    
+    
+    <div class="column-right-shadow is-hidden-widescreen ">
+        
+    </div>
+    
+</div>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <!-- <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="/images/logo2.png" alt="音视频开发之Android录制视频" height="28">
+                
+                </a> -->
+                <p class="is-size-7">
+                    &copy; 2020 zhenyu&nbsp;
+                    Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a
+                        href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank">Icarus</a>
+                    
+                </p>
+            </div>
+            <div class="level-end">
+                
+            </div>
+        </div>
+    </div>
+</footer>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("zh-CN");</script>
+
+<script>
+var IcarusThemeSettings = {
+    article: {
+        highlight: {
+            clipboard: true,
+            fold: 'unfolded'
+        }
+    }
+};
+</script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+
+
+
+    
+    
+<script src="/js/animation.js"></script>
+
+    
+    
+<script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+<script src="/js/gallery.js" defer></script>
+
+    
+    
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    MathJax.Hub.Config({
+        'HTML-CSS': {
+            matchFontHeight: false
+        },
+        SVG: {
+            matchFontHeight: false
+        },
+        CommonHTML: {
+            matchFontHeight: false
+        },
+        tex2jax: {
+            inlineMath: [
+                ['$','$'],
+                ['\\(','\\)']
+            ]
+        }
+    });
+});
+</script>
+    
+    
+<a id="back-to-top" title="回到顶端" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="想要查找什么..." />
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: '文章',
+                PAGES: '页面',
+                CATEGORIES: '分类',
+                TAGS: '标签',
+                UNTITLED: '(无标题)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+</body>
+
+</html>

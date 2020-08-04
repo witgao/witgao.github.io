@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html  lang="zh">
+
+<head>
+    <meta charset="utf-8" />
+
+<meta name="generator" content="Hexo 3.9.0" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<title>音视频开发之Android硬件解封装 - 富贵山庄</title>
+
+
+    <meta name="description" content="硬件解封装Android平台针对音视频封装提供了MediaMuxer API，支持.mp4格式的封装；针对解封装提供了MediaExtractor API，支持.mp4等格式。 API架构在 frameworks/base/media 文件夹中提供了所有音视频相关的Java层API，本文中讲述的解封装API都定义在该处。而具体的服务实现都在 frameworks/av 文件夹中  自7.0开始，M">
+<meta property="og:type" content="article">
+<meta property="og:title" content="音视频开发之Android硬件解封装">
+<meta property="og:url" content="https://witgao.com/音视频开发之Android硬件解封装/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:description" content="硬件解封装Android平台针对音视频封装提供了MediaMuxer API，支持.mp4格式的封装；针对解封装提供了MediaExtractor API，支持.mp4等格式。 API架构在 frameworks/base/media 文件夹中提供了所有音视频相关的Java层API，本文中讲述的解封装API都定义在该处。而具体的服务实现都在 frameworks/av 文件夹中  自7.0开始，M">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://witgao.com/images/5.jpeg">
+<meta property="og:updated_time" content="2020-07-21T09:19:48.112Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="音视频开发之Android硬件解封装">
+<meta name="twitter:description" content="硬件解封装Android平台针对音视频封装提供了MediaMuxer API，支持.mp4格式的封装；针对解封装提供了MediaExtractor API，支持.mp4等格式。 API架构在 frameworks/base/media 文件夹中提供了所有音视频相关的Java层API，本文中讲述的解封装API都定义在该处。而具体的服务实现都在 frameworks/av 文件夹中  自7.0开始，M">
+<meta name="twitter:image" content="https://witgao.com/images/5.jpeg">
+
+
+
+
+
+
+
+<link rel="icon" href="/images/favicon1.svg">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/default.css">
+
+
+    
+    
+<style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+    
+    
+    
+    
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+    
+    
+    
+    
+    
+    
+    
+    <link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+    
+    
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body class="is-3-column">
+    <nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="/images/logo2.png" alt="音视频开发之Android硬件解封装" height="28">
+            
+            </a>
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item"
+                href="/">燕子坞</a>
+                
+                <a class="navbar-item"
+                href="/archives">听香水榭</a>
+                
+                <a class="navbar-item"
+                href="/categories">还施水阁</a>
+                
+                <a class="navbar-item"
+                href="/about">思过崖</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    <a class="navbar-item" target="_blank" title="Download on GitHub" href="https://github.com/witgao/blog">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                <a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;">
+                    <i class="fas fa-list-ul"></i>
+                </a>
+                
+                
+                <a class="navbar-item search" title="搜索" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-9-widescreen has-order-2 column-main">
+<div class="card">
+    
+    <div class="card-image">
+        <span  class="image is-7by1">
+        <img class="thumbnail" src="/images/5.jpeg" alt="音视频开发之Android硬件解封装">
+        </span>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-04-11T16:00:00.000Z">2020-04-12</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    21 分钟 读完 (大约 3198 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            音视频开发之Android硬件解封装
+            
+        </h1>
+        <div class="content">
+            <h3 id="硬件解封装"><a href="#硬件解封装" class="headerlink" title="硬件解封装"></a>硬件解封装</h3><p>Android平台针对音视频封装提供了<strong>MediaMuxer API</strong>，支持.mp4格式的封装；针对解封装提供了<strong>MediaExtractor API</strong>，支持.mp4等格式。</p>
+<h3 id="API架构"><a href="#API架构" class="headerlink" title="API架构"></a>API架构</h3><p>在 <strong>frameworks/base/media</strong> 文件夹中提供了所有音视频相关的Java层API，本文中讲述的解封装API都定义在该处。而具体的服务实现都在 <strong>frameworks/av</strong> 文件夹中</p>
+<p><img src="/images/android_muxer_demuxer.jpg" alt="android_muxer_demuxer" style="zoom: 70%;"></p>
+<p>自7.0开始，MediaService被拆分成多个服务，每个服务都运行在各自的进程中。</p>
+<h3 id="MediaExtractor-解封装"><a href="#MediaExtractor-解封装" class="headerlink" title="MediaExtractor 解封装"></a>MediaExtractor 解封装</h3><p>MediaExtractor类是官方提供的音视频解封装类。其官方使用Demo如下所示：</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 创建解封装器 </span></span><br><span class="line">MediaExtractor extractor = <span class="hljs-keyword">new</span> MediaExtractor();</span><br><span class="line"><span class="hljs-comment">// 设置数据源</span></span><br><span class="line"> extractor.setDataSource(...);</span><br><span class="line"><span class="hljs-comment">// 遍历所有轨道</span></span><br><span class="line"> <span class="hljs-keyword">int</span> numTracks = extractor.getTrackCount();</span><br><span class="line"> <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; numTracks; ++i) &#123;</span><br><span class="line">   MediaFormat format = extractor.getTrackFormat(i);</span><br><span class="line">   String mime = format.getString(MediaFormat.KEY_MIME);</span><br><span class="line">   <span class="hljs-comment">// 根据轨道类型选择想要的轨道</span></span><br><span class="line">   <span class="hljs-keyword">if</span> (weAreInterestedInThisTrack) &#123;</span><br><span class="line">     extractor.selectTrack(i);</span><br><span class="line">   &#125;</span><br><span class="line"> &#125;</span><br><span class="line"> ByteBuffer inputBuffer = ByteBuffer.allocate(...)</span><br><span class="line"> <span class="hljs-comment">// 读取选中轨道的样本数据</span></span><br><span class="line"> <span class="hljs-keyword">while</span> (extractor.readSampleData(inputBuffer, ...) &gt;= <span class="hljs-number">0</span>) &#123;</span><br><span class="line">   <span class="hljs-keyword">int</span> trackIndex = extractor.getSampleTrackIndex();</span><br><span class="line">   <span class="hljs-keyword">long</span> presentationTimeUs = extractor.getSampleTime();</span><br><span class="line">   ...</span><br><span class="line">   <span class="hljs-comment">// 下一个样本</span></span><br><span class="line">   extractor.advance();</span><br><span class="line"> &#125;</span><br><span class="line"> extractor.release();</span><br><span class="line"> extractor = <span class="hljs-keyword">null</span>;</span><br></pre></td></tr></table></figure>
+<h4 id="支持的格式"><a href="#支持的格式" class="headerlink" title="支持的格式"></a>支持的格式</h4><p><img src="/images/media_extractor_support.png" alt="android_muxer_demuxer" style="zoom:67%;"></p>
+<h4 id="注册解封装器"><a href="#注册解封装器" class="headerlink" title="注册解封装器"></a>注册解封装器</h4><p>在<strong>MediaExtractorService</strong>被创建的时候，会注册所有的Extractor实现。</p>
+ <a id="more"></a>
+<figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// libDirPath 有两个，一个是 /apex/com.android.media/lib/extractors/ ，另一个是/system/lib/extractors/ </span></span><br><span class="line"><span class="hljs-keyword">void</span> MediaExtractorFactory::RegisterExtractors(</span><br><span class="line">        <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *libDirPath, <span class="hljs-keyword">const</span> android_dlextinfo* dlextinfo,</span><br><span class="line">        <span class="hljs-built_in">std</span>::<span class="hljs-built_in">list</span>&lt;sp&lt;ExtractorPlugin&gt;&gt; &amp;pluginList) &#123;</span><br><span class="line">    DIR *libDir = opendir(libDirPath);</span><br><span class="line">    <span class="hljs-keyword">if</span> (libDir) &#123;</span><br><span class="line">        <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">dirent</span>* <span class="hljs-title">libEntry</span>;</span></span><br><span class="line">        <span class="hljs-keyword">while</span> ((libEntry = readdir(libDir))) &#123;</span><br><span class="line">            <span class="hljs-keyword">if</span> (libEntry-&gt;d_name[<span class="hljs-number">0</span>] == <span class="hljs-string">'.'</span>) &#123;</span><br><span class="line">                <span class="hljs-keyword">continue</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            String8 libPath = String8(libDirPath) + <span class="hljs-string">"/"</span> + libEntry-&gt;d_name;</span><br><span class="line">            <span class="hljs-keyword">if</span> (!libPath.contains(<span class="hljs-string">"extractor.so"</span>)) &#123;</span><br><span class="line">                <span class="hljs-keyword">continue</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="hljs-comment">// 加载 extractor.so</span></span><br><span class="line">            <span class="hljs-keyword">void</span> *libHandle = android_dlopen_ext(</span><br><span class="line">                    libPath.<span class="hljs-built_in">string</span>(),</span><br><span class="line">                    RTLD_NOW | RTLD_LOCAL, dlextinfo);</span><br><span class="line">         </span><br><span class="line">            <span class="hljs-comment">// 查找GETEXTRACTORDEF函数</span></span><br><span class="line">            GetExtractorDef getDef =</span><br><span class="line">                (GetExtractorDef) dlsym(libHandle, <span class="hljs-string">"GETEXTRACTORDEF"</span>);</span><br><span class="line">            <span class="hljs-comment">// 执行GETEXTRACTORDEF函数，获取到解封装器配置，创建一个Plugin，加入到list中</span></span><br><span class="line">            RegisterExtractor(</span><br><span class="line">                    <span class="hljs-keyword">new</span> ExtractorPlugin(getDef(), libHandle, libPath), pluginList);</span><br><span class="line">        &#125;</span><br><span class="line">        closedir(libDir);</span><br><span class="line">    &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">        ALOGE(<span class="hljs-string">"couldn't opendir(%s)"</span>, libDirPath);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>MPEG-4的GETEXTRACTORDEF函数，其中的 Sniff方法就是创建对象的构造器。</p>
+<figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function">ExtractorDef <span class="hljs-title">GETEXTRACTORDEF</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">    <span class="hljs-keyword">return</span> &#123;</span><br><span class="line">        EXTRACTORDEF_VERSION,</span><br><span class="line">        UUID(<span class="hljs-string">"27575c67-4417-4c54-8d3d-8e626985a164"</span>),</span><br><span class="line">        <span class="hljs-number">2</span>, <span class="hljs-comment">// version</span></span><br><span class="line">        <span class="hljs-string">"MP4 Extractor"</span>,</span><br><span class="line">        &#123; .v3 = &#123;Sniff, extensions&#125; &#125;,</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="创建解封装器"><a href="#创建解封装器" class="headerlink" title="创建解封装器"></a>创建解封装器</h4><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">sp&lt;IMediaExtractor&gt; MediaExtractorFactory::CreateFromService(</span><br><span class="line">        <span class="hljs-keyword">const</span> sp&lt;DataSource&gt; &amp;source, <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *mime) &#123;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// 根据上面注册的Sniff函数，获取最合适的解封装器的CreateExtractor函数。</span></span><br><span class="line">    creator = sniff(source, &amp;confidence, &amp;meta, &amp;freeMeta, plugin, &amp;creatorVersion);</span><br><span class="line">    <span class="hljs-keyword">if</span> (!creator) &#123;</span><br><span class="line">        ALOGV(<span class="hljs-string">"FAILED to autodetect media content."</span>);</span><br><span class="line">        <span class="hljs-keyword">return</span> <span class="hljs-literal">NULL</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    MediaExtractor *ex = <span class="hljs-literal">nullptr</span>;</span><br><span class="line">    <span class="hljs-keyword">if</span> (creatorVersion == EXTRACTORDEF_VERSION_NDK_V1 ||</span><br><span class="line">            creatorVersion == EXTRACTORDEF_VERSION_NDK_V2) &#123;</span><br><span class="line">        <span class="hljs-comment">// 创建具体的解封装器实例</span></span><br><span class="line">        CMediaExtractor *ret = ((CreatorFunc)creator)(source-&gt;wrap(), meta);</span><br><span class="line">        <span class="hljs-keyword">if</span> (meta != <span class="hljs-literal">nullptr</span> &amp;&amp; freeMeta != <span class="hljs-literal">nullptr</span>) &#123;</span><br><span class="line">            freeMeta(meta);</span><br><span class="line">        &#125;</span><br><span class="line">        ex = ret != <span class="hljs-literal">nullptr</span> ? <span class="hljs-keyword">new</span> MediaExtractorCUnwrapper(ret) : <span class="hljs-literal">nullptr</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">return</span> CreateIMediaExtractorFromMediaExtractor(ex, source, plugin);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="选择最合适的解封装器实例"><a href="#选择最合适的解封装器实例" class="headerlink" title="选择最合适的解封装器实例"></a>选择最合适的解封装器实例</h5><p>选择具体格式的封装器是通过将DataSource依次给所有已经注册的解封装器的Sniff函数进行尝试，每次尝试都会有一个分数返回，保存在confidence中，最终会选择分数最大的做为最终的解封装器。</p>
+<figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">void</span> *MediaExtractorFactory::sniff(</span><br><span class="line">        <span class="hljs-keyword">const</span> sp&lt;DataSource&gt; &amp;source, <span class="hljs-keyword">float</span> *confidence, <span class="hljs-keyword">void</span> **meta,</span><br><span class="line">        FreeMetaFunc *freeMeta, sp&lt;ExtractorPlugin&gt; &amp;plugin, <span class="hljs-keyword">uint32_t</span> *creatorVersion) &#123;</span><br><span class="line">    <span class="hljs-comment">// 初始分数为0</span></span><br><span class="line">  	*confidence = <span class="hljs-number">0.0f</span>;</span><br><span class="line">    *meta = <span class="hljs-literal">nullptr</span>;</span><br><span class="line">    <span class="hljs-comment">// 所有注册的解封装器实例</span></span><br><span class="line">    <span class="hljs-built_in">std</span>::<span class="hljs-built_in">shared_ptr</span>&lt;<span class="hljs-built_in">std</span>::<span class="hljs-built_in">list</span>&lt;sp&lt;ExtractorPlugin&gt;&gt;&gt; plugins;</span><br><span class="line">    &#123;</span><br><span class="line">        Mutex::<span class="hljs-function">Autolock <span class="hljs-title">autoLock</span><span class="hljs-params">(gPluginMutex)</span></span>;</span><br><span class="line">        <span class="hljs-keyword">if</span> (!gPluginsRegistered) &#123;</span><br><span class="line">            <span class="hljs-keyword">return</span> <span class="hljs-literal">NULL</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        plugins = gPlugins;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-comment">// 遍历</span></span><br><span class="line">    <span class="hljs-keyword">void</span> *bestCreator = <span class="hljs-literal">NULL</span>;</span><br><span class="line">    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">auto</span> it = plugins-&gt;begin(); it != plugins-&gt;end(); ++it) &#123;</span><br><span class="line">        ALOGV(<span class="hljs-string">"sniffing %s"</span>, (*it)-&gt;def.extractor_name);</span><br><span class="line">        <span class="hljs-keyword">float</span> newConfidence;</span><br><span class="line">        <span class="hljs-keyword">void</span> *newMeta = <span class="hljs-literal">nullptr</span>;</span><br><span class="line">        FreeMetaFunc newFreeMeta = <span class="hljs-literal">nullptr</span>;</span><br><span class="line">        <span class="hljs-comment">// 执行对应实例的Sniff函数</span></span><br><span class="line">        <span class="hljs-keyword">void</span> *curCreator = <span class="hljs-literal">NULL</span>;</span><br><span class="line">        <span class="hljs-keyword">if</span> ((*it)-&gt;def.def_version == EXTRACTORDEF_VERSION_NDK_V1) &#123;</span><br><span class="line">            curCreator = (<span class="hljs-keyword">void</span>*) (*it)-&gt;def.u.v2.sniff(</span><br><span class="line">                    source-&gt;wrap(), &amp;newConfidence, &amp;newMeta, &amp;newFreeMeta);</span><br><span class="line">        &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> ((*it)-&gt;def.def_version == EXTRACTORDEF_VERSION_NDK_V2) &#123;</span><br><span class="line">            curCreator = (<span class="hljs-keyword">void</span>*) (*it)-&gt;def.u.v3.sniff(</span><br><span class="line">                    source-&gt;wrap(), &amp;newConfidence, &amp;newMeta, &amp;newFreeMeta);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="hljs-comment">// 如果实例创建成功</span></span><br><span class="line">        <span class="hljs-keyword">if</span> (curCreator) &#123;</span><br><span class="line">            <span class="hljs-comment">// 则对比分数，分数大于上次的则将该实例作为最合适实例；</span></span><br><span class="line">            <span class="hljs-keyword">if</span> (newConfidence &gt; *confidence) &#123;</span><br><span class="line">                *confidence = newConfidence;</span><br><span class="line">                <span class="hljs-keyword">if</span> (*meta != <span class="hljs-literal">nullptr</span> &amp;&amp; *freeMeta != <span class="hljs-literal">nullptr</span>) &#123;</span><br><span class="line">                    (*freeMeta)(*meta);</span><br><span class="line">                &#125;</span><br><span class="line">                *meta = newMeta;</span><br><span class="line">                *freeMeta = newFreeMeta;</span><br><span class="line">                plugin = *it;</span><br><span class="line">                bestCreator = curCreator;</span><br><span class="line">                *creatorVersion = (*it)-&gt;def.def_version;</span><br><span class="line">            &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">                <span class="hljs-comment">// 小于则释放</span></span><br><span class="line">                <span class="hljs-keyword">if</span> (newMeta != <span class="hljs-literal">nullptr</span> &amp;&amp; newFreeMeta != <span class="hljs-literal">nullptr</span>) &#123;</span><br><span class="line">                    newFreeMeta(newMeta);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-comment">// 返回分数最高的实例</span></span><br><span class="line">    <span class="hljs-keyword">return</span> bestCreator;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="WAV解封装器"><a href="#WAV解封装器" class="headerlink" title="WAV解封装器"></a>WAV解封装器</h5><p>下面就是WAV格式的解封装器的Sniff函数</p>
+<figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> CreatorFunc <span class="hljs-title">Sniff</span><span class="hljs-params">(</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">        CDataSource *source,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">        <span class="hljs-keyword">float</span> *confidence,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">        <span class="hljs-keyword">void</span> **,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">        FreeMetaFunc *)</span> </span>&#123;</span><br><span class="line">    DataSourceHelper *helper = <span class="hljs-keyword">new</span> DataSourceHelper(source);</span><br><span class="line">    <span class="hljs-keyword">char</span> header[<span class="hljs-number">12</span>];</span><br><span class="line">    <span class="hljs-keyword">if</span> (helper-&gt;readAt(<span class="hljs-number">0</span>, header, <span class="hljs-keyword">sizeof</span>(header)) &lt; (<span class="hljs-keyword">ssize_t</span>)<span class="hljs-keyword">sizeof</span>(header)) &#123;</span><br><span class="line">        <span class="hljs-keyword">delete</span> helper;</span><br><span class="line">        <span class="hljs-keyword">return</span> <span class="hljs-literal">NULL</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">if</span> (<span class="hljs-built_in">memcmp</span>(header, <span class="hljs-string">"RIFF"</span>, <span class="hljs-number">4</span>) || <span class="hljs-built_in">memcmp</span>(&amp;header[<span class="hljs-number">8</span>], <span class="hljs-string">"WAVE"</span>, <span class="hljs-number">4</span>)) &#123;</span><br><span class="line">        <span class="hljs-keyword">delete</span> helper;</span><br><span class="line">        <span class="hljs-keyword">return</span> <span class="hljs-literal">NULL</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    WAVExtractor *extractor = <span class="hljs-keyword">new</span> WAVExtractor(helper); <span class="hljs-comment">// extractor owns the helper</span></span><br><span class="line">    <span class="hljs-keyword">int</span> numTracks = extractor-&gt;countTracks();</span><br><span class="line">    <span class="hljs-keyword">delete</span> extractor;</span><br><span class="line">    <span class="hljs-keyword">if</span> (numTracks == <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        <span class="hljs-keyword">return</span> <span class="hljs-literal">NULL</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    *confidence = <span class="hljs-number">0.3f</span>;</span><br><span class="line">    <span class="hljs-keyword">return</span> CreateExtractor;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="重要方法详解"><a href="#重要方法详解" class="headerlink" title="重要方法详解"></a>重要方法详解</h4><h5 id="setDataSource"><a href="#setDataSource" class="headerlink" title="setDataSource"></a>setDataSource</h5><p>​    方法很简单，就是设置数据源，对于数据源的协议目前只支持本地文件和HTTP、HTTPS。</p>
+<figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line">sp&lt;DataSource&gt; DataSourceFactory::CreateFromURI(</span><br><span class="line">        <span class="hljs-keyword">const</span> sp&lt;MediaHTTPService&gt; &amp;httpService,</span><br><span class="line">        <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *uri,</span><br><span class="line">        <span class="hljs-keyword">const</span> KeyedVector&lt;String8, String8&gt; *headers,</span><br><span class="line">        String8 *contentType,</span><br><span class="line">        HTTPBase *httpSource) &#123;</span><br><span class="line">    <span class="hljs-keyword">if</span> (contentType != <span class="hljs-literal">NULL</span>) &#123;</span><br><span class="line">        *contentType = <span class="hljs-string">""</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    sp&lt;DataSource&gt; source;</span><br><span class="line">    <span class="hljs-keyword">if</span> (!strncasecmp(<span class="hljs-string">"file://"</span>, uri, <span class="hljs-number">7</span>)) &#123;</span><br><span class="line">        <span class="hljs-comment">// 本地文件</span></span><br><span class="line">        source = CreateFileSource(uri + <span class="hljs-number">7</span>);</span><br><span class="line">    &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (!strncasecmp(<span class="hljs-string">"http://"</span>, uri, <span class="hljs-number">7</span>) || !strncasecmp(<span class="hljs-string">"https://"</span>, uri, <span class="hljs-number">8</span>)) &#123;</span><br><span class="line">      	<span class="hljs-comment">// HTTP HTTPS</span></span><br><span class="line">        sp&lt;HTTPBase&gt; mediaHTTP = httpSource;</span><br><span class="line">        <span class="hljs-keyword">if</span> (mediaHTTP == <span class="hljs-literal">NULL</span>) &#123;</span><br><span class="line">            mediaHTTP = <span class="hljs-keyword">static_cast</span>&lt;HTTPBase *&gt;(CreateMediaHTTP(httpService).get());</span><br><span class="line">        &#125;</span><br><span class="line">        String8 cacheConfig;</span><br><span class="line">        <span class="hljs-keyword">bool</span> disconnectAtHighwatermark = <span class="hljs-literal">false</span>;</span><br><span class="line">        KeyedVector&lt;String8, String8&gt; nonCacheSpecificHeaders;</span><br><span class="line">        <span class="hljs-keyword">if</span> (headers != <span class="hljs-literal">NULL</span>) &#123;</span><br><span class="line">            nonCacheSpecificHeaders = *headers;</span><br><span class="line">            NuCachedSource2::RemoveCacheSpecificHeaders(</span><br><span class="line">                    &amp;nonCacheSpecificHeaders,</span><br><span class="line">                    &amp;cacheConfig,</span><br><span class="line">                    &amp;disconnectAtHighwatermark);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="hljs-keyword">if</span> (mediaHTTP-&gt;connect(uri, &amp;nonCacheSpecificHeaders) != OK) &#123;</span><br><span class="line">            ALOGE(<span class="hljs-string">"Failed to connect http source!"</span>);</span><br><span class="line">            <span class="hljs-keyword">return</span> <span class="hljs-literal">NULL</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="hljs-keyword">if</span> (contentType != <span class="hljs-literal">NULL</span>) &#123;</span><br><span class="line">            *contentType = mediaHTTP-&gt;getMIMEType();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        source = NuCachedSource2::Create(</span><br><span class="line">                mediaHTTP,</span><br><span class="line">                cacheConfig.isEmpty() ? <span class="hljs-literal">NULL</span> : cacheConfig.<span class="hljs-built_in">string</span>(),</span><br><span class="line">                disconnectAtHighwatermark);</span><br><span class="line">    &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (!strncasecmp(<span class="hljs-string">"data:"</span>, uri, <span class="hljs-number">5</span>)) &#123;</span><br><span class="line">        source = DataURISource::Create(uri);</span><br><span class="line">    &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">      	<span class="hljs-comment">// 如果scheme都不符合，则假设其是个本地文件</span></span><br><span class="line">        source = CreateFileSource(uri);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">if</span> (source == <span class="hljs-literal">NULL</span> || source-&gt;initCheck() != OK) &#123;</span><br><span class="line">        <span class="hljs-keyword">return</span> <span class="hljs-literal">NULL</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">return</span> source;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="selectTrack、unselectTrack"><a href="#selectTrack、unselectTrack" class="headerlink" title="selectTrack、unselectTrack"></a>selectTrack、unselectTrack</h5><p>选中指定轨道和解除选中。一个媒体文件中会包含着多个轨道，比如音频轨道和视频轨道等，在MediaExtractor中对样本数据的操作都是基于指定的轨道来的，所以在操作样本数据之前，必须先选中一个轨道。</p>
+<p>当一个轨道被选中后，后续的<strong>getSamplexxx</strong>方法都是针对该轨道，如果想换一个轨道进行处理，则必须先解除当前轨道的选中，调用unselectTrack函数。</p>
+<p>对于如何选择想要的轨道，可以通过<strong>getTrackFormat</strong>方法来获取每一个轨道的详细信息，通过这些信息筛选出想要处理的轨道。</p>
+<h5 id="getTrackCount"><a href="#getTrackCount" class="headerlink" title="getTrackCount"></a>getTrackCount</h5><p>获取当前媒体文件中的轨道数量，通常用来遍历所有的轨道。</p>
+<h5 id="getTrackFormat"><a href="#getTrackFormat" class="headerlink" title="getTrackFormat"></a>getTrackFormat</h5><p>获取指定索引的轨道的详细信息，索引的值从0开始递增。轨道信息在不同Android版本上有不同的支持，在使用的时候需要注意。</p>
+<p><img src="/images/media_extractor_format_key.png" alt="image-20200412151827474" style="zoom:90%;"></p>
+<blockquote>
+<p>这里有一点需要注意，就是在使用轨道的MediaFormat对象去创建解码器的时候，最好先将KEY_LEVEL的值设置为null（<code>MediaFormat.setString(KEY_LEVEL, null)</code>），因为这个值经常不准。</p>
+</blockquote>
+<h5 id="readSampleData"><a href="#readSampleData" class="headerlink" title="readSampleData"></a>readSampleData</h5><p>读取当前选中的轨道的一个样本数据，返回读取的size，这里要注意的是buffer的大小，需要足够大，否则无法一次读取完一个样本，通常可以使用<strong>MediaFormat.KEY_MAX_INPUT_SIZE</strong>来获取。</p>
+<p>返回-1则表示当前轨道已经没有可读取的样本数据了。</p>
+<h5 id="getSampleTrackIndex"><a href="#getSampleTrackIndex" class="headerlink" title="getSampleTrackIndex"></a>getSampleTrackIndex</h5><p>查询当前样本来源的轨道索引，也就是当前选中的轨道索引。如果当前轨道没有可读取的样本数据，会返回-1。</p>
+<h5 id="getSampleTime"><a href="#getSampleTime" class="headerlink" title="getSampleTime"></a>getSampleTime</h5><p>返回当前样本的PTS，微秒。</p>
+<h5 id="getSmapleFlags"><a href="#getSmapleFlags" class="headerlink" title="getSmapleFlags"></a>getSmapleFlags</h5><p>返回当前样本的标记，通过标记可以判断当前样本的一些特征。</p>
+<ul>
+<li>SAMPLE_FLAG_ENCRYPTED 样本数据被加密</li>
+<li>SAMPLE_FLAG_SYNC 样本为关键帧</li>
+</ul>
+<h5 id="seekTo"><a href="#seekTo" class="headerlink" title="seekTo"></a>seekTo</h5><p>根据指定模式跳转到指定时间，只能跳转到关键帧，所以最终时间可能会和指定时间有误差。模式有三种：</p>
+<ul>
+<li>SEEK_TO_CLOSEST_SYNC 在指定时间的前后查找最近关键帧</li>
+<li>SEEK_TO_NEXT_SYNC 在指定时间的后面查找最近关键帧</li>
+<li>SEEK_TO_PREVIOUS_SYNC 在指定时间的前面查找最近关键帧</li>
+</ul>
+<h5 id="advance"><a href="#advance" class="headerlink" title="advance"></a>advance</h5><p>移动到下一个样本，每次读取完样本数据后，都需要调用该方法，此时调用<strong>getSmaplexxx</strong>方法读取到的才是下一个样本的数据。</p>
+<p>如果当前轨道没有可读样本，则返回false。</p>
+<h5 id="release"><a href="#release" class="headerlink" title="release"></a>release</h5><p>释放资源</p>
+<h3 id="MediaMuxer-封装"><a href="#MediaMuxer-封装" class="headerlink" title="MediaMuxer 封装"></a>MediaMuxer 封装</h3><p>MediaMuxer类是官方提供的音视频封装类。其官方使用Demo如下所示：</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 创建封装器，指定输出文件和封装格式。</span></span><br><span class="line">MediaMuxer muxer = <span class="hljs-keyword">new</span> MediaMuxer(<span class="hljs-string">"temp.mp4"</span>, OutputFormat.MUXER_OUTPUT_MPEG_4);</span><br><span class="line"><span class="hljs-comment">// 创建音频和视频轨道</span></span><br><span class="line">MediaFormat audioFormat = <span class="hljs-keyword">new</span> MediaFormat(...);</span><br><span class="line">MediaFormat videoFormat = <span class="hljs-keyword">new</span> MediaFormat(...);</span><br><span class="line"><span class="hljs-comment">// 将轨道添加到封装器中</span></span><br><span class="line"><span class="hljs-keyword">int</span> audioTrackIndex = muxer.addTrack(audioFormat);</span><br><span class="line"><span class="hljs-keyword">int</span> videoTrackIndex = muxer.addTrack(videoFormat);</span><br><span class="line"><span class="hljs-comment">// 创建一个buffer用来接收样本数据</span></span><br><span class="line">ByteBuffer inputBuffer = ByteBuffer.allocate(bufferSize);</span><br><span class="line"><span class="hljs-keyword">boolean</span> finished = <span class="hljs-keyword">false</span>;</span><br><span class="line">BufferInfo bufferInfo = <span class="hljs-keyword">new</span> BufferInfo();</span><br><span class="line"><span class="hljs-comment">// 启动封装器，启动后不可再更改</span></span><br><span class="line">muxer.start();</span><br><span class="line"><span class="hljs-keyword">while</span>(!finished) &#123;</span><br><span class="line">  <span class="hljs-comment">// 循环写入样本数据到指定轨道中</span></span><br><span class="line">  finished = getInputBuffer(inputBuffer, isAudioSample, bufferInfo);</span><br><span class="line">  <span class="hljs-keyword">if</span> (!finished) &#123;</span><br><span class="line">    <span class="hljs-keyword">int</span> currentTrackIndex = isAudioSample ? audioTrackIndex : videoTrackIndex;</span><br><span class="line">    muxer.writeSampleData(currentTrackIndex, inputBuffer, bufferInfo);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="hljs-comment">// 停止封装器</span></span><br><span class="line">muxer.stop();</span><br><span class="line"><span class="hljs-comment">// 释放</span></span><br><span class="line">muxer.release();</span><br></pre></td></tr></table></figure>
+<h4 id="支持的格式-1"><a href="#支持的格式-1" class="headerlink" title="支持的格式"></a>支持的格式</h4><p><img src="/images/media_muxer_support.png" alt="image-20200412160730708" style="zoom:80%;"></p>
+<h4 id="创建封装器"><a href="#创建封装器" class="headerlink" title="创建封装器"></a>创建封装器</h4><p>封装器的创建比较简单，根据指定的OutputFormat来创建对应格式的封装器。</p>
+<figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">bool</span> <span class="hljs-title">isMp4Format</span><span class="hljs-params">(MediaMuxer::OutputFormat format)</span> </span>&#123;</span><br><span class="line">    <span class="hljs-keyword">return</span> format == MediaMuxer::OUTPUT_FORMAT_MPEG_4 ||</span><br><span class="line">           format == MediaMuxer::OUTPUT_FORMAT_THREE_GPP ||</span><br><span class="line">           format == MediaMuxer::OUTPUT_FORMAT_HEIF;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">MediaMuxer::MediaMuxer(<span class="hljs-keyword">int</span> fd, OutputFormat format)</span><br><span class="line">    : mFormat(format),</span><br><span class="line">      mState(UNINITIALIZED) &#123;</span><br><span class="line">    <span class="hljs-comment">// 根据指定format创建对应的writer</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (isMp4Format(format)) &#123;</span><br><span class="line">        mWriter = <span class="hljs-keyword">new</span> MPEG4Writer(fd);</span><br><span class="line">    &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (format == OUTPUT_FORMAT_WEBM) &#123;</span><br><span class="line">        mWriter = <span class="hljs-keyword">new</span> WebmWriter(fd);</span><br><span class="line">    &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (format == OUTPUT_FORMAT_OGG) &#123;</span><br><span class="line">        mWriter = <span class="hljs-keyword">new</span> OggWriter(fd);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (mWriter != <span class="hljs-literal">NULL</span>) &#123;</span><br><span class="line">        mFileMeta = <span class="hljs-keyword">new</span> MetaData;</span><br><span class="line">        <span class="hljs-keyword">if</span> (format == OUTPUT_FORMAT_HEIF) &#123;</span><br><span class="line">            <span class="hljs-comment">// Note that the key uses recorder file types.</span></span><br><span class="line">            mFileMeta-&gt;setInt32(kKeyFileType, output_format::OUTPUT_FORMAT_HEIF);</span><br><span class="line">        &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (format == OUTPUT_FORMAT_OGG) &#123;</span><br><span class="line">            mFileMeta-&gt;setInt32(kKeyFileType, output_format::OUTPUT_FORMAT_OGG);</span><br><span class="line">        &#125;</span><br><span class="line">        mState = INITIALIZED;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="重要方法详解-1"><a href="#重要方法详解-1" class="headerlink" title="重要方法详解"></a>重要方法详解</h4><h5 id="addTrack"><a href="#addTrack" class="headerlink" title="addTrack"></a>addTrack</h5><p>创建了封装器后，需要添加对应的轨道，轨道的信息通过MediaFormat来描述，也就是上面解封装器中通过<strong>getTrackFormat</strong>方法获取到的信息，通过这些信息添加一个轨道，添加成功返回轨道的索引，后续write数据的时候使用该索引即可。</p>
+<p>对于音频轨道，需要添加的是KEY_SAMPLE_RATE 采样率以及KEY_CHANNEL_COUT声道数，需要注意的是CSD的添加。</p>
+<p>对于视频轨道，处理必要的KEY_WIDTH和KEY_HEIGHT外，需要注意的有KEY_BIT_RATE码率和CSD的添加。</p>
+<blockquote>
+<p>关于CSD这里简单介绍下，也就是Codec-Specific Data，对于H.264来说，csd-0的数据为SPS序列参数集，csd-1的数据为PPS图像参数集，而对于AAC来说，csd-0的数据为ESDS。</p>
+</blockquote>
+<p>那么对于MediaFormat的key在不同版本中的支持情况与接封装器中的又不太一样，使用的时候需要注意参考下表。</p>
+<p><img src="/images/media_muxer_format_key.png" alt="image-20200412162101726" style="zoom:90%;"></p>
+<h5 id="writeSampleData"><a href="#writeSampleData" class="headerlink" title="writeSampleData"></a>writeSampleData</h5><p>将编码后的样本数据写入到封装器中的指定轨道中，参数为轨道索引、数据buffer、bufferInfo。buffer和bufferInfo都是通过MediaCodec编码后产生的，需要注意的是bufferInfo的flag标记.</p>
+<ul>
+<li>BUFFER_FLAG_CODEC_CONFIG 表明buffer中包含CSD数据，而并非样本数据。</li>
+<li>BUFFER_FLAG_END_OF_STREAM 表明流结束。</li>
+<li>BUFFER_FLAG_KEY_FRAME 关键帧</li>
+<li>BUFFER_FLAG_SYNC_FRAME 关键帧，API21废弃</li>
+<li>BUFFER_FLAG_PARTIAL_FRAME 表明当前数据并非完整的一帧，API26添加</li>
+</ul>
+<blockquote>
+<p>这里需要注意的一点是，CSD数据是不能通过该方法来写入的，所以在调用该方法的时候需要判断bufferInfo的flag是否有BUFFER_FLAG_CODEC_CONFIG标记，没有BUFFER_FLAG_CODEC_CONFIG标记的数据才可以用该方法写入。CSD数据需要通过添加到轨道的MediaFormat中，跟随MediaFormt被addTrack到封装器中。</p>
+</blockquote>
+<h5 id="start"><a href="#start" class="headerlink" title="start"></a>start</h5><p>启动封装器，启动后无法再添加轨道。</p>
+<h5 id="stop"><a href="#stop" class="headerlink" title="stop"></a>stop</h5><p>停止封装器。</p>
+<h5 id="release-1"><a href="#release-1" class="headerlink" title="release"></a>release</h5><p>释放封装器。</p>
+<h3 id="MediaMetadataRetriever-获取元信息-（扩展）"><a href="#MediaMetadataRetriever-获取元信息-（扩展）" class="headerlink" title="MediaMetadataRetriever 获取元信息 （扩展）"></a>MediaMetadataRetriever 获取元信息 （扩展）</h3><p>MediaMetadataRetriever是用于获取媒体文件信息和指定帧数据的API。</p>
+<h4 id="重要方法详解-2"><a href="#重要方法详解-2" class="headerlink" title="重要方法详解"></a>重要方法详解</h4><h5 id="extractMetadata"><a href="#extractMetadata" class="headerlink" title="extractMetadata"></a>extractMetadata</h5><p>查询指定的媒体信息。常用的有以下几种KEY，需要注意返回的值很有可能为空。</p>
+<ul>
+<li>METADATA_KEY_BITRATE  如果可用，此键检索平均比特率（以比特/秒为单位）。</li>
+<li>METADATA_KEY_CAPTURE_FRAMERATE  该键可检索原始捕获帧率（如果可用）</li>
+<li>METADATA_KEY_DATE  用于检索数据源创建或修改日期的元数据键。</li>
+<li>METADATA_KEY_HAS_AUDIO  如果此键存在，则媒体包含音频内容。</li>
+<li>METADATA_KEY_HAS_VIDEO  如果该键存在，则媒体包含视频内容。</li>
+<li>METADATA_KEY_LOCATION  该键检索位置信息（如果可用）。</li>
+<li>METADATA_KEY_MIMETYPE  用于检索数据源的MIME类型的元数据密钥。</li>
+<li>METADATA_KEY_TITLE  用于检索数据源标题的元数据键。</li>
+<li>METADATA_KEY_VIDEO_HEIGHT  如果媒体包含视频，则此键检索其高度。</li>
+<li>METADATA_KEY_VIDEO_ROTATION  如果可用，此键以度数检索视频旋转角度。</li>
+<li>METADATA_KEY_VIDEO_WIDTH  如果媒体包含视频，则此键检索其宽度。</li>
+</ul>
+<h5 id="getFrameAtTime"><a href="#getFrameAtTime" class="headerlink" title="getFrameAtTime"></a>getFrameAtTime</h5><p>根据指定模式，返回接近指定时间的关键帧数据，以bitmap格式返回。一般使用该方法获取封面图。</p>
+<ul>
+<li>OPTION_CLOSEST_SYNC 在指定时间的前后查找最近关键帧</li>
+<li>OPTION_NEXT_SYNC 在指定时间的后面查找最近关键帧</li>
+<li>OPTION_PREVIOUS_SYNC 在指定时间的前面查找最近关键帧</li>
+</ul>
+
+        </div>
+        
+        <ul class="post-copyright">
+            <li><strong>本文标题：</strong><a href="https://witgao.com/音视频开发之Android硬件解封装/">音视频开发之Android硬件解封装</a></li>
+            <li><strong>本文作者：</strong><a href="https://witgao.com">zhenyu</a></li>
+            <li><strong>本文链接：</strong><a href="https://witgao.com/音视频开发之Android硬件解封装/">https://witgao.com/音视频开发之Android硬件解封装/</a></li>
+            <li><strong>发布时间：</strong>2020-04-12</li>
+            <li><strong>版权声明：</strong>本博客所有文章除特别声明外，均采用 <a
+                    href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="external nofollow"
+                    target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明出处！
+            </li>
+        </ul>
+        
+        
+        
+        
+    </div>
+</div>
+
+
+
+
+
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        <div class="level-start">
+            <a class="level level-item has-link-grey  article-nav-prev"
+                href="/音视频开发之Android硬件编解码/">
+                <i class="level-item fas fa-chevron-left"></i>
+                <span class="level-item">音视频开发之Android硬件编解码</span>
+            </a>
+        </div>
+        
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next"
+                href="/音视频开发之基础篇/">
+                <span class="level-item">音视频开发之基础篇</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+    </div>
+</div>
+
+
+</div>
+                
+
+
+
+
+<div
+    class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left ">
+    
+    
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered" style="flex-shrink: 1">
+                <div>
+                    
+                    <figure class="image is-128x128 has-mb-6">
+                        <img class="" src="/images/avatar1.png" alt="zhenyu">
+                    </figure>
+                    
+                    <p class="is-size-4 is-block">
+                        zhenyu
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        富贵山庄无富贵，只留欢乐在此间
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>杭州</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        文章
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        38
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        分类
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        9
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        标签
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        0
+                    </p>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="level">
+            <a class="level-item button is-link is-rounded" href="https://github.com/witgao" target="_blank">
+                关注我</a>
+        </div>
+        
+        
+        
+    </div>
+</div>
+    
+    
+<div class="card widget column-left is-sticky" id="toc">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                目录
+            </h3>
+            <ul class="menu-list"><li>
+        <a class="is-flex" href="#硬件解封装">
+        <span class="has-mr-6">1</span>
+        <span>硬件解封装</span>
+        </a></li><li>
+        <a class="is-flex" href="#API架构">
+        <span class="has-mr-6">2</span>
+        <span>API架构</span>
+        </a></li><li>
+        <a class="is-flex" href="#MediaExtractor-解封装">
+        <span class="has-mr-6">3</span>
+        <span>MediaExtractor 解封装</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#支持的格式">
+        <span class="has-mr-6">3.1</span>
+        <span>支持的格式</span>
+        </a></li><li>
+        <a class="is-flex" href="#注册解封装器">
+        <span class="has-mr-6">3.2</span>
+        <span>注册解封装器</span>
+        </a></li><li>
+        <a class="is-flex" href="#创建解封装器">
+        <span class="has-mr-6">3.3</span>
+        <span>创建解封装器</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#选择最合适的解封装器实例">
+        <span class="has-mr-6">3.3.1</span>
+        <span>选择最合适的解封装器实例</span>
+        </a></li><li>
+        <a class="is-flex" href="#WAV解封装器">
+        <span class="has-mr-6">3.3.2</span>
+        <span>WAV解封装器</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#重要方法详解">
+        <span class="has-mr-6">3.4</span>
+        <span>重要方法详解</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#setDataSource">
+        <span class="has-mr-6">3.4.1</span>
+        <span>setDataSource</span>
+        </a></li><li>
+        <a class="is-flex" href="#selectTrack、unselectTrack">
+        <span class="has-mr-6">3.4.2</span>
+        <span>selectTrack、unselectTrack</span>
+        </a></li><li>
+        <a class="is-flex" href="#getTrackCount">
+        <span class="has-mr-6">3.4.3</span>
+        <span>getTrackCount</span>
+        </a></li><li>
+        <a class="is-flex" href="#getTrackFormat">
+        <span class="has-mr-6">3.4.4</span>
+        <span>getTrackFormat</span>
+        </a></li><li>
+        <a class="is-flex" href="#readSampleData">
+        <span class="has-mr-6">3.4.5</span>
+        <span>readSampleData</span>
+        </a></li><li>
+        <a class="is-flex" href="#getSampleTrackIndex">
+        <span class="has-mr-6">3.4.6</span>
+        <span>getSampleTrackIndex</span>
+        </a></li><li>
+        <a class="is-flex" href="#getSampleTime">
+        <span class="has-mr-6">3.4.7</span>
+        <span>getSampleTime</span>
+        </a></li><li>
+        <a class="is-flex" href="#getSmapleFlags">
+        <span class="has-mr-6">3.4.8</span>
+        <span>getSmapleFlags</span>
+        </a></li><li>
+        <a class="is-flex" href="#seekTo">
+        <span class="has-mr-6">3.4.9</span>
+        <span>seekTo</span>
+        </a></li><li>
+        <a class="is-flex" href="#advance">
+        <span class="has-mr-6">3.4.10</span>
+        <span>advance</span>
+        </a></li><li>
+        <a class="is-flex" href="#release">
+        <span class="has-mr-6">3.4.11</span>
+        <span>release</span>
+        </a></li></ul></li></ul></li><li>
+        <a class="is-flex" href="#MediaMuxer-封装">
+        <span class="has-mr-6">4</span>
+        <span>MediaMuxer 封装</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#支持的格式-1">
+        <span class="has-mr-6">4.1</span>
+        <span>支持的格式</span>
+        </a></li><li>
+        <a class="is-flex" href="#创建封装器">
+        <span class="has-mr-6">4.2</span>
+        <span>创建封装器</span>
+        </a></li><li>
+        <a class="is-flex" href="#重要方法详解-1">
+        <span class="has-mr-6">4.3</span>
+        <span>重要方法详解</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#addTrack">
+        <span class="has-mr-6">4.3.1</span>
+        <span>addTrack</span>
+        </a></li><li>
+        <a class="is-flex" href="#writeSampleData">
+        <span class="has-mr-6">4.3.2</span>
+        <span>writeSampleData</span>
+        </a></li><li>
+        <a class="is-flex" href="#start">
+        <span class="has-mr-6">4.3.3</span>
+        <span>start</span>
+        </a></li><li>
+        <a class="is-flex" href="#stop">
+        <span class="has-mr-6">4.3.4</span>
+        <span>stop</span>
+        </a></li><li>
+        <a class="is-flex" href="#release-1">
+        <span class="has-mr-6">4.3.5</span>
+        <span>release</span>
+        </a></li></ul></li></ul></li><li>
+        <a class="is-flex" href="#MediaMetadataRetriever-获取元信息-（扩展）">
+        <span class="has-mr-6">5</span>
+        <span>MediaMetadataRetriever 获取元信息 （扩展）</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#重要方法详解-2">
+        <span class="has-mr-6">5.1</span>
+        <span>重要方法详解</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#extractMetadata">
+        <span class="has-mr-6">5.1.1</span>
+        <span>extractMetadata</span>
+        </a></li><li>
+        <a class="is-flex" href="#getFrameAtTime">
+        <span class="has-mr-6">5.1.2</span>
+        <span>getFrameAtTime</span>
+        </a></li></ul></li></ul></li></ul>
+        </div>
+    </div>
+</div>
+    
+    
+    <div class="column-right-shadow is-hidden-widescreen ">
+        
+    </div>
+    
+</div>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <!-- <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="/images/logo2.png" alt="音视频开发之Android硬件解封装" height="28">
+                
+                </a> -->
+                <p class="is-size-7">
+                    &copy; 2020 zhenyu&nbsp;
+                    Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a
+                        href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank">Icarus</a>
+                    
+                </p>
+            </div>
+            <div class="level-end">
+                
+            </div>
+        </div>
+    </div>
+</footer>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("zh-CN");</script>
+
+<script>
+var IcarusThemeSettings = {
+    article: {
+        highlight: {
+            clipboard: true,
+            fold: 'unfolded'
+        }
+    }
+};
+</script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+
+
+
+    
+    
+<script src="/js/animation.js"></script>
+
+    
+    
+<script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+<script src="/js/gallery.js" defer></script>
+
+    
+    
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    MathJax.Hub.Config({
+        'HTML-CSS': {
+            matchFontHeight: false
+        },
+        SVG: {
+            matchFontHeight: false
+        },
+        CommonHTML: {
+            matchFontHeight: false
+        },
+        tex2jax: {
+            inlineMath: [
+                ['$','$'],
+                ['\\(','\\)']
+            ]
+        }
+    });
+});
+</script>
+    
+    
+<a id="back-to-top" title="回到顶端" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="想要查找什么..." />
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: '文章',
+                PAGES: '页面',
+                CATEGORIES: '分类',
+                TAGS: '标签',
+                UNTITLED: '(无标题)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+</body>
+
+</html>

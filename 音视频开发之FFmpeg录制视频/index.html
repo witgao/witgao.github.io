@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html  lang="zh">
+
+<head>
+    <meta charset="utf-8" />
+
+<meta name="generator" content="Hexo 3.9.0" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<title>音视频开发之FFmpeg录制视频 - 富贵山庄</title>
+
+
+    <meta name="description" content="视频录制流程前面讲解录制音频时讲过，FFmpeg对各大平台的输入和输出API进行了统一的封装，这里就不在阐述。 视频的录制相比音频的录制流程基本差不多，主要是去掉了FIFO队列的逻辑。另外对于视频帧来说，FFmpeg提供的SwsContext API处理较慢，一般不太使用，可以用libyuv库，或者使用OpenGL API用GPU来提速。  打开视频输入注册视频设备所有的输入和输出设备默认都是没有">
+<meta property="og:type" content="article">
+<meta property="og:title" content="音视频开发之FFmpeg录制视频">
+<meta property="og:url" content="https://witgao.com/音视频开发之FFmpeg录制视频/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:description" content="视频录制流程前面讲解录制音频时讲过，FFmpeg对各大平台的输入和输出API进行了统一的封装，这里就不在阐述。 视频的录制相比音频的录制流程基本差不多，主要是去掉了FIFO队列的逻辑。另外对于视频帧来说，FFmpeg提供的SwsContext API处理较慢，一般不太使用，可以用libyuv库，或者使用OpenGL API用GPU来提速。  打开视频输入注册视频设备所有的输入和输出设备默认都是没有">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://witgao.com/images/8.jpeg">
+<meta property="og:updated_time" content="2020-07-15T05:40:09.897Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="音视频开发之FFmpeg录制视频">
+<meta name="twitter:description" content="视频录制流程前面讲解录制音频时讲过，FFmpeg对各大平台的输入和输出API进行了统一的封装，这里就不在阐述。 视频的录制相比音频的录制流程基本差不多，主要是去掉了FIFO队列的逻辑。另外对于视频帧来说，FFmpeg提供的SwsContext API处理较慢，一般不太使用，可以用libyuv库，或者使用OpenGL API用GPU来提速。  打开视频输入注册视频设备所有的输入和输出设备默认都是没有">
+<meta name="twitter:image" content="https://witgao.com/images/8.jpeg">
+
+
+
+
+
+
+
+<link rel="icon" href="/images/favicon1.svg">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/default.css">
+
+
+    
+    
+<style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+    
+    
+    
+    
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+    
+    
+    
+    
+    
+    
+    
+    <link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+    
+    
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body class="is-3-column">
+    <nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="/images/logo2.png" alt="音视频开发之FFmpeg录制视频" height="28">
+            
+            </a>
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item"
+                href="/">燕子坞</a>
+                
+                <a class="navbar-item"
+                href="/archives">听香水榭</a>
+                
+                <a class="navbar-item"
+                href="/categories">还施水阁</a>
+                
+                <a class="navbar-item"
+                href="/about">思过崖</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    <a class="navbar-item" target="_blank" title="Download on GitHub" href="https://github.com/witgao/blog">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                <a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;">
+                    <i class="fas fa-list-ul"></i>
+                </a>
+                
+                
+                <a class="navbar-item search" title="搜索" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-9-widescreen has-order-2 column-main">
+<div class="card">
+    
+    <div class="card-image">
+        <span  class="image is-7by1">
+        <img class="thumbnail" src="/images/8.jpeg" alt="音视频开发之FFmpeg录制视频">
+        </span>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-07-13T16:00:00.000Z">2020-07-14</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    15 分钟 读完 (大约 2255 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            音视频开发之FFmpeg录制视频
+            
+        </h1>
+        <div class="content">
+            <h3 id="视频录制流程"><a href="#视频录制流程" class="headerlink" title="视频录制流程"></a>视频录制流程</h3><p>前面讲解录制音频时讲过，FFmpeg对各大平台的输入和输出API进行了统一的封装，这里就不在阐述。</p>
+<p>视频的录制相比音频的录制流程基本差不多，主要是去掉了FIFO队列的逻辑。另外对于视频帧来说，FFmpeg提供的SwsContext API处理较慢，一般不太使用，可以用libyuv库，或者使用OpenGL API用GPU来提速。</p>
+<p><img src="/images/音视频开发之FFmpeg录制视频.resources/4E40FEDD-212D-4633-94A7-F5BC2DF0905F.png" alt="0c9c218a544d7c258f06aeded22f3197"></p>
+<h4 id="打开视频输入"><a href="#打开视频输入" class="headerlink" title="打开视频输入"></a>打开视频输入</h4><h5 id="注册视频设备"><a href="#注册视频设备" class="headerlink" title="注册视频设备"></a>注册视频设备</h5><p>所有的输入和输出设备默认都是没有注册的，如果需要使用，需要手动调用下面的注册函数。</p>
+<figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">avdevice_register_all();</span><br></pre></td></tr></table></figure>
+<h5 id="创建输入上下文"><a href="#创建输入上下文" class="headerlink" title="创建输入上下文"></a>创建输入上下文</h5><p>FFmpeg将对视频文件的解封装和封装等操作都抽象到AVFormatContext中，所以视频文件的打开和输出都是要通道AVFormatContext来完成。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// Mac平台上依旧使用avfoundation API</span></span><br><span class="line">AVInputFormat* format = av_find_input_format(<span class="hljs-string">"avfoundation"</span>);</span><br><span class="line"><span class="hljs-comment">// 视频的采集必须设置采集的分辨率和帧率以及像素格式，如果设置的组合在设备上不支持，会出错</span></span><br><span class="line">AVDictionary* options = <span class="hljs-literal">nullptr</span>;</span><br><span class="line">av_dict_set(&amp;options, <span class="hljs-string">"video_size"</span>, <span class="hljs-string">"1280x720"</span>, <span class="hljs-number">0</span>);</span><br><span class="line">av_dict_set(&amp;options, <span class="hljs-string">"framerate"</span>, <span class="hljs-string">"30"</span>, <span class="hljs-number">0</span>);</span><br><span class="line">av_dict_set(&amp;options, <span class="hljs-string">"pixel_format"</span>, <span class="hljs-string">"nv12"</span>, <span class="hljs-number">0</span>);</span><br><span class="line"><span class="hljs-comment">// 开启输入上下文</span></span><br><span class="line"><span class="hljs-keyword">if</span> ((error = avformat_open_input(&amp;fmt_ctx_in_, <span class="hljs-string">"0"</span>, format, &amp;options)) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">  <span class="hljs-built_in">std</span>::<span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-string">"Could not open input device "</span> &lt;&lt; av_err2str(error)</span><br><span class="line">            &lt;&lt; <span class="hljs-built_in">std</span>::<span class="hljs-built_in">endl</span>;</span><br><span class="line">  fmt_ctx_in_ = <span class="hljs-literal">nullptr</span>;</span><br><span class="line">  <span class="hljs-keyword">return</span> error;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+ <a id="more"></a>
+<h5 id="获取设备输入数据格式"><a href="#获取设备输入数据格式" class="headerlink" title="获取设备输入数据格式"></a>获取设备输入数据格式</h5><p>FFmpeg将视频文件中的每一个轨道都封装成了AVStream对象，一个正常的媒体文件一般都包含两个Stream，一个音频流和一个视频流。</p>
+<p>对于这里，视频设备只有一个输入流，AVStream中包含了输入视频数据的分辨率、帧率、像素格式等视频相关信息</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 视频设备只有一个输入流</span></span><br><span class="line">stream_in_ = fmt_ctx_in_-&gt;streams[<span class="hljs-number">0</span>];</span><br></pre></td></tr></table></figure>
+<h5 id="创建解码上下文"><a href="#创建解码上下文" class="headerlink" title="创建解码上下文"></a>创建解码上下文</h5><p>FFmpeg将对视频文件的编码和解码等操作都抽象到AVCodecContext中，所以视频文件的编码和解码都是要通过AVCodecContext来完成。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 获取视频输入流的编码格式，进行解码</span></span><br><span class="line">codec = avcodec_find_decoder(stream_in_-&gt;codecpar-&gt;codec_id);</span><br><span class="line"><span class="hljs-keyword">if</span> (!codec) &#123;</span><br><span class="line">  <span class="hljs-built_in">std</span>::<span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-string">"Could not find input codec"</span> &lt;&lt; <span class="hljs-built_in">std</span>::<span class="hljs-built_in">endl</span>;</span><br><span class="line">  <span class="hljs-keyword">return</span> AVERROR_EXIT;</span><br><span class="line">&#125;</span><br><span class="line"><span class="hljs-comment">// 创建解码上下文</span></span><br><span class="line">codec_ctx_in_ = avcodec_alloc_context3(codec);</span><br><span class="line"><span class="hljs-keyword">if</span> (!codec_ctx_in_) &#123;</span><br><span class="line">  <span class="hljs-built_in">std</span>::<span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-string">"Could not allocate input codec context"</span> &lt;&lt; <span class="hljs-built_in">std</span>::<span class="hljs-built_in">endl</span>;</span><br><span class="line">  <span class="hljs-keyword">return</span> AVERROR(ENOMEM);</span><br><span class="line">&#125;</span><br><span class="line"><span class="hljs-comment">// 将输入流中的解码参数设置给解码上下文</span></span><br><span class="line"><span class="hljs-keyword">if</span> ((error = avcodec_parameters_to_context(codec_ctx_in_,</span><br><span class="line">                                           stream_in_-&gt;codecpar)) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">  <span class="hljs-built_in">std</span>::<span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-string">"Could not copy parameters to input codec"</span> &lt;&lt; av_err2str(error)</span><br><span class="line">            &lt;&lt; <span class="hljs-built_in">std</span>::<span class="hljs-built_in">endl</span>;</span><br><span class="line">  <span class="hljs-keyword">return</span> error;</span><br><span class="line">&#125;</span><br><span class="line"><span class="hljs-comment">// 开启解码器</span></span><br><span class="line"><span class="hljs-keyword">if</span> ((error = avcodec_open2(codec_ctx_in_, codec, <span class="hljs-literal">nullptr</span>)) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">  <span class="hljs-built_in">std</span>::<span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-string">"Could not open input codec "</span> &lt;&lt; av_err2str(error)</span><br><span class="line">            &lt;&lt; <span class="hljs-built_in">std</span>::<span class="hljs-built_in">endl</span>;</span><br><span class="line">  <span class="hljs-keyword">return</span> error;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="打开视频输出"><a href="#打开视频输出" class="headerlink" title="打开视频输出"></a>打开视频输出</h4><h5 id="创建输出上下文"><a href="#创建输出上下文" class="headerlink" title="创建输出上下文"></a>创建输出上下文</h5><p>下面是创建了一个aac文件的输出上下文</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span>* filename = <span class="hljs-string">"/Users/gaozhenyu/Desktop/video.h264"</span>;</span><br><span class="line">AVOutputFormat* oformat = av_guess_format(<span class="hljs-literal">nullptr</span>, filename, <span class="hljs-literal">nullptr</span>);</span><br><span class="line"><span class="hljs-comment">// 创建输出上下文</span></span><br><span class="line"><span class="hljs-keyword">if</span> ((error = avformat_alloc_output_context2(&amp;fmt_ctx_out_, oformat, <span class="hljs-literal">nullptr</span>,</span><br><span class="line">                                            filename)) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">  <span class="hljs-built_in">std</span>::<span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-string">"Could not allocate output format context"</span> &lt;&lt; <span class="hljs-built_in">std</span>::<span class="hljs-built_in">endl</span>;</span><br><span class="line">  <span class="hljs-keyword">return</span> error;</span><br><span class="line">&#125;</span><br><span class="line"><span class="hljs-comment">// 开启输出IO</span></span><br><span class="line"><span class="hljs-keyword">if</span> ((error = avio_open(&amp;(fmt_ctx_out_-&gt;pb), filename, AVIO_FLAG_WRITE)) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">  <span class="hljs-built_in">std</span>::<span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-string">"Could not open output file"</span> &lt;&lt; av_err2str(error) &lt;&lt; <span class="hljs-built_in">std</span>::<span class="hljs-built_in">endl</span>;</span><br><span class="line">  <span class="hljs-keyword">return</span> error;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="创建指定编码器上下文"><a href="#创建指定编码器上下文" class="headerlink" title="创建指定编码器上下文"></a>创建指定编码器上下文</h5><p>使用libx264编码器来进行编码，并设置音频编码的相关参数</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 找到libx264编码器</span></span><br><span class="line">codec = avcodec_find_encoder_by_name(<span class="hljs-string">"libx264"</span>);</span><br><span class="line"><span class="hljs-keyword">if</span> (!codec) &#123;</span><br><span class="line">  <span class="hljs-built_in">std</span>::<span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-string">"Could not find libfdk_aac encoder"</span> &lt;&lt; <span class="hljs-built_in">std</span>::<span class="hljs-built_in">endl</span>;</span><br><span class="line">  <span class="hljs-keyword">return</span> AVERROR_EXIT;</span><br><span class="line">&#125;</span><br><span class="line"><span class="hljs-comment">// 创建输出编码上下文</span></span><br><span class="line">codec_ctx_out_ = avcodec_alloc_context3(codec);</span><br><span class="line"><span class="hljs-keyword">if</span> (!stream_out_) &#123;</span><br><span class="line">  <span class="hljs-built_in">std</span>::<span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-string">"Could not allocate output codec context"</span> &lt;&lt; <span class="hljs-built_in">std</span>::<span class="hljs-built_in">endl</span>;</span><br><span class="line">  <span class="hljs-keyword">return</span> AVERROR(ENOMEM);</span><br><span class="line">&#125;</span><br><span class="line"><span class="hljs-comment">// 设置输出编码参数</span></span><br><span class="line">codec_ctx_out_-&gt;profile = FF_PROFILE_H264_HIGH;</span><br><span class="line">codec_ctx_out_-&gt;level = <span class="hljs-number">50</span>;</span><br><span class="line"></span><br><span class="line">codec_ctx_out_-&gt;width = <span class="hljs-number">640</span>;</span><br><span class="line">codec_ctx_out_-&gt;height = <span class="hljs-number">520</span>;</span><br><span class="line"></span><br><span class="line">codec_ctx_out_-&gt;gop_size = <span class="hljs-number">300</span>;</span><br><span class="line">codec_ctx_out_-&gt;keyint_min = <span class="hljs-number">30</span>;</span><br><span class="line">codec_ctx_out_-&gt;max_b_frames = <span class="hljs-number">3</span>;</span><br><span class="line">codec_ctx_out_-&gt;has_b_frames = <span class="hljs-number">1</span>;</span><br><span class="line"></span><br><span class="line">codec_ctx_out_-&gt;refs = <span class="hljs-number">3</span>;</span><br><span class="line">codec_ctx_out_-&gt;pix_fmt = AV_PIX_FMT_YUV420P;</span><br><span class="line">codec_ctx_out_-&gt;bit_rate = <span class="hljs-number">6000000</span>;</span><br><span class="line">codec_ctx_out_-&gt;time_base = AVRational&#123;<span class="hljs-number">1</span>, <span class="hljs-number">25</span>&#125;;</span><br><span class="line">codec_ctx_out_-&gt;framerate = AVRational&#123;<span class="hljs-number">25</span>, <span class="hljs-number">1</span>&#125;;</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">// 开启编码器</span></span><br><span class="line"><span class="hljs-keyword">if</span> ((error = avcodec_open2(codec_ctx_out_, codec, <span class="hljs-literal">nullptr</span>)) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">  <span class="hljs-built_in">std</span>::<span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-string">"Could not open output codec "</span> &lt;&lt; av_err2str(error)</span><br><span class="line">            &lt;&lt; <span class="hljs-built_in">std</span>::<span class="hljs-built_in">endl</span>;</span><br><span class="line">  <span class="hljs-keyword">return</span> error;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="创建输出流"><a href="#创建输出流" class="headerlink" title="创建输出流"></a>创建输出流</h5><p>这里我们需要输出的轨道只有一个视频轨道，所以创建一个流就可以。创建完流后还需要将上面设置的视频编码相关参数设置给流。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 创建指定编码器的输出视频流，添加到输出上下文中</span></span><br><span class="line">stream_out_ = avformat_new_stream(fmt_ctx_out_, codec);</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">// 将编码上下文中的参数设置给输出流</span></span><br><span class="line"><span class="hljs-keyword">if</span> ((error = avcodec_parameters_from_context(stream_out_-&gt;codecpar,</span><br><span class="line">                                             codec_ctx_out_)) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">  <span class="hljs-built_in">std</span>::<span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-string">"Could not initialize output stream parameters "</span></span><br><span class="line">            &lt;&lt; av_err2str(error) &lt;&lt; <span class="hljs-built_in">std</span>::<span class="hljs-built_in">endl</span>;</span><br><span class="line">  <span class="hljs-keyword">return</span> error;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="初始化图像处理上下文"><a href="#初始化图像处理上下文" class="headerlink" title="初始化图像处理上下文"></a>初始化图像处理上下文</h4><h5 id="图像处理上下文"><a href="#图像处理上下文" class="headerlink" title="图像处理上下文"></a>图像处理上下文</h5><p>FFmpeg将对视频的图像处理操作抽象到SwsContext中，根据输入的视频帧数据格式和处理后的视频帧数据格式来创建一个SwsContext。</p>
+<p>实际上决定视频帧数据格式的就是三要素：宽、高、像素格式</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 创建图像处理上下文，设置输入输出参数</span></span><br><span class="line">sws_ctx_ = sws_getContext(codec_ctx_in_-&gt;width, codec_ctx_in_-&gt;height,</span><br><span class="line">                          codec_ctx_in_-&gt;pix_fmt, codec_ctx_out_-&gt;width,</span><br><span class="line">                          codec_ctx_out_-&gt;height, codec_ctx_out_-&gt;pix_fmt,</span><br><span class="line">                          SWS_BILINEAR, <span class="hljs-literal">nullptr</span>, <span class="hljs-literal">nullptr</span>, <span class="hljs-literal">nullptr</span>);</span><br><span class="line"><span class="hljs-keyword">if</span> (!sws_ctx_) &#123;</span><br><span class="line">  <span class="hljs-built_in">std</span>::<span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-string">"Could not allocate sws context"</span> &lt;&lt; <span class="hljs-built_in">std</span>::<span class="hljs-built_in">endl</span>;</span><br><span class="line">  <span class="hljs-keyword">return</span> AVERROR_EXIT;</span><br><span class="line">&#125;</span><br><span class="line"><span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;</span><br></pre></td></tr></table></figure>
+<h4 id="录制"><a href="#录制" class="headerlink" title="录制"></a>录制</h4><p>对于AVFormatContext来进行视频数据的输出，需要调用三个write函数，avformat_write_header、av_write_frame、av_write_trailer。</p>
+<p>整体流程就是不断的从视频设备中读取数据，解码后进行图像处理，将处理后的视频帧进行编码，编码后写入到输出文件中。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 5. 读取数据并编码</span></span><br><span class="line"><span class="hljs-keyword">while</span> (request_abort_) &#123;</span><br><span class="line">  AVFrame* frame = av_frame_alloc();</span><br><span class="line">  <span class="hljs-keyword">int</span> data_present;</span><br><span class="line">  AVFrame* out = av_frame_alloc();</span><br><span class="line">  <span class="hljs-comment">// 读取并解码</span></span><br><span class="line">  <span class="hljs-keyword">if</span> ((error = DecodeVideoFrame(frame, &amp;data_present)) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">    av_frame_free(&amp;frame);</span><br><span class="line">    <span class="hljs-built_in">std</span>::<span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-string">"Could not decoding video packet "</span> &lt;&lt; av_err2str(error)</span><br><span class="line">              &lt;&lt; <span class="hljs-built_in">std</span>::<span class="hljs-built_in">endl</span>;</span><br><span class="line">    <span class="hljs-keyword">goto</span> cleanup;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="hljs-keyword">if</span> (data_present) &#123;</span><br><span class="line">    <span class="hljs-comment">// 视频图像处理</span></span><br><span class="line">    out-&gt;format = codec_ctx_out_-&gt;pix_fmt;</span><br><span class="line">    out-&gt;width = codec_ctx_out_-&gt;width;</span><br><span class="line">    out-&gt;height = codec_ctx_out_-&gt;height;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> ((error = av_frame_get_buffer(out, <span class="hljs-number">0</span>)) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">      <span class="hljs-built_in">std</span>::<span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-string">"Could not alloc av image"</span> &lt;&lt; av_err2str(error)</span><br><span class="line">                &lt;&lt; <span class="hljs-built_in">std</span>::<span class="hljs-built_in">endl</span>;</span><br><span class="line">      <span class="hljs-keyword">goto</span> cleanup;</span><br><span class="line">    &#125;</span><br><span class="line">    sws_scale(sws_ctx_, (<span class="hljs-keyword">const</span> <span class="hljs-keyword">uint8_t</span>* <span class="hljs-keyword">const</span>*)frame-&gt;data, frame-&gt;linesize,</span><br><span class="line">              <span class="hljs-number">0</span>, frame-&gt;height, out-&gt;data, out-&gt;linesize);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// 编码并写入</span></span><br><span class="line">  <span class="hljs-keyword">if</span> ((error = EncodeVideoFrame(out, data_present)) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">    av_frame_free(&amp;frame);</span><br><span class="line">    <span class="hljs-built_in">std</span>::<span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-string">"Could not encodeing video frame "</span> &lt;&lt; av_err2str(error)</span><br><span class="line">              &lt;&lt; <span class="hljs-built_in">std</span>::<span class="hljs-built_in">endl</span>;</span><br><span class="line">    <span class="hljs-keyword">goto</span> cleanup;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<h5 id="读取数据并解码"><a href="#读取数据并解码" class="headerlink" title="读取数据并解码"></a>读取数据并解码</h5><p>读取数据非常简单，创建一个AVPacket对象，通过av_read_frame就可以读取一帧数据</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 创建AVPacket，用来从视频设备中接收一帧数据</span></span><br><span class="line">av_init_packet(&amp;pkt);</span><br><span class="line"><span class="hljs-comment">// 从视频设备中读取一帧数据到AVPacket中</span></span><br><span class="line">av_read_frame(fmt_ctx_in_, &amp;pkt);</span><br></pre></td></tr></table></figure>
+<p>通过avcodec_send_packet、avcodec_receive_frame来进行解码，avcodec_send_packet负责将一个AVPacket送给解码器，avcodec_receive_frame负责从解码器中取出一个已经解码好的AVFrame，如果返回AVERROR(EAGAIN)表明当前没有已经解码好的数据，返回AVERROR_EOF表明已经全部解码完成，返回大于0则表明获取解码数据成功。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"> <span class="hljs-comment">// 发送到解码器中进行解码</span></span><br><span class="line"> <span class="hljs-keyword">if</span> ((error = avcodec_send_packet(codec_ctx_in_, &amp;pkt)) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">   <span class="hljs-keyword">goto</span> cleanup;</span><br><span class="line"> &#125;  </span><br><span class="line"><span class="hljs-comment">// 从解码器中获取一帧解码后的数据，存到AVFrame中</span></span><br><span class="line"> error = avcodec_receive_frame(codec_ctx_in_, frame);</span><br><span class="line"> <span class="hljs-keyword">if</span> (error == AVERROR(EAGAIN)) &#123;</span><br><span class="line">   <span class="hljs-comment">// 没有获取到数据</span></span><br><span class="line">   error = <span class="hljs-number">0</span>;</span><br><span class="line">   <span class="hljs-keyword">goto</span> cleanup;</span><br><span class="line"> &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (error == AVERROR_EOF) &#123;</span><br><span class="line">   <span class="hljs-comment">// 解码器中数据已经全部解码完成</span></span><br><span class="line">   error = <span class="hljs-number">0</span>;</span><br><span class="line">   *finished = <span class="hljs-number">1</span>;</span><br><span class="line"> &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (error &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">   <span class="hljs-comment">// 解码错误</span></span><br><span class="line">   <span class="hljs-keyword">goto</span> cleanup;</span><br><span class="line"> &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">   <span class="hljs-comment">// 数据成功解码到AVFrame中</span></span><br><span class="line">   *data_present = <span class="hljs-number">1</span>;</span><br><span class="line">   error = <span class="hljs-number">0</span>;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<h5 id="图像处理"><a href="#图像处理" class="headerlink" title="图像处理"></a>图像处理</h5><p>创建一个AVFrame用来接收处理后的视频帧<br><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">AVFrame* out = av_frame_alloc();</span><br><span class="line"><span class="hljs-comment">// 设置输出参数给视频帧</span></span><br><span class="line">out-&gt;format = codec_ctx_out_-&gt;pix_fmt;</span><br><span class="line">out-&gt;width = codec_ctx_out_-&gt;width;</span><br><span class="line">out-&gt;height = codec_ctx_out_-&gt;height;</span><br><span class="line"><span class="hljs-comment">// 分配buffer</span></span><br><span class="line"><span class="hljs-keyword">if</span> ((error = av_frame_get_buffer(out, <span class="hljs-number">0</span>)) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">  <span class="hljs-built_in">std</span>::<span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-string">"Could not alloc av image"</span> &lt;&lt; av_err2str(error)</span><br><span class="line">            &lt;&lt; <span class="hljs-built_in">std</span>::<span class="hljs-built_in">endl</span>;</span><br><span class="line">  <span class="hljs-keyword">goto</span> cleanup;</span><br><span class="line">&#125;</span><br><span class="line"><span class="hljs-comment">// 图像处理，将解码后的AVFrame数据处理后，存储到上面创建的AVFrame中</span></span><br><span class="line">sws_scale(sws_ctx_, (<span class="hljs-keyword">const</span> <span class="hljs-keyword">uint8_t</span>* <span class="hljs-keyword">const</span>*)frame-&gt;data, frame-&gt;linesize,</span><br><span class="line">          <span class="hljs-number">0</span>, frame-&gt;height, out-&gt;data, out-&gt;linesize);</span><br></pre></td></tr></table></figure></p>
+<h5 id="编码数据并输出"><a href="#编码数据并输出" class="headerlink" title="编码数据并输出"></a>编码数据并输出</h5><p>通过avcodec_send_frame、avcodec_receive_packet来进行编码。avcodec_send_frame负责将一个AVFrame帧发送给编码器，avcodec_receive_packet负责从编码器中取出一帧已经编码好的数据。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">AVPacket pkt;</span><br><span class="line"><span class="hljs-comment">// 创建AVPacket，接收编码后的数据</span></span><br><span class="line">av_init_packet(&amp;pkt);</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">// 如果待编码数据不为空，则累计计算当前帧的pts</span></span><br><span class="line"><span class="hljs-keyword">if</span> (frame) &#123;</span><br><span class="line">  frame-&gt;pts = pts;</span><br><span class="line">  pts += frame-&gt;nb_samples;</span><br><span class="line">&#125;</span><br><span class="line"><span class="hljs-comment">// 发送AVFrame到编码器中进行编码</span></span><br><span class="line"><span class="hljs-keyword">if</span> ((error = avcodec_send_frame(codec_ctx_out_, frame)) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">  <span class="hljs-comment">// 发送失败</span></span><br><span class="line">  <span class="hljs-keyword">goto</span> cleanup;</span><br><span class="line">&#125;</span><br><span class="line"><span class="hljs-comment">// 接收编码后的数据到AVPacket中</span></span><br><span class="line">error = avcodec_receive_packet(codec_ctx_out_, &amp;pkt);</span><br><span class="line"><span class="hljs-keyword">if</span> (error == AVERROR(EAGAIN)) &#123;</span><br><span class="line">  <span class="hljs-comment">// 没有获取到编码后数据</span></span><br><span class="line">  error = <span class="hljs-number">0</span>;</span><br><span class="line">  <span class="hljs-keyword">goto</span> cleanup;</span><br><span class="line">&#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (error == AVERROR_EOF) &#123;</span><br><span class="line">  <span class="hljs-comment">// 编码器中所有数据编码完成</span></span><br><span class="line">  error = <span class="hljs-number">0</span>;</span><br><span class="line">  <span class="hljs-keyword">goto</span> cleanup;</span><br><span class="line">&#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (error &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">  <span class="hljs-comment">// 编码出错</span></span><br><span class="line">  <span class="hljs-keyword">goto</span> cleanup;</span><br><span class="line">&#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">  <span class="hljs-comment">// 成功获取编码后数据到AVPacket中</span></span><br><span class="line">  error = <span class="hljs-number">0</span>;</span><br><span class="line">  *data_written = <span class="hljs-number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="写入到输出"><a href="#写入到输出" class="headerlink" title="写入到输出"></a>写入到输出</h5><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 如果获取数据，则写入到输出上下文中</span></span><br><span class="line"><span class="hljs-keyword">if</span> (*data_written &amp;&amp; (error = av_write_frame(fmt_ctx_out_, &amp;pkt)) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">  <span class="hljs-comment">// 写入失败</span></span><br><span class="line">  <span class="hljs-keyword">goto</span> cleanup;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+        </div>
+        
+        <ul class="post-copyright">
+            <li><strong>本文标题：</strong><a href="https://witgao.com/音视频开发之FFmpeg录制视频/">音视频开发之FFmpeg录制视频</a></li>
+            <li><strong>本文作者：</strong><a href="https://witgao.com">zhenyu</a></li>
+            <li><strong>本文链接：</strong><a href="https://witgao.com/音视频开发之FFmpeg录制视频/">https://witgao.com/音视频开发之FFmpeg录制视频/</a></li>
+            <li><strong>发布时间：</strong>2020-07-14</li>
+            <li><strong>版权声明：</strong>本博客所有文章除特别声明外，均采用 <a
+                    href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="external nofollow"
+                    target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明出处！
+            </li>
+        </ul>
+        
+        
+        
+        
+    </div>
+</div>
+
+
+
+
+
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        <div class="level-start">
+            <a class="level level-item has-link-grey  article-nav-prev"
+                href="/音视频开发之Android录制音频/">
+                <i class="level-item fas fa-chevron-left"></i>
+                <span class="level-item">音视频开发之Android录制音频</span>
+            </a>
+        </div>
+        
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next"
+                href="/音视频开发之FFmpeg录制音频/">
+                <span class="level-item">音视频开发之FFmpeg录制音频</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+    </div>
+</div>
+
+
+</div>
+                
+
+
+
+
+<div
+    class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left ">
+    
+    
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered" style="flex-shrink: 1">
+                <div>
+                    
+                    <figure class="image is-128x128 has-mb-6">
+                        <img class="" src="/images/avatar1.png" alt="zhenyu">
+                    </figure>
+                    
+                    <p class="is-size-4 is-block">
+                        zhenyu
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        富贵山庄无富贵，只留欢乐在此间
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>杭州</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        文章
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        38
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        分类
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        9
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        标签
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        0
+                    </p>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="level">
+            <a class="level-item button is-link is-rounded" href="https://github.com/witgao" target="_blank">
+                关注我</a>
+        </div>
+        
+        
+        
+    </div>
+</div>
+    
+    
+<div class="card widget column-left is-sticky" id="toc">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                目录
+            </h3>
+            <ul class="menu-list"><li>
+        <a class="is-flex" href="#视频录制流程">
+        <span class="has-mr-6">1</span>
+        <span>视频录制流程</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#打开视频输入">
+        <span class="has-mr-6">1.1</span>
+        <span>打开视频输入</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#注册视频设备">
+        <span class="has-mr-6">1.1.1</span>
+        <span>注册视频设备</span>
+        </a></li><li>
+        <a class="is-flex" href="#创建输入上下文">
+        <span class="has-mr-6">1.1.2</span>
+        <span>创建输入上下文</span>
+        </a></li><li>
+        <a class="is-flex" href="#获取设备输入数据格式">
+        <span class="has-mr-6">1.1.3</span>
+        <span>获取设备输入数据格式</span>
+        </a></li><li>
+        <a class="is-flex" href="#创建解码上下文">
+        <span class="has-mr-6">1.1.4</span>
+        <span>创建解码上下文</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#打开视频输出">
+        <span class="has-mr-6">1.2</span>
+        <span>打开视频输出</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#创建输出上下文">
+        <span class="has-mr-6">1.2.1</span>
+        <span>创建输出上下文</span>
+        </a></li><li>
+        <a class="is-flex" href="#创建指定编码器上下文">
+        <span class="has-mr-6">1.2.2</span>
+        <span>创建指定编码器上下文</span>
+        </a></li><li>
+        <a class="is-flex" href="#创建输出流">
+        <span class="has-mr-6">1.2.3</span>
+        <span>创建输出流</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#初始化图像处理上下文">
+        <span class="has-mr-6">1.3</span>
+        <span>初始化图像处理上下文</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#图像处理上下文">
+        <span class="has-mr-6">1.3.1</span>
+        <span>图像处理上下文</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#录制">
+        <span class="has-mr-6">1.4</span>
+        <span>录制</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#读取数据并解码">
+        <span class="has-mr-6">1.4.1</span>
+        <span>读取数据并解码</span>
+        </a></li><li>
+        <a class="is-flex" href="#图像处理">
+        <span class="has-mr-6">1.4.2</span>
+        <span>图像处理</span>
+        </a></li><li>
+        <a class="is-flex" href="#编码数据并输出">
+        <span class="has-mr-6">1.4.3</span>
+        <span>编码数据并输出</span>
+        </a></li><li>
+        <a class="is-flex" href="#写入到输出">
+        <span class="has-mr-6">1.4.4</span>
+        <span>写入到输出</span>
+        </a></li></ul></li></ul></li></ul>
+        </div>
+    </div>
+</div>
+    
+    
+    <div class="column-right-shadow is-hidden-widescreen ">
+        
+    </div>
+    
+</div>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <!-- <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="/images/logo2.png" alt="音视频开发之FFmpeg录制视频" height="28">
+                
+                </a> -->
+                <p class="is-size-7">
+                    &copy; 2020 zhenyu&nbsp;
+                    Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a
+                        href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank">Icarus</a>
+                    
+                </p>
+            </div>
+            <div class="level-end">
+                
+            </div>
+        </div>
+    </div>
+</footer>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("zh-CN");</script>
+
+<script>
+var IcarusThemeSettings = {
+    article: {
+        highlight: {
+            clipboard: true,
+            fold: 'unfolded'
+        }
+    }
+};
+</script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+
+
+
+    
+    
+<script src="/js/animation.js"></script>
+
+    
+    
+<script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+<script src="/js/gallery.js" defer></script>
+
+    
+    
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    MathJax.Hub.Config({
+        'HTML-CSS': {
+            matchFontHeight: false
+        },
+        SVG: {
+            matchFontHeight: false
+        },
+        CommonHTML: {
+            matchFontHeight: false
+        },
+        tex2jax: {
+            inlineMath: [
+                ['$','$'],
+                ['\\(','\\)']
+            ]
+        }
+    });
+});
+</script>
+    
+    
+<a id="back-to-top" title="回到顶端" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="想要查找什么..." />
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: '文章',
+                PAGES: '页面',
+                CATEGORIES: '分类',
+                TAGS: '标签',
+                UNTITLED: '(无标题)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+</body>
+
+</html>

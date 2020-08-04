@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html  lang="zh">
+
+<head>
+    <meta charset="utf-8" />
+
+<meta name="generator" content="Hexo 3.9.0" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<title>音视频开发之ffplay解复用线程分析 - 富贵山庄</title>
+
+
+    <meta name="description" content="由主线程创建，负责媒体文件的解复用和读取，读取的数据根据流类型放入到对应的编码数据队列中 查询流信息创建解复用上下文1234567891011121314151617181920212223242526272829// 创建解复用上下文ic = avformat_alloc_context();if (!ic) &amp;#123;  ...&amp;#125;// 设置中断回调ic-&amp;gt;interrupt_">
+<meta property="og:type" content="article">
+<meta property="og:title" content="音视频开发之ffplay解复用线程分析">
+<meta property="og:url" content="https://witgao.com/音视频开发之ffplay解复用线程分析/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:description" content="由主线程创建，负责媒体文件的解复用和读取，读取的数据根据流类型放入到对应的编码数据队列中 查询流信息创建解复用上下文1234567891011121314151617181920212223242526272829// 创建解复用上下文ic = avformat_alloc_context();if (!ic) &amp;#123;  ...&amp;#125;// 设置中断回调ic-&amp;gt;interrupt_">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://witgao.com/images/16.jpg">
+<meta property="og:updated_time" content="2020-08-04T06:05:32.988Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="音视频开发之ffplay解复用线程分析">
+<meta name="twitter:description" content="由主线程创建，负责媒体文件的解复用和读取，读取的数据根据流类型放入到对应的编码数据队列中 查询流信息创建解复用上下文1234567891011121314151617181920212223242526272829// 创建解复用上下文ic = avformat_alloc_context();if (!ic) &amp;#123;  ...&amp;#125;// 设置中断回调ic-&amp;gt;interrupt_">
+<meta name="twitter:image" content="https://witgao.com/images/16.jpg">
+
+
+
+
+
+
+
+<link rel="icon" href="/images/favicon1.svg">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/default.css">
+
+
+    
+    
+<style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+    
+    
+    
+    
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+    
+    
+    
+    
+    
+    
+    
+    <link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+    
+    
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body class="is-3-column">
+    <nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="/images/logo2.png" alt="音视频开发之ffplay解复用线程分析" height="28">
+            
+            </a>
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item"
+                href="/">燕子坞</a>
+                
+                <a class="navbar-item"
+                href="/archives">听香水榭</a>
+                
+                <a class="navbar-item"
+                href="/categories">还施水阁</a>
+                
+                <a class="navbar-item"
+                href="/about">思过崖</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    <a class="navbar-item" target="_blank" title="Download on GitHub" href="https://github.com/witgao/blog">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                <a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;">
+                    <i class="fas fa-list-ul"></i>
+                </a>
+                
+                
+                <a class="navbar-item search" title="搜索" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-9-widescreen has-order-2 column-main">
+<div class="card">
+    
+    <div class="card-image">
+        <span  class="image is-7by1">
+        <img class="thumbnail" src="/images/16.jpg" alt="音视频开发之ffplay解复用线程分析">
+        </span>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-08-02T16:00:00.000Z">2020-08-03</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    17 分钟 读完 (大约 2505 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            音视频开发之ffplay解复用线程分析
+            
+        </h1>
+        <div class="content">
+            <p>由主线程创建，负责媒体文件的解复用和读取，读取的数据根据流类型放入到对应的编码数据队列中</p>
+<h4 id="查询流信息"><a href="#查询流信息" class="headerlink" title="查询流信息"></a>查询流信息</h4><h5 id="创建解复用上下文"><a href="#创建解复用上下文" class="headerlink" title="创建解复用上下文"></a>创建解复用上下文</h5><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="hljs-comment">// 创建解复用上下文</span></span><br><span class="line">ic = avformat_alloc_context();</span><br><span class="line"><span class="hljs-keyword">if</span> (!ic) &#123;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br><span class="line"><span class="hljs-comment">// 设置中断回调</span></span><br><span class="line">ic-&gt;interrupt_callback.callback = decode_interrupt_cb;</span><br><span class="line"><span class="hljs-comment">// 回调函数的参数</span></span><br><span class="line">ic-&gt;interrupt_callback.opaque = is;</span><br><span class="line">...</span><br><span class="line"><span class="hljs-comment">// 打开输入</span></span><br><span class="line">err = avformat_open_input(&amp;ic, is-&gt;filename, is-&gt;iformat, &amp;format_opts);</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">is-&gt;ic = ic;</span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">if</span> (genpts) ic-&gt;flags |= AVFMT_FLAG_GENPTS;</span><br><span class="line"></span><br><span class="line">av_format_inject_global_side_data(ic);</span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">if</span> (find_stream_info) &#123;</span><br><span class="line">  AVDictionary **opts = setup_find_stream_info_opts(ic, codec_opts);</span><br><span class="line">  <span class="hljs-keyword">int</span> orig_nb_streams = ic-&gt;nb_streams;</span><br><span class="line">  <span class="hljs-comment">// 读取文件头，获取文件的流详细信息</span></span><br><span class="line">  err = avformat_find_stream_info(ic, opts);</span><br><span class="line"></span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="查找流索引"><a href="#查找流索引" class="headerlink" title="查找流索引"></a>查找流索引</h5><p>查找音频和视频流的索引<br><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; ic-&gt;nb_streams; i++) &#123;</span><br><span class="line">  AVStream *st = ic-&gt;streams[i];</span><br><span class="line">  <span class="hljs-keyword">enum</span> AVMediaType type = st-&gt;codecpar-&gt;codec_type;</span><br><span class="line">  st-&gt;discard = AVDISCARD_ALL;</span><br><span class="line">  <span class="hljs-keyword">if</span> (type &gt;= <span class="hljs-number">0</span> &amp;&amp; wanted_stream_spec[type] &amp;&amp; st_index[type] == <span class="hljs-number">-1</span>)</span><br><span class="line">    <span class="hljs-keyword">if</span> (avformat_match_stream_specifier(ic, st, wanted_stream_spec[type]) &gt; <span class="hljs-number">0</span>)</span><br><span class="line">      st_index[type] = i;</span><br><span class="line">&#125;</span><br><span class="line"><span class="hljs-keyword">for</span> (i = <span class="hljs-number">0</span>; i &lt; AVMEDIA_TYPE_NB; i++) &#123;</span><br><span class="line">  <span class="hljs-keyword">if</span> (wanted_stream_spec[i] &amp;&amp; st_index[i] == <span class="hljs-number">-1</span>) &#123;</span><br><span class="line">    av_log(<span class="hljs-literal">NULL</span>, AV_LOG_ERROR,</span><br><span class="line">           <span class="hljs-string">"Stream specifier %s does not match any %s stream\n"</span>,</span><br><span class="line">           wanted_stream_spec[i], av_get_media_type_string(i));</span><br><span class="line">    st_index[i] = INT_MAX;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="hljs-comment">// 查找流索引</span></span><br><span class="line"><span class="hljs-keyword">if</span> (!video_disable)</span><br><span class="line">  st_index[AVMEDIA_TYPE_VIDEO] = av_find_best_stream(</span><br><span class="line">      ic, AVMEDIA_TYPE_VIDEO, st_index[AVMEDIA_TYPE_VIDEO], <span class="hljs-number">-1</span>, <span class="hljs-literal">NULL</span>, <span class="hljs-number">0</span>);</span><br><span class="line"><span class="hljs-keyword">if</span> (!audio_disable)</span><br><span class="line">  st_index[AVMEDIA_TYPE_AUDIO] = av_find_best_stream(</span><br><span class="line">      ic, AVMEDIA_TYPE_AUDIO, st_index[AVMEDIA_TYPE_AUDIO],</span><br><span class="line">      st_index[AVMEDIA_TYPE_VIDEO], <span class="hljs-literal">NULL</span>, <span class="hljs-number">0</span>);</span><br><span class="line"><span class="hljs-keyword">if</span> (!video_disable &amp;&amp; !subtitle_disable)</span><br><span class="line">  st_index[AVMEDIA_TYPE_SUBTITLE] = av_find_best_stream(</span><br><span class="line">      ic, AVMEDIA_TYPE_SUBTITLE, st_index[AVMEDIA_TYPE_SUBTITLE],</span><br><span class="line">      (st_index[AVMEDIA_TYPE_AUDIO] &gt;= <span class="hljs-number">0</span> ? st_index[AVMEDIA_TYPE_AUDIO]</span><br><span class="line">                                         : st_index[AVMEDIA_TYPE_VIDEO]),</span><br><span class="line">      <span class="hljs-literal">NULL</span>, <span class="hljs-number">0</span>);</span><br></pre></td></tr></table></figure></p>
+ <a id="more"></a>
+<h4 id="开启输入流"><a href="#开启输入流" class="headerlink" title="开启输入流"></a>开启输入流</h4><h5 id="创建解码上下文"><a href="#创建解码上下文" class="headerlink" title="创建解码上下文"></a>创建解码上下文</h5><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 创建解码上下文</span></span><br><span class="line">avctx = avcodec_alloc_context3(<span class="hljs-literal">NULL</span>);</span><br><span class="line"><span class="hljs-keyword">if</span> (!avctx) <span class="hljs-keyword">return</span> AVERROR(ENOMEM);</span><br><span class="line"><span class="hljs-comment">// 设置解码上下文参数</span></span><br><span class="line">ret = avcodec_parameters_to_context(avctx, ic-&gt;streams[stream_index]-&gt;codecpar);</span><br><span class="line"><span class="hljs-keyword">if</span> (ret &lt; <span class="hljs-number">0</span>) <span class="hljs-keyword">goto</span> fail;</span><br><span class="line"><span class="hljs-comment">// 设置解码上下文时间基</span></span><br><span class="line">avctx-&gt;pkt_timebase = ic-&gt;streams[stream_index]-&gt;time_base;</span><br><span class="line"><span class="hljs-comment">// 查找解码器</span></span><br><span class="line">codec = avcodec_find_decoder(avctx-&gt;codec_id);</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">avctx-&gt;codec_id = codec-&gt;id;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">// 开启编码器上下文</span></span><br><span class="line"><span class="hljs-keyword">if</span> ((ret = avcodec_open2(avctx, codec, &amp;opts)) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">  <span class="hljs-keyword">goto</span> fail;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="开启音频设备"><a href="#开启音频设备" class="headerlink" title="开启音频设备"></a>开启音频设备</h5><p>使用SDL_OpenAudioDevice开启音频设备，如果失败，则不断更换音频参数组合来重试<br><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">int</span> <span class="hljs-title">audio_open</span><span class="hljs-params">(<span class="hljs-keyword">void</span> *opaque, <span class="hljs-keyword">int64_t</span> wanted_channel_layout,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">                      <span class="hljs-keyword">int</span> wanted_nb_channels, <span class="hljs-keyword">int</span> wanted_sample_rate,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">                      struct AudioParams *audio_hw_params)</span> </span>&#123;</span><br><span class="line">  SDL_AudioSpec wanted_spec, spec;</span><br><span class="line">  <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *env;</span><br><span class="line">  <span class="hljs-keyword">static</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> next_nb_channels[] = &#123;<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">6</span>, <span class="hljs-number">2</span>, <span class="hljs-number">6</span>, <span class="hljs-number">4</span>, <span class="hljs-number">6</span>&#125;;</span><br><span class="line">  <span class="hljs-keyword">static</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> next_sample_rates[] = &#123;<span class="hljs-number">0</span>, <span class="hljs-number">44100</span>, <span class="hljs-number">48000</span>, <span class="hljs-number">96000</span>, <span class="hljs-number">192000</span>&#125;;</span><br><span class="line">  <span class="hljs-keyword">int</span> next_sample_rate_idx = FF_ARRAY_ELEMS(next_sample_rates) - <span class="hljs-number">1</span>;</span><br><span class="line">  <span class="hljs-comment">// 设置SDL音频播放参数</span></span><br><span class="line">  env = SDL_getenv(<span class="hljs-string">"SDL_AUDIO_CHANNELS"</span>);</span><br><span class="line">  <span class="hljs-keyword">if</span> (env) &#123;</span><br><span class="line">    wanted_nb_channels = atoi(env);</span><br><span class="line">    wanted_channel_layout = av_get_default_channel_layout(wanted_nb_channels);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-keyword">if</span> (!wanted_channel_layout ||</span><br><span class="line">      wanted_nb_channels !=</span><br><span class="line">          av_get_channel_layout_nb_channels(wanted_channel_layout)) &#123;</span><br><span class="line">    wanted_channel_layout = av_get_default_channel_layout(wanted_nb_channels);</span><br><span class="line">    wanted_channel_layout &amp;= ~AV_CH_LAYOUT_STEREO_DOWNMIX;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// 设置 采样率、声道数</span></span><br><span class="line">  wanted_nb_channels = av_get_channel_layout_nb_channels(wanted_channel_layout);</span><br><span class="line">  wanted_spec.channels = wanted_nb_channels;</span><br><span class="line">  wanted_spec.freq = wanted_sample_rate;</span><br><span class="line">  <span class="hljs-keyword">if</span> (wanted_spec.freq &lt;= <span class="hljs-number">0</span> || wanted_spec.channels &lt;= <span class="hljs-number">0</span>) &#123;</span><br><span class="line">    av_log(<span class="hljs-literal">NULL</span>, AV_LOG_ERROR, <span class="hljs-string">"Invalid sample rate or channel count!\n"</span>);</span><br><span class="line">    <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-keyword">while</span> (next_sample_rate_idx &amp;&amp;</span><br><span class="line">         next_sample_rates[next_sample_rate_idx] &gt;= wanted_spec.freq)</span><br><span class="line">    next_sample_rate_idx--;</span><br><span class="line">  <span class="hljs-comment">// 采样位数</span></span><br><span class="line">  wanted_spec.format = AUDIO_S16SYS;</span><br><span class="line">  <span class="hljs-comment">// 静音</span></span><br><span class="line">  wanted_spec.silence = <span class="hljs-number">0</span>;</span><br><span class="line">  <span class="hljs-comment">// 样本数量</span></span><br><span class="line">  wanted_spec.samples =</span><br><span class="line">      FFMAX(SDL_AUDIO_MIN_BUFFER_SIZE,</span><br><span class="line">            <span class="hljs-number">2</span> &lt;&lt; av_log2(wanted_spec.freq / SDL_AUDIO_MAX_CALLBACKS_PER_SEC));</span><br><span class="line">  <span class="hljs-comment">// 回调函数</span></span><br><span class="line">  wanted_spec.callback = sdl_audio_callback;</span><br><span class="line">  <span class="hljs-comment">// 回调函数参数</span></span><br><span class="line">  wanted_spec.userdata = opaque;</span><br><span class="line">  <span class="hljs-comment">// 开启音频播放设备，如果开启失败，则更换参数不断重试</span></span><br><span class="line">  <span class="hljs-keyword">while</span> (</span><br><span class="line">      !(audio_dev = SDL_OpenAudioDevice(<span class="hljs-literal">NULL</span>, <span class="hljs-number">0</span>, &amp;wanted_spec, &amp;spec,</span><br><span class="line">                                        SDL_AUDIO_ALLOW_FREQUENCY_CHANGE |</span><br><span class="line">                                            SDL_AUDIO_ALLOW_CHANNELS_CHANGE))) &#123;</span><br><span class="line">    av_log(<span class="hljs-literal">NULL</span>, AV_LOG_WARNING, <span class="hljs-string">"SDL_OpenAudio (%d channels, %d Hz): %s\n"</span>,</span><br><span class="line">           wanted_spec.channels, wanted_spec.freq, SDL_GetError());</span><br><span class="line">    wanted_spec.channels = next_nb_channels[FFMIN(<span class="hljs-number">7</span>, wanted_spec.channels)];</span><br><span class="line">    <span class="hljs-keyword">if</span> (!wanted_spec.channels) &#123;</span><br><span class="line">      wanted_spec.freq = next_sample_rates[next_sample_rate_idx--];</span><br><span class="line">      wanted_spec.channels = wanted_nb_channels;</span><br><span class="line">      <span class="hljs-keyword">if</span> (!wanted_spec.freq) &#123;</span><br><span class="line">        <span class="hljs-comment">// 如果所有组合都重试完了还是打不开则直接退出</span></span><br><span class="line">        av_log(<span class="hljs-literal">NULL</span>, AV_LOG_ERROR,</span><br><span class="line">               <span class="hljs-string">"No more combinations to try, audio open failed\n"</span>);</span><br><span class="line">        <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    wanted_channel_layout = av_get_default_channel_layout(wanted_spec.channels);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// 如果开启音频设备的参数中采样位数不是16位，则退出，只支持16位</span></span><br><span class="line">  <span class="hljs-keyword">if</span> (spec.format != AUDIO_S16SYS) &#123;</span><br><span class="line">    av_log(<span class="hljs-literal">NULL</span>, AV_LOG_ERROR,</span><br><span class="line">           <span class="hljs-string">"SDL advised audio format %d is not supported!\n"</span>, spec.format);</span><br><span class="line">    <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-keyword">if</span> (spec.channels != wanted_spec.channels) &#123;</span><br><span class="line">    wanted_channel_layout = av_get_default_channel_layout(spec.channels);</span><br><span class="line">    <span class="hljs-keyword">if</span> (!wanted_channel_layout) &#123;</span><br><span class="line">      av_log(<span class="hljs-literal">NULL</span>, AV_LOG_ERROR,</span><br><span class="line">             <span class="hljs-string">"SDL advised channel count %d is not supported!\n"</span>, spec.channels);</span><br><span class="line">      <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// 将真正开启音频设备的参数保存到 audio_hw_params 中</span></span><br><span class="line">  <span class="hljs-comment">// 只支持16位</span></span><br><span class="line">  audio_hw_params-&gt;fmt = AV_SAMPLE_FMT_S16;</span><br><span class="line">  <span class="hljs-comment">// 采样率</span></span><br><span class="line">  audio_hw_params-&gt;freq = spec.freq;</span><br><span class="line">  <span class="hljs-comment">// 声道布局</span></span><br><span class="line">  audio_hw_params-&gt;channel_layout = wanted_channel_layout;</span><br><span class="line">  <span class="hljs-comment">// 声道数</span></span><br><span class="line">  audio_hw_params-&gt;channels = spec.channels;</span><br><span class="line">  <span class="hljs-comment">//</span></span><br><span class="line">  audio_hw_params-&gt;frame_size = av_samples_get_buffer_size(</span><br><span class="line">      <span class="hljs-literal">NULL</span>, audio_hw_params-&gt;channels, <span class="hljs-number">1</span>, audio_hw_params-&gt;fmt, <span class="hljs-number">1</span>);</span><br><span class="line">  <span class="hljs-comment">// 1s数据的字节大小</span></span><br><span class="line">  audio_hw_params-&gt;bytes_per_sec = av_samples_get_buffer_size(</span><br><span class="line">      <span class="hljs-literal">NULL</span>, audio_hw_params-&gt;channels, audio_hw_params-&gt;freq,</span><br><span class="line">      audio_hw_params-&gt;fmt, <span class="hljs-number">1</span>);</span><br><span class="line">  <span class="hljs-keyword">if</span> (audio_hw_params-&gt;bytes_per_sec &lt;= <span class="hljs-number">0</span> || audio_hw_params-&gt;frame_size &lt;= <span class="hljs-number">0</span>) &#123;</span><br><span class="line">    av_log(<span class="hljs-literal">NULL</span>, AV_LOG_ERROR, <span class="hljs-string">"av_samples_get_buffer_size failed\n"</span>);</span><br><span class="line">    <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// 返回分配的缓冲区字节大小</span></span><br><span class="line">  <span class="hljs-keyword">return</span> spec.size;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h5 id="启动解码线程"><a href="#启动解码线程" class="headerlink" title="启动解码线程"></a>启动解码线程</h5><p>初始化Decoder结构体<br><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">decoder_init</span><span class="hljs-params">(Decoder *d, AVCodecContext *avctx, PacketQueue *<span class="hljs-built_in">queue</span>,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">                         SDL_cond *empty_queue_cond)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-built_in">memset</span>(d, <span class="hljs-number">0</span>, <span class="hljs-keyword">sizeof</span>(Decoder));</span><br><span class="line">  d-&gt;avctx = avctx;</span><br><span class="line">  d-&gt;<span class="hljs-built_in">queue</span> = <span class="hljs-built_in">queue</span>;</span><br><span class="line">  d-&gt;empty_queue_cond = empty_queue_cond;</span><br><span class="line">  d-&gt;start_pts = AV_NOPTS_VALUE;</span><br><span class="line">  d-&gt;pkt_serial = <span class="hljs-number">-1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>启动解码线程<br><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">static int decoder_start(Decoder *d, int (*fn)(void *), const char *thread_name,</span><br><span class="line">                         <span class="hljs-keyword">void</span> *arg) &#123;</span><br><span class="line">  <span class="hljs-comment">// 启动编码数据队列</span></span><br><span class="line">  packet_queue_start(d-&gt;<span class="hljs-built_in">queue</span>);</span><br><span class="line">  <span class="hljs-comment">// 创建编码线程</span></span><br><span class="line">  d-&gt;decoder_tid = SDL_CreateThread(fn, thread_name, arg);</span><br><span class="line">  <span class="hljs-keyword">if</span> (!d-&gt;decoder_tid) &#123;</span><br><span class="line">    av_log(<span class="hljs-literal">NULL</span>, AV_LOG_ERROR, <span class="hljs-string">"SDL_CreateThread(): %s\n"</span>, SDL_GetError());</span><br><span class="line">    <span class="hljs-keyword">return</span> AVERROR(ENOMEM);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="轮询读取流数据"><a href="#轮询读取流数据" class="headerlink" title="轮询读取流数据"></a>轮询读取流数据</h4><p>流开启完毕后，就开始轮询从媒体文件中读取数据放入到Packet队列中，当Packet队列中数据足够的时候，会wait等待，<br><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br></pre></td><td class="code"><pre><span class="line">  <span class="hljs-comment">// 轮询从文件中读取流数据</span></span><br><span class="line">  <span class="hljs-keyword">for</span> (;;) &#123;</span><br><span class="line">    <span class="hljs-comment">// 是否退出</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (is-&gt;abort_request) <span class="hljs-keyword">break</span>;</span><br><span class="line">    <span class="hljs-comment">// 如果本次暂停事件没有处理，则处理暂停事件</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (is-&gt;paused != is-&gt;last_paused) &#123;</span><br><span class="line">      <span class="hljs-comment">// 更新最新处理的暂停事件</span></span><br><span class="line">      is-&gt;last_paused = is-&gt;paused;</span><br><span class="line">      <span class="hljs-comment">// 如果是暂停，就停止读取，如果是播放，则开始读取</span></span><br><span class="line">      <span class="hljs-keyword">if</span> (is-&gt;paused)</span><br><span class="line">        is-&gt;read_pause_return = av_read_pause(ic);</span><br><span class="line">      <span class="hljs-keyword">else</span></span><br><span class="line">        av_read_play(ic);</span><br><span class="line">    &#125;</span><br><span class="line"><span class="hljs-meta">#<span class="hljs-meta-keyword">if</span> CONFIG_RTSP_DEMUXER || CONFIG_MMSH_PROTOCOL</span></span><br><span class="line">    <span class="hljs-comment">// 如果是RTSP流，暂停就是等待10ms后再重试</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (is-&gt;paused &amp;&amp; (!<span class="hljs-built_in">strcmp</span>(ic-&gt;iformat-&gt;name, <span class="hljs-string">"rtsp"</span>) ||</span><br><span class="line">                       (ic-&gt;pb &amp;&amp; !<span class="hljs-built_in">strncmp</span>(input_filename, <span class="hljs-string">"mmsh:"</span>, <span class="hljs-number">5</span>)))) &#123;</span><br><span class="line">      <span class="hljs-comment">/* wait 10 ms to avoid trying to get another packet */</span></span><br><span class="line">      <span class="hljs-comment">/* <span class="hljs-doctag">XXX:</span> horrible */</span></span><br><span class="line">      SDL_Delay(<span class="hljs-number">10</span>);</span><br><span class="line">      <span class="hljs-keyword">continue</span>;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span></span><br><span class="line">    <span class="hljs-comment">// seek操作</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (is-&gt;seek_req) &#123;</span><br><span class="line">      <span class="hljs-comment">// seek的位置</span></span><br><span class="line">      <span class="hljs-keyword">int64_t</span> seek_target = is-&gt;seek_pos;</span><br><span class="line">      <span class="hljs-comment">// seek的区间,上下行</span></span><br><span class="line">      <span class="hljs-keyword">int64_t</span> seek_min =</span><br><span class="line">          is-&gt;seek_rel &gt; <span class="hljs-number">0</span> ? seek_target - is-&gt;seek_rel + <span class="hljs-number">2</span> : INT64_MIN;</span><br><span class="line">      <span class="hljs-keyword">int64_t</span> seek_max =</span><br><span class="line">          is-&gt;seek_rel &lt; <span class="hljs-number">0</span> ? seek_target - is-&gt;seek_rel - <span class="hljs-number">2</span> : INT64_MAX;</span><br><span class="line">      <span class="hljs-comment">// FIXME the +-2 is due to rounding being not done in the correct</span></span><br><span class="line">      <span class="hljs-comment">// direction in generation</span></span><br><span class="line">      <span class="hljs-comment">//      of the seek_pos/seek_rel variables</span></span><br><span class="line">      <span class="hljs-comment">// seek</span></span><br><span class="line">      ret = avformat_seek_file(is-&gt;ic, <span class="hljs-number">-1</span>, seek_min, seek_target, seek_max,</span><br><span class="line">                               is-&gt;seek_flags);</span><br><span class="line">      <span class="hljs-keyword">if</span> (ret &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        av_log(<span class="hljs-literal">NULL</span>, AV_LOG_ERROR, <span class="hljs-string">"%s: error while seeking\n"</span>, is-&gt;ic-&gt;url);</span><br><span class="line">      &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">        <span class="hljs-keyword">if</span> (is-&gt;audio_stream &gt;= <span class="hljs-number">0</span>) &#123;</span><br><span class="line">          <span class="hljs-comment">// 重置音频编码数据队列</span></span><br><span class="line">          packet_queue_flush(&amp;is-&gt;audioq);</span><br><span class="line">          <span class="hljs-comment">// 队列中加入flush_pkt分割标记</span></span><br><span class="line">          packet_queue_put(&amp;is-&gt;audioq, &amp;flush_pkt);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="hljs-keyword">if</span> (is-&gt;subtitle_stream &gt;= <span class="hljs-number">0</span>) &#123;</span><br><span class="line">          <span class="hljs-comment">// 重置字幕编码数据队列</span></span><br><span class="line">          packet_queue_flush(&amp;is-&gt;subtitleq);</span><br><span class="line">          <span class="hljs-comment">// 队列中加入flush_pkt分割标记</span></span><br><span class="line">          packet_queue_put(&amp;is-&gt;subtitleq, &amp;flush_pkt);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="hljs-keyword">if</span> (is-&gt;video_stream &gt;= <span class="hljs-number">0</span>) &#123;</span><br><span class="line">          <span class="hljs-comment">// 重置视频编码数据队列</span></span><br><span class="line">          packet_queue_flush(&amp;is-&gt;videoq);</span><br><span class="line">          <span class="hljs-comment">// 队列中加入flush_pkt分割标记，让队列的序号+1</span></span><br><span class="line">          packet_queue_put(&amp;is-&gt;videoq, &amp;flush_pkt);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="hljs-comment">// 更新外部时钟的PTS</span></span><br><span class="line">        <span class="hljs-keyword">if</span> (is-&gt;seek_flags &amp; AVSEEK_FLAG_BYTE) &#123;</span><br><span class="line">          set_clock(&amp;is-&gt;extclk, NAN, <span class="hljs-number">0</span>);</span><br><span class="line">        &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">          set_clock(&amp;is-&gt;extclk, seek_target / (<span class="hljs-keyword">double</span>)AV_TIME_BASE, <span class="hljs-number">0</span>);</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      is-&gt;seek_req = <span class="hljs-number">0</span>;</span><br><span class="line">      is-&gt;queue_attachments_req = <span class="hljs-number">1</span>;</span><br><span class="line">      is-&gt;eof = <span class="hljs-number">0</span>;</span><br><span class="line">      <span class="hljs-keyword">if</span> (is-&gt;paused) step_to_next_frame(is);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">if</span> (is-&gt;queue_attachments_req) &#123;</span><br><span class="line">      <span class="hljs-keyword">if</span> (is-&gt;video_st &amp;&amp;</span><br><span class="line">          is-&gt;video_st-&gt;disposition &amp; AV_DISPOSITION_ATTACHED_PIC) &#123;</span><br><span class="line">        AVPacket copy = &#123;<span class="hljs-number">0</span>&#125;;</span><br><span class="line">        <span class="hljs-keyword">if</span> ((ret = av_packet_ref(&amp;copy, &amp;is-&gt;video_st-&gt;attached_pic)) &lt; <span class="hljs-number">0</span>)</span><br><span class="line">          <span class="hljs-keyword">goto</span> fail;</span><br><span class="line">        packet_queue_put(&amp;is-&gt;videoq, &amp;copy);</span><br><span class="line">        packet_queue_put_nullpacket(&amp;is-&gt;videoq, is-&gt;video_stream);</span><br><span class="line">      &#125;</span><br><span class="line">      is-&gt;queue_attachments_req = <span class="hljs-number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">/* if the queue are full, no need to read more */</span></span><br><span class="line">    <span class="hljs-comment">// 如果音频编码数据队列+视频编码数据队列+字幕编码数据队列中字节数量超过了15</span></span><br><span class="line">    <span class="hljs-comment">// * 1024 * 1024（15M） 或者说</span></span><br><span class="line">    <span class="hljs-comment">// 音频流、视频流、字幕流中都已经读取了充足的Packet在队列中缓存着，则wait</span></span><br><span class="line">    <span class="hljs-comment">// 10ms等待</span></span><br><span class="line">    <span class="hljs-comment">// 也就是说三个队列中缓冲数据超过15M或者三个队列中都已经有了一定的数据(1s的数据)，那么就不能继续读下去了，等待10ms后再来重试</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (infinite_buffer &lt; <span class="hljs-number">1</span> &amp;&amp;</span><br><span class="line">        (is-&gt;audioq.size + is-&gt;videoq.size + is-&gt;subtitleq.size &gt;</span><br><span class="line">             MAX_QUEUE_SIZE ||</span><br><span class="line">         (stream_has_enough_packets(is-&gt;audio_st, is-&gt;audio_stream,</span><br><span class="line">                                    &amp;is-&gt;audioq) &amp;&amp;</span><br><span class="line">          stream_has_enough_packets(is-&gt;video_st, is-&gt;video_stream,</span><br><span class="line">                                    &amp;is-&gt;videoq) &amp;&amp;</span><br><span class="line">          stream_has_enough_packets(is-&gt;subtitle_st, is-&gt;subtitle_stream,</span><br><span class="line">                                    &amp;is-&gt;subtitleq)))) &#123;</span><br><span class="line">      <span class="hljs-comment">/* wait 10 ms */</span></span><br><span class="line">      SDL_LockMutex(wait_mutex);</span><br><span class="line">      <span class="hljs-comment">// 等待10ms后，重新循环</span></span><br><span class="line">      SDL_CondWaitTimeout(is-&gt;continue_read_thread, wait_mutex, <span class="hljs-number">10</span>);</span><br><span class="line">      SDL_UnlockMutex(wait_mutex);</span><br><span class="line">      <span class="hljs-keyword">continue</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-comment">// 处理播放结束</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (!is-&gt;paused &amp;&amp;</span><br><span class="line">        (!is-&gt;audio_st || (is-&gt;auddec.finished == is-&gt;audioq.serial &amp;&amp;</span><br><span class="line">                           frame_queue_nb_remaining(&amp;is-&gt;sampq) == <span class="hljs-number">0</span>)) &amp;&amp;</span><br><span class="line">        (!is-&gt;video_st || (is-&gt;viddec.finished == is-&gt;videoq.serial &amp;&amp;</span><br><span class="line">                           frame_queue_nb_remaining(&amp;is-&gt;pictq) == <span class="hljs-number">0</span>))) &#123;</span><br><span class="line">      <span class="hljs-comment">// loop = 0 表示无限循环， 否则表示循环次数，每次结束-1，直到等于1停止循环</span></span><br><span class="line">      <span class="hljs-keyword">if</span> (loop != <span class="hljs-number">1</span> &amp;&amp; (!loop || --loop)) &#123;</span><br><span class="line">        stream_seek(is, start_time != AV_NOPTS_VALUE ? start_time : <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);</span><br><span class="line">      &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (autoexit) &#123;</span><br><span class="line">        ret = AVERROR_EOF;</span><br><span class="line">        <span class="hljs-keyword">goto</span> fail;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-comment">// 读取一个Packet</span></span><br><span class="line">    ret = av_read_frame(ic, pkt);</span><br><span class="line">    <span class="hljs-keyword">if</span> (ret &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">      <span class="hljs-comment">// 读取失败</span></span><br><span class="line">      <span class="hljs-keyword">if</span> ((ret == AVERROR_EOF || avio_feof(ic-&gt;pb)) &amp;&amp; !is-&gt;eof) &#123;</span><br><span class="line">        <span class="hljs-comment">// 如果文件流已经结束，放入一个空的Packet到队列中</span></span><br><span class="line">        <span class="hljs-keyword">if</span> (is-&gt;video_stream &gt;= <span class="hljs-number">0</span>)</span><br><span class="line">          packet_queue_put_nullpacket(&amp;is-&gt;videoq, is-&gt;video_stream);</span><br><span class="line">        <span class="hljs-keyword">if</span> (is-&gt;audio_stream &gt;= <span class="hljs-number">0</span>)</span><br><span class="line">          packet_queue_put_nullpacket(&amp;is-&gt;audioq, is-&gt;audio_stream);</span><br><span class="line">        <span class="hljs-keyword">if</span> (is-&gt;subtitle_stream &gt;= <span class="hljs-number">0</span>)</span><br><span class="line">          packet_queue_put_nullpacket(&amp;is-&gt;subtitleq, is-&gt;subtitle_stream);</span><br><span class="line">        <span class="hljs-comment">// EOF 流结束</span></span><br><span class="line">        is-&gt;eof = <span class="hljs-number">1</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="hljs-keyword">if</span> (ic-&gt;pb &amp;&amp; ic-&gt;pb-&gt;error) <span class="hljs-keyword">break</span>;</span><br><span class="line">      SDL_LockMutex(wait_mutex);</span><br><span class="line">      <span class="hljs-comment">// 等待10ms</span></span><br><span class="line">      SDL_CondWaitTimeout(is-&gt;continue_read_thread, wait_mutex, <span class="hljs-number">10</span>);</span><br><span class="line">      SDL_UnlockMutex(wait_mutex);</span><br><span class="line">      <span class="hljs-keyword">continue</span>;</span><br><span class="line">    &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">      is-&gt;eof = <span class="hljs-number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-comment">/* check if packet is in play range specified by user, then queue, otherwise</span></span><br><span class="line"><span class="hljs-comment">     * discard */</span></span><br><span class="line">    <span class="hljs-comment">// 流的开始时间</span></span><br><span class="line">    stream_start_time = ic-&gt;streams[pkt-&gt;stream_index]-&gt;start_time;</span><br><span class="line">    <span class="hljs-comment">// 当前Packet的PTS</span></span><br><span class="line">    pkt_ts = pkt-&gt;pts == AV_NOPTS_VALUE ? pkt-&gt;dts : pkt-&gt;pts;</span><br><span class="line">    <span class="hljs-comment">// 当前Packet的PTS - 流开始时间 &lt;= 播放时长duration</span></span><br><span class="line">    <span class="hljs-comment">// 则表明当前Packet是在播放范围内的</span></span><br><span class="line">    pkt_in_play_range =</span><br><span class="line">        duration == AV_NOPTS_VALUE ||</span><br><span class="line">        (pkt_ts -</span><br><span class="line">         (stream_start_time != AV_NOPTS_VALUE ? stream_start_time : <span class="hljs-number">0</span>)) *</span><br><span class="line">                    av_q2d(ic-&gt;streams[pkt-&gt;stream_index]-&gt;time_base) -</span><br><span class="line">                (<span class="hljs-keyword">double</span>)(start_time != AV_NOPTS_VALUE ? start_time : <span class="hljs-number">0</span>) /</span><br><span class="line">                    <span class="hljs-number">1000000</span> &lt;=</span><br><span class="line">            ((<span class="hljs-keyword">double</span>)duration / <span class="hljs-number">1000000</span>);</span><br><span class="line">    <span class="hljs-keyword">if</span> (pkt-&gt;stream_index == is-&gt;audio_stream &amp;&amp; pkt_in_play_range) &#123;</span><br><span class="line">      <span class="hljs-comment">// 音频Packet，放入到音频编码数据队列中</span></span><br><span class="line">      packet_queue_put(&amp;is-&gt;audioq, pkt);</span><br><span class="line">    &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (pkt-&gt;stream_index == is-&gt;video_stream &amp;&amp; pkt_in_play_range &amp;&amp;</span><br><span class="line">               !(is-&gt;video_st-&gt;disposition &amp; AV_DISPOSITION_ATTACHED_PIC)) &#123;</span><br><span class="line">      <span class="hljs-comment">// 音频Packet，放入到音频编码数据队列中</span></span><br><span class="line">      packet_queue_put(&amp;is-&gt;videoq, pkt);</span><br><span class="line">    &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (pkt-&gt;stream_index == is-&gt;subtitle_stream &amp;&amp; pkt_in_play_range) &#123;</span><br><span class="line">      <span class="hljs-comment">// 音频Packet，放入到音频编码数据队列中</span></span><br><span class="line">      packet_queue_put(&amp;is-&gt;subtitleq, pkt);</span><br><span class="line">    &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">      <span class="hljs-comment">// 类型都不符合，则释放不处理</span></span><br><span class="line">      av_packet_unref(pkt);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></p>
+
+        </div>
+        
+        <ul class="post-copyright">
+            <li><strong>本文标题：</strong><a href="https://witgao.com/音视频开发之ffplay解复用线程分析/">音视频开发之ffplay解复用线程分析</a></li>
+            <li><strong>本文作者：</strong><a href="https://witgao.com">zhenyu</a></li>
+            <li><strong>本文链接：</strong><a href="https://witgao.com/音视频开发之ffplay解复用线程分析/">https://witgao.com/音视频开发之ffplay解复用线程分析/</a></li>
+            <li><strong>发布时间：</strong>2020-08-03</li>
+            <li><strong>版权声明：</strong>本博客所有文章除特别声明外，均采用 <a
+                    href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="external nofollow"
+                    target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明出处！
+            </li>
+        </ul>
+        
+        
+        
+        
+    </div>
+</div>
+
+
+
+
+
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        <div class="level-start">
+            <a class="level level-item has-link-grey  article-nav-prev"
+                href="/音视频开发之ffplay解码线程分析/">
+                <i class="level-item fas fa-chevron-left"></i>
+                <span class="level-item">音视频开发之ffplay解码线程分析</span>
+            </a>
+        </div>
+        
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next"
+                href="/音视频开发之ffplay队列分析/">
+                <span class="level-item">音视频开发之ffplay队列分析</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+    </div>
+</div>
+
+
+</div>
+                
+
+
+
+
+<div
+    class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left ">
+    
+    
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered" style="flex-shrink: 1">
+                <div>
+                    
+                    <figure class="image is-128x128 has-mb-6">
+                        <img class="" src="/images/avatar1.png" alt="zhenyu">
+                    </figure>
+                    
+                    <p class="is-size-4 is-block">
+                        zhenyu
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        富贵山庄无富贵，只留欢乐在此间
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>杭州</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        文章
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        38
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        分类
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        9
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        标签
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        0
+                    </p>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="level">
+            <a class="level-item button is-link is-rounded" href="https://github.com/witgao" target="_blank">
+                关注我</a>
+        </div>
+        
+        
+        
+    </div>
+</div>
+    
+    
+<div class="card widget column-left is-sticky" id="toc">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                目录
+            </h3>
+            <ul class="menu-list"><li>
+        <a class="is-flex" href="#查询流信息">
+        <span class="has-mr-6">1</span>
+        <span>查询流信息</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#创建解复用上下文">
+        <span class="has-mr-6">1.1</span>
+        <span>创建解复用上下文</span>
+        </a></li><li>
+        <a class="is-flex" href="#查找流索引">
+        <span class="has-mr-6">1.2</span>
+        <span>查找流索引</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#开启输入流">
+        <span class="has-mr-6">2</span>
+        <span>开启输入流</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#创建解码上下文">
+        <span class="has-mr-6">2.1</span>
+        <span>创建解码上下文</span>
+        </a></li><li>
+        <a class="is-flex" href="#开启音频设备">
+        <span class="has-mr-6">2.2</span>
+        <span>开启音频设备</span>
+        </a></li><li>
+        <a class="is-flex" href="#启动解码线程">
+        <span class="has-mr-6">2.3</span>
+        <span>启动解码线程</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#轮询读取流数据">
+        <span class="has-mr-6">3</span>
+        <span>轮询读取流数据</span>
+        </a></li></ul>
+        </div>
+    </div>
+</div>
+    
+    
+    <div class="column-right-shadow is-hidden-widescreen ">
+        
+    </div>
+    
+</div>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <!-- <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="/images/logo2.png" alt="音视频开发之ffplay解复用线程分析" height="28">
+                
+                </a> -->
+                <p class="is-size-7">
+                    &copy; 2020 zhenyu&nbsp;
+                    Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a
+                        href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank">Icarus</a>
+                    
+                </p>
+            </div>
+            <div class="level-end">
+                
+            </div>
+        </div>
+    </div>
+</footer>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("zh-CN");</script>
+
+<script>
+var IcarusThemeSettings = {
+    article: {
+        highlight: {
+            clipboard: true,
+            fold: 'unfolded'
+        }
+    }
+};
+</script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+
+
+
+    
+    
+<script src="/js/animation.js"></script>
+
+    
+    
+<script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+<script src="/js/gallery.js" defer></script>
+
+    
+    
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    MathJax.Hub.Config({
+        'HTML-CSS': {
+            matchFontHeight: false
+        },
+        SVG: {
+            matchFontHeight: false
+        },
+        CommonHTML: {
+            matchFontHeight: false
+        },
+        tex2jax: {
+            inlineMath: [
+                ['$','$'],
+                ['\\(','\\)']
+            ]
+        }
+    });
+});
+</script>
+    
+    
+<a id="back-to-top" title="回到顶端" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="想要查找什么..." />
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: '文章',
+                PAGES: '页面',
+                CATEGORIES: '分类',
+                TAGS: '标签',
+                UNTITLED: '(无标题)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+</body>
+
+</html>

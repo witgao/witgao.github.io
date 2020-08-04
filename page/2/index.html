@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html  lang="zh">
+
+<head>
+    <meta charset="utf-8" />
+
+<meta name="generator" content="Hexo 3.9.0" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<title>富贵山庄</title>
+
+
+    <meta property="og:type" content="website">
+<meta property="og:title" content="富贵山庄">
+<meta property="og:url" content="https://witgao.com/page/2/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://witgao.com/images/og_image.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="富贵山庄">
+<meta name="twitter:image" content="https://witgao.com/images/og_image.png">
+
+
+
+
+
+
+
+<link rel="icon" href="/images/favicon1.svg">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/default.css">
+
+
+    
+    
+<style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+    
+    
+    
+    
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+    
+    
+    
+    
+    
+    
+    
+    <link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+    
+    
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body class="is-3-column">
+    <nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="/images/logo2.png" alt="富贵山庄" height="28">
+            
+            </a>
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item"
+                href="/">燕子坞</a>
+                
+                <a class="navbar-item"
+                href="/archives">听香水榭</a>
+                
+                <a class="navbar-item"
+                href="/categories">还施水阁</a>
+                
+                <a class="navbar-item"
+                href="/about">思过崖</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    <a class="navbar-item" target="_blank" title="Download on GitHub" href="https://github.com/witgao/blog">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                
+                <a class="navbar-item search" title="搜索" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-6-widescreen has-order-2 column-main">
+    
+<div class="card">
+    
+    <div class="card-image">
+        <a href="/音视频开发之Android播放音频/" class="image is-7by1">
+        <img class="thumbnail" src="/images/11.jpg" alt="音视频开发之Android播放音频">
+        </a>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-07-21T16:00:00.000Z">2020-07-22</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    14 分钟 读完 (大约 2105 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/音视频开发之Android播放音频/">音视频开发之Android播放音频</a>
+            
+        </h1>
+        <div class="content">
+            <p>SDL是一个跨平台的音视频渲染库，是支持Android平台的，所以可以直接使用SDL库进行音频的播放。</p>
+<p>但是SDL库在Android平台上的实现只有一种，就是通过JNI来调用Java层的AudioTrack来进行播放。所以如果你有其它的需求不想使用SDL库，那么可以直接使用Android平台原生API来播放音频。</p>
+<h3 id="Android平台音频播放API"><a href="#Android平台音频播放API" class="headerlink" title="Android平台音频播放API"></a>Android平台音频播放API</h3><p>前面录制的时候讲过，Android上音频输出的API比较繁琐，有多套实现。有Java层的实现AudioTrack，也有native层实现OpenSLES，在 Android O上又推出了新的native层实现AAudio，并且提供了Oboe库，对OpenSLES和AAudio进行了封装。</p>
+<p>下面来详细的介绍下每套API的使用</p>
+<h4 id="AudioTrack"><a href="#AudioTrack" class="headerlink" title="AudioTrack"></a>AudioTrack</h4><p>AudioTrack是Android平台提供的播放音频的Java层API，使用起来非常简单。通过设置待播放音频参数就可以创建一个AudioTrack对象，调用了play方法后，就可以开始写入数据了，通过write方法将数据写入，调用stop后就停止播放。</p>
+<p>需要注意的是，在创建AudioTrack的时候，对于待播放的音频数据格式都已经设定好了，也就是说这个创建的AudioTrack只能播放这种格式的音频数据。所以一般在获取到音频流解码后，都需要将PCM数据进行重采样，重采样成和AudioTrack一样的数据格式，才能交给AudioTrack播放。</p>
+<h5 id="创建AudioTrack"><a href="#创建AudioTrack" class="headerlink" title="创建AudioTrack"></a>创建AudioTrack</h5><p>AudioTrack的构造函数有两套，新的一套是在Android L推出的，老的一套已经被标记为deprecated。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 根据指定采样率、声道数、位数获取最小需要的缓冲区大小，后续再创建AudioTrack时设置的缓冲区大小必须大于这个值</span></span><br><span class="line"><span class="hljs-comment">// 如果想要将缓冲区设大一点，比如 bufferSizeFactor = 1.5</span></span><br><span class="line"><span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> minBufferSizeInBytes = (<span class="hljs-keyword">int</span>) (AudioTrack.getMinBufferSize(sampleRate, channelConfig,</span><br><span class="line">                                                AudioFormat.ENCODING_PCM_16BIT) * bufferSizeFactor);</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">// 一个音频帧的字节大小 = 声道数 *（位数 /8）  </span></span><br><span class="line"><span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> bytesPerFrame = channels * (BITS_PER_SAMPLE / <span class="hljs-number">8</span>);</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">// 创建buffer用来存放每一次要写入的数据，使用堆外内存，避免JNI内存拷贝</span></span><br><span class="line"><span class="hljs-comment">// BUFFERS_PER_SECOND = 100，预测一秒钟回调100次</span></span><br><span class="line"><span class="hljs-comment">// 那么44100的采样率，每次回调应该给的数据帧个数为4410个</span></span><br><span class="line">byteBuffer = ByteBuffer.allocateDirect(bytesPerFrame * (sampleRate / BUFFERS_PER_SECOND));</span><br><span class="line">    </span><br><span class="line">AudioTrack audioTrack;</span><br><span class="line"><span class="hljs-keyword">if</span> (Build.VERSION.SDK_INT &gt;= <span class="hljs-number">21</span>) &#123;</span><br><span class="line">    <span class="hljs-comment">// AudioFormat是对音频的格式进行封装，包括采样率、声道数、位数等。</span></span><br><span class="line">    <span class="hljs-comment">// AudioAttributes是对播放内容的描述</span></span><br><span class="line">    audioTrack = <span class="hljs-keyword">new</span> AudioTrack(</span><br><span class="line">            <span class="hljs-keyword">new</span> AudioAttributes.Builder()</span><br><span class="line">                    <span class="hljs-comment">// 音频的用途</span></span><br><span class="line">                    .setUsage(usageAttribute)</span><br><span class="line">                    <span class="hljs-comment">// 音频内容的类型</span></span><br><span class="line">                    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)</span><br><span class="line">                    .build(),</span><br><span class="line">            <span class="hljs-keyword">new</span> AudioFormat.Builder()</span><br><span class="line">                    <span class="hljs-comment">// 位数</span></span><br><span class="line">                    .setEncoding(AudioFormat.ENCODING_PCM_16BIT)</span><br><span class="line">                    <span class="hljs-comment">// 采样率</span></span><br><span class="line">                    .setSampleRate(sampleRateInHz)</span><br><span class="line">                    <span class="hljs-comment">// 声道数</span></span><br><span class="line">                    .setChannelMask(channelConfig)</span><br><span class="line">                    .build(),</span><br><span class="line">            bufferSizeInBytes,<span class="hljs-comment">// 缓冲区大小</span></span><br><span class="line">            AudioTrack.MODE_STREAM,<span class="hljs-comment">// 模式</span></span><br><span class="line">            <span class="hljs-comment">// 生成新的会话ID</span></span><br><span class="line">            AudioManager.AUDIO_SESSION_ID_GENERATE );</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">    <span class="hljs-comment">// 构造参数：</span></span><br><span class="line">    <span class="hljs-comment">//      音频流类型</span></span><br><span class="line">    <span class="hljs-comment">//      采样率</span></span><br><span class="line">    <span class="hljs-comment">//      声道数</span></span><br><span class="line">    <span class="hljs-comment">//      位数</span></span><br><span class="line">    <span class="hljs-comment">//      缓冲区大小</span></span><br><span class="line">    <span class="hljs-comment">//      模式 : MODE_STATIC 预先将需要播放的音频数据读取到内存中，然后才开始播放。MODE_STREAM 边读边播，不会将数据直接加载到内存</span></span><br><span class="line">    audioTrack = <span class="hljs-keyword">new</span> AudioTrack(AudioManager.STREAM_VOICE_CALL, sampleRateInHz, channelConfig,</span><br><span class="line">            AudioFormat.ENCODING_PCM_16BIT, bufferSizeInBytes, AudioTrack.MODE_STREAM);</span><br><span class="line">   </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">if</span> (audioTrack == <span class="hljs-keyword">null</span> || audioTrack.getState() != AudioTrack.STATE_INITIALIZED) &#123;</span><br><span class="line">    <span class="hljs-comment">// 创建失败</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/音视频开发之Android播放音频/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-image">
+        <a href="/音视频开发之Android录制视频/" class="image is-7by1">
+        <img class="thumbnail" src="/images/10.jpeg" alt="音视频开发之Android录制视频">
+        </a>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-07-20T16:00:00.000Z">2020-07-21</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    19 分钟 读完 (大约 2803 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/音视频开发之Android录制视频/">音视频开发之Android录制视频</a>
+            
+        </h1>
+        <div class="content">
+            <p>FFmpeg对于Android平台的视频输入设备API有一定的支持，但是比较局限，只支持Android N以上的版本，低版本无法使用。</p>
+<p>其原因是因为FFmpeg采用的是Android N推出的native层camera API来实现的(NDK中的libcamera2ndk.so），而并非采用JNI的方式来调用Java层camera API。</p>
+<h3 id="Android平台视频录制API"><a href="#Android平台视频录制API" class="headerlink" title="Android平台视频录制API"></a>Android平台视频录制API</h3><p>对于视频录制API，Android平台上有两套API实现，一套是老版的Camera1，另一套是Android L之后推出的Camera2。</p>
+<p>Camera1使用起来较为简单，但是功能相对较少，不支持多纹理输出。Camera2的API功能上虽然更加强大，但是API设计的非常底层化，不利于理解，并且YUV_420_888的数据格式，国内各大产商在实现上留下的坑太多。</p>
+<p>Jetpack组件中，Google推出了全新的CameraX组件，对Camera1和Camera2进行了统一的封装，使得API更加简单易用。</p>
+<h4 id="Camera1"><a href="#Camera1" class="headerlink" title="Camera1"></a>Camera1</h4><h5 id="获取Camera设备信息"><a href="#获取Camera设备信息" class="headerlink" title="获取Camera设备信息"></a>获取Camera设备信息</h5><ul>
+<li>Camera.getNumberOfCameras() : 获取Camera设备数量 </li>
+<li>index : 索引就是后续会使用的CameraID</li>
+<li>Camera.CameraInfo : Camera设备信息  </li>
+<li>Camera.getCameraInfo(index, info) : 获取指定索引的Camera设备信息，存储到info对象中</li>
+<li>Camera.CameraInfo.facing : 相机面对的方向，前置还是后置 CAMERA_FACING_BACK or CAMERA_FACING_FRONT.</li>
+<li>Camera.CameraInfo.orientation : 相机图像的方向，获取到的图像需要顺时针旋转该角度才能正常显示。值为0、90、180、270。（因为我们拿手机一般是竖着拿，但是摄像头可能是向左横着或向右横着被安装的）</li>
+<li>Camera.open : 获取指定索引位置的Camera设备实例。</li>
+</ul>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 遍历所有的camera设备</span></span><br><span class="line"><span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> index = <span class="hljs-number">0</span>; index &lt; android.hardware.Camera.getNumberOfCameras(); ++index) &#123;</span><br><span class="line">  <span class="hljs-comment">// 获取camera设备信息</span></span><br><span class="line">  android.hardware.Camera.CameraInfo info = <span class="hljs-keyword">new</span> android.hardware.Camera.CameraInfo();</span><br><span class="line">  android.hardware.Camera.getCameraInfo(index, info);</span><br><span class="line">  String facing =</span><br><span class="line">        (info.facing == android.hardware.Camera.CameraInfo.CAMERA_FACING_FRONT) ? <span class="hljs-string">"front"</span> : <span class="hljs-string">"back"</span>; </span><br><span class="line">  <span class="hljs-keyword">final</span> android.hardware.Camera camera;</span><br><span class="line">  <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">      <span class="hljs-comment">// 开启camera设备，获取camera实例</span></span><br><span class="line">      camera = android.hardware.Camera.open(cameraId);</span><br><span class="line">  &#125; <span class="hljs-keyword">catch</span> (RuntimeException e) &#123;</span><br><span class="line">      callback.onFailure(FailureType.ERROR, e.getMessage());</span><br><span class="line">      <span class="hljs-keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/音视频开发之Android录制视频/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-image">
+        <a href="/音视频开发之Android录制音频/" class="image is-7by1">
+        <img class="thumbnail" src="/images/9.jpeg" alt="音视频开发之Android录制音频">
+        </a>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-07-19T16:00:00.000Z">2020-07-20</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    13 分钟 读完 (大约 2001 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/音视频开发之Android录制音频/">音视频开发之Android录制音频</a>
+            
+        </h1>
+        <div class="content">
+            <p>由于FFmpeg一直都没有支持Android平台的音频输入设备API，所以无法使用FFmpeg在Android上录制音频。</p>
+<h3 id="Android平台音频录制API"><a href="#Android平台音频录制API" class="headerlink" title="Android平台音频录制API"></a>Android平台音频录制API</h3><p>Android上音频输入的API比较繁琐，有多套实现。有Java层的实现AudioRecord，也有native层实现OpenSLES，在 Android O之后又推出了新的native层实现AAudio，并且提供了Oboe库，对OpenSLES和AAudio进行了封装。</p>
+<p>下面来详细的介绍下每套API的使用</p>
+<h4 id="AudioRecord"><a href="#AudioRecord" class="headerlink" title="AudioRecord"></a>AudioRecord</h4><p>AudioRecord是Android平台提供的录制音频的Java层API，使用起来非常简单。通过设置采集参数就可以创建一个AudioRecord对象，调用了start方法后，就可以开始读取数据了，通过read方法将数据读取到指定的缓冲区中，调用stop后就停止采集。</p>
+<h5 id="创建AudioRecord"><a href="#创建AudioRecord" class="headerlink" title="创建AudioRecord"></a>创建AudioRecord</h5><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 一个音频帧的字节大小 = 声道数 *（位数 /8）</span></span><br><span class="line"><span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> bytesPerFrame = channels * (BITS_PER_SAMPLE / <span class="hljs-number">8</span>);</span><br><span class="line"><span class="hljs-comment">// BUFFERS_PER_SECOND = 100，预测一秒钟回调100次</span></span><br><span class="line"><span class="hljs-comment">// 那么44100的采样率，每次回调应该给的数据帧个数为4410个</span></span><br><span class="line"><span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> framesPerBuffer = sampleRate / BUFFERS_PER_SECOND;</span><br><span class="line"><span class="hljs-comment">// 一次回调给的总数据字节大小 = 一次给的数据帧个数 * 一个数据帧的字节大小</span></span><br><span class="line"><span class="hljs-comment">// 创建一个buffer用来接收回调数据，使用堆外内存，在通过JNI传递的时候避免内存拷贝</span></span><br><span class="line">byteBuffer = ByteBuffer.allocateDirect(bytesPerFrame * framesPerBuffer);</span><br><span class="line">   </span><br><span class="line">emptyBytes = <span class="hljs-keyword">new</span> <span class="hljs-keyword">byte</span>[byteBuffer.capacity()];</span><br><span class="line"><span class="hljs-comment">// 避免每次读取数据都需要传递buffer到JNI层，这里提前将buffer的地址保存在JNI层</span></span><br><span class="line">nativeCacheDirectBufferAddress(byteBuffer, nativeAudioRecord);</span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> channelConfig = channelCountToConfiguration(channels);</span><br><span class="line"><span class="hljs-comment">// 根据音频参数(采样率，声道数，位数)得到系统最小需要的缓冲区大小，创建AudioRecord时设置的缓冲区大小必须大于这个值</span></span><br><span class="line"><span class="hljs-keyword">int</span> minBufferSize =</span><br><span class="line">    AudioRecord.getMinBufferSize(sampleRate, channelConfig, AudioFormat.ENCODING_PCM_16BIT); </span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">// BUFFER_SIZE_FACTOR = 2</span></span><br><span class="line"><span class="hljs-comment">// 缓冲区一般要大一点，所以下面比较了两倍的最小缓冲区和我们自己计算的缓冲区大小</span></span><br><span class="line"><span class="hljs-comment">// 也就是说设置的缓冲区大小最小也要是最小缓冲区的两倍。</span></span><br><span class="line"><span class="hljs-keyword">int</span> bufferSizeInBytes = Math.max(BUFFER_SIZE_FACTOR * minBufferSize, byteBuffer.capacity());</span><br><span class="line"><span class="hljs-keyword">try</span> &#123;</span><br><span class="line">  <span class="hljs-comment">// 根据音频参数创建AudioRecord，audioSource是指音频采集的来源</span></span><br><span class="line">  audioRecord = <span class="hljs-keyword">new</span> AudioRecord(audioSource, sampleRate, channelConfig,</span><br><span class="line">      AudioFormat.ENCODING_PCM_16BIT, bufferSizeInBytes);</span><br><span class="line">&#125; <span class="hljs-keyword">catch</span> (IllegalArgumentException e) &#123;</span><br><span class="line">  <span class="hljs-keyword">return</span> -<span class="hljs-number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="hljs-keyword">if</span> (audioRecord == <span class="hljs-keyword">null</span> || audioRecord.getState() != AudioRecord.STATE_INITIALIZED) &#123;</span><br><span class="line">  <span class="hljs-keyword">return</span> -<span class="hljs-number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/音视频开发之Android录制音频/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-image">
+        <a href="/音视频开发之FFmpeg录制视频/" class="image is-7by1">
+        <img class="thumbnail" src="/images/8.jpeg" alt="音视频开发之FFmpeg录制视频">
+        </a>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-07-13T16:00:00.000Z">2020-07-14</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    15 分钟 读完 (大约 2255 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/音视频开发之FFmpeg录制视频/">音视频开发之FFmpeg录制视频</a>
+            
+        </h1>
+        <div class="content">
+            <h3 id="视频录制流程"><a href="#视频录制流程" class="headerlink" title="视频录制流程"></a>视频录制流程</h3><p>前面讲解录制音频时讲过，FFmpeg对各大平台的输入和输出API进行了统一的封装，这里就不在阐述。</p>
+<p>视频的录制相比音频的录制流程基本差不多，主要是去掉了FIFO队列的逻辑。另外对于视频帧来说，FFmpeg提供的SwsContext API处理较慢，一般不太使用，可以用libyuv库，或者使用OpenGL API用GPU来提速。</p>
+<p><img src="/images/音视频开发之FFmpeg录制视频.resources/4E40FEDD-212D-4633-94A7-F5BC2DF0905F.png" alt="0c9c218a544d7c258f06aeded22f3197"></p>
+<h4 id="打开视频输入"><a href="#打开视频输入" class="headerlink" title="打开视频输入"></a>打开视频输入</h4><h5 id="注册视频设备"><a href="#注册视频设备" class="headerlink" title="注册视频设备"></a>注册视频设备</h5><p>所有的输入和输出设备默认都是没有注册的，如果需要使用，需要手动调用下面的注册函数。</p>
+<figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">avdevice_register_all();</span><br></pre></td></tr></table></figure>
+<h5 id="创建输入上下文"><a href="#创建输入上下文" class="headerlink" title="创建输入上下文"></a>创建输入上下文</h5><p>FFmpeg将对视频文件的解封装和封装等操作都抽象到AVFormatContext中，所以视频文件的打开和输出都是要通道AVFormatContext来完成。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// Mac平台上依旧使用avfoundation API</span></span><br><span class="line">AVInputFormat* format = av_find_input_format(<span class="hljs-string">"avfoundation"</span>);</span><br><span class="line"><span class="hljs-comment">// 视频的采集必须设置采集的分辨率和帧率以及像素格式，如果设置的组合在设备上不支持，会出错</span></span><br><span class="line">AVDictionary* options = <span class="hljs-literal">nullptr</span>;</span><br><span class="line">av_dict_set(&amp;options, <span class="hljs-string">"video_size"</span>, <span class="hljs-string">"1280x720"</span>, <span class="hljs-number">0</span>);</span><br><span class="line">av_dict_set(&amp;options, <span class="hljs-string">"framerate"</span>, <span class="hljs-string">"30"</span>, <span class="hljs-number">0</span>);</span><br><span class="line">av_dict_set(&amp;options, <span class="hljs-string">"pixel_format"</span>, <span class="hljs-string">"nv12"</span>, <span class="hljs-number">0</span>);</span><br><span class="line"><span class="hljs-comment">// 开启输入上下文</span></span><br><span class="line"><span class="hljs-keyword">if</span> ((error = avformat_open_input(&amp;fmt_ctx_in_, <span class="hljs-string">"0"</span>, format, &amp;options)) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">  <span class="hljs-built_in">std</span>::<span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-string">"Could not open input device "</span> &lt;&lt; av_err2str(error)</span><br><span class="line">            &lt;&lt; <span class="hljs-built_in">std</span>::<span class="hljs-built_in">endl</span>;</span><br><span class="line">  fmt_ctx_in_ = <span class="hljs-literal">nullptr</span>;</span><br><span class="line">  <span class="hljs-keyword">return</span> error;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/音视频开发之FFmpeg录制视频/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-image">
+        <a href="/音视频开发之FFmpeg录制音频/" class="image is-7by1">
+        <img class="thumbnail" src="/images/4.jpeg" alt="音视频开发之FFmpeg录制音频">
+        </a>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-07-04T16:00:00.000Z">2020-07-05</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    22 分钟 读完 (大约 3290 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/音视频开发之FFmpeg录制音频/">音视频开发之FFmpeg录制音频</a>
+            
+        </h1>
+        <div class="content">
+            <h3 id="音频录制流程"><a href="#音频录制流程" class="headerlink" title="音频录制流程"></a>音频录制流程</h3><p>FFmpeg对各大平台的音频输入和输出的API进行了统一的封装，将输入API封装成AVInputFormat，将输出API封装成AVOutputFormat，并且将音频采集设备封装成一个音频文件进行处理，所以我们在采集音频数据的时候，可以将音频设备当做一个无限大的音频文件，不断的从音频文件中读取数据。</p>
+<p><img src="/images/ffmpeg_record_audio.png" alt="FFmpeg录制音频"></p>
+<h4 id="打开音频输入"><a href="#打开音频输入" class="headerlink" title="打开音频输入"></a>打开音频输入</h4><h5 id="注册音频设备"><a href="#注册音频设备" class="headerlink" title="注册音频设备"></a>注册音频设备</h5><p>所有的输入和输出设备默认都是没有注册的，如果需要使用，需要手动调用下面的注册函数。</p>
+<figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">avdevice_register_all();</span><br></pre></td></tr></table></figure>
+<h5 id="创建输入上下文"><a href="#创建输入上下文" class="headerlink" title="创建输入上下文"></a>创建输入上下文</h5><p>FFmpeg将对音频文件的解封装和封装等操作都抽象到AVFormatContext中，所以音频文件的打开和输出都是要通道AVFormatContext来完成。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 设置音频设备API Mac上为avfoundation</span></span><br><span class="line">AVInputFormat* format = av_find_input_format(<span class="hljs-string">"avfoundation"</span>);</span><br><span class="line"><span class="hljs-comment">// :0 为音频第一个设备，开启音频设备，FFmpeg中将音频设备封装为一个音频文件</span></span><br><span class="line"><span class="hljs-comment">// video:audio 如果视频设备为空，则写成 :音频设备</span></span><br><span class="line"><span class="hljs-comment">// 获取到输入上下文</span></span><br><span class="line"><span class="hljs-keyword">if</span> ((error = avformat_open_input(&amp;fmt_ctx_in_, <span class="hljs-string">":0"</span>, format, <span class="hljs-literal">nullptr</span>)) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">  <span class="hljs-built_in">std</span>::<span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-string">"Could not open input device "</span> &lt;&lt; av_err2str(error)</span><br><span class="line">            &lt;&lt; <span class="hljs-built_in">std</span>::<span class="hljs-built_in">endl</span>;</span><br><span class="line">  fmt_ctx_in_ = <span class="hljs-literal">nullptr</span>;</span><br><span class="line">  <span class="hljs-keyword">return</span> error;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/音视频开发之FFmpeg录制音频/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-image">
+        <a href="/音视频开发之OpenGL-ES入门/" class="image is-7by1">
+        <img class="thumbnail" src="/images/1.jpeg" alt="音视频开发之OpenGL-ES入门">
+        </a>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-07-01T16:00:00.000Z">2020-07-02</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    21 分钟 读完 (大约 3186 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/音视频开发之OpenGL-ES入门/">音视频开发之OpenGL-ES入门</a>
+            
+        </h1>
+        <div class="content">
+            <h4 id="名词解释"><a href="#名词解释" class="headerlink" title="名词解释"></a>名词解释</h4><h5 id="OpenGL"><a href="#OpenGL" class="headerlink" title="OpenGL"></a>OpenGL</h5><p>通俗来讲，OpenGL是一个图形库，提供了一系列操作图形图像的API。因为OpenGL只是一个规范，具体的实现一般是由显卡提供。类似的图形库还有Windows平台的DirectX。</p>
+<h5 id="OpenGL-ES"><a href="#OpenGL-ES" class="headerlink" title="OpenGL-ES"></a>OpenGL-ES</h5><p>OpenGL-ES是专为嵌入式设备准备的一个OpenGL的裁剪版（去除了一些复杂的图元）。OpenGL-ES支持Android、iOS等平台，并且它也是WebGL的基础。</p>
+<h5 id="EGL"><a href="#EGL" class="headerlink" title="EGL"></a>EGL</h5><p>EGL是OpenGL-ES与本地窗口系统之间的一个中间层API，一般由系统实现。EGL作为OpenGL-ES与设备之间的桥梁，将OpenGL-ES绘制在设备上。</p>
+<h5 id="WebGL"><a href="#WebGL" class="headerlink" title="WebGL"></a>WebGL</h5><p>WebGL是OpenGL-ES在浏览器上的实现，WebGL1.0基于OpenGL-ES2.0实现，WebGL2.0基于OpenGl-ES3.0实现。</p>
+<h4 id="图形渲染管线"><a href="#图形渲染管线" class="headerlink" title="图形渲染管线"></a>图形渲染管线</h4><p>图形渲染管线也叫做渲染流水线，指的是将输入的原始图形数据经过渲染管线处理，输出一帧想要的图像的过程。</p>
+<p>在OpenGL-ES中，任何事物都在3D空间中，而屏幕和窗口却都是2D的。所以图形渲染管线主要是在将输入的3D坐标转换成2D坐标，再讲2D坐标转换成实际有颜色的像素。(将输入的3D坐标画在3D坐标系中，然后根据视锥范围截取一个2D平面，将截取的平面转换为平面坐标显示)</p>
+<blockquote>
+<p>2D坐标精确的表示一个点在2D空间的位置；而像素是这个点的近似值，像素的显示收到屏幕分辨率的限制</p>
+</blockquote>
+<blockquote>
+<p>与CPU不同，GPU适合处理的问题都有这样的特征，一个问题可以分解为多个相同的小问题，每个问题之间相互独立不影响，所以GPU拥有大量的处理单元，处理单元数量越多，性能也就越好。而每个单元都可以并行处理，所以GPU的并行能力非常强。</p>
+</blockquote>
+<h5 id="可编程的渲染管线"><a href="#可编程的渲染管线" class="headerlink" title="可编程的渲染管线"></a>可编程的渲染管线</h5><p>自OpenGL-ES 2.0开始，采用的都是可编程的渲染管线，也就是开发者可以自定义部分流水线中的着色器，使得可以更细致的控制图形渲染管线。</p>
+<p>着色器是运行在GPU上的小程序，这些小程序在图形渲染管线的某个特定部分运行，着色器是一个非常独立的程序，是一种把输入转化为输出的程序，着色器与着色器之间无法通信。</p>
+<p>开发者可编程的阶段有两个，一个是顶点着色器，一个是片段着色器。</p>
+<p><img src="/images/opengl-es-pipeline.png" alt="OpenGL-ES渲染管线"><br></p>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/音视频开发之OpenGL-ES入门/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-image">
+        <a href="/音视频开发之Android硬件编解码/" class="image is-7by1">
+        <img class="thumbnail" src="/images/6.jpeg" alt="音视频开发之Android硬件编解码">
+        </a>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-04-21T16:00:00.000Z">2020-04-22</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    22 分钟 读完 (大约 3288 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/音视频开发之Android硬件编解码/">音视频开发之Android硬件编解码</a>
+            
+        </h1>
+        <div class="content">
+            <h2 id="MediaCodec介绍"><a href="#MediaCodec介绍" class="headerlink" title="MediaCodec介绍"></a>MediaCodec介绍</h2><p>MediaCodec是Android平台上用来访问编码器和解码器的组件。</p>
+<h3 id="工作流程"><a href="#工作流程" class="headerlink" title="工作流程"></a>工作流程</h3><p><img src="/images/mediacodec-processes.png" alt="mediacodec-processes"></p>
+<p>MediaCodec中维护了两个BufferQueue，一个用来存放输入数据，一个用来存放输出数据。对于编码来说，InputBufferQueue用来接收视频原始YUV数据，经过Codec编码处理后，将编码后的数据放入到OutputBufferQueue中输出。而对于解码来说，InputBufferQueue用来接收视频编码数据，经过Codec解码处理后，将解码后的视频原始YUV数据放入到OutputBufferQueue中输出。</p>
+<p>BufferQueue的数量是有限的，每次通过dequeueInputBuffer从InputBufferQueue中获取一个空的buffer索引，将输入数据填充到该buffer，通过queueInputBuffer通知Codec该索引位置的buffer已经填充了数据，可以开始处理了。然后通过dequeueOutputBuffer从OutputBufferQueue中获取处理完毕的buffer索引，获取到该buffer中的数据进行渲染或封装，使用完后，通过releaseOutputBuffer通知Codec释放该buffer中的数据（也可以让Codec进行数据的渲染）。</p>
+<p>MediaCodec的数据分为两种，一种是原始音视频数据，一种是压缩数据。上面讲到这两种数据都是使用bytebuffer来处理的，输入层获取到空的buffer后需要将数据copy到该buffer中，而输出层获取到buffer后也需要将数据copy出来进行消费，大量的数据copy是很影响性能的。</p>
+<p>针对原始音视频数据，MediaCodec提供了更加高效的方式来避免了数据的copy，那就是Surface。对于解码器来说，可以通过在configure的时候，设置OutputSurface来接收输出的Buffer，这样就不需要从OutputBufferQueue中copy数据了。而对于编码器来说，可以通过createInputSurface方法创建一个用来输入的Surface，这样就不需要往InputBufferQueue里copy数据了。</p>
+<p><img src="/images/mediacodec-surface-processes.png" alt="mediacodec-surface-processes"></p>
+<h3 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h3><h4 id="原始数据"><a href="#原始数据" class="headerlink" title="原始数据"></a>原始数据</h4><p>音频原始数据类型是一个PCM音频数据帧，视频原始数据类型由color_format决定，常用的有以下两种：</p>
+<ul>
+<li><strong>Surface Format</strong> ：这种类型的format数据，表明使用的GraphicBuffer，这是一个内存共享的缓冲区。（CodecCapabilities#COLOR_FormatSurface ）。</li>
+<li><strong>YUV Format</strong> ：YUV颜色格式，支持多种YUV格式（CodecCapabilities#COLOR_FormatYUV420Flexible ）。</li>
+</ul>
+<blockquote>
+<p>在configure的时候，对于编码器来说可以指定编码器输出的数据的format，对于解码器来说可以指定解码器输入的format。</p>
+<p>对于编码器，如果输入的时候使用的是Surface，则format需要设置为COLOR_FormatSurface。而对于解码器来说输入的format一般从媒体文件中读取。</p>
+</blockquote>
+<h4 id="压缩数据"><a href="#压缩数据" class="headerlink" title="压缩数据"></a>压缩数据</h4><p>对于视频来说，buffer中是一帧的压缩数据，对于音频来说，buffer中是一个单元的压缩数据，buffer中包含的都是完整的一帧或一个单元的数据。</p>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/音视频开发之Android硬件编解码/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+    
+<div class="card card-transparent">
+    <nav class="pagination is-centered" role="navigation" aria-label="pagination">
+        <div class="pagination-previous">
+            <a class="is-flex-grow has-text-black-ter" href="/">上一页</a>
+        </div>
+        <div class="pagination-next">
+            <a class="is-flex-grow has-text-black-ter" href="/page/3/">下一页</a>
+        </div>
+        <ul class="pagination-list is-hidden-mobile">
+            
+            <li><a class="pagination-link has-text-black-ter" href="/">1</a></li>
+            
+            <li><a class="pagination-link is-current" href="/page/2/">2</a></li>
+            
+            <li><a class="pagination-link has-text-black-ter" href="/page/3/">3</a></li>
+            
+            <li><span class="pagination-ellipsis has-text-black-ter">&hellip;</span></li>
+            
+            <li><a class="pagination-link has-text-black-ter" href="/page/6/">6</a></li>
+            
+        </ul>
+    </nav>
+</div>
+</div>
+                
+
+
+
+
+<div
+    class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left ">
+    
+    
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered" style="flex-shrink: 1">
+                <div>
+                    
+                    <figure class="image is-128x128 has-mb-6">
+                        <img class="" src="/images/avatar1.png" alt="zhenyu">
+                    </figure>
+                    
+                    <p class="is-size-4 is-block">
+                        zhenyu
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        富贵山庄无富贵，只留欢乐在此间
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>杭州</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        文章
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        38
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        分类
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        9
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        标签
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        0
+                    </p>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="level">
+            <a class="level-item button is-link is-rounded" href="https://github.com/witgao" target="_blank">
+                关注我</a>
+        </div>
+        
+        
+        
+    </div>
+</div>
+    
+    
+    
+    
+<div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                分类
+            </h3>
+            <ul class="menu-list">
+            <li>
+        <a class="level is-marginless" href="/categories/内功心法（CS基础）/">
+            <span class="level-start">
+                <span class="level-item">内功心法（CS基础）</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">9</span>
+            </span>
+        </a><ul><li>
+        <a class="level is-marginless" href="/categories/内功心法（CS基础）/北冥神功（编程语言）/">
+            <span class="level-start">
+                <span class="level-item">北冥神功（编程语言）</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">2</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/内功心法（CS基础）/神照功（网络协议）/">
+            <span class="level-start">
+                <span class="level-item">神照功（网络协议）</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">7</span>
+            </span>
+        </a></li></ul></li><li>
+        <a class="level is-marginless" href="/categories/刀枪棍棒（Android）/">
+            <span class="level-start">
+                <span class="level-item">刀枪棍棒（Android）</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">11</span>
+            </span>
+        </a><ul><li>
+        <a class="level is-marginless" href="/categories/刀枪棍棒（Android）/五虎断门刀（Android原生）/">
+            <span class="level-start">
+                <span class="level-item">五虎断门刀（Android原生）</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">7</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/刀枪棍棒（Android）/伏魔杖法（Flutter）/">
+            <span class="level-start">
+                <span class="level-item">伏魔杖法（Flutter）</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">4</span>
+            </span>
+        </a></li></ul></li><li>
+        <a class="level is-marginless" href="/categories/拳掌指腿（音视频）/">
+            <span class="level-start">
+                <span class="level-item">拳掌指腿（音视频）</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">18</span>
+            </span>
+        </a><ul><li>
+        <a class="level is-marginless" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">
+            <span class="level-start">
+                <span class="level-item">七伤拳（音视频基础）</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">10</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">
+            <span class="level-start">
+                <span class="level-item">降龙十八掌（FFmpeg）</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">8</span>
+            </span>
+        </a></li></ul></li>
+            </ul>
+        </div>
+    </div>
+</div>
+    
+    
+    <div class="column-right-shadow is-hidden-widescreen ">
+        
+        <div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            最新文章
+        </h3>
+        
+        <article class="media">
+            
+            <a href="/音视频开发之ffplay渲染线程分析/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/18.jpg" alt="音视频开发之ffplay渲染线程分析">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-04T16:00:00.000Z">2020-08-05</time></div>
+                    <a href="/音视频开发之ffplay渲染线程分析/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之ffplay渲染线程分析</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/音视频开发之ffplay解码线程分析/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/17.jpg" alt="音视频开发之ffplay解码线程分析">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-03T16:00:00.000Z">2020-08-04</time></div>
+                    <a href="/音视频开发之ffplay解码线程分析/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之ffplay解码线程分析</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/音视频开发之ffplay解复用线程分析/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/16.jpg" alt="音视频开发之ffplay解复用线程分析">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-02T16:00:00.000Z">2020-08-03</time></div>
+                    <a href="/音视频开发之ffplay解复用线程分析/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之ffplay解复用线程分析</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/音视频开发之ffplay队列分析/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/15.jpg" alt="音视频开发之ffplay队列分析">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-01T16:00:00.000Z">2020-08-02</time></div>
+                    <a href="/音视频开发之ffplay队列分析/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之ffplay队列分析</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/音视频开发之SDL2播放视频/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/14.jpg" alt="音视频开发之SDL2播放视频">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-07-31T16:00:00.000Z">2020-08-01</time></div>
+                    <a href="/音视频开发之SDL2播放视频/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之SDL2播放视频</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+    </div>
+</div>
+        
+        <div class="card widget is-hidden-mobile">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                归档
+            </h3>
+            <ul class="menu-list">
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/08/">
+                        <span class="level-start">
+                            <span class="level-item">八月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">6</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/07/">
+                        <span class="level-start">
+                            <span class="level-item">七月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">7</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/04/">
+                        <span class="level-start">
+                            <span class="level-item">四月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">2</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/03/">
+                        <span class="level-start">
+                            <span class="level-item">三月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/02/">
+                        <span class="level-start">
+                            <span class="level-item">二月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2019/12/">
+                        <span class="level-start">
+                            <span class="level-item">十二月 2019</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">2</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2019/10/">
+                        <span class="level-start">
+                            <span class="level-item">十月 2019</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2019/09/">
+                        <span class="level-start">
+                            <span class="level-item">九月 2019</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2019/02/">
+                        <span class="level-start">
+                            <span class="level-item">二月 2019</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2018/11/">
+                        <span class="level-start">
+                            <span class="level-item">十一月 2018</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">3</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2018/07/">
+                        <span class="level-start">
+                            <span class="level-item">七月 2018</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">2</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2018/06/">
+                        <span class="level-start">
+                            <span class="level-item">六月 2018</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2018/05/">
+                        <span class="level-start">
+                            <span class="level-item">五月 2018</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">3</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2017/12/">
+                        <span class="level-start">
+                            <span class="level-item">十二月 2017</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">7</span>
+                        </span>
+                    </a>
+                </li>
+                
+            </ul>
+        </div>
+    </div>
+</div>
+        
+        <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                标签
+            </h3>
+            <div class="field is-grouped is-grouped-multiline">
+                
+            </div>
+        </div>
+    </div>
+</div>
+        
+    </div>
+    
+</div>
+
+                
+
+
+
+
+<div
+    class="column is-4-tablet is-4-desktop is-3-widescreen is-hidden-touch is-hidden-desktop-only has-order-3 column-right ">
+    
+    <div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            最新文章
+        </h3>
+        
+        <article class="media">
+            
+            <a href="/音视频开发之ffplay渲染线程分析/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/18.jpg" alt="音视频开发之ffplay渲染线程分析">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-04T16:00:00.000Z">2020-08-05</time></div>
+                    <a href="/音视频开发之ffplay渲染线程分析/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之ffplay渲染线程分析</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/音视频开发之ffplay解码线程分析/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/17.jpg" alt="音视频开发之ffplay解码线程分析">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-03T16:00:00.000Z">2020-08-04</time></div>
+                    <a href="/音视频开发之ffplay解码线程分析/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之ffplay解码线程分析</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/音视频开发之ffplay解复用线程分析/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/16.jpg" alt="音视频开发之ffplay解复用线程分析">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-02T16:00:00.000Z">2020-08-03</time></div>
+                    <a href="/音视频开发之ffplay解复用线程分析/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之ffplay解复用线程分析</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/音视频开发之ffplay队列分析/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/15.jpg" alt="音视频开发之ffplay队列分析">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-01T16:00:00.000Z">2020-08-02</time></div>
+                    <a href="/音视频开发之ffplay队列分析/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之ffplay队列分析</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/音视频开发之SDL2播放视频/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/14.jpg" alt="音视频开发之SDL2播放视频">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-07-31T16:00:00.000Z">2020-08-01</time></div>
+                    <a href="/音视频开发之SDL2播放视频/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之SDL2播放视频</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+    </div>
+</div>
+    
+    <div class="card widget is-hidden-mobile">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                归档
+            </h3>
+            <ul class="menu-list">
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/08/">
+                        <span class="level-start">
+                            <span class="level-item">八月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">6</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/07/">
+                        <span class="level-start">
+                            <span class="level-item">七月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">7</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/04/">
+                        <span class="level-start">
+                            <span class="level-item">四月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">2</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/03/">
+                        <span class="level-start">
+                            <span class="level-item">三月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/02/">
+                        <span class="level-start">
+                            <span class="level-item">二月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2019/12/">
+                        <span class="level-start">
+                            <span class="level-item">十二月 2019</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">2</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2019/10/">
+                        <span class="level-start">
+                            <span class="level-item">十月 2019</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2019/09/">
+                        <span class="level-start">
+                            <span class="level-item">九月 2019</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2019/02/">
+                        <span class="level-start">
+                            <span class="level-item">二月 2019</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2018/11/">
+                        <span class="level-start">
+                            <span class="level-item">十一月 2018</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">3</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2018/07/">
+                        <span class="level-start">
+                            <span class="level-item">七月 2018</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">2</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2018/06/">
+                        <span class="level-start">
+                            <span class="level-item">六月 2018</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2018/05/">
+                        <span class="level-start">
+                            <span class="level-item">五月 2018</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">3</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2017/12/">
+                        <span class="level-start">
+                            <span class="level-item">十二月 2017</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">7</span>
+                        </span>
+                    </a>
+                </li>
+                
+            </ul>
+        </div>
+    </div>
+</div>
+    
+    <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                标签
+            </h3>
+            <div class="field is-grouped is-grouped-multiline">
+                
+            </div>
+        </div>
+    </div>
+</div>
+    
+    
+</div>
+
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <!-- <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="/images/logo2.png" alt="富贵山庄" height="28">
+                
+                </a> -->
+                <p class="is-size-7">
+                    &copy; 2020 zhenyu&nbsp;
+                    Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a
+                        href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank">Icarus</a>
+                    
+                </p>
+            </div>
+            <div class="level-end">
+                
+            </div>
+        </div>
+    </div>
+</footer>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("zh-CN");</script>
+
+<script>
+var IcarusThemeSettings = {
+    article: {
+        highlight: {
+            clipboard: true,
+            fold: 'unfolded'
+        }
+    }
+};
+</script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+
+
+
+    
+    
+<script src="/js/animation.js"></script>
+
+    
+    
+<script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+<script src="/js/gallery.js" defer></script>
+
+    
+    
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    MathJax.Hub.Config({
+        'HTML-CSS': {
+            matchFontHeight: false
+        },
+        SVG: {
+            matchFontHeight: false
+        },
+        CommonHTML: {
+            matchFontHeight: false
+        },
+        tex2jax: {
+            inlineMath: [
+                ['$','$'],
+                ['\\(','\\)']
+            ]
+        }
+    });
+});
+</script>
+    
+    
+<a id="back-to-top" title="回到顶端" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="想要查找什么..." />
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: '文章',
+                PAGES: '页面',
+                CATEGORIES: '分类',
+                TAGS: '标签',
+                UNTITLED: '(无标题)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+</body>
+
+</html>

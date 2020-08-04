@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html  lang="zh">
+
+<head>
+    <meta charset="utf-8" />
+
+<meta name="generator" content="Hexo 3.9.0" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<title>分类: 五虎断门刀（Android原生） - 富贵山庄</title>
+
+
+    <meta property="og:type" content="website">
+<meta property="og:title" content="富贵山庄">
+<meta property="og:url" content="https://witgao.com/categories/刀枪棍棒（Android）/五虎断门刀（Android原生）/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://witgao.com/images/og_image.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="富贵山庄">
+<meta name="twitter:image" content="https://witgao.com/images/og_image.png">
+
+
+
+
+
+
+
+<link rel="icon" href="/images/favicon1.svg">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/default.css">
+
+
+    
+    
+<style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+    
+    
+    
+    
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+    
+    
+    
+    
+    
+    
+    
+    <link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+    
+    
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body class="is-3-column">
+    <nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="/images/logo2.png" alt="富贵山庄" height="28">
+            
+            </a>
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item"
+                href="/">燕子坞</a>
+                
+                <a class="navbar-item"
+                href="/archives">听香水榭</a>
+                
+                <a class="navbar-item"
+                href="/categories">还施水阁</a>
+                
+                <a class="navbar-item"
+                href="/about">思过崖</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    <a class="navbar-item" target="_blank" title="Download on GitHub" href="https://github.com/witgao/blog">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                
+                <a class="navbar-item search" title="搜索" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-6-widescreen has-order-2 column-main"><div class="card">
+    <div class="card-content">
+        <nav class="breadcrumb" aria-label="breadcrumbs">
+        <ul>
+            <li><a href="/categories">分类</a></li>
+            
+            <li><a href="/categories/刀枪棍棒（Android）/">刀枪棍棒（Android）</a></li>
+            
+            <li class="is-active"><a href="#" aria-current="page">五虎断门刀（Android原生）</a></li>
+        </ul>
+        </nav>
+    </div>
+</div>
+
+    
+<div class="card">
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2019-12-14T16:00:00.000Z">2019-12-15</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/">刀枪棍棒（Android）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/五虎断门刀（Android原生）/">五虎断门刀（Android原生）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    21 分钟 读完 (大约 3161 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/SurfaceFlinger深入之Layer创建与渲染/">SurfaceFlinger深入之Layer创建与渲染</a>
+            
+        </h1>
+        <div class="content">
+            <h3 id="一切的开始resumeActivity"><a href="#一切的开始resumeActivity" class="headerlink" title="一切的开始resumeActivity"></a>一切的开始resumeActivity</h3><p>在Activity第一次执行resume的时候，会将DecorView添加到WindowManager中，由此开始了Activity视图显示的第一步。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">final</span> <span class="hljs-keyword">void</span> <span class="hljs-title">handleResumeActivity</span><span class="hljs-params">(IBinder token,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">        <span class="hljs-keyword">boolean</span> clearHide, <span class="hljs-keyword">boolean</span> isForward, <span class="hljs-keyword">boolean</span> reallyResume, <span class="hljs-keyword">int</span> seq, String reason)</span> </span>&#123;</span><br><span class="line">        ...</span><br><span class="line">        <span class="hljs-keyword">final</span> Activity a = r.activity;</span><br><span class="line">		...</span><br><span class="line">        <span class="hljs-keyword">if</span> (r.window == <span class="hljs-keyword">null</span> &amp;&amp; !a.mFinished &amp;&amp; willBeVisible) &#123;</span><br><span class="line">            r.window = r.activity.getWindow();</span><br><span class="line">            View decor = r.window.getDecorView();</span><br><span class="line">            decor.setVisibility(View.INVISIBLE);</span><br><span class="line">            ViewManager wm = a.getWindowManager();</span><br><span class="line">            ...</span><br><span class="line">            <span class="hljs-keyword">if</span> (a.mVisibleFromClient) &#123;</span><br><span class="line">                <span class="hljs-keyword">if</span> (!a.mWindowAdded) &#123;</span><br><span class="line">                    a.mWindowAdded = <span class="hljs-keyword">true</span>;</span><br><span class="line">                    wm.addView(decor, l);</span><br><span class="line">                &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">                  ...</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">          ...</span><br><span class="line">        &#125;</span><br><span class="line">        ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="WindowManager-addView"><a href="#WindowManager-addView" class="headerlink" title="WindowManager.addView"></a>WindowManager.addView</h4><p>WindowManagerImpl最终会调用到WindowManagerGlobal中，在WindowManagerGlobal中会创建一个ViewRootImpl对象，每个DecorView都会有对应的ViewRootImpl对象，而一个Window中可以有多个DecorView。</p>
+<p>ViewRootImpl负责与WMS通信，通过其维护的IWindowSession对象来与WMS进行通信。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">addView</span><span class="hljs-params">(View view, ViewGroup.LayoutParams params,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">        Display display, Window parentWindow)</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    ViewRootImpl root;</span><br><span class="line">    View panelParentView = <span class="hljs-keyword">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">synchronized</span> (mLock) &#123;</span><br><span class="line">        ...</span><br><span class="line">        root = <span class="hljs-keyword">new</span> ViewRootImpl(view.getContext(), display);</span><br><span class="line"></span><br><span class="line">        view.setLayoutParams(wparams);</span><br><span class="line"></span><br><span class="line">        mViews.add(view);</span><br><span class="line">        mRoots.add(root);</span><br><span class="line">        mParams.add(wparams);</span><br><span class="line"></span><br><span class="line">        <span class="hljs-comment">// do this last because it fires off messages to start doing things</span></span><br><span class="line">        <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">            root.setView(view, wparams, panelParentView);</span><br><span class="line">        &#125; <span class="hljs-keyword">catch</span> (RuntimeException e) &#123;</span><br><span class="line">            ...</span><br><span class="line">            <span class="hljs-keyword">throw</span> e;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/SurfaceFlinger深入之Layer创建与渲染/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2019-10-14T16:00:00.000Z">2019-10-15</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/">刀枪棍棒（Android）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/五虎断门刀（Android原生）/">五虎断门刀（Android原生）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    16 分钟 读完 (大约 2391 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/Android图形架构总览/">Android图形架构总览</a>
+            
+        </h1>
+        <div class="content">
+            <h3 id="图形渲染流程"><a href="#图形渲染流程" class="headerlink" title="图形渲染流程"></a>图形渲染流程</h3><p>​    在Android中，所有的渲染都是将内容绘制到对应的Surface上，Surface作为BufferQueue的生产方，每当发生入队操作时，都会通知BufferQueue创建者进行消费，也就是SurfaceFlinger，由SurfaceFlinger进行合并，然后发送到显示器进行显示。</p>
+<p>下面这张图描述了关键组件的工作流程:</p>
+<p><img src="/images/ape_fwk_graphics.png" alt="工作流程"></p>
+<ol>
+<li><p>当前一个可见的界面被创建时，会通过WindowManager去创建一个Window对象，而每一个Window对象中都会包含一个Surface对象，该对象由WindowManager向SurfaceFlinger请求创建。Surface中包含一个BufferQueue，它由SurfaceFlinger向HAL层调用Gralloc对其进行内存分配。</p></li></ol>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/Android图形架构总览/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2018-07-01T16:00:00.000Z">2018-07-02</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/">刀枪棍棒（Android）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/五虎断门刀（Android原生）/">五虎断门刀（Android原生）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    14 分钟 读完 (大约 2152 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/Android-ReactNative渲染流程/">Android-ReactNative渲染流程</a>
+            
+        </h1>
+        <div class="content">
+            <h4 id="注册组件"><a href="#注册组件" class="headerlink" title="注册组件"></a>注册组件</h4><p>在RN项目中必须使用AppRegistry.registerComponent(appkey,component)来注册组件。在上一篇中的runJSBundle里面，加载js文件后，交给JSC运行(evaluateSourceCode函数)，就会开始执行index.js，执行里面的代码，在index.js里面就会调用AppRegistry来注册组件。</p>
+<figure class="highlight js hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">registerComponent(</span><br><span class="line">  appKey: string,</span><br><span class="line">  componentProvider: ComponentProvider,</span><br><span class="line">  section?: boolean,</span><br><span class="line">): string &#123;</span><br><span class="line">  <span class="hljs-comment">// 为该appkey准备了一个runnable</span></span><br><span class="line">  runnables[appKey] = &#123;</span><br><span class="line">    componentProvider,</span><br><span class="line">    run: <span class="hljs-function"><span class="hljs-params">appParameters</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="hljs-comment">// appParameters启动参数，来自原生调用传入的</span></span><br><span class="line">      <span class="hljs-comment">// 开始渲染</span></span><br><span class="line">      renderApplication(</span><br><span class="line">        componentProviderInstrumentationHook(componentProvider),</span><br><span class="line">        appParameters.initialProps,</span><br><span class="line">        appParameters.rootTag,</span><br><span class="line">        wrapperComponentProvider &amp;&amp; wrapperComponentProvider(appParameters),</span><br><span class="line">        appParameters.fabric,</span><br><span class="line">      );</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;;</span><br><span class="line">  <span class="hljs-keyword">if</span> (section) &#123;</span><br><span class="line">    sections[appKey] = runnables[appKey];</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-keyword">return</span> appKey;</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
+<h4 id="启动组件"><a href="#启动组件" class="headerlink" title="启动组件"></a>启动组件</h4><p>在上一篇说到，当Context创建完毕后，会启动js组件(defaultJSEntryPoint函数)，通过调用js函数AppRegister.runApplication来启动。</p>
+<figure class="highlight js hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">runApplication(appKey: string, <span class="hljs-attr">appParameters</span>: any): <span class="hljs-keyword">void</span> &#123;</span><br><span class="line">  invariant(</span><br><span class="line">    runnables[appKey] &amp;&amp; runnables[appKey].run,</span><br><span class="line">    <span class="hljs-string">'Application '</span> +</span><br><span class="line">      appKey +</span><br><span class="line">      <span class="hljs-string">' has not been registered.\n\n'</span> +</span><br><span class="line">      <span class="hljs-string">"Hint: This error often happens when you're running the packager "</span> +</span><br><span class="line">      <span class="hljs-string">'(local dev server) from a wrong folder. For example you have '</span> +</span><br><span class="line">      <span class="hljs-string">'multiple apps and the packager is still running for the app you '</span> +</span><br><span class="line">      <span class="hljs-string">'were working on before.\nIf this is the case, simply kill the old '</span> +</span><br><span class="line">      <span class="hljs-string">'packager instance (e.g. close the packager terminal window) '</span> +</span><br><span class="line">      <span class="hljs-string">'and start the packager in the correct app folder (e.g. cd into app '</span> +</span><br><span class="line">      <span class="hljs-string">"folder and run 'npm start').\n\n"</span> +</span><br><span class="line">      <span class="hljs-string">'This error can also happen due to a require() error during '</span> +</span><br><span class="line">      <span class="hljs-string">'initialization or failure to call AppRegistry.registerComponent.\n\n'</span>,</span><br><span class="line">  );</span><br><span class="line"></span><br><span class="line">  <span class="hljs-comment">// 运行该appkey注册的runnable</span></span><br><span class="line">  runnables[appKey].run(appParameters);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="解析组件"><a href="#解析组件" class="headerlink" title="解析组件"></a>解析组件</h4><p>通过ReactNativeRenderer来解析组件视图，然后会调用组件的render方法获取渲染内容。</p>
+<figure class="highlight js hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">renderApplication</span>&lt;<span class="hljs-title">Props</span>: <span class="hljs-title">Object</span>&gt;(<span class="hljs-params"></span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">  RootComponent: React.ComponentType&lt;Props&gt;,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">  initialProps: Props,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">  rootTag: any,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">  WrapperComponent?: ?React.ComponentType&lt;*&gt;,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">  fabric?: boolean,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params"></span>) </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">let</span> renderable = (</span><br><span class="line">    &lt;AppContainer rootTag=&#123;rootTag&#125; WrapperComponent=&#123;WrapperComponent&#125;&gt;</span><br><span class="line">      &lt;RootComponent &#123;...initialProps&#125; rootTag=&#123;rootTag&#125; /&gt;</span><br><span class="line">    &lt;<span class="hljs-regexp">/AppContainer&gt;</span></span><br><span class="line"><span class="hljs-regexp">  );</span></span><br><span class="line"><span class="hljs-regexp">  if (</span></span><br><span class="line"><span class="hljs-regexp">    RootComponent.prototype != null &amp;&amp;</span></span><br><span class="line"><span class="hljs-regexp">    RootComponent.prototype.unstable_isAsyncReactComponent === true</span></span><br><span class="line"><span class="hljs-regexp">  ) &#123;</span></span><br><span class="line"><span class="hljs-regexp">    const AsyncMode = React.unstable_AsyncMode;</span></span><br><span class="line"><span class="hljs-regexp">    renderable = &lt;AsyncMode&gt;&#123;renderable&#125;&lt;/</span>AsyncMode&gt;;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-keyword">if</span> (fabric) &#123;</span><br><span class="line">    <span class="hljs-built_in">require</span>(<span class="hljs-string">'ReactFabric'</span>).render(renderable, rootTag);</span><br><span class="line">  &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">    <span class="hljs-comment">// </span></span><br><span class="line">    <span class="hljs-built_in">require</span>(<span class="hljs-string">'ReactNative'</span>).render(renderable, rootTag);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/Android-ReactNative渲染流程/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2018-07-01T16:00:00.000Z">2018-07-02</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/">刀枪棍棒（Android）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/五虎断门刀（Android原生）/">五虎断门刀（Android原生）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    26 分钟 读完 (大约 3908 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/Android-ReactNative启动流程/">Android-ReactNative通信流程</a>
+            
+        </h1>
+        <div class="content">
+            <h4 id="ReactAndroid"><a href="#ReactAndroid" class="headerlink" title="ReactAndroid"></a>ReactAndroid</h4><h5 id="ReactActivity"><a href="#ReactActivity" class="headerlink" title="ReactActivity"></a>ReactActivity</h5><p>一个ReactActivity对应着一个RN组件(通过AppRegistry.registerComponent注册)，而ReactActivity的功能都包装在ReactActivityDelegate中。</p>
+<p>ReactActivity实际上类似于一个浏览器窗口，在一个窗口内对一个网页访问，并进行页面的跳转和回退。</p>
+<h5 id="ReactRootView"><a href="#ReactRootView" class="headerlink" title="ReactRootView"></a>ReactRootView</h5><p>ReactRootView是ReactNative组件的根布局，是一个ViewGroup(继承自FrameLayout)，所有的RN视图都会被添加到该布局下，然后该布局会被添加到Activity上，因此每个ReactActivity都有着一个ReactRootView。RN组件内的页面跳转实际上就是在该ReactRootView上重绘。</p>
+<h5 id="ReactNativeHost"><a href="#ReactNativeHost" class="headerlink" title="ReactNativeHost"></a>ReactNativeHost</h5><p>每个RN组件的配置，设置jsbundle文件的文件名和js模块名称以及开发模式等。</p>
+<ul>
+<li>getJSMainModuleName : 远程服务获取bundle时，获取的模块名称</li>
+<li>getBundleAssetName : 本地加载bundle时，获取asset文件的文件名</li>
+<li>getUseDeveloperSupport : 是否开启debug模式</li>
+<li>getPackages :  配置js和native通信module，必须包含MainReactPackage</li>
+<li>ReactInstanceManager :  与js通信的管理类，CatalystInstance是一个异步JSC桥梁，提供了调用js方法的JavaAPI</li>
+</ul>
+<p>每个ReactActivity都需要一个Host配置，对应不同的jsbundle配置。在ReactActivity中默认会去获取Application中的ReactNativeHost，默认Application需要继承ReactApplication接口，并实现其getReactNativeHost方法。如果我们不想在Application中实现该接口(必须我们有多个RN组件需要多个ReactNativeHost对象)，就必须重写ReactActivity中getReactNativeHost方法。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">protected</span> ReactNativeHost <span class="hljs-title">getReactNativeHost</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">return</span> ((ReactApplication) getPlainActivity().getApplication()).getReactNativeHost();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="加载RN组件"><a href="#加载RN组件" class="headerlink" title="加载RN组件"></a>加载RN组件</h4><h5 id="启动ReactActivity"><a href="#启动ReactActivity" class="headerlink" title="启动ReactActivity"></a>启动ReactActivity</h5><p>首先启动ReactActivity，创建ReactActivity时会同时创建ReactActivityDelegate，ReactActivity的getMainComponentName方法对应的是js组件的注册名称(js中AppRegistry.registerComponent注册时的appKey)，在ReactActivity的onCreate回调中，开始加载该js组件。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onCreate</span><span class="hljs-params">(Bundle savedInstanceState)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">if</span> (mMainComponentName != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">    loadApp(mMainComponentName);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title">loadApp</span><span class="hljs-params">(String appKey)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">if</span> (mReactRootView != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalStateException(<span class="hljs-string">"Cannot loadApp while app is already running."</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// 创建根布局</span></span><br><span class="line">  mReactRootView = createRootView();</span><br><span class="line">  <span class="hljs-comment">// 启动该js组件，加载jsbundle文件，并通过jsc来构建virtualDom来解析js组件</span></span><br><span class="line">  <span class="hljs-comment">// 将js控件解析成对应的View，并添加到根布局上，组成视图树。</span></span><br><span class="line">  mReactRootView.startReactApplication(</span><br><span class="line">    <span class="hljs-comment">// 创建js通信管理器</span></span><br><span class="line">    getReactNativeHost().getReactInstanceManager(),</span><br><span class="line">    appKey,</span><br><span class="line">    getLaunchOptions());</span><br><span class="line">  <span class="hljs-comment">// 将解析完成的布局放到Activity中渲染</span></span><br><span class="line">  getPlainActivity().setContentView(mReactRootView);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="创建ReactRootView"><a href="#创建ReactRootView" class="headerlink" title="创建ReactRootView"></a>创建ReactRootView</h5><p>ReactRootView继承FrameLayout，是整个RN组件的根布局，解析出来的View都会添加到该布局上。该View主要处理了测量和事件的分发拦截，包括触摸、手势、焦点等。还设置了OnGlobalLayout监听，该方法会在布局重新layout或者系统UI发生改变时触发(具体在ViewRootImpl.performTraversals中)，在该监听中将发生的改变通知给js模块。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta">@Override</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onGlobalLayout</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">if</span> (mReactInstanceManager == <span class="hljs-keyword">null</span> || !mIsAttachedToInstance ||</span><br><span class="line">    mReactInstanceManager.getCurrentReactContext() == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">    <span class="hljs-keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// 键盘状态改变</span></span><br><span class="line">  checkForKeyboardEvents();</span><br><span class="line">  <span class="hljs-comment">// 屏幕方向改变</span></span><br><span class="line">  checkForDeviceOrientationChanges();</span><br><span class="line">  <span class="hljs-comment">// 屏幕分辨率改变</span></span><br><span class="line">  checkForDeviceDimensionsChanges();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="创建ReactInstanceManager"><a href="#创建ReactInstanceManager" class="headerlink" title="创建ReactInstanceManager"></a>创建ReactInstanceManager</h5><p>ReactInstanceManager是一个CatalystInstance实例的管理者，而CatalysInstance是一个异步的JSC桥梁，负责与js进行通信，调用js方法。</p>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/Android-ReactNative启动流程/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2018-06-27T16:00:00.000Z">2018-06-28</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/">刀枪棍棒（Android）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/五虎断门刀（Android原生）/">五虎断门刀（Android原生）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    24 分钟 读完 (大约 3656 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/Android-ReactNative通信流程/">Android-ReactNative通信流程</a>
+            
+        </h1>
+        <div class="content">
+            <h4 id="JNI注册"><a href="#JNI注册" class="headerlink" title="JNI注册"></a>JNI注册</h4><p>Android中注册JNI方法有两种方式，一种是静态注册，一种是动态注册。</p>
+<h5 id="动态注册"><a href="#动态注册" class="headerlink" title="动态注册"></a>动态注册</h5><p>因为JNI允许我们提供一个函数映射表(native函数和jni函数对应表)。而在执行System.loadLibrary加载so库时，会执行该so的JNI_OnLoad函数，利用这个时机可以动态注册JIN方法。具体实现的话是通过JNINativeMethod结构保存映射关系，然后通过RegisterNatives函数来将该映射关系注册。</p>
+<h5 id="静态注册"><a href="#静态注册" class="headerlink" title="静态注册"></a>静态注册</h5><p>如果没有在JNI_OnLoad中将JNI方法注册(将方法在进程中的地址增加到ClassObject-&gt;directMethods中)，则在调用的时候解析javah风格的函数(比如Java_com_example_hellojni_HelloJni_stringFromJNI)，进行静态注册。静态注册根据函数名来建立java方法和jni函数的对应关系。静态注册需要根据方法名本地搜索，比较耗时。</p>
+<h5 id="RN中的JNI注册"><a href="#RN中的JNI注册" class="headerlink" title="RN中的JNI注册"></a>RN中的JNI注册</h5><h6 id="JNI-OnLoad"><a href="#JNI-OnLoad" class="headerlink" title="JNI_OnLoad"></a>JNI_OnLoad</h6><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta"># src/main/jni/react/jni/OnLoad.cpp</span></span><br><span class="line"><span class="hljs-keyword">extern</span> <span class="hljs-string">"C"</span> <span class="hljs-function">JNIEXPORT jint <span class="hljs-title">JNI_OnLoad</span><span class="hljs-params">(JavaVM* vm, <span class="hljs-keyword">void</span>* reserved)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-comment">// 调用各个类的注册方法</span></span><br><span class="line">  <span class="hljs-keyword">return</span> initialize(vm, [] &#123;</span><br><span class="line">    gloginit::initialize();</span><br><span class="line">    JSCJavaScriptExecutorHolder::registerNatives();</span><br><span class="line">    ProxyJavaScriptExecutorHolder::registerNatives();</span><br><span class="line">    CatalystInstanceImpl::registerNatives();</span><br><span class="line">    CxxModuleWrapperBase::registerNatives();</span><br><span class="line">    CxxModuleWrapper::registerNatives();</span><br><span class="line">    JCxxCallbackImpl::registerNatives();</span><br><span class="line">    NativeArray::registerNatives();</span><br><span class="line">    NativeDeltaClient::registerNatives();</span><br><span class="line">    ReadableNativeArray::registerNatives();</span><br><span class="line">    WritableNativeArray::registerNatives();</span><br><span class="line">    NativeMap::registerNatives();</span><br><span class="line">    ReadableNativeMap::registerNatives();</span><br><span class="line">    WritableNativeMap::registerNatives();</span><br><span class="line">    ReadableNativeMapKeySetIterator::registerNatives();</span><br><span class="line"></span><br><span class="line">    #ifdef WITH_INSPECTOR</span><br><span class="line">    JInspector::registerNatives();</span><br><span class="line">    #endif</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="CatalystInstanceImpl-registerNatives"><a href="#CatalystInstanceImpl-registerNatives" class="headerlink" title="CatalystInstanceImpl.registerNatives"></a>CatalystInstanceImpl.registerNatives</h6><p>先拿CatalystInstanceImpl来举例子，先准备好映射数据，然后构建映射表，再通过FindClass获取对应java类的引用，通过这些参数使用RegisterNatives函数来注册。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta"># src/main/jni/react/jni/CatalystInstanceImpl.h </span></span><br><span class="line"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CatalystInstanceImpl</span> :</span> <span class="hljs-keyword">public</span> jni::HybridClass&lt;CatalystInstanceImpl&gt; &#123;</span><br><span class="line"> <span class="hljs-comment">// 该类对应的Java类，通过该路径来加载java类的class引用</span></span><br><span class="line"> <span class="hljs-keyword">public</span>:</span><br><span class="line">  <span class="hljs-keyword">static</span> <span class="hljs-keyword">constexpr</span> <span class="hljs-keyword">auto</span> kJavaDescriptor = <span class="hljs-string">"Lcom/facebook/react/bridge/CatalystInstanceImpl;"</span>;</span><br><span class="line"></span><br><span class="line">  <span class="hljs-keyword">static</span> jni::local_ref&lt;jhybriddata&gt; initHybrid(jni::alias_ref&lt;jclass&gt;);</span><br><span class="line">  ~CatalystInstanceImpl() override;</span><br><span class="line"></span><br><span class="line">  <span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">registerNatives</span><span class="hljs-params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta"># src/main/jni/react/jni/CatalysInstanceImpl.cpp </span></span><br><span class="line"><span class="hljs-keyword">void</span> CatalystInstanceImpl::registerNatives() &#123;</span><br><span class="line">  registerHybrid(&#123;</span><br><span class="line">    <span class="hljs-comment">// 返回&#123;java方法名，java类命名空间(CatalysInstanceImpl.kJavaDescriptor),JNIMethod指针&#125;</span></span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"initHybrid"</span>, CatalystInstanceImpl::initHybrid),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"initializeBridge"</span>, CatalystInstanceImpl::initializeBridge),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"jniExtendNativeModules"</span>, CatalystInstanceImpl::extendNativeModules),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"jniSetSourceURL"</span>, CatalystInstanceImpl::jniSetSourceURL),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"jniRegisterSegment"</span>, CatalystInstanceImpl::jniRegisterSegment),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"jniLoadScriptFromAssets"</span>, CatalystInstanceImpl::jniLoadScriptFromAssets),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"jniLoadScriptFromFile"</span>, CatalystInstanceImpl::jniLoadScriptFromFile),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"jniLoadScriptFromDeltaBundle"</span>, CatalystInstanceImpl::jniLoadScriptFromDeltaBundle),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"jniCallJSFunction"</span>, CatalystInstanceImpl::jniCallJSFunction),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"jniCallJSCallback"</span>, CatalystInstanceImpl::jniCallJSCallback),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"setGlobalVariable"</span>, CatalystInstanceImpl::setGlobalVariable),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"getJavaScriptContext"</span>, CatalystInstanceImpl::getJavaScriptContext),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"jniHandleMemoryPressure"</span>, CatalystInstanceImpl::handleMemoryPressure),</span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  JNativeRunnable::registerNatives();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/Android-ReactNative通信流程/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2018-05-29T16:00:00.000Z">2018-05-30</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/">刀枪棍棒（Android）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/五虎断门刀（Android原生）/">五虎断门刀（Android原生）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    28 分钟 读完 (大约 4179 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/RePlugin之插件Activity启动/">RePlugin之插件Activity启动</a>
+            
+        </h1>
+        <div class="content">
+            <h4 id="Host中启动插件Activity"><a href="#Host中启动插件Activity" class="headerlink" title="Host中启动插件Activity"></a>Host中启动插件Activity</h4><p><strong>为什么同一配置要多个坑？同一坑多次启动不行？</strong></p>
+<h5 id="启动插件Activity"><a href="#启动插件Activity" class="headerlink" title="启动插件Activity"></a>启动插件Activity</h5><p>开启一个占坑的插件Activity，需要使用RePlugin.startActivity来启动，为了避免Hook更多的API，所以无法在原生启动过程中(Instrumentation)动态替换，因此在进入原生启动流程之前，先做好准备工作和替换。</p>
+<h5 id="框架预处理"><a href="#框架预处理" class="headerlink" title="框架预处理"></a>框架预处理</h5><p>PluginLibraryInternalProxy.startActivity</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line">  <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">startActivity</span><span class="hljs-params">(Context context, Intent intent, String plugin, String activity, <span class="hljs-keyword">int</span> process, <span class="hljs-keyword">boolean</span> download)</span> </span>&#123;</span><br><span class="line">      ...</span><br><span class="line">      <span class="hljs-comment">// 是否启动下载</span></span><br><span class="line">      <span class="hljs-comment">// 若插件不可用（不存在或版本不匹配），则直接弹出“下载插件”对话框</span></span><br><span class="line">      <span class="hljs-comment">// 因为已经打开UpdateActivity，故在这里返回True，告诉外界已经打开，无需处理</span></span><br><span class="line">      <span class="hljs-keyword">if</span> (download) &#123;</span><br><span class="line">  		<span class="hljs-comment">// 如果在PluginTable.PLUGINS中找不到该插件，则尝试下载</span></span><br><span class="line">          <span class="hljs-keyword">if</span> (PluginTable.getPluginInfo(plugin) == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">              ...</span><br><span class="line">              <span class="hljs-comment">// 如果用户在下载即将完成时突然点按“取消”，则有可能出现插件已下载成功，但没有及时加载进来的情况</span></span><br><span class="line">              <span class="hljs-comment">// 因此我们会判断这种情况，如果是，则重新加载一次即可，反之则提示用户下载</span></span><br><span class="line">              <span class="hljs-comment">// 原因：“取消”会触发Task.release方法，最终调用mDownloadTask.destroy，导致“下载服务”的Receiver被注销，即使文件下载了也没有回调回来</span></span><br><span class="line">              <span class="hljs-comment">// NOTE isNeedToDownload方法会调用pluginDownloaded再次尝试加载</span></span><br><span class="line">              <span class="hljs-comment">// 如果插件文件存在，则不需要再次下载，直接加载。如果文件不存在，则需要下载</span></span><br><span class="line">              <span class="hljs-keyword">if</span> (isNeedToDownload(context, plugin)) &#123;</span><br><span class="line">                  <span class="hljs-comment">// 通知上层插件不存在</span></span><br><span class="line">                  <span class="hljs-keyword">return</span> RePlugin.getConfig().getCallbacks().onPluginNotExistsForActivity(context, plugin, intent, process);</span><br><span class="line">              &#125;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line">...</span><br><span class="line">      <span class="hljs-comment">// 如果插件状态出现问题，则每次弹此插件的Activity都应提示无法使用，或提示升级（如有新版）</span></span><br><span class="line">      <span class="hljs-comment">// Added by Jiongxuan Zhang</span></span><br><span class="line">      <span class="hljs-keyword">if</span> (PluginStatusController.getStatus(plugin) &lt; PluginStatusController.STATUS_OK) &#123;</span><br><span class="line">          ...</span><br><span class="line">          <span class="hljs-comment">// 通知上层插件不存在</span></span><br><span class="line">          <span class="hljs-keyword">return</span> RePlugin.getConfig().getCallbacks().onPluginNotExistsForActivity(context, plugin, intent, process);</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="hljs-comment">// 若为首次加载插件，且是“大插件”，则应异步加载，同时弹窗提示“加载中”</span></span><br><span class="line">      <span class="hljs-comment">// Added by Jiongxuan Zhang</span></span><br><span class="line">      <span class="hljs-keyword">if</span> (!RePlugin.isPluginDexExtracted(plugin)) &#123;</span><br><span class="line">          PluginDesc pd = PluginDesc.get(plugin);</span><br><span class="line">          <span class="hljs-keyword">if</span> (pd != <span class="hljs-keyword">null</span> &amp;&amp; pd.isLarge()) &#123;</span><br><span class="line">              <span class="hljs-comment">// 加载大插件，通知上层启动等待弹窗</span></span><br><span class="line">              <span class="hljs-keyword">return</span> RePlugin.getConfig().getCallbacks().onLoadLargePluginForActivity(context, plugin, intent, process);</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="hljs-comment">// WARNING：千万不要修改intent内容，尤其不要修改其ComponentName</span></span><br><span class="line">      <span class="hljs-comment">// 因为一旦分配坑位有误（或压根不是插件Activity），则外界还需要原封不动的startActivity到系统中</span></span><br><span class="line">      <span class="hljs-comment">// 可防止出现“本来要打开宿主，结果被改成插件”，进而无法打开宿主Activity的问题</span></span><br><span class="line"></span><br><span class="line">      <span class="hljs-comment">// 缓存打开前的Intent对象，里面将包括Action等内容</span></span><br><span class="line">      Intent from = <span class="hljs-keyword">new</span> Intent(intent);</span><br><span class="line"></span><br><span class="line">      <span class="hljs-comment">// 帮助填写打开前的Intent的ComponentName信息（如有。没有的情况如直接通过Action打开等）</span></span><br><span class="line">      <span class="hljs-keyword">if</span> (!TextUtils.isEmpty(plugin) &amp;&amp; !TextUtils.isEmpty(activity)) &#123;</span><br><span class="line">          from.setComponent(<span class="hljs-keyword">new</span> ComponentName(plugin, activity));</span><br><span class="line">      &#125;</span><br><span class="line"><span class="hljs-comment">// 分配坑位</span></span><br><span class="line">      ComponentName cn = mPluginMgr.mLocal.loadPluginActivity(intent, plugin, activity, process);</span><br><span class="line">      <span class="hljs-keyword">if</span> (cn == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">          <span class="hljs-comment">// 坑位获取失败</span></span><br><span class="line">          <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="hljs-comment">// 将Intent指向到“坑位”。这样：</span></span><br><span class="line">      <span class="hljs-comment">// from：插件原Intent</span></span><br><span class="line">      <span class="hljs-comment">// to：坑位Intent</span></span><br><span class="line">      intent.setComponent(cn);</span><br><span class="line"><span class="hljs-comment">// 启动坑位Activity</span></span><br><span class="line">      context.startActivity(intent);</span><br><span class="line">      <span class="hljs-comment">// 通知外界，已准备好要打开Activity了</span></span><br><span class="line">      <span class="hljs-comment">// 其中：from为要打开的插件的Intent，to为坑位Intent</span></span><br><span class="line">      RePlugin.getConfig().getEventCallbacks().onPrepareStartPitActivity(context, from, intent);</span><br><span class="line">      <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<h5 id="分配坑位Activity"><a href="#分配坑位Activity" class="headerlink" title="分配坑位Activity"></a>分配坑位Activity</h5><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> ComponentName <span class="hljs-title">loadPluginActivity</span><span class="hljs-params">(Intent intent, String plugin, String activity, <span class="hljs-keyword">int</span> process)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    ActivityInfo ai = <span class="hljs-keyword">null</span>;</span><br><span class="line">    String container = <span class="hljs-keyword">null</span>;</span><br><span class="line">    PluginBinderInfo info = <span class="hljs-keyword">new</span> PluginBinderInfo(PluginBinderInfo.ACTIVITY_REQUEST);</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">        <span class="hljs-comment">// 获取 ActivityInfo(可能是其它插件的 Activity，所以这里使用 pair 将 pluginName 也返回)</span></span><br><span class="line">        ai = getActivityInfo(plugin, activity, intent);</span><br><span class="line">        <span class="hljs-keyword">if</span> (ai == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">            <span class="hljs-comment">// 从插件的PackageInfo中找不到该插件Activity的ActivityInfo</span></span><br><span class="line">            <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="hljs-comment">// 存储此 Activity 在插件 Manifest 中声明主题到 Intent</span></span><br><span class="line">        intent.putExtra(INTENT_KEY_THEME_ID, ai.theme);</span><br><span class="line">        ...</span><br><span class="line">        <span class="hljs-comment">// 根据 activity 的 processName，选择进程 ID 标识</span></span><br><span class="line">        <span class="hljs-keyword">if</span> (ai.processName != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">            process = PluginClientHelper.getProcessInt(ai.processName);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="hljs-comment">// 容器选择（启动目标进程）</span></span><br><span class="line">        IPluginClient client = MP.startPluginProcess(plugin, process, info);</span><br><span class="line">        <span class="hljs-keyword">if</span> (client == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">            <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="hljs-comment">// 插件所在进程远程分配坑位</span></span><br><span class="line">        container = client.allocActivityContainer(plugin, process, ai.name, intent);</span><br><span class="line">        ...</span><br><span class="line">    &#125; <span class="hljs-keyword">catch</span> (Throwable e) &#123;</span><br><span class="line">        ...</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-comment">// 分配失败</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (TextUtils.isEmpty(container)) &#123;</span><br><span class="line">        <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    PmBase.cleanIntentPluginParams(intent);</span><br><span class="line">    ...</span><br><span class="line">    <span class="hljs-comment">// 就坑位Activity信息返回</span></span><br><span class="line">    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> ComponentName(IPC.getPackageName(), container);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="获取插件Activity的ActivityInfo"><a href="#获取插件Activity的ActivityInfo" class="headerlink" title="获取插件Activity的ActivityInfo"></a>获取插件Activity的ActivityInfo</h5><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> ActivityInfo <span class="hljs-title">getActivityInfo</span><span class="hljs-params">(String plugin, String activity, Intent intent)</span> </span>&#123;</span><br><span class="line">    <span class="hljs-comment">// 获取插件对象</span></span><br><span class="line">    Plugin p = mPluginMgr.loadAppPlugin(plugin);</span><br><span class="line">    <span class="hljs-keyword">if</span> (p == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">        <span class="hljs-comment">// 获取插件对象失败</span></span><br><span class="line">        <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ActivityInfo ai = <span class="hljs-keyword">null</span>;</span><br><span class="line">    <span class="hljs-comment">// activity 不为空时，从插件声明的 Activity 集合中查找</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (!TextUtils.isEmpty(activity)) &#123;</span><br><span class="line">        <span class="hljs-comment">// Plugin.mLoader.mComponents中保存了该插件所有的组件列表，该组件信息从插件的PackageInfo中获取</span></span><br><span class="line">        ai = p.mLoader.mComponents.getActivity(activity);</span><br><span class="line">    &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">        <span class="hljs-comment">// activity 为空时，根据 Intent 匹配</span></span><br><span class="line">        ai = IntentMatcherHelper.getActivityInfo(mContext, plugin, intent);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">return</span> ai;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="解压插件"><a href="#解压插件" class="headerlink" title="解压插件"></a>解压插件</h5><p>在doLoad方法中，会将插件包解压，将dex和so文件提取出来，通过应用的PackageManager加载该插件apk，然后获取该插件的PackageInfo。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">loadLocked</span><span class="hljs-params">(<span class="hljs-keyword">int</span> load, <span class="hljs-keyword">boolean</span> useCache)</span> </span>&#123;</span><br><span class="line">        <span class="hljs-comment">// 若插件被“禁用”，则即便上次加载过（且进程一直活着），这次也不能再次使用了</span></span><br><span class="line">        <span class="hljs-comment">// Added by Jiongxuan Zhang</span></span><br><span class="line">        <span class="hljs-keyword">int</span> status = PluginStatusController.getStatus(mInfo.getName(), mInfo.getVersion());</span><br><span class="line">        <span class="hljs-keyword">if</span> (status &lt; PluginStatusController.STATUS_OK) &#123;</span><br><span class="line">            <span class="hljs-comment">// 加载失败</span></span><br><span class="line">            <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="hljs-keyword">if</span> (mInitialized) &#123;</span><br><span class="line">            <span class="hljs-keyword">if</span> (mLoader == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">                <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="hljs-keyword">if</span> (load == LOAD_INFO) &#123;</span><br><span class="line">                <span class="hljs-keyword">boolean</span> rl = mLoader.isPackageInfoLoaded();        </span><br><span class="line">                <span class="hljs-keyword">return</span> rl;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="hljs-keyword">if</span> (load == LOAD_RESOURCES) &#123;</span><br><span class="line">                <span class="hljs-keyword">boolean</span> rl = mLoader.isResourcesLoaded();</span><br><span class="line">                <span class="hljs-keyword">return</span> rl;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="hljs-keyword">if</span> (load == LOAD_DEX) &#123;</span><br><span class="line">                <span class="hljs-keyword">boolean</span> rl = mLoader.isDexLoaded();</span><br><span class="line">                <span class="hljs-keyword">return</span> rl;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="hljs-keyword">boolean</span> il = mLoader.isAppLoaded();</span><br><span class="line">            <span class="hljs-comment">// 如果已经初始化过该插件，则直接返回是否被加载</span></span><br><span class="line">            <span class="hljs-keyword">return</span> il;</span><br><span class="line">        &#125;</span><br><span class="line">        mInitialized = <span class="hljs-keyword">true</span>;</span><br><span class="line">		...</span><br><span class="line">        <span class="hljs-comment">// 这里先处理一下，如果cache命中，省了后面插件提取（如释放Jar包等）操作</span></span><br><span class="line">        <span class="hljs-keyword">if</span> (useCache) &#123;</span><br><span class="line">            <span class="hljs-keyword">boolean</span> result = loadByCache(load);</span><br><span class="line">            <span class="hljs-comment">// 如果缓存命中，则直接返回</span></span><br><span class="line">            <span class="hljs-keyword">if</span> (result) &#123;</span><br><span class="line">                <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        Context context = mContext;</span><br><span class="line">        ClassLoader parent = mParent;</span><br><span class="line">        PluginCommImpl manager = mPluginManager;</span><br><span class="line">        <span class="hljs-comment">// 第一次尝试加载</span></span><br><span class="line">        <span class="hljs-keyword">boolean</span> rc = doLoad(logTag, context, parent, manager, load);</span><br><span class="line">        <span class="hljs-keyword">if</span> (rc) &#123;</span><br><span class="line">            <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">                <span class="hljs-comment">// 第一次加载成功，至此，该插件已开始运行</span></span><br><span class="line">                PluginManagerProxy.addToRunningPluginsNoThrows(mInfo.getName());</span><br><span class="line">            &#125; <span class="hljs-keyword">catch</span> (Throwable e) &#123;</span><br><span class="line">               ...</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        ...</span><br><span class="line">        <span class="hljs-comment">// 清除第一次加载失败的残留</span></span><br><span class="line">        <span class="hljs-comment">// 清空数据对象</span></span><br><span class="line">        mLoader = <span class="hljs-keyword">null</span>;</span><br><span class="line">        <span class="hljs-comment">// 删除优化dex文件</span></span><br><span class="line">        File odex = mInfo.getDexFile();</span><br><span class="line">        <span class="hljs-keyword">if</span> (odex.exists()) &#123;</span><br><span class="line">            odex.delete();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="hljs-keyword">if</span> (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.LOLLIPOP) &#123;</span><br><span class="line">            <span class="hljs-comment">// support for multidex below LOLLIPOP:delete Extra odex,if need</span></span><br><span class="line">            <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">                FileUtils.forceDelete(mInfo.getExtraOdexDir());</span><br><span class="line">            &#125; <span class="hljs-keyword">catch</span> (IOException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="hljs-comment">// 尝试第二次加载</span></span><br><span class="line">        rc = doLoad(logTag, context, parent, manager, load);</span><br><span class="line">        <span class="hljs-keyword">if</span> (!rc) &#123;</span><br><span class="line">            <span class="hljs-comment">// 第二次失败则直接返回失败</span></span><br><span class="line">            <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">		...</span><br><span class="line">        <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">            <span class="hljs-comment">// 第二次成功，至此，该插件已开始运行</span></span><br><span class="line">            PluginManagerProxy.addToRunningPluginsNoThrows(mInfo.getName());</span><br><span class="line">        &#125; <span class="hljs-keyword">catch</span> (Throwable e) &#123;</span><br><span class="line">            ...</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h5 id="处理dex"><a href="#处理dex" class="headerlink" title="处理dex"></a>处理dex</h5><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br></pre></td><td class="code"><pre><span class="line"> <span class="hljs-function"><span class="hljs-keyword">final</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">loadDex</span><span class="hljs-params">(ClassLoader parent, <span class="hljs-keyword">int</span> load)</span> </span>&#123;</span><br><span class="line">     <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">         PackageManager pm = mContext.getPackageManager();</span><br><span class="line"></span><br><span class="line">         mPackageInfo = Plugin.queryCachedPackageInfo(mPath);</span><br><span class="line">         <span class="hljs-keyword">if</span> (mPackageInfo == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">             <span class="hljs-comment">// 通过应用的PackageManager加载插件APK，获得插件的PackageInfo</span></span><br><span class="line">             <span class="hljs-comment">// getPackageArchiveInfo可以获取没有安装(没有在PMS中注册的)的应用的包信息</span></span><br><span class="line">             mPackageInfo = pm.getPackageArchiveInfo(mPath,</span><br><span class="line">                     PackageManager.GET_ACTIVITIES | PackageManager.GET_SERVICES | PackageManager.GET_PROVIDERS | PackageManager.GET_RECEIVERS | PackageManager.GET_META_DATA);</span><br><span class="line">             <span class="hljs-keyword">if</span> (mPackageInfo == <span class="hljs-keyword">null</span> || mPackageInfo.applicationInfo == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">                 mPackageInfo = <span class="hljs-keyword">null</span>;</span><br><span class="line">                 <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;</span><br><span class="line">             &#125;</span><br><span class="line">             <span class="hljs-comment">// 将插件包信息中的资源路径(此处修改applicationInfo资源路径后，就可以通过pm.getResourcesForApplication方法获取资源Resources对象)和so路径指向之前解压的路径</span></span><br><span class="line">             mPackageInfo.applicationInfo.sourceDir = mPath;</span><br><span class="line">             mPackageInfo.applicationInfo.publicSourceDir = mPath;</span><br><span class="line">             <span class="hljs-keyword">if</span> (TextUtils.isEmpty(mPackageInfo.applicationInfo.processName)) &#123;</span><br><span class="line">                 mPackageInfo.applicationInfo.processName = mPackageInfo.applicationInfo.packageName;</span><br><span class="line">             &#125;</span><br><span class="line">	...</span><br><span class="line">             mPackageInfo.applicationInfo.nativeLibraryDir = ld.getAbsolutePath();</span><br><span class="line">         &#125;</span><br><span class="line">...</span><br><span class="line">         <span class="hljs-comment">// 创建或获取ComponentList表</span></span><br><span class="line">         <span class="hljs-comment">// Added by Jiongxuan Zhang</span></span><br><span class="line">         mComponents = Plugin.queryCachedComponentList(mPath);</span><br><span class="line">         <span class="hljs-keyword">if</span> (mComponents == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">             <span class="hljs-comment">// ComponentList</span></span><br><span class="line">             mComponents = <span class="hljs-keyword">new</span> ComponentList(mPackageInfo, mPath, mPluginObj.mInfo);</span><br><span class="line"></span><br><span class="line">             <span class="hljs-comment">// 动态注册插件中声明的 receiver</span></span><br><span class="line">           	<span class="hljs-comment">// 将插件manifest中静态注册的receiver通过常驻进程动态注册，虽然无法实现静态注册，但是由于常驻进程存活时间长，所以即使插件进程退出，也可以接受到通知。</span></span><br><span class="line">             regReceivers();</span><br><span class="line"></span><br><span class="line">             <span class="hljs-comment">// 缓存表：ComponentList</span></span><br><span class="line">             <span class="hljs-comment">// 将PackageInfo中的组件都缓存到列表中，方便查询</span></span><br><span class="line">             <span class="hljs-keyword">synchronized</span> (Plugin.FILENAME_2_COMPONENT_LIST) &#123;</span><br><span class="line">                 Plugin.FILENAME_2_COMPONENT_LIST.put(mPath, <span class="hljs-keyword">new</span> WeakReference&lt;&gt;(mComponents));</span><br><span class="line">             &#125;</span><br><span class="line">             <span class="hljs-comment">/* 只调整一次 */</span></span><br><span class="line">             <span class="hljs-comment">// 调整插件中组件的进程名称</span></span><br><span class="line">             adjustPluginProcess(mPackageInfo.applicationInfo);</span><br><span class="line">             <span class="hljs-comment">// 调整插件中 Activity 的 TaskAffinity</span></span><br><span class="line">             adjustPluginTaskAffinity(mPluginName, mPackageInfo.applicationInfo);</span><br><span class="line">         &#125;</span><br><span class="line">         <span class="hljs-keyword">if</span> (load == Plugin.LOAD_INFO) &#123;</span><br><span class="line">             <span class="hljs-keyword">return</span> isPackageInfoLoaded();</span><br><span class="line">         &#125;</span><br><span class="line">         mPkgResources = Plugin.queryCachedResources(mPath);</span><br><span class="line">         <span class="hljs-comment">// LOAD_RESOURCES和LOAD_ALL都会获取资源，但LOAD_INFO不可以（只允许获取PackageInfo）</span></span><br><span class="line">         <span class="hljs-keyword">if</span> (mPkgResources == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">             <span class="hljs-comment">// Resources</span></span><br><span class="line">             <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">                 <span class="hljs-keyword">if</span> (BuildConfig.DEBUG) &#123;</span><br><span class="line">                     <span class="hljs-comment">// 如果是Debug模式的话，防止与Instant Run冲突，资源重新New一个</span></span><br><span class="line">                     Resources r = pm.getResourcesForApplication(mPackageInfo.applicationInfo);</span><br><span class="line">                     mPkgResources = <span class="hljs-keyword">new</span> Resources(r.getAssets(), r.getDisplayMetrics(), r.getConfiguration());</span><br><span class="line">                 &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">                     <span class="hljs-comment">// 通过上面获得的PackageInfo和对applicationInfo内资源路径的修改，得到一个指向之前解压的资源的Resources对象</span></span><br><span class="line">                     mPkgResources = pm.getResourcesForApplication(mPackageInfo.applicationInfo);</span><br><span class="line">                 &#125;</span><br><span class="line">             &#125; <span class="hljs-keyword">catch</span> (NameNotFoundException e) &#123;</span><br><span class="line">                 <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;</span><br><span class="line">             &#125;</span><br><span class="line">             <span class="hljs-keyword">if</span> (mPkgResources == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">                 <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;</span><br><span class="line">             &#125;</span><br><span class="line">             <span class="hljs-comment">// 缓存表: Resources</span></span><br><span class="line">             <span class="hljs-keyword">synchronized</span> (Plugin.FILENAME_2_RESOURCES) &#123;</span><br><span class="line">                 Plugin.FILENAME_2_RESOURCES.put(mPath, <span class="hljs-keyword">new</span> WeakReference&lt;&gt;(mPkgResources));</span><br><span class="line">             &#125;</span><br><span class="line">         &#125;</span><br><span class="line">         <span class="hljs-keyword">if</span> (load == Plugin.LOAD_RESOURCES) &#123;</span><br><span class="line">             <span class="hljs-keyword">return</span> isResourcesLoaded();</span><br><span class="line">         &#125;</span><br><span class="line"></span><br><span class="line">         mClassLoader = Plugin.queryCachedClassLoader(mPath);</span><br><span class="line">         <span class="hljs-keyword">if</span> (mClassLoader == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">             <span class="hljs-comment">// ClassLoader</span></span><br><span class="line">             String out = mPluginObj.mInfo.getDexParentDir().getPath();</span><br><span class="line">             <span class="hljs-comment">//changeDexMode(out);</span></span><br><span class="line"></span><br><span class="line">             <span class="hljs-comment">//</span></span><br><span class="line">             Log.i(<span class="hljs-string">"dex"</span>, <span class="hljs-string">"load "</span> + mPath + <span class="hljs-string">" ..."</span>);</span><br><span class="line">             <span class="hljs-keyword">if</span> (BuildConfig.DEBUG) &#123;</span><br><span class="line">                 <span class="hljs-comment">// 因为Instant Run会替换parent为IncrementalClassLoader，所以在DEBUG环境里</span></span><br><span class="line">                 <span class="hljs-comment">// 需要替换为BootClassLoader才行</span></span><br><span class="line">                 <span class="hljs-comment">// Added by yangchao-xy &amp; Jiongxuan Zhang</span></span><br><span class="line">                 parent = ClassLoader.getSystemClassLoader();</span><br><span class="line">             &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">                 <span class="hljs-comment">// 线上环境保持不变</span></span><br><span class="line">                 parent = getClass().getClassLoader().getParent(); <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> 这里直接用父类加载器</span></span><br><span class="line">             &#125;</span><br><span class="line">             String soDir = mPackageInfo.applicationInfo.nativeLibraryDir;</span><br><span class="line"></span><br><span class="line">             <span class="hljs-keyword">long</span> begin = <span class="hljs-number">0</span>;</span><br><span class="line">             <span class="hljs-keyword">boolean</span> isDexExist = <span class="hljs-keyword">false</span>;</span><br><span class="line">	<span class="hljs-comment">// 通过解压的dex路径和so路径，创建一个PluginDexClassLoader，用来加载该插件的class</span></span><br><span class="line">             mClassLoader = RePlugin.getConfig().getCallbacks().createPluginClassLoader(mPluginObj.mInfo, mPath, out, soDir, parent);</span><br><span class="line"></span><br><span class="line">             <span class="hljs-keyword">if</span> (mClassLoader == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">                 <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;</span><br><span class="line">             &#125;</span><br><span class="line">             <span class="hljs-comment">// 缓存表：ClassLoader</span></span><br><span class="line">             <span class="hljs-keyword">synchronized</span> (Plugin.FILENAME_2_DEX) &#123;</span><br><span class="line">                 Plugin.FILENAME_2_DEX.put(mPath, <span class="hljs-keyword">new</span> WeakReference&lt;&gt;(mClassLoader));</span><br><span class="line">             &#125;</span><br><span class="line">         &#125;</span><br><span class="line">         <span class="hljs-keyword">if</span> (load == Plugin.LOAD_DEX) &#123;</span><br><span class="line">             <span class="hljs-keyword">return</span> isDexLoaded();</span><br><span class="line">         &#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">// 创建插件的上下文对象</span></span><br><span class="line">         mPkgContext = <span class="hljs-keyword">new</span> PluginContext(mContext, android.R.style.Theme, mClassLoader, mPkgResources, mPluginName, <span class="hljs-keyword">this</span>);</span><br><span class="line"></span><br><span class="line">     &#125; <span class="hljs-keyword">catch</span> (Throwable e) &#123;</span><br><span class="line">         <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;</span><br><span class="line">     &#125;</span><br><span class="line"></span><br><span class="line">     <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<h5 id="创建插件Application"><a href="#创建插件Application" class="headerlink" title="创建插件Application"></a>创建插件Application</h5><p>安装完插件后，会检查插件是否需要创建插件application，如果需要，则创建插件的application，并调用其attachBaseContext和onCreate回调，并将上面创建的PluginContext作为mBase。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"> <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">callAppLocked</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">     <span class="hljs-comment">// 获取并调用Application的几个核心方法</span></span><br><span class="line">     <span class="hljs-keyword">if</span> (!mDummyPlugin) &#123;</span><br><span class="line">         <span class="hljs-comment">// NOTE 不排除A的Application中调到了B，B又调回到A，或在同一插件内的onCreate开启Service/Activity，而内部逻辑又调用fetchContext并再次走到这里</span></span><br><span class="line">         <span class="hljs-comment">// NOTE 因此需要对mApplicationClient做判断，确保永远只执行一次，无论是否成功</span></span><br><span class="line">         <span class="hljs-keyword">if</span> (mApplicationClient != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">             <span class="hljs-comment">// 已经初始化过，无需再次处理</span></span><br><span class="line">             <span class="hljs-keyword">return</span>;</span><br><span class="line">         &#125;</span><br><span class="line"><span class="hljs-comment">// 通过反射创建插件manifest中配置的application</span></span><br><span class="line">         mApplicationClient = PluginApplicationClient.getOrCreate(</span><br><span class="line">                 mInfo.getName(), mLoader.mClassLoader, mLoader.mComponents, mLoader.mPluginObj.mInfo);</span><br><span class="line"><span class="hljs-comment">// 将PluginContext作为参数传给application</span></span><br><span class="line">         <span class="hljs-keyword">if</span> (mApplicationClient != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">             mApplicationClient.callAttachBaseContext(mLoader.mPkgContext);</span><br><span class="line">             mApplicationClient.callOnCreate();</span><br><span class="line">         &#125;</span><br><span class="line">     &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<h5 id="启动目标进程"><a href="#启动目标进程" class="headerlink" title="启动目标进程"></a>启动目标进程</h5><p>回到第3步，拿到了已经安装好的插件对象，从插件的组件列表(Plugin.mLoader.mComponents)中获得启动的Activity的信息，通过该Activity的process信息和插件信息从常驻进程服务那获得该插件的PluginClient服务对象，通过该对象和插件进程进行通信，如果插件进程没有启动，则通过provider启动该进程。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">  <span class="hljs-function"><span class="hljs-keyword">final</span> IPluginClient <span class="hljs-title">startPluginProcessLocked</span><span class="hljs-params">(String plugin, <span class="hljs-keyword">int</span> process, PluginBinderInfo info)</span> </span>&#123;</span><br><span class="line">...</span><br><span class="line">      <span class="hljs-comment">//</span></span><br><span class="line">      PluginProcessMain.schedulePluginProcessLoop(PluginProcessMain.CHECK_STAGE1_DELAY);</span><br><span class="line"></span><br><span class="line">      <span class="hljs-comment">// 获取插件进程在常驻进程中注册的服务代理对象</span></span><br><span class="line">      IPluginClient client = PluginProcessMain.probePluginClient(plugin, process, info);</span><br><span class="line">      <span class="hljs-keyword">if</span> (client != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">          <span class="hljs-keyword">return</span> client;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="hljs-comment">// 分配，如果插件进程没有启动</span></span><br><span class="line">      <span class="hljs-keyword">int</span> index = IPluginManager.PROCESS_AUTO;</span><br><span class="line">      <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">          index = PluginProcessMain.allocProcess(plugin, process);</span><br><span class="line">      &#125; <span class="hljs-keyword">catch</span> (Throwable e) &#123;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="hljs-comment">// 分配的坑位不属于UI、和自定义进程，就返回。</span></span><br><span class="line">      <span class="hljs-keyword">if</span> (!(index == IPluginManager.PROCESS_UI</span><br><span class="line">              || PluginProcessHost.isCustomPluginProcess(index)</span><br><span class="line">              || PluginManager.isPluginProcess(index))) &#123;</span><br><span class="line">          <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="hljs-comment">// 启动，通过provider启动插件进程</span></span><br><span class="line">      <span class="hljs-keyword">boolean</span> rc = PluginProviderStub.proxyStartPluginProcess(mContext, index);</span><br><span class="line">      <span class="hljs-keyword">if</span> (!rc) &#123;</span><br><span class="line">          <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="hljs-comment">// 再次获取该插件进程注册的服务代理</span></span><br><span class="line">      client = PluginProcessMain.probePluginClient(plugin, process, info);</span><br><span class="line">      <span class="hljs-keyword">if</span> (client == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">          <span class="hljs-keyword">if</span> (LOGR) &#123;</span><br><span class="line">              LogRelease.e(PLUGIN_TAG, <span class="hljs-string">"spp pc n"</span>);</span><br><span class="line">          &#125;</span><br><span class="line">          <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="hljs-keyword">return</span> client;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<h5 id="目标进程分配坑位"><a href="#目标进程分配坑位" class="headerlink" title="目标进程分配坑位"></a>目标进程分配坑位</h5><p>根据启动Activity的启动模式和样式从注册的坑位中分配一个合适的坑位</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">final</span> String <span class="hljs-title">bindActivity</span><span class="hljs-params">(String plugin, <span class="hljs-keyword">int</span> process, String activity, Intent intent)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">/* 获取插件对象 */</span></span><br><span class="line">    Plugin p = mPluginMgr.loadAppPlugin(plugin);</span><br><span class="line">    <span class="hljs-keyword">if</span> (p == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">        <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">/* 获取 ActivityInfo */</span></span><br><span class="line">    ActivityInfo ai = p.mLoader.mComponents.getActivity(activity);</span><br><span class="line">    <span class="hljs-keyword">if</span> (ai == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">        <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (ai.processName == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">        ai.processName = ai.applicationInfo.processName;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">if</span> (ai.processName == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">        ai.processName = ai.packageName;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">/* 获取 Container */</span></span><br><span class="line">    String container;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// 自定义进程</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (ai.processName.contains(PluginProcessHost.PROCESS_PLUGIN_SUFFIX2)) &#123;</span><br><span class="line">        String processTail = PluginProcessHost.processTail(ai.processName);</span><br><span class="line">        container = mACM.alloc2(ai, plugin, activity, process, intent, processTail);</span><br><span class="line">    &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">        container = mACM.alloc(ai, plugin, activity, process, intent);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (TextUtils.isEmpty(container)) &#123;</span><br><span class="line">        <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">/* 检查 activity 是否存在 */</span></span><br><span class="line">    Class&lt;?&gt; c = <span class="hljs-keyword">null</span>;</span><br><span class="line">    <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">        c = p.mLoader.mClassLoader.loadClass(activity);</span><br><span class="line">    &#125; <span class="hljs-keyword">catch</span> (Throwable e) &#123;</span><br><span class="line">        <span class="hljs-keyword">if</span> (LOGR) &#123;</span><br><span class="line">            LogRelease.e(PLUGIN_TAG, e.getMessage(), e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">if</span> (c == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">        <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">return</span> container;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> ActivityState <span class="hljs-title">allocLocked</span><span class="hljs-params">(ActivityInfo ai, HashMap&lt;String, ActivityState&gt; map,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">                                        String plugin, String activity, Intent intent)</span> </span>&#123;</span><br><span class="line">    <span class="hljs-comment">// 坑和状态的 map 为空</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (map == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">        <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// 首先找上一个活的，或者已经注册的，避免多个坑到同一个activity的映射</span></span><br><span class="line">    <span class="hljs-keyword">for</span> (ActivityState state : map.values()) &#123;</span><br><span class="line">        <span class="hljs-keyword">if</span> (state.isTarget(plugin, activity)) &#123;</span><br><span class="line">            <span class="hljs-keyword">return</span> state;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// 新分配：找空白的，第一个</span></span><br><span class="line">    <span class="hljs-keyword">for</span> (ActivityState state : map.values()) &#123;</span><br><span class="line">        <span class="hljs-keyword">if</span> (state.state == STATE_NONE) &#123;</span><br><span class="line">            state.occupy(plugin, activity);</span><br><span class="line">            <span class="hljs-keyword">return</span> state;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ActivityState found;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// 重用：则找最老的那个</span></span><br><span class="line">    found = <span class="hljs-keyword">null</span>;</span><br><span class="line">    <span class="hljs-keyword">for</span> (ActivityState state : map.values()) &#123;</span><br><span class="line">        <span class="hljs-keyword">if</span> (!state.hasRef()) &#123;</span><br><span class="line">            <span class="hljs-keyword">if</span> (found == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">                found = state;</span><br><span class="line">            &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (state.timestamp &lt; found.timestamp) &#123;</span><br><span class="line">                found = state;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">if</span> (found != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">        found.occupy(plugin, activity);</span><br><span class="line">        <span class="hljs-keyword">return</span> found;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// 强挤：最后一招，挤掉：最老的那个</span></span><br><span class="line">    found = <span class="hljs-keyword">null</span>;</span><br><span class="line">    <span class="hljs-keyword">for</span> (ActivityState state : map.values()) &#123;</span><br><span class="line">        <span class="hljs-keyword">if</span> (found == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">            found = state;</span><br><span class="line">        &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (state.timestamp &lt; found.timestamp) &#123;</span><br><span class="line">            found = state;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">if</span> (found != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">        found.finishRefs();</span><br><span class="line">        found.occupy(plugin, activity);</span><br><span class="line">        <span class="hljs-keyword">return</span> found;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-comment">// never reach here</span></span><br><span class="line">    <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="启动坑位Activity"><a href="#启动坑位Activity" class="headerlink" title="启动坑位Activity"></a>启动坑位Activity</h5><p>回到第2步中，在获取到坑位Activity后，直接将其放到Intent中，然后正常启动</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">        ComponentName cn = mPluginMgr.mLocal.loadPluginActivity(intent, plugin, activity, process);</span><br><span class="line">        <span class="hljs-keyword">if</span> (cn == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">            <span class="hljs-keyword">if</span> (LOG) &#123;</span><br><span class="line">                LogDebug.d(PLUGIN_TAG, <span class="hljs-string">"plugin cn not found: intent="</span> + intent + <span class="hljs-string">" plugin="</span> + plugin + <span class="hljs-string">" activity="</span> + activity + <span class="hljs-string">" process="</span> + process);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="hljs-comment">// 将Intent指向到“坑位”。这样：</span></span><br><span class="line">        <span class="hljs-comment">// from：插件原Intent</span></span><br><span class="line">        <span class="hljs-comment">// to：坑位Intent</span></span><br><span class="line">        intent.setComponent(cn);</span><br><span class="line"></span><br><span class="line">        <span class="hljs-keyword">if</span> (LOG) &#123;</span><br><span class="line">            LogDebug.d(PLUGIN_TAG, <span class="hljs-string">"start activity: real intent="</span> + intent);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">//        if (RePluginInternal.FOR_DEV) &#123;</span></span><br><span class="line"><span class="hljs-comment">//            try &#123;</span></span><br><span class="line"><span class="hljs-comment">//                String str = cn.getPackageName() + "/" + cn.getClassName();</span></span><br><span class="line"><span class="hljs-comment">//                if (LOG) &#123;</span></span><br><span class="line"><span class="hljs-comment">//                    LogDebug.d(PLUGIN_TAG, "str=" + str);</span></span><br><span class="line"><span class="hljs-comment">//                &#125;</span></span><br><span class="line"><span class="hljs-comment">//                new ProcessBuilder().command("am", "start", "-D", "--user", "0", "-n", str).start();</span></span><br><span class="line"><span class="hljs-comment">//            &#125; catch (IOException e) &#123;</span></span><br><span class="line"><span class="hljs-comment">//                e.printStackTrace();</span></span><br><span class="line"><span class="hljs-comment">//            &#125;</span></span><br><span class="line"><span class="hljs-comment">//        &#125; else &#123;</span></span><br><span class="line"></span><br><span class="line">        context.startActivity(intent);</span><br></pre></td></tr></table></figure>
+<h5 id="ClassLoader替换坑位"><a href="#ClassLoader替换坑位" class="headerlink" title="ClassLoader替换坑位"></a>ClassLoader替换坑位</h5><p>坑位Activity被正常启动，经过AMS和当前进程以及目标进程多次来回后，在performLaunchActivity时，使用CLassLoader来加载该Activity类。使用的是appContext.getClassLoader，而ContextImpl中的classLoader是从PackageInfo中获取的，在上一篇中提到，唯一的Hook点就是在启动的时候将PackageInfo.mClassLoader改成RePluginClassLoader对象，所以最终会进入RePluginClassLoader.loadClass方法。在该方法中会使用插件的PluginDexClassLoader来加载坑位对应的Activity，然后返回到performLaunchActivity中继续启动。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">  <span class="hljs-function"><span class="hljs-keyword">private</span> Activity <span class="hljs-title">performLaunchActivity</span><span class="hljs-params">(ActivityClientRecord r, Intent customIntent)</span> </span>&#123;</span><br><span class="line">      ContextImpl appContext = createBaseContextForActivity(r);</span><br><span class="line">      Activity activity = <span class="hljs-keyword">null</span>;</span><br><span class="line">      <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">          java.lang.ClassLoader cl = appContext.getClassLoader();</span><br><span class="line">          activity = mInstrumentation.newActivity(</span><br><span class="line">                  cl, component.getClassName(), r.intent);</span><br><span class="line">          StrictMode.incrementExpectedActivityCount(activity.getClass());</span><br><span class="line">          r.intent.setExtrasClassLoader(cl);</span><br><span class="line">          r.intent.prepareToEnterProcess();</span><br><span class="line">          <span class="hljs-keyword">if</span> (r.state != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">              r.state.setClassLoader(cl);</span><br><span class="line">          &#125;</span><br><span class="line">      &#125; <span class="hljs-keyword">catch</span> (Exception e) &#123;</span><br><span class="line">         </span><br><span class="line">      &#125;</span><br><span class="line">...</span><br><span class="line">      <span class="hljs-keyword">return</span> activity;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<h5 id="加载真正的插件Activity"><a href="#加载真正的插件Activity" class="headerlink" title="加载真正的插件Activity"></a>加载真正的插件Activity</h5><p>在RepluginClassLoader的loadClass方法中，会先通过PMF.loadClass加载类，如果失败，则由原生的PathDexClassLoader来加载。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">final</span> Class&lt;?&gt; loadClass(String className, <span class="hljs-keyword">boolean</span> resolve) &#123;</span><br><span class="line">    <span class="hljs-comment">// 加载Service中介坑位</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (className.startsWith(PluginPitService.class.getName())) &#123;</span><br><span class="line">        <span class="hljs-keyword">return</span> PluginPitService.class;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// 如果Activity坑位列表中包含该类，则尝试将坑位替换成原本的Activity</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (mContainerActivities.contains(className)) &#123;</span><br><span class="line">        Class&lt;?&gt; c = mClient.resolveActivityClass(className);</span><br><span class="line">        <span class="hljs-keyword">if</span> (c != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">            <span class="hljs-comment">// 返回插件Activity</span></span><br><span class="line">            <span class="hljs-keyword">return</span> c;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="hljs-keyword">return</span> DummyActivity.class;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// 如果Service坑位列表中包含该类，则尝试将坑位替换成原本的Service</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (mContainerServices.contains(className)) &#123;</span><br><span class="line">        Class&lt;?&gt; c = loadServiceClass(className);</span><br><span class="line">        <span class="hljs-keyword">if</span> (c != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">            <span class="hljs-keyword">return</span> c;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="hljs-keyword">return</span> DummyService.class;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// 如果Provider坑位列表中包含该类，则尝试将坑位替换成原本的Provider</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (mContainerProviders.contains(className)) &#123;</span><br><span class="line">        Class&lt;?&gt; c = loadProviderClass(className);</span><br><span class="line">        <span class="hljs-keyword">if</span> (c != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">            <span class="hljs-keyword">return</span> c;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="hljs-comment">// 输出warn日志便于查看</span></span><br><span class="line">        <span class="hljs-comment">// use DummyProvider orig=</span></span><br><span class="line">        <span class="hljs-keyword">if</span> (LOGR) &#123;</span><br><span class="line">            LogRelease.w(PLUGIN_TAG, <span class="hljs-string">"p m hlc u d p o "</span> + className);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="hljs-keyword">return</span> DummyProvider.class;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">return</span> loadDefaultClass(className);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">  <span class="hljs-keyword">final</span> Class&lt;?&gt; resolveActivityClass(String container) &#123;</span><br><span class="line">      String plugin = <span class="hljs-keyword">null</span>;</span><br><span class="line">      String activity = <span class="hljs-keyword">null</span>;</span><br><span class="line"></span><br><span class="line">      <span class="hljs-comment">// 先找登记的，如果找不到，则用forward activity</span></span><br><span class="line">      PluginContainers.ActivityState state = mACM.lookupByContainer(container);</span><br><span class="line">      <span class="hljs-keyword">if</span> (state == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">          <span class="hljs-keyword">return</span> ForwardActivity.class;</span><br><span class="line">      &#125;</span><br><span class="line">      plugin = state.plugin;</span><br><span class="line">      activity = state.activity;</span><br><span class="line"></span><br><span class="line">      Plugin p = mPluginMgr.loadAppPlugin(plugin);</span><br><span class="line">      <span class="hljs-keyword">if</span> (p == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">          <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;</span><br><span class="line">      &#125;</span><br><span class="line"><span class="hljs-comment">// 获取插件的ClassLoader</span></span><br><span class="line">      ClassLoader cl = p.getClassLoader();</span><br><span class="line">      Class&lt;?&gt; c = <span class="hljs-keyword">null</span>;</span><br><span class="line">      <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">          <span class="hljs-comment">// 使用插件的PluginDexClassLoader来加载插件Activity</span></span><br><span class="line">          c = cl.loadClass(activity);</span><br><span class="line">      &#125; <span class="hljs-keyword">catch</span> (Throwable e) &#123;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="hljs-keyword">return</span> c;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<h5 id="PluginActivity替换上下文"><a href="#PluginActivity替换上下文" class="headerlink" title="PluginActivity替换上下文"></a>PluginActivity替换上下文</h5><p>实际上插件的每个Activity在编译的时候都会改成继承RePlugin自己定义的Activity(这些都定义在plugin-lib中)，该Activity会在声明周期触发时，通过反射调用host-lib进行一系列的操作。在attach中会将Activity的上下文改成PluginContext，这样当我们使用context.getResources等方法时，得到的就是插件的resources。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PluginActivity</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Activity</span> </span>&#123;</span><br><span class="line">    <span class="hljs-meta">@Override</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title">attachBaseContext</span><span class="hljs-params">(Context newBase)</span> </span>&#123;</span><br><span class="line">        <span class="hljs-comment">// 通过反射创建PluginContext，这样插件Activity的上下文就是PluginContext，其内部的ClassLoader和Resources就是该插件的ClassLoader和Resources。</span></span><br><span class="line">        newBase = RePluginInternal.createActivityContext(<span class="hljs-keyword">this</span>, newBase);</span><br><span class="line">        <span class="hljs-keyword">super</span>.attachBaseContext(newBase);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">final</span> Context <span class="hljs-title">createBaseContext</span><span class="hljs-params">(Context newBase)</span> </span>&#123;</span><br><span class="line">    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> PluginContext(newBase, android.R.style.Theme, mClassLoader, mPkgResources, mPluginName, <span class="hljs-keyword">this</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>流程如下：</p>
+<pre class="mermaid">graph TD
+A[启动Activity_A] --> B{插件是否下载}
+B-->|否|C[通知上层插件不存在]
+B-->|是|D{插件是否安装}
+D-->|否|E[解压插件,处理dex,获得PackageInfo]
+D-->|是|F[获取A的ActivityInfo]
+E-->F
+F-->G[启动目标进程,并获取目标进程Binder服务代理]
+G-->H[通知目标进程服务分配坑位,获得坑位Activity]
+H-->I[启动坑位Activity]
+I-->J[AMS正常启动坑位Activity]
+J-->K[目标进程newActivity]
+K-->L[RePluginClassLoader将坑位替换]
+L-->M[使用目标插件的PluginDexClassLoader加载真正的Activity_A]
+M-->N[拿到替换的Activity对象继续和AMS交互]
+N-->O[attach时替换Activity的上下文]</pre>
+
+
+
+
+        </div>
+        
+        
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2018-05-24T16:00:00.000Z">2018-05-25</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/">刀枪棍棒（Android）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/五虎断门刀（Android原生）/">五虎断门刀（Android原生）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    26 分钟 读完 (大约 3900 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/RePlugin之Host进程启动/">RePlugin之Host进程启动</a>
+            
+        </h1>
+        <div class="content">
+            <h4 id="常驻进程"><a href="#常驻进程" class="headerlink" title="常驻进程"></a>常驻进程</h4><p>RePlugin默认开启常驻进程，所谓常驻进程就是单独启动一个进程来运行插件服务，可以在gradle中配置关闭常驻进程，那么服务会运行在UI进程。</p>
+<figure class="highlight groovy hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">repluginHostConfig &#123;</span><br><span class="line">    <span class="hljs-comment">/** 是否使用常驻进程？ */</span></span><br><span class="line">    persistentEnable <span class="hljs-literal">false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="启用常驻进程下插件服务的启动"><a href="#启用常驻进程下插件服务的启动" class="headerlink" title="启用常驻进程下插件服务的启动"></a>启用常驻进程下插件服务的启动</h4><h5 id="UI进程启动"><a href="#UI进程启动" class="headerlink" title="UI进程启动"></a>UI进程启动</h5><p>创建RePluginApplication，在attachBaseContext函数中开始初始化RePlugin框架。</p>
+<h5 id="初始化RePlugin"><a href="#初始化RePlugin" class="headerlink" title="初始化RePlugin"></a>初始化RePlugin</h5><p>通过RePlugin.App.attachBaseContext函数初始化<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">attachBaseContext</span><span class="hljs-params">(Application app, RePluginConfig config)</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="hljs-comment">// 标记当前进程是UI进程还是常驻进程</span></span><br><span class="line">    IPC.init(app);</span><br><span class="line">    ...</span><br><span class="line">    <span class="hljs-comment">// 通过反射获取gradle中repluginHostConfig中的配置信息</span></span><br><span class="line">    HostConfigHelper.init();</span><br><span class="line">    ...</span><br><span class="line">    <span class="hljs-comment">// 创建PmBase对象，初始化插件管理框架，并且Hook应用的ClassLoader</span></span><br><span class="line">    PMF.init(app);</span><br><span class="line">    <span class="hljs-comment">// 挂载所有插件</span></span><br><span class="line">    PMF.callAttach();</span><br><span class="line"></span><br><span class="line">    sAttached = <span class="hljs-keyword">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h5 id="创建PmBase对象"><a href="#创建PmBase对象" class="headerlink" title="创建PmBase对象"></a>创建PmBase对象</h5><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">PmBase(Context context) &#123;</span><br><span class="line">    mContext = context;</span><br><span class="line">    <span class="hljs-comment">// 添加客户端进程对应的provider和service的authorities，用来启动对应的组件</span></span><br><span class="line">    <span class="hljs-comment">// processIndex是子进程个数，不能超过2</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (PluginManager.sPluginProcessIndex == IPluginManager.PROCESS_UI || PluginManager.isPluginProcess()) &#123;</span><br><span class="line">        String suffix;</span><br><span class="line">        <span class="hljs-keyword">if</span> (PluginManager.sPluginProcessIndex == IPluginManager.PROCESS_UI) &#123;</span><br><span class="line">            suffix = <span class="hljs-string">"N1"</span>;</span><br><span class="line">        &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">            suffix = <span class="hljs-string">""</span> + PluginManager.sPluginProcessIndex;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="hljs-comment">// 如果是UI进程则启动ProviderN1和ServiceN1</span></span><br><span class="line">        <span class="hljs-comment">// 如果是插件进程则启动Provider0、Provider1和Service0、Service1</span></span><br><span class="line">        mContainerProviders.add(IPC.getPackageName() + CONTAINER_PROVIDER_PART + suffix);</span><br><span class="line">        mContainerServices.add(IPC.getPackageName() + CONTAINER_SERVICE_PART + suffix);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// 4.创建Binder服务PluginClient，每个客户端都拥有一个该服务，常驻进程持有所有客户端进程该服务的代理对象，</span></span><br><span class="line">    <span class="hljs-comment">// 常驻进程通过mClient服务的代理调用客户端的PluginProcessPer服务</span></span><br><span class="line">    mClient = <span class="hljs-keyword">new</span> PluginProcessPer(context, <span class="hljs-keyword">this</span>, PluginManager.sPluginProcessIndex, mContainerActivities);</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">//</span></span><br><span class="line">    mLocal = <span class="hljs-keyword">new</span> PluginCommImpl(context, <span class="hljs-keyword">this</span>);</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">//</span></span><br><span class="line">    mInternal = <span class="hljs-keyword">new</span> PluginLibraryInternalProxy(<span class="hljs-keyword">this</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="创建PluginClient服务"><a href="#创建PluginClient服务" class="headerlink" title="创建PluginClient服务"></a>创建PluginClient服务</h5><p>每个客户端都有一个PluginClient服务，该服务包含PluginServiceServer子服务和一个坑管理容器，因此每个客户端进程都有一个自己的坑容器。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">PluginProcessPer(Context context, PmBase pm, <span class="hljs-keyword">int</span> process, HashSet&lt;String&gt; containers) &#123;</span><br><span class="line">    mContext = context;</span><br><span class="line">    mPluginMgr = pm;</span><br><span class="line">    <span class="hljs-comment">// 在服务中又创建了子服务 PluginServiceServer</span></span><br><span class="line">    mServiceMgr = <span class="hljs-keyword">new</span> PluginServiceServer(context);</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// 创建插件容器管理，坑的分配</span></span><br><span class="line">    mACM = <span class="hljs-keyword">new</span> PluginContainers();</span><br><span class="line">    <span class="hljs-comment">// UI进程和自定义子进程初始化给定启动模式的activity对应manifest中占的坑的名称</span></span><br><span class="line">    <span class="hljs-comment">// 也就是设置坑位</span></span><br><span class="line">    mACM.init(process, containers);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/RePlugin之Host进程启动/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+</div>
+                
+
+
+
+
+<div
+    class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left ">
+    
+    
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered" style="flex-shrink: 1">
+                <div>
+                    
+                    <figure class="image is-128x128 has-mb-6">
+                        <img class="" src="/images/avatar1.png" alt="zhenyu">
+                    </figure>
+                    
+                    <p class="is-size-4 is-block">
+                        zhenyu
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        富贵山庄无富贵，只留欢乐在此间
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>杭州</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        文章
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        38
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        分类
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        9
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        标签
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        0
+                    </p>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="level">
+            <a class="level-item button is-link is-rounded" href="https://github.com/witgao" target="_blank">
+                关注我</a>
+        </div>
+        
+        
+        
+    </div>
+</div>
+    
+    
+    
+    
+<div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                分类
+            </h3>
+            <ul class="menu-list">
+            <li>
+        <a class="level is-marginless" href="/categories/内功心法（CS基础）/">
+            <span class="level-start">
+                <span class="level-item">内功心法（CS基础）</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">9</span>
+            </span>
+        </a><ul><li>
+        <a class="level is-marginless" href="/categories/内功心法（CS基础）/北冥神功（编程语言）/">
+            <span class="level-start">
+                <span class="level-item">北冥神功（编程语言）</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">2</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/内功心法（CS基础）/神照功（网络协议）/">
+            <span class="level-start">
+                <span class="level-item">神照功（网络协议）</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">7</span>
+            </span>
+        </a></li></ul></li><li>
+        <a class="level is-marginless" href="/categories/刀枪棍棒（Android）/">
+            <span class="level-start">
+                <span class="level-item">刀枪棍棒（Android）</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">11</span>
+            </span>
+        </a><ul><li>
+        <a class="level is-marginless" href="/categories/刀枪棍棒（Android）/五虎断门刀（Android原生）/">
+            <span class="level-start">
+                <span class="level-item">五虎断门刀（Android原生）</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">7</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/刀枪棍棒（Android）/伏魔杖法（Flutter）/">
+            <span class="level-start">
+                <span class="level-item">伏魔杖法（Flutter）</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">4</span>
+            </span>
+        </a></li></ul></li><li>
+        <a class="level is-marginless" href="/categories/拳掌指腿（音视频）/">
+            <span class="level-start">
+                <span class="level-item">拳掌指腿（音视频）</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">18</span>
+            </span>
+        </a><ul><li>
+        <a class="level is-marginless" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">
+            <span class="level-start">
+                <span class="level-item">七伤拳（音视频基础）</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">10</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">
+            <span class="level-start">
+                <span class="level-item">降龙十八掌（FFmpeg）</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">8</span>
+            </span>
+        </a></li></ul></li>
+            </ul>
+        </div>
+    </div>
+</div>
+    
+    
+    <div class="column-right-shadow is-hidden-widescreen ">
+        
+        <div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            最新文章
+        </h3>
+        
+        <article class="media">
+            
+            <a href="/音视频开发之ffplay渲染线程分析/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/18.jpg" alt="音视频开发之ffplay渲染线程分析">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-04T16:00:00.000Z">2020-08-05</time></div>
+                    <a href="/音视频开发之ffplay渲染线程分析/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之ffplay渲染线程分析</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/音视频开发之ffplay解码线程分析/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/17.jpg" alt="音视频开发之ffplay解码线程分析">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-03T16:00:00.000Z">2020-08-04</time></div>
+                    <a href="/音视频开发之ffplay解码线程分析/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之ffplay解码线程分析</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/音视频开发之ffplay解复用线程分析/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/16.jpg" alt="音视频开发之ffplay解复用线程分析">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-02T16:00:00.000Z">2020-08-03</time></div>
+                    <a href="/音视频开发之ffplay解复用线程分析/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之ffplay解复用线程分析</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/音视频开发之ffplay队列分析/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/15.jpg" alt="音视频开发之ffplay队列分析">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-01T16:00:00.000Z">2020-08-02</time></div>
+                    <a href="/音视频开发之ffplay队列分析/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之ffplay队列分析</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/音视频开发之SDL2播放视频/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/14.jpg" alt="音视频开发之SDL2播放视频">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-07-31T16:00:00.000Z">2020-08-01</time></div>
+                    <a href="/音视频开发之SDL2播放视频/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之SDL2播放视频</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+    </div>
+</div>
+        
+        <div class="card widget is-hidden-mobile">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                归档
+            </h3>
+            <ul class="menu-list">
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/08/">
+                        <span class="level-start">
+                            <span class="level-item">八月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">6</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/07/">
+                        <span class="level-start">
+                            <span class="level-item">七月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">7</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/04/">
+                        <span class="level-start">
+                            <span class="level-item">四月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">2</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/03/">
+                        <span class="level-start">
+                            <span class="level-item">三月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/02/">
+                        <span class="level-start">
+                            <span class="level-item">二月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2019/12/">
+                        <span class="level-start">
+                            <span class="level-item">十二月 2019</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">2</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2019/10/">
+                        <span class="level-start">
+                            <span class="level-item">十月 2019</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2019/09/">
+                        <span class="level-start">
+                            <span class="level-item">九月 2019</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2019/02/">
+                        <span class="level-start">
+                            <span class="level-item">二月 2019</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2018/11/">
+                        <span class="level-start">
+                            <span class="level-item">十一月 2018</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">3</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2018/07/">
+                        <span class="level-start">
+                            <span class="level-item">七月 2018</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">2</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2018/06/">
+                        <span class="level-start">
+                            <span class="level-item">六月 2018</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2018/05/">
+                        <span class="level-start">
+                            <span class="level-item">五月 2018</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">3</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2017/12/">
+                        <span class="level-start">
+                            <span class="level-item">十二月 2017</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">7</span>
+                        </span>
+                    </a>
+                </li>
+                
+            </ul>
+        </div>
+    </div>
+</div>
+        
+        <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                标签
+            </h3>
+            <div class="field is-grouped is-grouped-multiline">
+                
+            </div>
+        </div>
+    </div>
+</div>
+        
+    </div>
+    
+</div>
+
+                
+
+
+
+
+<div
+    class="column is-4-tablet is-4-desktop is-3-widescreen is-hidden-touch is-hidden-desktop-only has-order-3 column-right ">
+    
+    <div class="card widget">
+    <div class="card-content">
+        <h3 class="menu-label">
+            最新文章
+        </h3>
+        
+        <article class="media">
+            
+            <a href="/音视频开发之ffplay渲染线程分析/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/18.jpg" alt="音视频开发之ffplay渲染线程分析">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-04T16:00:00.000Z">2020-08-05</time></div>
+                    <a href="/音视频开发之ffplay渲染线程分析/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之ffplay渲染线程分析</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/音视频开发之ffplay解码线程分析/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/17.jpg" alt="音视频开发之ffplay解码线程分析">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-03T16:00:00.000Z">2020-08-04</time></div>
+                    <a href="/音视频开发之ffplay解码线程分析/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之ffplay解码线程分析</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/音视频开发之ffplay解复用线程分析/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/16.jpg" alt="音视频开发之ffplay解复用线程分析">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-02T16:00:00.000Z">2020-08-03</time></div>
+                    <a href="/音视频开发之ffplay解复用线程分析/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之ffplay解复用线程分析</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/音视频开发之ffplay队列分析/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/15.jpg" alt="音视频开发之ffplay队列分析">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-01T16:00:00.000Z">2020-08-02</time></div>
+                    <a href="/音视频开发之ffplay队列分析/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之ffplay队列分析</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
+            <a href="/音视频开发之SDL2播放视频/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/14.jpg" alt="音视频开发之SDL2播放视频">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-07-31T16:00:00.000Z">2020-08-01</time></div>
+                    <a href="/音视频开发之SDL2播放视频/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之SDL2播放视频</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+    </div>
+</div>
+    
+    <div class="card widget is-hidden-mobile">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                归档
+            </h3>
+            <ul class="menu-list">
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/08/">
+                        <span class="level-start">
+                            <span class="level-item">八月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">6</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/07/">
+                        <span class="level-start">
+                            <span class="level-item">七月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">7</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/04/">
+                        <span class="level-start">
+                            <span class="level-item">四月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">2</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/03/">
+                        <span class="level-start">
+                            <span class="level-item">三月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/02/">
+                        <span class="level-start">
+                            <span class="level-item">二月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2019/12/">
+                        <span class="level-start">
+                            <span class="level-item">十二月 2019</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">2</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2019/10/">
+                        <span class="level-start">
+                            <span class="level-item">十月 2019</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2019/09/">
+                        <span class="level-start">
+                            <span class="level-item">九月 2019</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2019/02/">
+                        <span class="level-start">
+                            <span class="level-item">二月 2019</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2018/11/">
+                        <span class="level-start">
+                            <span class="level-item">十一月 2018</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">3</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2018/07/">
+                        <span class="level-start">
+                            <span class="level-item">七月 2018</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">2</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2018/06/">
+                        <span class="level-start">
+                            <span class="level-item">六月 2018</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2018/05/">
+                        <span class="level-start">
+                            <span class="level-item">五月 2018</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">3</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2017/12/">
+                        <span class="level-start">
+                            <span class="level-item">十二月 2017</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">7</span>
+                        </span>
+                    </a>
+                </li>
+                
+            </ul>
+        </div>
+    </div>
+</div>
+    
+    <div class="card widget">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                标签
+            </h3>
+            <div class="field is-grouped is-grouped-multiline">
+                
+            </div>
+        </div>
+    </div>
+</div>
+    
+    
+</div>
+
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <!-- <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="/images/logo2.png" alt="富贵山庄" height="28">
+                
+                </a> -->
+                <p class="is-size-7">
+                    &copy; 2020 zhenyu&nbsp;
+                    Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a
+                        href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank">Icarus</a>
+                    
+                </p>
+            </div>
+            <div class="level-end">
+                
+            </div>
+        </div>
+    </div>
+</footer>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("zh-CN");</script>
+
+<script>
+var IcarusThemeSettings = {
+    article: {
+        highlight: {
+            clipboard: true,
+            fold: 'unfolded'
+        }
+    }
+};
+</script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+
+
+
+    
+    
+<script src="/js/animation.js"></script>
+
+    
+    
+<script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+<script src="/js/gallery.js" defer></script>
+
+    
+    
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    MathJax.Hub.Config({
+        'HTML-CSS': {
+            matchFontHeight: false
+        },
+        SVG: {
+            matchFontHeight: false
+        },
+        CommonHTML: {
+            matchFontHeight: false
+        },
+        tex2jax: {
+            inlineMath: [
+                ['$','$'],
+                ['\\(','\\)']
+            ]
+        }
+    });
+});
+</script>
+    
+    
+<a id="back-to-top" title="回到顶端" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="想要查找什么..." />
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: '文章',
+                PAGES: '页面',
+                CATEGORIES: '分类',
+                TAGS: '标签',
+                UNTITLED: '(无标题)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+</body>
+
+</html>

@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html  lang="zh">
+
+<head>
+    <meta charset="utf-8" />
+
+<meta name="generator" content="Hexo 3.9.0" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<title>SurfaceFlinger深入之Layer创建与渲染 - 富贵山庄</title>
+
+
+    <meta name="description" content="一切的开始resumeActivity在Activity第一次执行resume的时候，会将DecorView添加到WindowManager中，由此开始了Activity视图显示的第一步。 1234567891011121314151617181920212223final void handleResumeActivity(IBinder token,        boolean clearH">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SurfaceFlinger深入之Layer创建与渲染">
+<meta property="og:url" content="https://witgao.com/SurfaceFlinger深入之Layer创建与渲染/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:description" content="一切的开始resumeActivity在Activity第一次执行resume的时候，会将DecorView添加到WindowManager中，由此开始了Activity视图显示的第一步。 1234567891011121314151617181920212223final void handleResumeActivity(IBinder token,        boolean clearH">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://witgao.com/images/og_image.png">
+<meta property="og:updated_time" content="2020-07-13T13:45:35.744Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SurfaceFlinger深入之Layer创建与渲染">
+<meta name="twitter:description" content="一切的开始resumeActivity在Activity第一次执行resume的时候，会将DecorView添加到WindowManager中，由此开始了Activity视图显示的第一步。 1234567891011121314151617181920212223final void handleResumeActivity(IBinder token,        boolean clearH">
+<meta name="twitter:image" content="https://witgao.com/images/og_image.png">
+
+
+
+
+
+
+
+<link rel="icon" href="/images/favicon1.svg">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/default.css">
+
+
+    
+    
+<style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+    
+    
+    
+    
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+    
+    
+    
+    
+    
+    
+    
+    <link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+    
+    
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body class="is-3-column">
+    <nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="/images/logo2.png" alt="SurfaceFlinger深入之Layer创建与渲染" height="28">
+            
+            </a>
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item"
+                href="/">燕子坞</a>
+                
+                <a class="navbar-item"
+                href="/archives">听香水榭</a>
+                
+                <a class="navbar-item"
+                href="/categories">还施水阁</a>
+                
+                <a class="navbar-item"
+                href="/about">思过崖</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    <a class="navbar-item" target="_blank" title="Download on GitHub" href="https://github.com/witgao/blog">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                <a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;">
+                    <i class="fas fa-list-ul"></i>
+                </a>
+                
+                
+                <a class="navbar-item search" title="搜索" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-9-widescreen has-order-2 column-main">
+<div class="card">
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2019-12-14T16:00:00.000Z">2019-12-15</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/">刀枪棍棒（Android）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/五虎断门刀（Android原生）/">五虎断门刀（Android原生）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    21 分钟 读完 (大约 3161 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            SurfaceFlinger深入之Layer创建与渲染
+            
+        </h1>
+        <div class="content">
+            <h3 id="一切的开始resumeActivity"><a href="#一切的开始resumeActivity" class="headerlink" title="一切的开始resumeActivity"></a>一切的开始resumeActivity</h3><p>在Activity第一次执行resume的时候，会将DecorView添加到WindowManager中，由此开始了Activity视图显示的第一步。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">final</span> <span class="hljs-keyword">void</span> <span class="hljs-title">handleResumeActivity</span><span class="hljs-params">(IBinder token,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">        <span class="hljs-keyword">boolean</span> clearHide, <span class="hljs-keyword">boolean</span> isForward, <span class="hljs-keyword">boolean</span> reallyResume, <span class="hljs-keyword">int</span> seq, String reason)</span> </span>&#123;</span><br><span class="line">        ...</span><br><span class="line">        <span class="hljs-keyword">final</span> Activity a = r.activity;</span><br><span class="line">		...</span><br><span class="line">        <span class="hljs-keyword">if</span> (r.window == <span class="hljs-keyword">null</span> &amp;&amp; !a.mFinished &amp;&amp; willBeVisible) &#123;</span><br><span class="line">            r.window = r.activity.getWindow();</span><br><span class="line">            View decor = r.window.getDecorView();</span><br><span class="line">            decor.setVisibility(View.INVISIBLE);</span><br><span class="line">            ViewManager wm = a.getWindowManager();</span><br><span class="line">            ...</span><br><span class="line">            <span class="hljs-keyword">if</span> (a.mVisibleFromClient) &#123;</span><br><span class="line">                <span class="hljs-keyword">if</span> (!a.mWindowAdded) &#123;</span><br><span class="line">                    a.mWindowAdded = <span class="hljs-keyword">true</span>;</span><br><span class="line">                    wm.addView(decor, l);</span><br><span class="line">                &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">                  ...</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">          ...</span><br><span class="line">        &#125;</span><br><span class="line">        ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="WindowManager-addView"><a href="#WindowManager-addView" class="headerlink" title="WindowManager.addView"></a>WindowManager.addView</h4><p>WindowManagerImpl最终会调用到WindowManagerGlobal中，在WindowManagerGlobal中会创建一个ViewRootImpl对象，每个DecorView都会有对应的ViewRootImpl对象，而一个Window中可以有多个DecorView。</p>
+<p>ViewRootImpl负责与WMS通信，通过其维护的IWindowSession对象来与WMS进行通信。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">addView</span><span class="hljs-params">(View view, ViewGroup.LayoutParams params,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">        Display display, Window parentWindow)</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    ViewRootImpl root;</span><br><span class="line">    View panelParentView = <span class="hljs-keyword">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">synchronized</span> (mLock) &#123;</span><br><span class="line">        ...</span><br><span class="line">        root = <span class="hljs-keyword">new</span> ViewRootImpl(view.getContext(), display);</span><br><span class="line"></span><br><span class="line">        view.setLayoutParams(wparams);</span><br><span class="line"></span><br><span class="line">        mViews.add(view);</span><br><span class="line">        mRoots.add(root);</span><br><span class="line">        mParams.add(wparams);</span><br><span class="line"></span><br><span class="line">        <span class="hljs-comment">// do this last because it fires off messages to start doing things</span></span><br><span class="line">        <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">            root.setView(view, wparams, panelParentView);</span><br><span class="line">        &#125; <span class="hljs-keyword">catch</span> (RuntimeException e) &#123;</span><br><span class="line">            ...</span><br><span class="line">            <span class="hljs-keyword">throw</span> e;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+ <a id="more"></a>
+<h4 id="ViewRootImpl-setView"><a href="#ViewRootImpl-setView" class="headerlink" title="ViewRootImpl.setView"></a>ViewRootImpl.setView</h4><p>通过WindowSession与WMS通信，将Window对象交给WMS，WMS通过Window对象与ViewRootImpl通信。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">setView</span><span class="hljs-params">(View view, WindowManager.LayoutParams attrs, View panelParentView)</span> </span>&#123;</span><br><span class="line">    <span class="hljs-keyword">synchronized</span> (<span class="hljs-keyword">this</span>) &#123;</span><br><span class="line">        <span class="hljs-keyword">if</span> (mView == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">            mView = view;</span><br><span class="line">            ...</span><br><span class="line">            <span class="hljs-comment">// If the application owns the surface, don't enable hardware acceleration</span></span><br><span class="line">            <span class="hljs-keyword">if</span> (mSurfaceHolder == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">                <span class="hljs-comment">// While this is supposed to enable only, it can effectively disable</span></span><br><span class="line">                <span class="hljs-comment">// the acceleration too.</span></span><br><span class="line">                <span class="hljs-comment">// 开启硬件渲染</span></span><br><span class="line">                enableHardwareAcceleration(attrs);</span><br><span class="line">                ...</span><br><span class="line">            &#125;</span><br><span class="line">				...</span><br><span class="line">            <span class="hljs-comment">// Schedule the first layout -before- adding to the window</span></span><br><span class="line">            <span class="hljs-comment">// manager, to make sure we do the relayout before receiving</span></span><br><span class="line">            <span class="hljs-comment">// any other events from the system.</span></span><br><span class="line">            <span class="hljs-comment">// post一次渲染请求，等待SF连接成功后调用</span></span><br><span class="line">            requestLayout();</span><br><span class="line">            ...</span><br><span class="line">            <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">                ...</span><br><span class="line">                <span class="hljs-comment">// 将mWindow添加到WMS上，WMS使用其与应用端进行通信，具体操作会对应到ViewRootImpl中</span></span><br><span class="line">                res = mWindowSession.addToDisplay(mWindow, mSeq, mWindowAttributes,</span><br><span class="line">                        getHostVisibility(), mDisplay.getDisplayId(),</span><br><span class="line">                        mAttachInfo.mContentInsets, mAttachInfo.mStableInsets,</span><br><span class="line">                        mAttachInfo.mOutsets, mInputChannel);</span><br><span class="line">            &#125; </span><br><span class="line">				...</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="WMS-addWindow"><a href="#WMS-addWindow" class="headerlink" title="WMS.addWindow"></a>WMS.addWindow</h4><p>SurfaceSession对应着C层的SurfaceComposerClient，该对象是用来与SurfaceFlinger进行通信的。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">addWindow</span><span class="hljs-params">(Session session, IWindow client, <span class="hljs-keyword">int</span> seq,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">        WindowManager.LayoutParams attrs, <span class="hljs-keyword">int</span> viewVisibility, <span class="hljs-keyword">int</span> displayId,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">        Rect outContentInsets, Rect outStableInsets, Rect outOutsets,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">        InputChannel outInputChannel)</span> </span>&#123;</span><br><span class="line">			...</span><br><span class="line">        <span class="hljs-keyword">final</span> WindowState win = <span class="hljs-keyword">new</span> WindowState(<span class="hljs-keyword">this</span>, session, client, token, parentWindow,</span><br><span class="line">                appOp[<span class="hljs-number">0</span>], seq, attrs, viewVisibility, session.mUid,</span><br><span class="line">                session.mCanAddInternalSystemWindow);</span><br><span class="line">		...</span><br><span class="line">        <span class="hljs-comment">// 创建SurfaceSession()，保存在应用端的WindowSession中，用来与SurfaceFlinger通信</span></span><br><span class="line">        win.attach();</span><br><span class="line">  			<span class="hljs-comment">// WindowMap管理所有添加到WMS上的Window</span></span><br><span class="line">        mWindowMap.put(client.asBinder(), win);</span><br><span class="line">		...</span><br><span class="line">        win.mToken.addWindow(win);</span><br><span class="line">        ...</span><br><span class="line">    		<span class="hljs-keyword">return</span> res;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="连接SF"><a href="#连接SF" class="headerlink" title="连接SF"></a>连接SF</h4><p>SurfaceSession维护了C层的SurfaceComposerClient对象</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">SurfaceSession</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">     mNativeClient = nativeCreate();</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> jlong <span class="hljs-title">nativeCreate</span><span class="hljs-params">(JNIEnv* env, jclass clazz)</span> </span>&#123;</span><br><span class="line">    <span class="hljs-comment">// 创建SurfaceComposerClient对象</span></span><br><span class="line">    SurfaceComposerClient* client = <span class="hljs-keyword">new</span> SurfaceComposerClient();</span><br><span class="line">    client-&gt;incStrong((<span class="hljs-keyword">void</span>*)nativeCreate);</span><br><span class="line">    <span class="hljs-keyword">return</span> <span class="hljs-keyword">reinterpret_cast</span>&lt;jlong&gt;(client);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="SurfaceComposerClient-onFirstRef"><a href="#SurfaceComposerClient-onFirstRef" class="headerlink" title="SurfaceComposerClient.onFirstRef"></a>SurfaceComposerClient.onFirstRef</h5><p>在SurfaceComposerClient对象被第一次强引用的时候（引用计数器变为1），会触发该方法。在该方法里从SF中请求一个Client连接对象，通过该Client对象与SF通信。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">void</span> SurfaceComposerClient::onFirstRef() &#123;</span><br><span class="line">    sp&lt;ISurfaceComposer&gt; sm(ComposerService::getComposerService());</span><br><span class="line">    <span class="hljs-keyword">if</span> (sm != <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        <span class="hljs-keyword">auto</span> rootProducer = mParent.promote();</span><br><span class="line">        sp&lt;ISurfaceComposerClient&gt; conn;</span><br><span class="line">        <span class="hljs-comment">// 创建与SF的连接,通过返回的ISurfaceComposerClient对象与SF进行通信</span></span><br><span class="line">        conn = (rootProducer != <span class="hljs-literal">nullptr</span>) ? sm-&gt;createScopedConnection(rootProducer) :</span><br><span class="line">                sm-&gt;createConnection();</span><br><span class="line">        <span class="hljs-keyword">if</span> (conn != <span class="hljs-number">0</span>) &#123;</span><br><span class="line">            mClient = conn;</span><br><span class="line">            mStatus = NO_ERROR;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="SF-createConnection"><a href="#SF-createConnection" class="headerlink" title="SF.createConnection"></a>SF.createConnection</h5><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sp&lt;ISurfaceComposerClient&gt; SurfaceFlinger::createConnection() &#123;</span><br><span class="line">    <span class="hljs-keyword">return</span> initClient(<span class="hljs-keyword">new</span> Client(<span class="hljs-keyword">this</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="ViewRootImpl-doTraversal创建和渲染"><a href="#ViewRootImpl-doTraversal创建和渲染" class="headerlink" title="ViewRootImpl.doTraversal创建和渲染"></a>ViewRootImpl.doTraversal创建和渲染</h3><h4 id="ViewRootImpl-relayoutWindow创建Layer"><a href="#ViewRootImpl-relayoutWindow创建Layer" class="headerlink" title="ViewRootImpl.relayoutWindow创建Layer"></a>ViewRootImpl.relayoutWindow创建Layer</h4><p>与SF建立连接后，上面post的渲染请求被执行，会通知WMS进行relayout，在该方法的最后一个参数是Surface，这个Surface是在ViewRootImpl创建的时候就创建好的，目前只是一个空壳子。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">final</span> Surface mSurface = <span class="hljs-keyword">new</span> Surface();</span><br><span class="line">   </span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">int</span> <span class="hljs-title">relayoutWindow</span><span class="hljs-params">(WindowManager.LayoutParams params, <span class="hljs-keyword">int</span> viewVisibility,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">            <span class="hljs-keyword">boolean</span> insetsPending)</span> <span class="hljs-keyword">throws</span> RemoteException </span>&#123;</span><br><span class="line">        ...</span><br><span class="line">        <span class="hljs-keyword">int</span> relayoutResult = mWindowSession.relayout(</span><br><span class="line">                mWindow, mSeq, params,</span><br><span class="line">                (<span class="hljs-keyword">int</span>) (mView.getMeasuredWidth() * appScale + <span class="hljs-number">0.5f</span>),</span><br><span class="line">                (<span class="hljs-keyword">int</span>) (mView.getMeasuredHeight() * appScale + <span class="hljs-number">0.5f</span>),</span><br><span class="line">                viewVisibility, insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : <span class="hljs-number">0</span>,</span><br><span class="line">                mWinFrame, mPendingOverscanInsets, mPendingContentInsets, mPendingVisibleInsets,</span><br><span class="line">                mPendingStableInsets, mPendingOutsets, mPendingBackDropFrame,</span><br><span class="line">                mPendingMergedConfiguration, mSurface);</span><br><span class="line">				...</span><br><span class="line">        <span class="hljs-keyword">return</span> relayoutResult;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h5 id="WMS-relayoutWindow"><a href="#WMS-relayoutWindow" class="headerlink" title="WMS.relayoutWindow"></a>WMS.relayoutWindow</h5><p>Java层的SurfaceControl对应着C层的SurfaceControl，SurfaceControl负责与SF进行通信。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">relayoutWindow</span><span class="hljs-params">(Session session, IWindow client, <span class="hljs-keyword">int</span> seq,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">        WindowManager.LayoutParams attrs, <span class="hljs-keyword">int</span> requestedWidth,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">        <span class="hljs-keyword">int</span> requestedHeight, <span class="hljs-keyword">int</span> viewVisibility, <span class="hljs-keyword">int</span> flags,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">        Rect outFrame, Rect outOverscanInsets, Rect outContentInsets,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">        Rect outVisibleInsets, Rect outStableInsets, Rect outOutsets, Rect outBackdropFrame,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">        MergedConfiguration mergedConfiguration, Surface outSurface)</span> </span>&#123;</span><br><span class="line">   </span><br><span class="line">    <span class="hljs-keyword">synchronized</span>(mWindowMap) &#123;</span><br><span class="line">        WindowState win = windowForClientLocked(session, client, <span class="hljs-keyword">false</span>);</span><br><span class="line">        ...</span><br><span class="line">        <span class="hljs-keyword">if</span> (shouldRelayout) &#123;</span><br><span class="line">    				...</span><br><span class="line">            <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">                <span class="hljs-comment">// 创建SurfaceControl对象，SurfaceControl对象负责与SF进行通信</span></span><br><span class="line">                result = createSurfaceControl(outSurface, result, win, winAnimator);</span><br><span class="line">            &#125; <span class="hljs-keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                ...</span><br><span class="line">                <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;</span><br><span class="line">            &#125;</span><br><span class="line">           </span><br><span class="line">        &#125; </span><br><span class="line">        ...</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">int</span> <span class="hljs-title">createSurfaceControl</span><span class="hljs-params">(Surface outSurface, <span class="hljs-keyword">int</span> result, WindowState win,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">        WindowStateAnimator winAnimator)</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    WindowSurfaceController surfaceController;</span><br><span class="line">    <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">        <span class="hljs-comment">// 创建Java层和C层SurfaceControl</span></span><br><span class="line">        surfaceController = winAnimator.createSurfaceLocked(win.mAttrs.type, win.mOwnerUid);</span><br><span class="line">    &#125; </span><br><span class="line">    <span class="hljs-keyword">if</span> (surfaceController != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">        <span class="hljs-comment">// 创建C层Surface，并关联Java层Surface</span></span><br><span class="line">        surfaceController.getSurface(outSurface);</span><br><span class="line">    &#125; </span><br><span class="line">    <span class="hljs-keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="创建SurfaceControl"><a href="#创建SurfaceControl" class="headerlink" title="创建SurfaceControl"></a>创建SurfaceControl</h5><h6 id="创建Java层SurfaceControl"><a href="#创建Java层SurfaceControl" class="headerlink" title="创建Java层SurfaceControl"></a>创建Java层SurfaceControl</h6><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">SurfaceControl</span><span class="hljs-params">(SurfaceSession session, String name, <span class="hljs-keyword">int</span> w, <span class="hljs-keyword">int</span> h, <span class="hljs-keyword">int</span> format, <span class="hljs-keyword">int</span> flags,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">        SurfaceControl parent, <span class="hljs-keyword">int</span> windowType, <span class="hljs-keyword">int</span> ownerUid)</span></span></span><br><span class="line"><span class="hljs-function">                <span class="hljs-keyword">throws</span> OutOfResourcesException </span>&#123;</span><br><span class="line">   </span><br><span class="line">    mName = name;</span><br><span class="line">    <span class="hljs-comment">// 创建C层SurfaceControl</span></span><br><span class="line">    mNativeObject = nativeCreate(session, name, w, h, format, flags,</span><br><span class="line">        parent != <span class="hljs-keyword">null</span> ? parent.mNativeObject : <span class="hljs-number">0</span>, windowType, ownerUid);</span><br><span class="line"> </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="创建C层SurfaceControl"><a href="#创建C层SurfaceControl" class="headerlink" title="创建C层SurfaceControl"></a>创建C层SurfaceControl</h6><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> jlong <span class="hljs-title">nativeCreate</span><span class="hljs-params">(JNIEnv* env, jclass clazz, jobject sessionObj,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">        jstring nameStr, jint w, jint h, jint format, jint flags, jlong parentObject,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">        jint windowType, jint ownerUid)</span> </span>&#123;</span><br><span class="line">    <span class="hljs-comment">// 获取到SurfaceSession对象，用来与SF通信</span></span><br><span class="line">    sp&lt;SurfaceComposerClient&gt; client(android_view_SurfaceSession_getClient(env, sessionObj));</span><br><span class="line">    SurfaceControl *parent = <span class="hljs-keyword">reinterpret_cast</span>&lt;SurfaceControl*&gt;(parentObject);</span><br><span class="line">    <span class="hljs-comment">// 创建SurfaceControl</span></span><br><span class="line">    sp&lt;SurfaceControl&gt; surface = client-&gt;createSurface(</span><br><span class="line">            String8(name.c_str()), w, h, format, flags, parent, windowType, ownerUid);</span><br><span class="line">    <span class="hljs-keyword">if</span> (surface == <span class="hljs-literal">NULL</span>) &#123;</span><br><span class="line">        jniThrowException(env, OutOfResourcesException, <span class="hljs-literal">NULL</span>);</span><br><span class="line">        <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    surface-&gt;incStrong((<span class="hljs-keyword">void</span> *)nativeCreate);</span><br><span class="line">    <span class="hljs-keyword">return</span> <span class="hljs-keyword">reinterpret_cast</span>&lt;jlong&gt;(surface.get());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">sp&lt;SurfaceControl&gt; SurfaceComposerClient::createSurface(</span><br><span class="line">        <span class="hljs-keyword">const</span> String8&amp; name,</span><br><span class="line">        <span class="hljs-keyword">uint32_t</span> w,</span><br><span class="line">        <span class="hljs-keyword">uint32_t</span> h,</span><br><span class="line">        PixelFormat format,</span><br><span class="line">        <span class="hljs-keyword">uint32_t</span> flags,</span><br><span class="line">        SurfaceControl* parent,</span><br><span class="line">        <span class="hljs-keyword">uint32_t</span> windowType,</span><br><span class="line">        <span class="hljs-keyword">uint32_t</span> ownerUid)</span><br><span class="line">&#123;</span><br><span class="line">    sp&lt;SurfaceControl&gt; sur;</span><br><span class="line">    <span class="hljs-keyword">if</span> (mStatus == NO_ERROR) &#123;</span><br><span class="line">        sp&lt;IBinder&gt; handle;</span><br><span class="line">        sp&lt;IBinder&gt; parentHandle;</span><br><span class="line">        sp&lt;IGraphicBufferProducer&gt; gbp;</span><br><span class="line"></span><br><span class="line">        <span class="hljs-keyword">if</span> (parent != <span class="hljs-literal">nullptr</span>) &#123;</span><br><span class="line">            parentHandle = parent-&gt;getHandle();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="hljs-comment">// 请求SF创建Layer，并返回该Layer的IGraphicBufferProducer</span></span><br><span class="line">        <span class="hljs-keyword">status_t</span> err = mClient-&gt;createSurface(name, w, h, format, flags, parentHandle,</span><br><span class="line">                windowType, ownerUid, &amp;handle, &amp;gbp);</span><br><span class="line">        <span class="hljs-keyword">if</span> (err == NO_ERROR) &#123;</span><br><span class="line">          	<span class="hljs-comment">// 创建SurfaceControl，gbp对象会交给Surface对象，Surface对象通过gbp与Layer进行Buffer的通信</span></span><br><span class="line">            sur = <span class="hljs-keyword">new</span> SurfaceControl(<span class="hljs-keyword">this</span>, handle, gbp);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">return</span> sur;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="SF-createLayer"><a href="#SF-createLayer" class="headerlink" title="SF.createLayer"></a>SF.createLayer</h5><p>在SurfaceFlinger中，Surface对应的概念叫Layer。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">status_t</span> SurfaceFlinger::createLayer(</span><br><span class="line">        <span class="hljs-keyword">const</span> String8&amp; name,</span><br><span class="line">        <span class="hljs-keyword">const</span> sp&lt;Client&gt;&amp; client,</span><br><span class="line">        <span class="hljs-keyword">uint32_t</span> w, <span class="hljs-keyword">uint32_t</span> h, PixelFormat format, <span class="hljs-keyword">uint32_t</span> flags,</span><br><span class="line">        <span class="hljs-keyword">uint32_t</span> windowType, <span class="hljs-keyword">uint32_t</span> ownerUid, sp&lt;IBinder&gt;* handle,</span><br><span class="line">        sp&lt;IGraphicBufferProducer&gt;* gbp, sp&lt;Layer&gt;* parent)</span><br><span class="line">&#123;</span><br><span class="line">  </span><br><span class="line">    sp&lt;Layer&gt; layer;</span><br><span class="line"></span><br><span class="line">    String8 uniqueName = getUniqueLayerName(name);</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">switch</span> (flags &amp; ISurfaceComposerClient::eFXSurfaceMask) &#123;</span><br><span class="line">        <span class="hljs-keyword">case</span> ISurfaceComposerClient::eFXSurfaceNormal:</span><br><span class="line">            result = createNormalLayer(client,</span><br><span class="line">                    uniqueName, w, h, flags, format,</span><br><span class="line">                    handle, gbp, &amp;layer);</span><br><span class="line">            <span class="hljs-keyword">break</span>;</span><br><span class="line">        <span class="hljs-keyword">case</span> ISurfaceComposerClient::eFXSurfaceDim:</span><br><span class="line">            result = createDimLayer(client,</span><br><span class="line">                    uniqueName, w, h, flags,</span><br><span class="line">                    handle, gbp, &amp;layer);</span><br><span class="line">            <span class="hljs-keyword">break</span>;</span><br><span class="line">        <span class="hljs-keyword">default</span>:</span><br><span class="line">            result = BAD_VALUE;</span><br><span class="line">            <span class="hljs-keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">		...</span><br><span class="line">    result = addClientLayer(client, *handle, *gbp, layer, *parent);</span><br><span class="line">    ...</span><br><span class="line">    <span class="hljs-keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">void</span> Layer::onFirstRef() &#123;</span><br><span class="line">    <span class="hljs-comment">// Creates a custom BufferQueue for SurfaceFlingerConsumer to use</span></span><br><span class="line">    sp&lt;IGraphicBufferProducer&gt; producer;</span><br><span class="line">    sp&lt;IGraphicBufferConsumer&gt; consumer;</span><br><span class="line">    BufferQueue::createBufferQueue(&amp;producer, &amp;consumer, <span class="hljs-literal">true</span>);</span><br><span class="line">    <span class="hljs-comment">// mProducer就是交给Surface中维护的gbp对象，所以Surface就是BufferQueue的生产者</span></span><br><span class="line">    mProducer = <span class="hljs-keyword">new</span> MonitoredProducer(producer, mFlinger, <span class="hljs-keyword">this</span>);</span><br><span class="line">    <span class="hljs-comment">// 而SurfaceFlinger是BufferQueue的消费者</span></span><br><span class="line">    mSurfaceFlingerConsumer = <span class="hljs-keyword">new</span> SurfaceFlingerConsumer(consumer, mTextureName, <span class="hljs-keyword">this</span>);</span><br><span class="line">    mSurfaceFlingerConsumer-&gt;setConsumerUsageBits(getEffectiveUsage(<span class="hljs-number">0</span>));</span><br><span class="line">    mSurfaceFlingerConsumer-&gt;setContentsChangedListener(<span class="hljs-keyword">this</span>);</span><br><span class="line">    mSurfaceFlingerConsumer-&gt;setName(mName);</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (mFlinger-&gt;isLayerTripleBufferingDisabled()) &#123;</span><br><span class="line">        mProducer-&gt;setMaxDequeuedBufferCount(<span class="hljs-number">2</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">const</span> sp&lt;<span class="hljs-keyword">const</span> DisplayDevice&gt; hw(mFlinger-&gt;getDefaultDisplayDevice());</span><br><span class="line">    updateTransformHint(hw);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="创建Surface"><a href="#创建Surface" class="headerlink" title="创建Surface"></a>创建Surface</h5><h6 id="Surface-copyFrom"><a href="#Surface-copyFrom" class="headerlink" title="Surface.copyFrom"></a>Surface.copyFrom</h6><p>通过SurfaceControl创建C层的Surface，并关联到Java层Surface中。</p>
+<p>最终创建完成后，SurfaceControl用SurfaceComposerClient与SurfaceFlinger通信。Surface用IGraphicBufferProducer与Layer进行通信。SurfaceControl由WindowManager来控制，而Surface由ViewRootImpl来控制。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">copyFrom</span><span class="hljs-params">(SurfaceControl other)</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="hljs-keyword">long</span> surfaceControlPtr = other.mNativeObject;</span><br><span class="line">    </span><br><span class="line">    <span class="hljs-keyword">long</span> newNativeObject = nativeGetFromSurfaceControl(surfaceControlPtr);</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">synchronized</span> (mLock) &#123;</span><br><span class="line">        <span class="hljs-keyword">if</span> (mNativeObject != <span class="hljs-number">0</span>) &#123;</span><br><span class="line">            nativeRelease(mNativeObject);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="hljs-comment">// 关联C层Surface</span></span><br><span class="line">        setNativeObjectLocked(newNativeObject);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> jlong <span class="hljs-title">nativeGetFromSurfaceControl</span><span class="hljs-params">(JNIEnv* env, jclass clazz,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">        jlong surfaceControlNativeObj)</span> </span>&#123;</span><br><span class="line">    <span class="hljs-comment">// 获取SurfaceControl对象</span></span><br><span class="line">    sp&lt;SurfaceControl&gt; ctrl(<span class="hljs-keyword">reinterpret_cast</span>&lt;SurfaceControl *&gt;(surfaceControlNativeObj));</span><br><span class="line">    sp&lt;Surface&gt; surface(ctrl-&gt;getSurface());</span><br><span class="line">    <span class="hljs-keyword">if</span> (surface != <span class="hljs-literal">NULL</span>) &#123;</span><br><span class="line">        surface-&gt;incStrong(&amp;sRefBaseOwner);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">return</span> <span class="hljs-keyword">reinterpret_cast</span>&lt;jlong&gt;(surface.get());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">sp&lt;Surface&gt; SurfaceControl::generateSurfaceLocked() <span class="hljs-keyword">const</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="hljs-comment">// This surface is always consumed by SurfaceFlinger, so the</span></span><br><span class="line">    <span class="hljs-comment">// producerControlledByApp value doesn't matter; using false.</span></span><br><span class="line">    <span class="hljs-comment">// 将Layer中的生产者对象gbp交给Surface来维护，Surface通过该对象来与Layer通信。</span></span><br><span class="line">    mSurfaceData = <span class="hljs-keyword">new</span> Surface(mGraphicBufferProducer, <span class="hljs-literal">false</span>);</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">return</span> mSurfaceData;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="ViewRootImpl-performDraw开始渲染"><a href="#ViewRootImpl-performDraw开始渲染" class="headerlink" title="ViewRootImpl.performDraw开始渲染"></a>ViewRootImpl.performDraw开始渲染</h4><p>在setView时，就会根据window的属性来判断是否开启了硬件渲染，如果开启了则会创建ThreadedRenderer对象。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">draw</span><span class="hljs-params">(<span class="hljs-keyword">boolean</span> fullRedrawNeeded)</span> </span>&#123;</span><br><span class="line">    Surface surface = mSurface;</span><br><span class="line">    ...</span><br><span class="line">    <span class="hljs-keyword">final</span> Rect dirty = mDirty;</span><br><span class="line">    ...</span><br><span class="line">    <span class="hljs-keyword">if</span> (!dirty.isEmpty() || mIsAnimating || accessibilityFocusDirty) &#123;</span><br><span class="line">      	<span class="hljs-comment">// 硬件渲染</span></span><br><span class="line">        <span class="hljs-keyword">if</span> (mAttachInfo.mThreadedRenderer != <span class="hljs-keyword">null</span> &amp;&amp; mAttachInfo.mThreadedRenderer.isEnabled()) &#123;</span><br><span class="line">            <span class="hljs-comment">// If accessibility focus moved, always invalidate the root.</span></span><br><span class="line">            <span class="hljs-keyword">boolean</span> invalidateRoot = accessibilityFocusDirty || mInvalidateRootRequested;</span><br><span class="line">            mInvalidateRootRequested = <span class="hljs-keyword">false</span>;</span><br><span class="line"></span><br><span class="line">            <span class="hljs-comment">// Draw with hardware renderer.</span></span><br><span class="line">            mIsAnimating = <span class="hljs-keyword">false</span>;</span><br><span class="line"></span><br><span class="line">            <span class="hljs-keyword">if</span> (mHardwareYOffset != yOffset || mHardwareXOffset != xOffset) &#123;</span><br><span class="line">                mHardwareYOffset = yOffset;</span><br><span class="line">                mHardwareXOffset = xOffset;</span><br><span class="line">                invalidateRoot = <span class="hljs-keyword">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="hljs-keyword">if</span> (invalidateRoot) &#123;</span><br><span class="line">                mAttachInfo.mThreadedRenderer.invalidateRoot();</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            dirty.setEmpty();</span><br><span class="line"></span><br><span class="line">            <span class="hljs-comment">// Stage the content drawn size now. It will be transferred to the renderer</span></span><br><span class="line">            <span class="hljs-comment">// shortly before the draw commands get send to the renderer.</span></span><br><span class="line">            <span class="hljs-keyword">final</span> <span class="hljs-keyword">boolean</span> updated = updateContentDrawBounds();</span><br><span class="line">				...</span><br><span class="line"></span><br><span class="line">            <span class="hljs-keyword">if</span> (updated) &#123;</span><br><span class="line">                requestDrawWindow();</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            useAsyncReport = <span class="hljs-keyword">true</span>;</span><br><span class="line"></span><br><span class="line">            mAttachInfo.mThreadedRenderer.draw(mView, mAttachInfo, <span class="hljs-keyword">this</span>);</span><br><span class="line">        &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">            <span class="hljs-comment">// 软件渲染</span></span><br><span class="line">          </span><br><span class="line">            <span class="hljs-comment">// If we get here with a disabled &amp; requested hardware renderer, something went</span></span><br><span class="line">            <span class="hljs-comment">// wrong (an invalidate posted right before we destroyed the hardware surface</span></span><br><span class="line">            <span class="hljs-comment">// for instance) so we should just bail out. Locking the surface with software</span></span><br><span class="line">            <span class="hljs-comment">// rendering at this point would lock it forever and prevent hardware renderer</span></span><br><span class="line">            <span class="hljs-comment">// from doing its job when it comes back.</span></span><br><span class="line">            <span class="hljs-comment">// Before we request a new frame we must however attempt to reinitiliaze the</span></span><br><span class="line">            <span class="hljs-comment">// hardware renderer if it's in requested state. This would happen after an</span></span><br><span class="line">            <span class="hljs-comment">// eglTerminate() for instance.</span></span><br><span class="line">            <span class="hljs-keyword">if</span> (mAttachInfo.mThreadedRenderer != <span class="hljs-keyword">null</span> &amp;&amp;</span><br><span class="line">                    !mAttachInfo.mThreadedRenderer.isEnabled() &amp;&amp;</span><br><span class="line">                    mAttachInfo.mThreadedRenderer.isRequested() &amp;&amp;</span><br><span class="line">                    mSurface.isValid()) &#123;</span><br><span class="line">					  <span class="hljs-comment">// 在ThreadedRenderer初始化之前，其isEnabled方法都返回false。</span></span><br><span class="line">                <span class="hljs-comment">// 所以在ThreadedRenderer.isRequested为true的时候，尝试初始化ThreadedRenderer，重新开始一次绘制。</span></span><br><span class="line">                <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">                    mAttachInfo.mThreadedRenderer.initializeIfNeeded(</span><br><span class="line">                            mWidth, mHeight, mAttachInfo, mSurface, surfaceInsets);</span><br><span class="line">                &#125; <span class="hljs-keyword">catch</span> (OutOfResourcesException e) &#123;</span><br><span class="line">                    handleOutOfResourcesException(e);</span><br><span class="line">                    <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                mFullRedrawNeeded = <span class="hljs-keyword">true</span>;</span><br><span class="line">                scheduleTraversals();</span><br><span class="line">                <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="hljs-keyword">if</span> (!drawSoftware(surface, mAttachInfo, xOffset, yOffset,</span><br><span class="line">                    scalingRequired, dirty, surfaceInsets)) &#123;</span><br><span class="line">                <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (animating) &#123;</span><br><span class="line">        mFullRedrawNeeded = <span class="hljs-keyword">true</span>;</span><br><span class="line">        scheduleTraversals();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">return</span> useAsyncReport;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="ThreadedRenderer-draw硬件渲染"><a href="#ThreadedRenderer-draw硬件渲染" class="headerlink" title="ThreadedRenderer.draw硬件渲染"></a>ThreadedRenderer.draw硬件渲染</h5><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">draw</span><span class="hljs-params">(View view, AttachInfo attachInfo, DrawCallbacks callbacks)</span> </span>&#123;</span><br><span class="line">    <span class="hljs-keyword">final</span> Choreographer choreographer = attachInfo.mViewRootImpl.mChoreographer;</span><br><span class="line">    choreographer.mFrameInfo.markDrawStart();</span><br><span class="line"></span><br><span class="line">    updateRootDisplayList(view, callbacks);</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// register animating rendernodes which started animating prior to renderer</span></span><br><span class="line">    <span class="hljs-comment">// creation, which is typical for animators started prior to first draw</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (attachInfo.mPendingAnimatingRenderNodes != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">        <span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> count = attachInfo.mPendingAnimatingRenderNodes.size();</span><br><span class="line">        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; count; i++) &#123;</span><br><span class="line">            registerAnimatingRenderNode(</span><br><span class="line">                    attachInfo.mPendingAnimatingRenderNodes.get(i));</span><br><span class="line">        &#125;</span><br><span class="line">        attachInfo.mPendingAnimatingRenderNodes.clear();</span><br><span class="line">        <span class="hljs-comment">// We don't need this anymore as subsequent calls to</span></span><br><span class="line">        <span class="hljs-comment">// ViewRootImpl#attachRenderNodeAnimator will go directly to us.</span></span><br><span class="line">        attachInfo.mPendingAnimatingRenderNodes = <span class="hljs-keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">int</span> syncResult = syncAndDrawFrame(choreographer.mFrameInfo);</span><br><span class="line">    <span class="hljs-keyword">if</span> ((syncResult &amp; SYNC_LOST_SURFACE_REWARD_IF_FOUND) != <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        setEnabled(<span class="hljs-keyword">false</span>);</span><br><span class="line">        attachInfo.mViewRootImpl.mSurface.release();</span><br><span class="line">        <span class="hljs-comment">// Invalidate since we failed to draw. This should fetch a Surface</span></span><br><span class="line">        <span class="hljs-comment">// if it is still needed or do nothing if we are no longer drawing</span></span><br><span class="line">        attachInfo.mViewRootImpl.invalidate();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">if</span> ((syncResult &amp; SYNC_REDRAW_REQUESTED) != <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        attachInfo.mViewRootImpl.invalidate();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">updateRootDisplayList</span><span class="hljs-params">(View view, DrawCallbacks callbacks)</span> </span>&#123;</span><br><span class="line">    Trace.traceBegin(Trace.TRACE_TAG_VIEW, <span class="hljs-string">"Record View#draw()"</span>);</span><br><span class="line">    updateViewTreeDisplayList(view);</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// Consume and set the frame callback after we dispatch draw to the view above, but before</span></span><br><span class="line">    <span class="hljs-comment">// onPostDraw below which may reset the callback for the next frame.  This ensures that</span></span><br><span class="line">    <span class="hljs-comment">// updates to the frame callback during scroll handling will also apply in this frame.</span></span><br><span class="line">    <span class="hljs-keyword">final</span> FrameDrawingCallback callback = mNextRtFrameCallback;</span><br><span class="line">    mNextRtFrameCallback = <span class="hljs-keyword">null</span>;</span><br><span class="line">    <span class="hljs-keyword">if</span> (callback != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">        setFrameCallback(callback);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (mRootNodeNeedsUpdate || !mRootNode.hasDisplayList()) &#123;</span><br><span class="line">        RecordingCanvas canvas = mRootNode.beginRecording(mSurfaceWidth, mSurfaceHeight);</span><br><span class="line">        <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">            <span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> saveCount = canvas.save();</span><br><span class="line">            canvas.translate(mInsetLeft, mInsetTop);</span><br><span class="line">            callbacks.onPreDraw(canvas);</span><br><span class="line"></span><br><span class="line">            canvas.enableZ();</span><br><span class="line">            canvas.drawRenderNode(view.updateDisplayListIfDirty());</span><br><span class="line">            canvas.disableZ();</span><br><span class="line"></span><br><span class="line">            callbacks.onPostDraw(canvas);</span><br><span class="line">            canvas.restoreToCount(saveCount);</span><br><span class="line">            mRootNodeNeedsUpdate = <span class="hljs-keyword">false</span>;</span><br><span class="line">        &#125; <span class="hljs-keyword">finally</span> &#123;</span><br><span class="line">            mRootNode.endRecording();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    Trace.traceEnd(Trace.TRACE_TAG_VIEW);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="syncAndDrawFrame"><a href="#syncAndDrawFrame" class="headerlink" title="syncAndDrawFrame"></a>syncAndDrawFrame</h6><h6 id="CanvasContext-create"><a href="#CanvasContext-create" class="headerlink" title="CanvasContext.create"></a>CanvasContext.create</h6><p>ThreadedRenderer创建的时候，会对应创建一个C层的RenderProxy对象，在RenderProxy对象中会维护一个CanvasContext的上下文对象。</p>
+<p>会根据renderType创建基于OpenGL-ES的Pipeline或者基于Vulkan的Pipeline。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">CanvasContext* CanvasContext::create(RenderThread&amp; thread, <span class="hljs-keyword">bool</span> translucent,</span><br><span class="line">                                     RenderNode* rootRenderNode, IContextFactory* contextFactory) &#123;</span><br><span class="line">    <span class="hljs-keyword">auto</span> renderType = Properties::getRenderPipelineType();</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">switch</span> (renderType) &#123;</span><br><span class="line">        <span class="hljs-keyword">case</span> RenderPipelineType::SkiaGL:</span><br><span class="line">            <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> CanvasContext(thread, translucent, rootRenderNode, contextFactory,</span><br><span class="line">                                     <span class="hljs-built_in">std</span>::make_unique&lt;skiapipeline::SkiaOpenGLPipeline&gt;(thread));</span><br><span class="line">        <span class="hljs-keyword">case</span> RenderPipelineType::SkiaVulkan:</span><br><span class="line">            <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> CanvasContext(thread, translucent, rootRenderNode, contextFactory,</span><br><span class="line">                                     <span class="hljs-built_in">std</span>::make_unique&lt;skiapipeline::SkiaVulkanPipeline&gt;(thread));</span><br><span class="line">        <span class="hljs-keyword">default</span>:</span><br><span class="line">            LOG_ALWAYS_FATAL(<span class="hljs-string">"canvas context type %d not supported"</span>, (<span class="hljs-keyword">int32_t</span>)renderType);</span><br><span class="line">            <span class="hljs-keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">return</span> <span class="hljs-literal">nullptr</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="CanvasContext-setSurface"><a href="#CanvasContext-setSurface" class="headerlink" title="CanvasContext.setSurface"></a>CanvasContext.setSurface</h6><p>ThreadedRenderer初始化的时候，会将ViewRootImpl中的Surface对象传递给CanvasContext。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">void</span> CanvasContext::setSurface(sp&lt;Surface&gt;&amp;&amp; surface) &#123;</span><br><span class="line">    <span class="hljs-keyword">if</span> (surface) &#123;</span><br><span class="line">        <span class="hljs-comment">// 创建一个Surface的包装类</span></span><br><span class="line">        mNativeSurface = <span class="hljs-keyword">new</span> ReliableSurface&#123;<span class="hljs-built_in">std</span>::move(surface)&#125;;</span><br><span class="line">        <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> Fix error handling &amp; re-shorten timeout</span></span><br><span class="line">        mNativeSurface-&gt;setDequeueTimeout(<span class="hljs-number">4000</span>_ms);</span><br><span class="line">    &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">        mNativeSurface = <span class="hljs-literal">nullptr</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br><span class="line">    <span class="hljs-comment">// 是否开启了广色域RGB色彩空间</span></span><br><span class="line">    ColorMode colorMode = mWideColorGamut ? ColorMode::WideColorGamut : ColorMode::SRGB;</span><br><span class="line">    <span class="hljs-keyword">bool</span> hasSurface = mRenderPipeline-&gt;setSurface(mNativeSurface.get(), mSwapBehavior, colorMode,</span><br><span class="line">                                                  mRenderAheadCapacity);</span><br><span class="line"></span><br><span class="line">   ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>RenderPipeline就是上面根据RenderType创建的pipeline对象。在OpenGLPileline中，初始化EglContext，然后根据Surface创建对应的EglSurface。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">bool</span> SkiaOpenGLPipeline::setSurface(ANativeWindow* surface, SwapBehavior swapBehavior,</span><br><span class="line">                                    ColorMode colorMode, <span class="hljs-keyword">uint32_t</span> extraBuffers) &#123;</span><br><span class="line">    <span class="hljs-keyword">if</span> (mEglSurface != EGL_NO_SURFACE) &#123;</span><br><span class="line">        mEglManager.destroySurface(mEglSurface);</span><br><span class="line">        mEglSurface = EGL_NO_SURFACE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    setSurfaceColorProperties(colorMode);</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (surface) &#123;</span><br><span class="line">        <span class="hljs-comment">// 初始化EglContext</span></span><br><span class="line">        mRenderThread.requireGlContext();</span><br><span class="line">        <span class="hljs-comment">// 创建EglSurface</span></span><br><span class="line">        <span class="hljs-keyword">auto</span> newSurface = mEglManager.createSurface(surface, colorMode, mSurfaceColorSpace);</span><br><span class="line">        <span class="hljs-keyword">if</span> (!newSurface) &#123;</span><br><span class="line">            <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        mEglSurface = newSurface.unwrap();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (mEglSurface != EGL_NO_SURFACE) &#123;</span><br><span class="line">        <span class="hljs-keyword">const</span> <span class="hljs-keyword">bool</span> preserveBuffer = (swapBehavior != SwapBehavior::kSwap_discardBuffer);</span><br><span class="line">        mBufferPreserved = mEglManager.setPreserveBuffer(mEglSurface, preserveBuffer);</span><br><span class="line">        setBufferCount(surface, extraBuffers);</span><br><span class="line">        <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>初始化EGL</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">void</span> EglManager::initialize() &#123;</span><br><span class="line">		... </span><br><span class="line">    <span class="hljs-comment">// 获取EglDisplay</span></span><br><span class="line">    mEglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);</span><br><span class="line">    LOG_ALWAYS_FATAL_IF(mEglDisplay == EGL_NO_DISPLAY, <span class="hljs-string">"Failed to get EGL_DEFAULT_DISPLAY! err=%s"</span>,</span><br><span class="line">                        eglErrorString());</span><br><span class="line"></span><br><span class="line">    EGLint major, minor;</span><br><span class="line">    <span class="hljs-comment">// 初始化EGL</span></span><br><span class="line">    LOG_ALWAYS_FATAL_IF(eglInitialize(mEglDisplay, &amp;major, &amp;minor) == EGL_FALSE,</span><br><span class="line">                        <span class="hljs-string">"Failed to initialize display %p! err=%s"</span>, mEglDisplay, eglErrorString());</span><br><span class="line"></span><br><span class="line">    initExtensions();</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// Now that extensions are loaded, pick a swap behavior</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (Properties::enablePartialUpdates) &#123;</span><br><span class="line">        <span class="hljs-comment">// An Adreno driver bug is causing rendering problems for SkiaGL with</span></span><br><span class="line">        <span class="hljs-comment">// buffer age swap behavior (b/31957043).  To temporarily workaround,</span></span><br><span class="line">        <span class="hljs-comment">// we will use preserved swap behavior.</span></span><br><span class="line">        <span class="hljs-keyword">if</span> (Properties::useBufferAge &amp;&amp; EglExtensions.bufferAge) &#123;</span><br><span class="line">            mSwapBehavior = SwapBehavior::BufferAge;</span><br><span class="line">        &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">            mSwapBehavior = SwapBehavior::Preserved;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">		<span class="hljs-comment">// 加载EglConfig</span></span><br><span class="line">    loadConfigs();</span><br><span class="line">    <span class="hljs-comment">// 创建EglContext</span></span><br><span class="line">    createContext();</span><br><span class="line">    <span class="hljs-comment">// 创建用于离屏渲染的surface，pbuffer_surface。</span></span><br><span class="line">    <span class="hljs-comment">// OpenGL-ES的surface一共有三种 window_surface、pbuffer_surface、pixmap_surface。EGL 和 OpenGL ES 支持两种绘制模式,back buffer和single buffer,window_surface和pbuffer_surface都是使用的back buffer,顾名思义,也就是一块GPU中的 buffer,当绘制完毕的时候,由于window_surface与nativewindow有关联,那么可以使用eglswapbuffer 将其转移到nativewindow上进行显示。而pbuffer_surface与nativewindow没有关联,也就无法显示。</span></span><br><span class="line">    createPBufferSurface();</span><br><span class="line">    <span class="hljs-comment">// 将mPBufferSurface与EglDisplay与EglContext进行关联。在当前线程中激活mPBufferSurface。</span></span><br><span class="line">    makeCurrent(mPBufferSurface, <span class="hljs-literal">nullptr</span>, <span class="hljs-comment">/* force */</span> <span class="hljs-literal">true</span>);</span><br><span class="line">    ...</span><br><span class="line">    mHasWideColorGamutSupport = EglExtensions.glColorSpace &amp;&amp; hasWideColorSpaceExtension &amp;&amp;</span><br><span class="line">                                mEglConfigWideGamut != EGL_NO_CONFIG_KHR;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>创建EglSurface</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">Result&lt;EGLSurface, EGLint&gt; EglManager::createSurface(EGLNativeWindowType window,</span><br><span class="line">                                                     ColorMode colorMode,</span><br><span class="line">                                                     sk_sp&lt;SkColorSpace&gt; colorSpace) &#123;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">bool</span> wideColorGamut = colorMode == ColorMode::WideColorGamut &amp;&amp; mHasWideColorGamutSupport &amp;&amp;</span><br><span class="line">                          EglExtensions.noConfigContext;</span><br><span class="line"></span><br><span class="line">    EGLint attribs[] = &#123;EGL_NONE, EGL_NONE, EGL_NONE&#125;;</span><br><span class="line">    ...</span><br><span class="line">    <span class="hljs-comment">// 根据Surface创建OpenGL-ES的surface，类型为window_surface</span></span><br><span class="line">    EGLSurface surface = eglCreateWindowSurface(</span><br><span class="line">            mEglDisplay, wideColorGamut ? mEglConfigWideGamut : mEglConfig, window, attribs);</span><br><span class="line">  </span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">return</span> surface;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="CanvasContext-draw"><a href="#CanvasContext-draw" class="headerlink" title="CanvasContext.draw"></a>CanvasContext.draw</h6><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">void</span> CanvasContext::draw() &#123;</span><br><span class="line">    SkRect dirty;</span><br><span class="line">    ...</span><br><span class="line">    Frame frame = mRenderPipeline-&gt;getFrame();</span><br><span class="line">    setPresentTime();</span><br><span class="line"></span><br><span class="line">    SkRect windowDirty = computeDirtyRect(frame, &amp;dirty);</span><br><span class="line">    <span class="hljs-comment">// 绘制缓冲区</span></span><br><span class="line">    <span class="hljs-keyword">bool</span> drew = mRenderPipeline-&gt;draw(frame, windowDirty, dirty, mLightGeometry, &amp;mLayerUpdateQueue,</span><br><span class="line">                                      mContentDrawBounds, mOpaque, mLightInfo, mRenderNodes,</span><br><span class="line">                                      &amp;(profiler()));</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line">    <span class="hljs-keyword">bool</span> requireSwap = <span class="hljs-literal">false</span>;</span><br><span class="line">    <span class="hljs-comment">// 将EglSurface中的缓冲区交换给Surface，由SurfaceFlinger消费。</span></span><br><span class="line">    <span class="hljs-keyword">bool</span> didSwap =</span><br><span class="line">            mRenderPipeline-&gt;swapBuffers(frame, drew, windowDirty, mCurrentFrameInfo, &amp;requireSwap);</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>SkiaOpenGLPipeline.draw</p>
+<p>在draw方法调用之前，会调用makeCurrent方法，将上面创建的EglSurface激活。后续所有的GL操作都将作用在该EglSurface上。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">bool</span> SkiaOpenGLPipeline::draw(<span class="hljs-keyword">const</span> Frame&amp; frame, <span class="hljs-keyword">const</span> SkRect&amp; screenDirty, <span class="hljs-keyword">const</span> SkRect&amp; dirty,</span><br><span class="line">                              <span class="hljs-keyword">const</span> LightGeometry&amp; lightGeometry,</span><br><span class="line">                              LayerUpdateQueue* layerUpdateQueue, <span class="hljs-keyword">const</span> Rect&amp; contentDrawBounds,</span><br><span class="line">                              <span class="hljs-keyword">bool</span> opaque, <span class="hljs-keyword">const</span> LightInfo&amp; lightInfo,</span><br><span class="line">                              <span class="hljs-keyword">const</span> <span class="hljs-built_in">std</span>::<span class="hljs-built_in">vector</span>&lt;sp&lt;RenderNode&gt;&gt;&amp; renderNodes,</span><br><span class="line">                              FrameInfoVisualizer* profiler) &#123;</span><br><span class="line">    mEglManager.damageFrame(frame, dirty);</span><br><span class="line"></span><br><span class="line">    SkColorType colorType = getSurfaceColorType();</span><br><span class="line">    <span class="hljs-comment">// setup surface for fbo0</span></span><br><span class="line">    GrGLFramebufferInfo fboInfo;</span><br><span class="line">    fboInfo.fFBOID = <span class="hljs-number">0</span>;</span><br><span class="line">    <span class="hljs-keyword">if</span> (colorType == kRGBA_F16_SkColorType) &#123;</span><br><span class="line">        fboInfo.fFormat = GL_RGBA16F;</span><br><span class="line">    &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (colorType == kN32_SkColorType) &#123;</span><br><span class="line">        <span class="hljs-comment">// Note: The default preference of pixel format is RGBA_8888, when other</span></span><br><span class="line">        <span class="hljs-comment">// pixel format is available, we should branch out and do more check.</span></span><br><span class="line">        fboInfo.fFormat = GL_RGBA8;</span><br><span class="line">    &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">        LOG_ALWAYS_FATAL(<span class="hljs-string">"Unsupported color type."</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    GrBackendRenderTarget backendRT(frame.width(), frame.height(), 0, STENCIL_BUFFER_SIZE, fboInfo);</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function">SkSurfaceProps <span class="hljs-title">props</span><span class="hljs-params">(<span class="hljs-number">0</span>, kUnknown_SkPixelGeometry)</span></span>;</span><br><span class="line"></span><br><span class="line">    SkASSERT(mRenderThread.getGrContext() != <span class="hljs-literal">nullptr</span>);</span><br><span class="line">    sk_sp&lt;SkSurface&gt; surface(SkSurface::MakeFromBackendRenderTarget(</span><br><span class="line">            mRenderThread.getGrContext(), backendRT, <span class="hljs-keyword">this</span>-&gt;getSurfaceOrigin(), colorType,</span><br><span class="line">            mSurfaceColorSpace, &amp;props));</span><br><span class="line"></span><br><span class="line">    SkiaPipeline::updateLighting(lightGeometry, lightInfo);</span><br><span class="line">    renderFrame(*layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface,</span><br><span class="line">                SkMatrix::I());</span><br><span class="line">    layerUpdateQueue-&gt;clear();</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// Draw visual debugging features</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (CC_UNLIKELY(Properties::showDirtyRegions ||</span><br><span class="line">                    ProfileType::None != Properties::getProfileType())) &#123;</span><br><span class="line">        SkCanvas* profileCanvas = surface-&gt;getCanvas();</span><br><span class="line">        <span class="hljs-function">SkiaProfileRenderer <span class="hljs-title">profileRenderer</span><span class="hljs-params">(profileCanvas)</span></span>;</span><br><span class="line">        profiler-&gt;draw(profileRenderer);</span><br><span class="line">        profileCanvas-&gt;flush();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// Log memory statistics</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (CC_UNLIKELY(Properties::debugLevel != kDebugDisabled)) &#123;</span><br><span class="line">        dumpResourceCacheUsage();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+        </div>
+        
+        <ul class="post-copyright">
+            <li><strong>本文标题：</strong><a href="https://witgao.com/SurfaceFlinger深入之Layer创建与渲染/">SurfaceFlinger深入之Layer创建与渲染</a></li>
+            <li><strong>本文作者：</strong><a href="https://witgao.com">zhenyu</a></li>
+            <li><strong>本文链接：</strong><a href="https://witgao.com/SurfaceFlinger深入之Layer创建与渲染/">https://witgao.com/SurfaceFlinger深入之Layer创建与渲染/</a></li>
+            <li><strong>发布时间：</strong>2019-12-15</li>
+            <li><strong>版权声明：</strong>本博客所有文章除特别声明外，均采用 <a
+                    href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="external nofollow"
+                    target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明出处！
+            </li>
+        </ul>
+        
+        
+        
+        
+    </div>
+</div>
+
+
+
+
+
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        <div class="level-start">
+            <a class="level level-item has-link-grey  article-nav-prev"
+                href="/Flutter深入之插件新API-Embedding-V2/">
+                <i class="level-item fas fa-chevron-left"></i>
+                <span class="level-item">Flutter深入之插件新API——Embedding-V2</span>
+            </a>
+        </div>
+        
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next"
+                href="/Android图形架构总览/">
+                <span class="level-item">Android图形架构总览</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+    </div>
+</div>
+
+
+</div>
+                
+
+
+
+
+<div
+    class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left ">
+    
+    
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered" style="flex-shrink: 1">
+                <div>
+                    
+                    <figure class="image is-128x128 has-mb-6">
+                        <img class="" src="/images/avatar1.png" alt="zhenyu">
+                    </figure>
+                    
+                    <p class="is-size-4 is-block">
+                        zhenyu
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        富贵山庄无富贵，只留欢乐在此间
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>杭州</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        文章
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        38
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        分类
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        9
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        标签
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        0
+                    </p>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="level">
+            <a class="level-item button is-link is-rounded" href="https://github.com/witgao" target="_blank">
+                关注我</a>
+        </div>
+        
+        
+        
+    </div>
+</div>
+    
+    
+<div class="card widget column-left is-sticky" id="toc">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                目录
+            </h3>
+            <ul class="menu-list"><li>
+        <a class="is-flex" href="#一切的开始resumeActivity">
+        <span class="has-mr-6">1</span>
+        <span>一切的开始resumeActivity</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#WindowManager-addView">
+        <span class="has-mr-6">1.1</span>
+        <span>WindowManager.addView</span>
+        </a></li><li>
+        <a class="is-flex" href="#ViewRootImpl-setView">
+        <span class="has-mr-6">1.2</span>
+        <span>ViewRootImpl.setView</span>
+        </a></li><li>
+        <a class="is-flex" href="#WMS-addWindow">
+        <span class="has-mr-6">1.3</span>
+        <span>WMS.addWindow</span>
+        </a></li><li>
+        <a class="is-flex" href="#连接SF">
+        <span class="has-mr-6">1.4</span>
+        <span>连接SF</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#SurfaceComposerClient-onFirstRef">
+        <span class="has-mr-6">1.4.1</span>
+        <span>SurfaceComposerClient.onFirstRef</span>
+        </a></li><li>
+        <a class="is-flex" href="#SF-createConnection">
+        <span class="has-mr-6">1.4.2</span>
+        <span>SF.createConnection</span>
+        </a></li></ul></li></ul></li><li>
+        <a class="is-flex" href="#ViewRootImpl-doTraversal创建和渲染">
+        <span class="has-mr-6">2</span>
+        <span>ViewRootImpl.doTraversal创建和渲染</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#ViewRootImpl-relayoutWindow创建Layer">
+        <span class="has-mr-6">2.1</span>
+        <span>ViewRootImpl.relayoutWindow创建Layer</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#WMS-relayoutWindow">
+        <span class="has-mr-6">2.1.1</span>
+        <span>WMS.relayoutWindow</span>
+        </a></li><li>
+        <a class="is-flex" href="#创建SurfaceControl">
+        <span class="has-mr-6">2.1.2</span>
+        <span>创建SurfaceControl</span>
+        </a></li><li>
+        <a class="is-flex" href="#SF-createLayer">
+        <span class="has-mr-6">2.1.3</span>
+        <span>SF.createLayer</span>
+        </a></li><li>
+        <a class="is-flex" href="#创建Surface">
+        <span class="has-mr-6">2.1.4</span>
+        <span>创建Surface</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#ViewRootImpl-performDraw开始渲染">
+        <span class="has-mr-6">2.2</span>
+        <span>ViewRootImpl.performDraw开始渲染</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#ThreadedRenderer-draw硬件渲染">
+        <span class="has-mr-6">2.2.1</span>
+        <span>ThreadedRenderer.draw硬件渲染</span>
+        </a></li></ul></li></ul></li></ul>
+        </div>
+    </div>
+</div>
+    
+    
+    <div class="column-right-shadow is-hidden-widescreen ">
+        
+    </div>
+    
+</div>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <!-- <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="/images/logo2.png" alt="SurfaceFlinger深入之Layer创建与渲染" height="28">
+                
+                </a> -->
+                <p class="is-size-7">
+                    &copy; 2020 zhenyu&nbsp;
+                    Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a
+                        href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank">Icarus</a>
+                    
+                </p>
+            </div>
+            <div class="level-end">
+                
+            </div>
+        </div>
+    </div>
+</footer>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("zh-CN");</script>
+
+<script>
+var IcarusThemeSettings = {
+    article: {
+        highlight: {
+            clipboard: true,
+            fold: 'unfolded'
+        }
+    }
+};
+</script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+
+
+
+    
+    
+<script src="/js/animation.js"></script>
+
+    
+    
+<script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+<script src="/js/gallery.js" defer></script>
+
+    
+    
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    MathJax.Hub.Config({
+        'HTML-CSS': {
+            matchFontHeight: false
+        },
+        SVG: {
+            matchFontHeight: false
+        },
+        CommonHTML: {
+            matchFontHeight: false
+        },
+        tex2jax: {
+            inlineMath: [
+                ['$','$'],
+                ['\\(','\\)']
+            ]
+        }
+    });
+});
+</script>
+    
+    
+<a id="back-to-top" title="回到顶端" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="想要查找什么..." />
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: '文章',
+                PAGES: '页面',
+                CATEGORIES: '分类',
+                TAGS: '标签',
+                UNTITLED: '(无标题)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+</body>
+
+</html>

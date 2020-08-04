@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html  lang="zh">
+
+<head>
+    <meta charset="utf-8" />
+
+<meta name="generator" content="Hexo 3.9.0" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<title>音视频开发之Android播放视频 - 富贵山庄</title>
+
+
+    <meta name="description" content="图像的显示最终都是由显示器完成的，显示器通过接收到的颜色矩阵来进行对应的显示。而颜色矩阵的产生一般有两种，一种是通过GPU来进行渲染生成，另一种是通过CPU来进行渲染生成。其中GPU比较适合来处理这件事情，所以其效率高。（硬件加速也就是指使用GPU来进行渲染加速） 在Android平台上，GPU渲染的API有两套，一套就是OpenGL-ES，另一套就是7.0后推出的Vulkan。目前使用最多的还是">
+<meta property="og:type" content="article">
+<meta property="og:title" content="音视频开发之Android播放视频">
+<meta property="og:url" content="https://witgao.com/音视频开发之Android播放视频/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:description" content="图像的显示最终都是由显示器完成的，显示器通过接收到的颜色矩阵来进行对应的显示。而颜色矩阵的产生一般有两种，一种是通过GPU来进行渲染生成，另一种是通过CPU来进行渲染生成。其中GPU比较适合来处理这件事情，所以其效率高。（硬件加速也就是指使用GPU来进行渲染加速） 在Android平台上，GPU渲染的API有两套，一套就是OpenGL-ES，另一套就是7.0后推出的Vulkan。目前使用最多的还是">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://witgao.com/images/12.jpg">
+<meta property="og:updated_time" content="2020-08-04T06:06:52.001Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="音视频开发之Android播放视频">
+<meta name="twitter:description" content="图像的显示最终都是由显示器完成的，显示器通过接收到的颜色矩阵来进行对应的显示。而颜色矩阵的产生一般有两种，一种是通过GPU来进行渲染生成，另一种是通过CPU来进行渲染生成。其中GPU比较适合来处理这件事情，所以其效率高。（硬件加速也就是指使用GPU来进行渲染加速） 在Android平台上，GPU渲染的API有两套，一套就是OpenGL-ES，另一套就是7.0后推出的Vulkan。目前使用最多的还是">
+<meta name="twitter:image" content="https://witgao.com/images/12.jpg">
+
+
+
+
+
+
+
+<link rel="icon" href="/images/favicon1.svg">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/default.css">
+
+
+    
+    
+<style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+    
+    
+    
+    
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+    
+    
+    
+    
+    
+    
+    
+    <link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+    
+    
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body class="is-3-column">
+    <nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="/images/logo2.png" alt="音视频开发之Android播放视频" height="28">
+            
+            </a>
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item"
+                href="/">燕子坞</a>
+                
+                <a class="navbar-item"
+                href="/archives">听香水榭</a>
+                
+                <a class="navbar-item"
+                href="/categories">还施水阁</a>
+                
+                <a class="navbar-item"
+                href="/about">思过崖</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    <a class="navbar-item" target="_blank" title="Download on GitHub" href="https://github.com/witgao/blog">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                <a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;">
+                    <i class="fas fa-list-ul"></i>
+                </a>
+                
+                
+                <a class="navbar-item search" title="搜索" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-9-widescreen has-order-2 column-main">
+<div class="card">
+    
+    <div class="card-image">
+        <span  class="image is-7by1">
+        <img class="thumbnail" src="/images/12.jpg" alt="音视频开发之Android播放视频">
+        </span>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-07-22T16:00:00.000Z">2020-07-23</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    10 分钟 读完 (大约 1551 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            音视频开发之Android播放视频
+            
+        </h1>
+        <div class="content">
+            <p>图像的显示最终都是由显示器完成的，显示器通过接收到的颜色矩阵来进行对应的显示。而颜色矩阵的产生一般有两种，一种是通过GPU来进行渲染生成，另一种是通过CPU来进行渲染生成。其中GPU比较适合来处理这件事情，所以其效率高。（硬件加速也就是指使用GPU来进行渲染加速）</p>
+<p>在Android平台上，GPU渲染的API有两套，一套就是OpenGL-ES，另一套就是7.0后推出的Vulkan。目前使用最多的还是OpenGL-ES。</p>
+<p>整个渲染流程中主要节点如下:<br>SurfaceFlinger &lt;- SurfaceView &lt;- Surface &lt;- EGLSurface &lt;- EGLContext &lt;- OpenGL-ES</p>
+<h4 id="接入原生渲染体系"><a href="#接入原生渲染体系" class="headerlink" title="接入原生渲染体系"></a>接入原生渲染体系</h4><p>Android原生平台上封装了一整套View体系用来进行图像的渲染和显示，所以任何的渲染都必须基于这个体系才能正确的显示出来。</p>
+<p>View系统中提供了两个View可以用来进行自定义渲染，一个是SurfaceView，另一个是TextureView。（关于SurfaceView和TextureView可以看我之前写的<a href="/Android图形架构总览/">Android图形架构总览</a>。</p>
+<p>只要将图形数据写入到SurfaceView或TextureView的Surface中，那么最终SurfaceFlinger服务就会将图形内容显示到显卡上。</p>
+<p>所以对于播放视频来说，就是要将视频每一帧的图像数据写入到SurfaceView或TextureView的Surface中即可。</p>
+<p>SurfaceView可以通过addCallback来接收来自原生渲染的生命周期回调，通过getSurface来获取内部的Surface对象。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">this</span>.getHolder().addCallback();</span><br><span class="line"><span class="hljs-keyword">this</span>.getHolder().getSurface()</span><br></pre></td></tr></table></figure></p>
+<p>TextureView可以通过setSurfaceTextureListener来接收生命周期回调，通过getSurfaceTexture可以获取到SurfaceTexture。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">setSurfaceTextureListener();</span><br><span class="line">Surface surface = <span class="hljs-keyword">new</span> Surface(getSurfaceTexture());</span><br></pre></td></tr></table></figure></p>
+<h4 id="Surface与EGLSurface"><a href="#Surface与EGLSurface" class="headerlink" title="Surface与EGLSurface"></a>Surface与EGLSurface</h4><p>一个Surface对象，可以关联一个EGLSurface对象（window_surface)，window_surface可以通过swap方法将其内部图像缓冲数据传入到Surface中（其它类型的EGLSurface是不可以的）。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 创建一个提供给opengl-es绘制的surface（display，配置，原生window，指定属性）</span></span><br><span class="line"><span class="hljs-keyword">if</span> (!(eglSurface = eglCreateWindowSurface(display, config, aNativeWindow, <span class="hljs-number">0</span>))) &#123;</span><br><span class="line">    <span class="hljs-keyword">return</span>;</span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">// android中创建NativeWindow</span></span><br><span class="line">ANativeWindow *pNativeWindow = ANativeWindow_fromSurface(jenv, surface);</span><br></pre></td></tr></table></figure>
+<h4 id="EGLSurface与EGLContext"><a href="#EGLSurface与EGLContext" class="headerlink" title="EGLSurface与EGLContext"></a>EGLSurface与EGLContext</h4><p>EGLContext是与线程相关的，一个线程中只能激活一个EGLContext，激活的EGLContext关联一个EGLSurface，激活后，在当前线程调用OpenGL-ES的API都将作用到EGLSurface的缓冲区中。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 创建context，在context中保存了opengl-es的状态信息 （display，配置，共享context的handle 一般设为null，属性）</span></span><br><span class="line"><span class="hljs-comment">// 一个display可以创建多个context</span></span><br><span class="line"><span class="hljs-keyword">if</span> (!(context = eglCreateContext(display, config, <span class="hljs-number">0</span>, context_attribs))) &#123;</span><br><span class="line">     <span class="hljs-keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+ <a id="more"></a>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 将上面创建的context绑定到当前线程上，并将context与surface进行关联。当makeCurrent执行后，就可以调用opengl-es的api对context中的状态集进行设定，</span></span><br><span class="line"><span class="hljs-comment">// 然后进而向surface中绘制内容，再把surface中的内容读取出来。</span></span><br><span class="line"><span class="hljs-comment">// 一个线程中enable状态的context只能有一个，如果当前线程已经有了一个enable状态的context，那么会先执行其flush操作，将没有执行完成的命令全部执行完成，然后将其改为disable状态，将新传入的context改为enable状态。</span></span><br><span class="line"><span class="hljs-comment">// 如果想要释放当前的context,也就是将当前的context disable,那么将第二个和第三个参数设置为 EGL_NO_SURFACE,第四个参数设置为 EGL_NO_CONTEXT即可。</span></span><br><span class="line"><span class="hljs-comment">// context enable后，视口大小和裁剪大小都会被设置为surface的尺寸</span></span><br><span class="line"><span class="hljs-keyword">if</span> (!eglMakeCurrent(display, eglSurface, eglSurface, context)) &#123;</span><br><span class="line">     <span class="hljs-keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="OpenGL-ES渲染纹理"><a href="#OpenGL-ES渲染纹理" class="headerlink" title="OpenGL-ES渲染纹理"></a>OpenGL-ES渲染纹理</h4><p>当我们准备好了EGLSurface和EGLContext后，那么接下来就是创建OpenGL—ES的Program进行纹理的绘制了。</p>
+<h5 id="创建Program"><a href="#创建Program" class="headerlink" title="创建Program"></a>创建Program</h5><h6 id="创建Vertex着色器"><a href="#创建Vertex着色器" class="headerlink" title="创建Vertex着色器"></a>创建Vertex着色器</h6><figure class="highlight glsl hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">precision</span> <span class="hljs-keyword">mediump</span> <span class="hljs-type">float</span>;</span><br><span class="line"><span class="hljs-keyword">attribute</span> <span class="hljs-keyword">highp</span> <span class="hljs-type">vec4</span> aPosition;</span><br><span class="line"><span class="hljs-keyword">attribute</span> <span class="hljs-keyword">highp</span> <span class="hljs-type">vec2</span> aTextureCoord;</span><br><span class="line"><span class="hljs-keyword">varying</span> <span class="hljs-type">vec2</span> textureCoordinate;</span><br><span class="line"><span class="hljs-type">void</span> main() &#123;</span><br><span class="line">    <span class="hljs-built_in">gl_Position</span>  = aPosition;</span><br><span class="line">    textureCoordinate = aTextureCoord.xy;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="创建Fragment着色器"><a href="#创建Fragment着色器" class="headerlink" title="创建Fragment着色器"></a>创建Fragment着色器</h6><figure class="highlight glsl hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">precision</span> <span class="hljs-keyword">mediump</span> <span class="hljs-type">float</span>;</span><br><span class="line"><span class="hljs-keyword">varying</span> <span class="hljs-keyword">highp</span> <span class="hljs-type">vec2</span> textureCoordinate;</span><br><span class="line"><span class="hljs-keyword">uniform</span> <span class="hljs-keyword">lowp</span> <span class="hljs-type">sampler2D</span> inputTextureY;</span><br><span class="line"><span class="hljs-keyword">uniform</span> <span class="hljs-keyword">lowp</span> <span class="hljs-type">sampler2D</span> inputTextureU;</span><br><span class="line"><span class="hljs-keyword">uniform</span> <span class="hljs-keyword">lowp</span> <span class="hljs-type">sampler2D</span> inputTextureV;</span><br><span class="line"></span><br><span class="line"><span class="hljs-type">void</span> main() &#123;</span><br><span class="line">    <span class="hljs-type">vec3</span> yuv;</span><br><span class="line">    <span class="hljs-type">vec3</span> rgb;</span><br><span class="line">    yuv.r = <span class="hljs-built_in">texture2D</span>(inputTextureY, textureCoordinate).r - (<span class="hljs-number">16.0</span> / <span class="hljs-number">255.0</span>);</span><br><span class="line">    yuv.g = <span class="hljs-built_in">texture2D</span>(inputTextureU, textureCoordinate).r - <span class="hljs-number">0.5</span>;</span><br><span class="line">    yuv.b = <span class="hljs-built_in">texture2D</span>(inputTextureV, textureCoordinate).r - <span class="hljs-number">0.5</span>;</span><br><span class="line">    rgb = <span class="hljs-type">mat3</span>(<span class="hljs-number">1.164</span>,  <span class="hljs-number">1.164</span>,  <span class="hljs-number">1.164</span>,</span><br><span class="line">               <span class="hljs-number">0.0</span>,   <span class="hljs-number">-0.213</span>,  <span class="hljs-number">2.112</span>,</span><br><span class="line">               <span class="hljs-number">1.793</span>, <span class="hljs-number">-0.533</span>,    <span class="hljs-number">0.0</span>) * yuv;</span><br><span class="line">    <span class="hljs-built_in">gl_FragColor</span> = <span class="hljs-type">vec4</span>(rgb, <span class="hljs-number">1.0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="创建Program-1"><a href="#创建Program-1" class="headerlink" title="创建Program"></a>创建Program</h6><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 创建Program</span></span><br><span class="line">programHandle = OpenGLUtils::createProgram(vertexShader, fragmentShader);</span><br><span class="line"><span class="hljs-comment">// 获取顶点坐标变量</span></span><br><span class="line">positionHandle = glGetAttribLocation(programHandle, <span class="hljs-string">"aPosition"</span>);</span><br><span class="line"><span class="hljs-comment">// 获取纹理坐标变量</span></span><br><span class="line">texCoordinateHandle = glGetAttribLocation(programHandle, <span class="hljs-string">"aTextureCoord"</span>);</span><br><span class="line"><span class="hljs-comment">// 获取YUV纹理变量</span></span><br><span class="line">inputTextureHandle[<span class="hljs-number">0</span>] = glGetUniformLocation(programHandle, <span class="hljs-string">"inputTextureY"</span>);</span><br><span class="line">inputTextureHandle[<span class="hljs-number">1</span>] = glGetUniformLocation(programHandle, <span class="hljs-string">"inputTextureU"</span>);</span><br><span class="line">inputTextureHandle[<span class="hljs-number">2</span>] = glGetUniformLocation(programHandle, <span class="hljs-string">"inputTextureV"</span>);</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">// 使用Program</span></span><br><span class="line">glUseProgram(programHandle);</span><br><span class="line"><span class="hljs-comment">// 创建三个纹理，用来接收YUV数据</span></span><br><span class="line"><span class="hljs-keyword">if</span> (textures[<span class="hljs-number">0</span>] == <span class="hljs-number">0</span>) &#123;</span><br><span class="line">    glGenTextures(<span class="hljs-number">3</span>, textures);</span><br><span class="line">&#125;</span><br><span class="line"><span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">3</span>; ++i) &#123;</span><br><span class="line">    glActiveTexture(GL_TEXTURE0 + i);</span><br><span class="line">    glBindTexture(GL_TEXTURE_2D, textures[i]);</span><br><span class="line"></span><br><span class="line">    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);</span><br><span class="line">    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);</span><br><span class="line">    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);</span><br><span class="line">    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);</span><br><span class="line">    glUniform1i(inputTextureHandle[i], i);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="设置坐标"><a href="#设置坐标" class="headerlink" title="设置坐标"></a>设置坐标</h5><p>对于图像来说，首先创建一个平面矩形，然后在其上贴上纹理即可。<br><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 矩形坐标，原点在屏幕中心，x、y轴为(-1,1)</span></span><br><span class="line"><span class="hljs-keyword">static</span> <span class="hljs-keyword">const</span>  <span class="hljs-keyword">float</span> vertices[] = &#123;</span><br><span class="line">        <span class="hljs-number">-1.0f</span>, <span class="hljs-number">-1.0f</span>,  <span class="hljs-comment">// left,  bottom</span></span><br><span class="line">        <span class="hljs-number">1.0f</span>,  <span class="hljs-number">-1.0f</span>,  <span class="hljs-comment">// right, bottom</span></span><br><span class="line">        <span class="hljs-number">-1.0f</span>,  <span class="hljs-number">1.0f</span>,  <span class="hljs-comment">// left,  top</span></span><br><span class="line">        <span class="hljs-number">1.0f</span>,   <span class="hljs-number">1.0f</span>,  <span class="hljs-comment">// right, top</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="hljs-comment">// 纹理坐标，原点在屏幕左上角，x、y轴为(0,1)</span></span><br><span class="line"><span class="hljs-keyword">static</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">float</span> texture_vertices[] = &#123;</span><br><span class="line">        <span class="hljs-number">0.0f</span>, <span class="hljs-number">1.0f</span>, <span class="hljs-comment">// left, top</span></span><br><span class="line">        <span class="hljs-number">1.0f</span>, <span class="hljs-number">1.0f</span>, <span class="hljs-comment">// right, top</span></span><br><span class="line">        <span class="hljs-number">0.0f</span>, <span class="hljs-number">0.0f</span>, <span class="hljs-comment">// left, bottom</span></span><br><span class="line">        <span class="hljs-number">1.0f</span>, <span class="hljs-number">0.0f</span>, <span class="hljs-comment">// right, bottom</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">// 绑定顶点坐标</span></span><br><span class="line">glVertexAttribPointer(positionHandle, <span class="hljs-number">2</span>, GL_FLOAT, GL_FALSE, <span class="hljs-number">0</span>, vertices);</span><br><span class="line">glEnableVertexAttribArray(positionHandle);</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">// 绑定纹理坐标</span></span><br><span class="line">glVertexAttribPointer(texCoordinateHandle, <span class="hljs-number">2</span>, GL_FLOAT, GL_FALSE, <span class="hljs-number">0</span>, texture_vertices);</span><br><span class="line">glEnableVertexAttribArray(texCoordinateHandle);</span><br></pre></td></tr></table></figure></p>
+<h5 id="设置纹理"><a href="#设置纹理" class="headerlink" title="设置纹理"></a>设置纹理</h5><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 更新绑定纹理的数据</span></span><br><span class="line"><span class="hljs-comment">// 这里处理的是YUV420p格式的数据，所以UV是Y的一半</span></span><br><span class="line"><span class="hljs-keyword">const</span> GLsizei heights[<span class="hljs-number">3</span>] = &#123; texture-&gt;height, texture-&gt;height / <span class="hljs-number">2</span>, texture-&gt;height / <span class="hljs-number">2</span>&#125;;</span><br><span class="line"><span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">3</span>; ++i) &#123;</span><br><span class="line">    <span class="hljs-comment">// 激活前面创建的YUV纹理</span></span><br><span class="line">    glActiveTexture(GL_TEXTURE0 + i);</span><br><span class="line">    <span class="hljs-comment">// 绑定纹理</span></span><br><span class="line">    glBindTexture(GL_TEXTURE_2D, textures[i]);</span><br><span class="line">    <span class="hljs-comment">// 将对应的YUV数据设置到纹理上</span></span><br><span class="line">    glTexImage2D(GL_TEXTURE_2D,</span><br><span class="line">                 <span class="hljs-number">0</span>,</span><br><span class="line">                 GL_LUMINANCE,</span><br><span class="line">                 texture-&gt;pitches[i],</span><br><span class="line">                 heights[i],</span><br><span class="line">                 <span class="hljs-number">0</span>,</span><br><span class="line">                 GL_LUMINANCE,</span><br><span class="line">                 GL_UNSIGNED_BYTE,</span><br><span class="line">                 <span class="hljs-comment">// 具体数据</span></span><br><span class="line">                 texture-&gt;pixels[i]);</span><br><span class="line">    <span class="hljs-comment">// 设置纹理变量对应的纹理单元层</span></span><br><span class="line">    glUniform1i(inputTextureHandle[i], i);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="绘制"><a href="#绘制" class="headerlink" title="绘制"></a>绘制</h5><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 绘制平面矩形</span></span><br><span class="line">glDrawArrays(GL_TRIANGLE_STRIP, <span class="hljs-number">0</span>, <span class="hljs-number">4</span>);</span><br></pre></td></tr></table></figure>
+<p>将OpenGL-ES生成的图像数据加入到EGLSurface绑定的Surface中<br><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 当opengl-es将内容绘制完成，调用该方法将该缓冲区加入到Surface的BufferQueue中</span></span><br><span class="line"><span class="hljs-keyword">if</span> (!eglSwapBuffers(display, eglSurface)) &#123;</span><br><span class="line">     <span class="hljs-keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+
+        </div>
+        
+        <ul class="post-copyright">
+            <li><strong>本文标题：</strong><a href="https://witgao.com/音视频开发之Android播放视频/">音视频开发之Android播放视频</a></li>
+            <li><strong>本文作者：</strong><a href="https://witgao.com">zhenyu</a></li>
+            <li><strong>本文链接：</strong><a href="https://witgao.com/音视频开发之Android播放视频/">https://witgao.com/音视频开发之Android播放视频/</a></li>
+            <li><strong>发布时间：</strong>2020-07-23</li>
+            <li><strong>版权声明：</strong>本博客所有文章除特别声明外，均采用 <a
+                    href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="external nofollow"
+                    target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明出处！
+            </li>
+        </ul>
+        
+        
+        
+        
+    </div>
+</div>
+
+
+
+
+
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        <div class="level-start">
+            <a class="level level-item has-link-grey  article-nav-prev"
+                href="/音视频开发之SDL2播放音频/">
+                <i class="level-item fas fa-chevron-left"></i>
+                <span class="level-item">音视频开发之SDL2播放音频</span>
+            </a>
+        </div>
+        
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next"
+                href="/音视频开发之Android播放音频/">
+                <span class="level-item">音视频开发之Android播放音频</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+    </div>
+</div>
+
+
+</div>
+                
+
+
+
+
+<div
+    class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left ">
+    
+    
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered" style="flex-shrink: 1">
+                <div>
+                    
+                    <figure class="image is-128x128 has-mb-6">
+                        <img class="" src="/images/avatar1.png" alt="zhenyu">
+                    </figure>
+                    
+                    <p class="is-size-4 is-block">
+                        zhenyu
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        富贵山庄无富贵，只留欢乐在此间
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>杭州</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        文章
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        38
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        分类
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        9
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        标签
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        0
+                    </p>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="level">
+            <a class="level-item button is-link is-rounded" href="https://github.com/witgao" target="_blank">
+                关注我</a>
+        </div>
+        
+        
+        
+    </div>
+</div>
+    
+    
+<div class="card widget column-left is-sticky" id="toc">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                目录
+            </h3>
+            <ul class="menu-list"><li>
+        <a class="is-flex" href="#接入原生渲染体系">
+        <span class="has-mr-6">1</span>
+        <span>接入原生渲染体系</span>
+        </a></li><li>
+        <a class="is-flex" href="#Surface与EGLSurface">
+        <span class="has-mr-6">2</span>
+        <span>Surface与EGLSurface</span>
+        </a></li><li>
+        <a class="is-flex" href="#EGLSurface与EGLContext">
+        <span class="has-mr-6">3</span>
+        <span>EGLSurface与EGLContext</span>
+        </a></li><li>
+        <a class="is-flex" href="#OpenGL-ES渲染纹理">
+        <span class="has-mr-6">4</span>
+        <span>OpenGL-ES渲染纹理</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#创建Program">
+        <span class="has-mr-6">4.1</span>
+        <span>创建Program</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#创建Vertex着色器">
+        <span class="has-mr-6">4.1.1</span>
+        <span>创建Vertex着色器</span>
+        </a></li><li>
+        <a class="is-flex" href="#创建Fragment着色器">
+        <span class="has-mr-6">4.1.2</span>
+        <span>创建Fragment着色器</span>
+        </a></li><li>
+        <a class="is-flex" href="#创建Program-1">
+        <span class="has-mr-6">4.1.3</span>
+        <span>创建Program</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#设置坐标">
+        <span class="has-mr-6">4.2</span>
+        <span>设置坐标</span>
+        </a></li><li>
+        <a class="is-flex" href="#设置纹理">
+        <span class="has-mr-6">4.3</span>
+        <span>设置纹理</span>
+        </a></li><li>
+        <a class="is-flex" href="#绘制">
+        <span class="has-mr-6">4.4</span>
+        <span>绘制</span>
+        </a></li></ul></li></ul>
+        </div>
+    </div>
+</div>
+    
+    
+    <div class="column-right-shadow is-hidden-widescreen ">
+        
+    </div>
+    
+</div>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <!-- <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="/images/logo2.png" alt="音视频开发之Android播放视频" height="28">
+                
+                </a> -->
+                <p class="is-size-7">
+                    &copy; 2020 zhenyu&nbsp;
+                    Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a
+                        href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank">Icarus</a>
+                    
+                </p>
+            </div>
+            <div class="level-end">
+                
+            </div>
+        </div>
+    </div>
+</footer>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("zh-CN");</script>
+
+<script>
+var IcarusThemeSettings = {
+    article: {
+        highlight: {
+            clipboard: true,
+            fold: 'unfolded'
+        }
+    }
+};
+</script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+
+
+
+    
+    
+<script src="/js/animation.js"></script>
+
+    
+    
+<script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+<script src="/js/gallery.js" defer></script>
+
+    
+    
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    MathJax.Hub.Config({
+        'HTML-CSS': {
+            matchFontHeight: false
+        },
+        SVG: {
+            matchFontHeight: false
+        },
+        CommonHTML: {
+            matchFontHeight: false
+        },
+        tex2jax: {
+            inlineMath: [
+                ['$','$'],
+                ['\\(','\\)']
+            ]
+        }
+    });
+});
+</script>
+    
+    
+<a id="back-to-top" title="回到顶端" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="想要查找什么..." />
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: '文章',
+                PAGES: '页面',
+                CATEGORIES: '分类',
+                TAGS: '标签',
+                UNTITLED: '(无标题)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+</body>
+
+</html>

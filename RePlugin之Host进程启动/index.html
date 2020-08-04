@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html  lang="zh">
+
+<head>
+    <meta charset="utf-8" />
+
+<meta name="generator" content="Hexo 3.9.0" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<title>RePlugin之Host进程启动 - 富贵山庄</title>
+
+
+    <meta name="description" content="常驻进程RePlugin默认开启常驻进程，所谓常驻进程就是单独启动一个进程来运行插件服务，可以在gradle中配置关闭常驻进程，那么服务会运行在UI进程。 1234repluginHostConfig &amp;#123;    /** 是否使用常驻进程？ */    persistentEnable false&amp;#125; 启用常驻进程下插件服务的启动UI进程启动创建RePluginApplicatio">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RePlugin之Host进程启动">
+<meta property="og:url" content="https://witgao.com/RePlugin之Host进程启动/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:description" content="常驻进程RePlugin默认开启常驻进程，所谓常驻进程就是单独启动一个进程来运行插件服务，可以在gradle中配置关闭常驻进程，那么服务会运行在UI进程。 1234repluginHostConfig &amp;#123;    /** 是否使用常驻进程？ */    persistentEnable false&amp;#125; 启用常驻进程下插件服务的启动UI进程启动创建RePluginApplicatio">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://witgao.com/images/og_image.png">
+<meta property="og:updated_time" content="2020-07-13T13:45:34.994Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="RePlugin之Host进程启动">
+<meta name="twitter:description" content="常驻进程RePlugin默认开启常驻进程，所谓常驻进程就是单独启动一个进程来运行插件服务，可以在gradle中配置关闭常驻进程，那么服务会运行在UI进程。 1234repluginHostConfig &amp;#123;    /** 是否使用常驻进程？ */    persistentEnable false&amp;#125; 启用常驻进程下插件服务的启动UI进程启动创建RePluginApplicatio">
+<meta name="twitter:image" content="https://witgao.com/images/og_image.png">
+
+
+
+
+
+
+
+<link rel="icon" href="/images/favicon1.svg">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/default.css">
+
+
+    
+    
+<style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+    
+    
+    
+    
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+    
+    
+    
+    
+    
+    
+    
+    <link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+    
+    
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body class="is-3-column">
+    <nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="/images/logo2.png" alt="RePlugin之Host进程启动" height="28">
+            
+            </a>
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item"
+                href="/">燕子坞</a>
+                
+                <a class="navbar-item"
+                href="/archives">听香水榭</a>
+                
+                <a class="navbar-item"
+                href="/categories">还施水阁</a>
+                
+                <a class="navbar-item"
+                href="/about">思过崖</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    <a class="navbar-item" target="_blank" title="Download on GitHub" href="https://github.com/witgao/blog">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                <a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;">
+                    <i class="fas fa-list-ul"></i>
+                </a>
+                
+                
+                <a class="navbar-item search" title="搜索" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-9-widescreen has-order-2 column-main">
+<div class="card">
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2018-05-24T16:00:00.000Z">2018-05-25</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/">刀枪棍棒（Android）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/五虎断门刀（Android原生）/">五虎断门刀（Android原生）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    26 分钟 读完 (大约 3900 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            RePlugin之Host进程启动
+            
+        </h1>
+        <div class="content">
+            <h4 id="常驻进程"><a href="#常驻进程" class="headerlink" title="常驻进程"></a>常驻进程</h4><p>RePlugin默认开启常驻进程，所谓常驻进程就是单独启动一个进程来运行插件服务，可以在gradle中配置关闭常驻进程，那么服务会运行在UI进程。</p>
+<figure class="highlight groovy hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">repluginHostConfig &#123;</span><br><span class="line">    <span class="hljs-comment">/** 是否使用常驻进程？ */</span></span><br><span class="line">    persistentEnable <span class="hljs-literal">false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="启用常驻进程下插件服务的启动"><a href="#启用常驻进程下插件服务的启动" class="headerlink" title="启用常驻进程下插件服务的启动"></a>启用常驻进程下插件服务的启动</h4><h5 id="UI进程启动"><a href="#UI进程启动" class="headerlink" title="UI进程启动"></a>UI进程启动</h5><p>创建RePluginApplication，在attachBaseContext函数中开始初始化RePlugin框架。</p>
+<h5 id="初始化RePlugin"><a href="#初始化RePlugin" class="headerlink" title="初始化RePlugin"></a>初始化RePlugin</h5><p>通过RePlugin.App.attachBaseContext函数初始化<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">attachBaseContext</span><span class="hljs-params">(Application app, RePluginConfig config)</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="hljs-comment">// 标记当前进程是UI进程还是常驻进程</span></span><br><span class="line">    IPC.init(app);</span><br><span class="line">    ...</span><br><span class="line">    <span class="hljs-comment">// 通过反射获取gradle中repluginHostConfig中的配置信息</span></span><br><span class="line">    HostConfigHelper.init();</span><br><span class="line">    ...</span><br><span class="line">    <span class="hljs-comment">// 创建PmBase对象，初始化插件管理框架，并且Hook应用的ClassLoader</span></span><br><span class="line">    PMF.init(app);</span><br><span class="line">    <span class="hljs-comment">// 挂载所有插件</span></span><br><span class="line">    PMF.callAttach();</span><br><span class="line"></span><br><span class="line">    sAttached = <span class="hljs-keyword">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h5 id="创建PmBase对象"><a href="#创建PmBase对象" class="headerlink" title="创建PmBase对象"></a>创建PmBase对象</h5><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">PmBase(Context context) &#123;</span><br><span class="line">    mContext = context;</span><br><span class="line">    <span class="hljs-comment">// 添加客户端进程对应的provider和service的authorities，用来启动对应的组件</span></span><br><span class="line">    <span class="hljs-comment">// processIndex是子进程个数，不能超过2</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (PluginManager.sPluginProcessIndex == IPluginManager.PROCESS_UI || PluginManager.isPluginProcess()) &#123;</span><br><span class="line">        String suffix;</span><br><span class="line">        <span class="hljs-keyword">if</span> (PluginManager.sPluginProcessIndex == IPluginManager.PROCESS_UI) &#123;</span><br><span class="line">            suffix = <span class="hljs-string">"N1"</span>;</span><br><span class="line">        &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">            suffix = <span class="hljs-string">""</span> + PluginManager.sPluginProcessIndex;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="hljs-comment">// 如果是UI进程则启动ProviderN1和ServiceN1</span></span><br><span class="line">        <span class="hljs-comment">// 如果是插件进程则启动Provider0、Provider1和Service0、Service1</span></span><br><span class="line">        mContainerProviders.add(IPC.getPackageName() + CONTAINER_PROVIDER_PART + suffix);</span><br><span class="line">        mContainerServices.add(IPC.getPackageName() + CONTAINER_SERVICE_PART + suffix);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// 4.创建Binder服务PluginClient，每个客户端都拥有一个该服务，常驻进程持有所有客户端进程该服务的代理对象，</span></span><br><span class="line">    <span class="hljs-comment">// 常驻进程通过mClient服务的代理调用客户端的PluginProcessPer服务</span></span><br><span class="line">    mClient = <span class="hljs-keyword">new</span> PluginProcessPer(context, <span class="hljs-keyword">this</span>, PluginManager.sPluginProcessIndex, mContainerActivities);</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">//</span></span><br><span class="line">    mLocal = <span class="hljs-keyword">new</span> PluginCommImpl(context, <span class="hljs-keyword">this</span>);</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">//</span></span><br><span class="line">    mInternal = <span class="hljs-keyword">new</span> PluginLibraryInternalProxy(<span class="hljs-keyword">this</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="创建PluginClient服务"><a href="#创建PluginClient服务" class="headerlink" title="创建PluginClient服务"></a>创建PluginClient服务</h5><p>每个客户端都有一个PluginClient服务，该服务包含PluginServiceServer子服务和一个坑管理容器，因此每个客户端进程都有一个自己的坑容器。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">PluginProcessPer(Context context, PmBase pm, <span class="hljs-keyword">int</span> process, HashSet&lt;String&gt; containers) &#123;</span><br><span class="line">    mContext = context;</span><br><span class="line">    mPluginMgr = pm;</span><br><span class="line">    <span class="hljs-comment">// 在服务中又创建了子服务 PluginServiceServer</span></span><br><span class="line">    mServiceMgr = <span class="hljs-keyword">new</span> PluginServiceServer(context);</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// 创建插件容器管理，坑的分配</span></span><br><span class="line">    mACM = <span class="hljs-keyword">new</span> PluginContainers();</span><br><span class="line">    <span class="hljs-comment">// UI进程和自定义子进程初始化给定启动模式的activity对应manifest中占的坑的名称</span></span><br><span class="line">    <span class="hljs-comment">// 也就是设置坑位</span></span><br><span class="line">    mACM.init(process, containers);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+ <a id="more"></a>
+<p>activity坑</p>
+<figure class="highlight xml hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">// 这种是UI线程对应的坑</span><br><span class="line"><span class="hljs-tag">&lt;<span class="hljs-name">activity</span></span></span><br><span class="line"><span class="hljs-tag">    <span class="hljs-attr">android:theme</span>=<span class="hljs-string">"@ref/0x01030010"</span></span></span><br><span class="line"><span class="hljs-tag">    <span class="hljs-attr">android:name</span>=<span class="hljs-string">"com.qihoo360.replugin.sample.host.loader.a.ActivityN1STTS0"</span></span></span><br><span class="line"><span class="hljs-tag">    <span class="hljs-attr">android:exported</span>=<span class="hljs-string">"false"</span></span></span><br><span class="line"><span class="hljs-tag">    <span class="hljs-attr">android:launchMode</span>=<span class="hljs-string">"2"</span></span></span><br><span class="line"><span class="hljs-tag">    <span class="hljs-attr">android:screenOrientation</span>=<span class="hljs-string">"1"</span></span></span><br><span class="line"><span class="hljs-tag">    <span class="hljs-attr">android:configChanges</span>=<span class="hljs-string">"0x4b0"</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">// 这种事自定义进程对应的坑</span><br><span class="line"><span class="hljs-tag">&lt;<span class="hljs-name">activity</span></span></span><br><span class="line"><span class="hljs-tag">    <span class="hljs-attr">android:theme</span>=<span class="hljs-string">"@ref/0x01030006"</span></span></span><br><span class="line"><span class="hljs-tag">    <span class="hljs-attr">android:name</span>=<span class="hljs-string">"com.qihoo360.replugin.sample.host.loader.a.Activity0_singleTask1"</span></span></span><br><span class="line"><span class="hljs-tag">    <span class="hljs-attr">android:exported</span>=<span class="hljs-string">"false"</span></span></span><br><span class="line"><span class="hljs-tag">    <span class="hljs-attr">android:process</span>=<span class="hljs-string">":loader0"</span></span></span><br><span class="line"><span class="hljs-tag">    <span class="hljs-attr">android:taskAffinity</span>=<span class="hljs-string">":loader0"</span></span></span><br><span class="line"><span class="hljs-tag">    <span class="hljs-attr">android:launchMode</span>=<span class="hljs-string">"2"</span></span></span><br><span class="line"><span class="hljs-tag">    <span class="hljs-attr">android:screenOrientation</span>=<span class="hljs-string">"1"</span></span></span><br><span class="line"><span class="hljs-tag">    <span class="hljs-attr">android:configChanges</span>=<span class="hljs-string">"0x4b0"</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+<h5 id="初始化PmBase"><a href="#初始化PmBase" class="headerlink" title="初始化PmBase"></a>初始化PmBase</h5><p>由于开启常驻进程模式，所以UI进程作为客户端，会走initForClient分支<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">init</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="hljs-keyword">if</span> (HostConfigHelper.PERSISTENT_ENABLE) &#123;</span><br><span class="line">        <span class="hljs-comment">// （默认）“常驻进程”作为插件管理进程，则常驻进程作为Server，其余进程作为Client</span></span><br><span class="line">        <span class="hljs-keyword">if</span> (IPC.isPersistentProcess()) &#123;</span><br><span class="line">            <span class="hljs-comment">// 初始化“Server”所做工作</span></span><br><span class="line">            initForServer();</span><br><span class="line">        &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">            <span class="hljs-comment">// 连接到Server</span></span><br><span class="line">            initForClient();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">        <span class="hljs-comment">// “UI进程”作为插件管理进程（唯一进程），则UI进程既可以作为Server也可以作为Client</span></span><br><span class="line">        <span class="hljs-keyword">if</span> (IPC.isUIProcess()) &#123;</span><br><span class="line">            <span class="hljs-comment">// 1. 尝试初始化Server所做工作，</span></span><br><span class="line">            initForServer();</span><br><span class="line"></span><br><span class="line">            <span class="hljs-comment">// 2. 注册该进程信息到“插件管理进程”中</span></span><br><span class="line">            <span class="hljs-comment">// 注意：这里无需再做 initForClient，因为不需要再走一次Binder</span></span><br><span class="line">            PMF.sPluginMgr.attach();</span><br><span class="line"></span><br><span class="line">        &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">            <span class="hljs-comment">// 其它进程？直接连接到Server即可</span></span><br><span class="line">            initForClient();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// 最新快照</span></span><br><span class="line">    PluginTable.initPlugins(mPlugins);</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// 输出</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (LOG) &#123;</span><br><span class="line">        <span class="hljs-keyword">for</span> (Plugin p : mPlugins.values()) &#123;</span><br><span class="line">            LogDebug.d(PLUGIN_TAG, <span class="hljs-string">"plugin: p="</span> + p.mInfo);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h5 id="initForClient"><a href="#initForClient" class="headerlink" title="initForClient"></a>initForClient</h5><p>客户端尝试连接服务端,在PluginProcessMain中拥有两个非常重要的变量，一个是sPluginHostLocal，一个是sPluginHostRemote，对于客户端进程来说，使用sPluginHostRemote，该变量是服务在客户端的代理。而对于服务端来说，使用sPluginHostLocal，该变量是真正的服务对象。</p>
+<p>常驻进程拥有IPluginHost服务(PmBase.mHostSvc)，客户端通过持有其服务代理(PluginProcessMain.sPluginHostRemote)与服务通信。<br>客户端拥有IPluginClient服务(PmBase.mClient)，常驻进程通过持有期服务代理(ProcessClientRecord.client)与服务通信。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">void</span> <span class="hljs-title">initForClient</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">    <span class="hljs-comment">// 1. 先尝试连接</span></span><br><span class="line">    PluginProcessMain.connectToHostSvc();</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// 2. 然后从常驻进程获取插件列表</span></span><br><span class="line">    refreshPluginsFromHostSvc();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h5 id="连接服务端，创建常驻进程"><a href="#连接服务端，创建常驻进程" class="headerlink" title="连接服务端，创建常驻进程"></a>连接服务端，创建常驻进程</h5><p>AIDL : Stub就是Binder服务对象，在onTransact中接受客户端消息并处理，其自己也可以是客户端通过transact发送消息给自己，所以在同一进程中，客户端和服务端都是同一Binder对象。而Stub.Proxy就是客户端的服务代理类，通过内部的mRemote，也就是BinderProxy对象与Binder服务进行跨进程交互，因为BinderProxy是给客户端用的，所以其只有transact方法用来发消息，而不能接受消息。</p>
+<p>客户端进程通过Stub.Proxy.mRemote.transact发送消息到服务端进程的Binder对象的onTransact方法中。</p>
+<p>asInterface : 将服务Binder转换，如果是真的Binder对象，其queryLocalInterface返回的是自身，则asInterface返回的还是该对象，但是如果是BinderProxy对象，那么其queryLocalInterface返回的是空，则会对其进行包装再返回，包装成Stub.Proxy对象，该Proxy对象内部mRemote变量就是BinderProxy对象。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">void</span> <span class="hljs-title">connectToHostSvc</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">    Context context = PMF.getApplicationContext();</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// 通过provider启动常驻进程并拿到服务Binder</span></span><br><span class="line">    IBinder binder = PluginProviderStub.proxyFetchHostBinder(context);</span><br><span class="line">    ...</span><br><span class="line">    sPluginHostRemote = IPluginHost.Stub.asInterface(binder);</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">        PluginManagerProxy.connectToServer(sPluginHostRemote);</span><br><span class="line"></span><br><span class="line">        <span class="hljs-comment">// 将当前进程的"正在运行"列表和常驻做同步</span></span><br><span class="line">        <span class="hljs-comment">// TODO 若常驻进程重启，则应在启动时发送广播，各存活着的进程调用该方法来同步</span></span><br><span class="line">        PluginManagerProxy.syncRunningPlugins();</span><br><span class="line">    &#125; <span class="hljs-keyword">catch</span> (RemoteException e) &#123;</span><br><span class="line">        <span class="hljs-comment">// 获取PluginManagerServer时出现问题，可能常驻进程突然挂掉等，当前进程自杀</span></span><br><span class="line">        <span class="hljs-keyword">if</span> (LOGR) &#123;</span><br><span class="line">            LogRelease.e(PLUGIN_TAG, <span class="hljs-string">"p.p p.h l3a: "</span> + e.getMessage(), e);</span><br><span class="line">        &#125;</span><br><span class="line">        System.exit(<span class="hljs-number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// 注册该进程信息到“插件管理进程”中</span></span><br><span class="line">    PMF.sPluginMgr.attach();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>由于插件服务并没有注册在ServiceManager中，所以不能通过SM来获取，这里是通过ContentProvider来获取，并且该provider会运行在新的进程中，该进程就作为常驻进程。</p>
+<p>此处启动的是ProcessPitProviderPersist，运行的进程名是GuardService。<br><figure class="highlight xml hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-tag">&lt;<span class="hljs-name">provider</span></span></span><br><span class="line"><span class="hljs-tag">    <span class="hljs-attr">android:name</span>=<span class="hljs-string">"com.qihoo360.replugin.component.process.ProcessPitProviderPersist"</span></span></span><br><span class="line"><span class="hljs-tag">    <span class="hljs-attr">android:exported</span>=<span class="hljs-string">"false"</span></span></span><br><span class="line"><span class="hljs-tag">    <span class="hljs-attr">android:process</span>=<span class="hljs-string">":GuardService"</span></span></span><br><span class="line"><span class="hljs-tag">    <span class="hljs-attr">android:authorities</span>=<span class="hljs-string">"com.qihoo360.replugin.sample.host.loader.p.main"</span> /&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>在query中如果该provider服务不存在，会先创建该provider以及其所在的进程,该进程创建会重新创建application，然后走一遍上面的初始化流程。</p>
+<p>query中返回的binder是常驻进程的PmBase.mHostSvc对象，通过Parcelable将Binder对象从常驻进程传递到UI进程，在序列化时通过Parcel.readStrongBinder来创建Binder对象，如果是同一进程创建的就是Binder对象，如果在不同进程，那么创建的就是BinderProxy对象。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> IBinder <span class="hljs-title">proxyFetchHostBinder</span><span class="hljs-params">(Context context, String selection)</span> </span>&#123;</span><br><span class="line">    <span class="hljs-comment">//</span></span><br><span class="line">    Cursor cursor = <span class="hljs-keyword">null</span>;</span><br><span class="line">    <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">        Uri uri = ProcessPitProviderPersist.URI;</span><br><span class="line">        cursor = context.getContentResolver().query(uri, PROJECTION_MAIN, selection, <span class="hljs-keyword">null</span>, <span class="hljs-keyword">null</span>);</span><br><span class="line">        ...</span><br><span class="line">        <span class="hljs-comment">// 此处拿到的是BinderProxy对象</span></span><br><span class="line">        IBinder binder = BinderCursor.getBinder(cursor);</span><br><span class="line">        <span class="hljs-keyword">return</span> binder;</span><br><span class="line">    &#125; <span class="hljs-keyword">finally</span> &#123;</span><br><span class="line">        CloseableUtils.closeQuietly(cursor);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h5 id="常驻进程初始化，initForServer"><a href="#常驻进程初始化，initForServer" class="headerlink" title="常驻进程初始化，initForServer"></a>常驻进程初始化，initForServer</h5><p>每个进程都会创建一个自己的application对象，所以会再次触发初始化流程，常驻进程创建后，会重复走一遍上面的流程，只是在走到第5步时，会执行initServer方法<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">void</span> <span class="hljs-title">initForServer</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="hljs-comment">// 该对象就是服务Binder，返回给UI进程的就是该Binder</span></span><br><span class="line">    mHostSvc = <span class="hljs-keyword">new</span> PmHostSvc(mContext, <span class="hljs-keyword">this</span>);</span><br><span class="line">    <span class="hljs-comment">// 将服务赋值给mPluginHostLocal，并获取PluginManagerServer</span></span><br><span class="line">    PluginProcessMain.installHost(mHostSvc);</span><br><span class="line">    PluginProcessMain.schedulePluginProcessLoop(PluginProcessMain.CHECK_STAGE1_DELAY);</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// 搜索所有本地插件，读取assets/plugins-builtin.json文件</span></span><br><span class="line">    mAll = <span class="hljs-keyword">new</span> Builder.PxAll();</span><br><span class="line">    Builder.builder(mContext, mAll);</span><br><span class="line">    <span class="hljs-comment">// 构建插件对象，保存在PmBase.mPlugins中</span></span><br><span class="line">    refreshPluginMap(mAll.getPlugins());</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">        List&lt;PluginInfo&gt; l = PluginManagerProxy.load();</span><br><span class="line">        <span class="hljs-keyword">if</span> (l != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">            <span class="hljs-comment">// 将"纯APK"插件信息并入总的插件信息表中，方便查询</span></span><br><span class="line">            <span class="hljs-comment">// 这里有可能会覆盖之前在p-n中加入的信息。本来我们就想这么干，以"纯APK"插件为准</span></span><br><span class="line">            refreshPluginMap(l);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="hljs-keyword">catch</span> (RemoteException e) &#123;</span><br><span class="line">        ...</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>创建服务时，会创建两个子服务PluginServiceServer和PluginManagerService。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">PmHostSvc(Context context, PmBase packm) &#123;</span><br><span class="line">    mContext = context;</span><br><span class="line">    mPluginMgr = packm;</span><br><span class="line">    mServiceMgr = <span class="hljs-keyword">new</span> PluginServiceServer(context);</span><br><span class="line">    mManager = <span class="hljs-keyword">new</span> PluginManagerServer(context);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><strong>此时UI进程等待在provider.query方法中等待，直到常驻进程的application初始化完毕，然后进程会创建provider对象，并执行provider.query方法返回数据后才开始执行。</strong></p>
+<h5 id="常驻进程-初始化本地插件列表"><a href="#常驻进程-初始化本地插件列表" class="headerlink" title="常驻进程-初始化本地插件列表"></a>常驻进程-初始化本地插件列表</h5><p>此时常驻进程执行完initServer后，常驻进程会继续第5步执行PluginTable.initPlugins(mPlugins),这个mPlugins就是上面搜索的本地插件对象。会将所有插件都放到PluginTable.PLUGINS这个静态Map中，key为plugin.alias，方便全局获取。到此，PmBase的初始化基本就完了。</p>
+<h5 id="常驻进程-Hook应用的ClassLoader"><a href="#常驻进程-Hook应用的ClassLoader" class="headerlink" title="常驻进程-Hook应用的ClassLoader"></a>常驻进程-Hook应用的ClassLoader</h5><p>回到第2步，在初始化PmBase之后，会Hook应用，将Application.mBase.mPackageInfo.mClassLoader改成RePluginClassLoader对象。并将当前线程的contextClassLoader也改了。<br>此时，PMF初始化完毕，会执行PMF的callAttach方法，该方法中会拿到应用原生的ClassLoader，并将其attach到所有的插件对象上。如果此时是插件子进程，那么就会安装默认的插件。</p>
+<h5 id="provider-query"><a href="#provider-query" class="headerlink" title="provider.query"></a>provider.query</h5><p>常驻进程初始化完毕，执行ProcessPitProviderPersist.query方法，将PmBase.mHostSvc服务对象通过Parcelable返回给UI进程。</p>
+<h5 id="UI进程-获取服务端代理"><a href="#UI进程-获取服务端代理" class="headerlink" title="UI进程-获取服务端代理"></a>UI进程-获取服务端代理</h5><p>回到第7步，此时UI进程通过provider.query去获取服务，由于在不同进程，此时返回的是BinderProxy对象，那么在asInterface中返回的就是IPluginHost.Stub.Proxy对象了，会将该对象赋值给PluginProcessMain.sPluginHostRemote。此时UI进程拿到了常驻进程的服务代理对象。</p>
+<h5 id="UI进程-客户端连接服务端"><a href="#UI进程-客户端连接服务端" class="headerlink" title="UI进程-客户端连接服务端"></a>UI进程-客户端连接服务端</h5><p>在第7步中，先连接服务端,通过PluginManagerProxy.connectToServer,获取服务端中的子服务PluginManagerServer服务(PmHostSvc.mManager.mStub)。保存在PluginManagerProxy.sRemote中。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">PluginManagerProxy.connectToServer(sPluginHostRemote);</span><br><span class="line"></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">connectToServer</span><span class="hljs-params">(IPluginHost host)</span> <span class="hljs-keyword">throws</span> RemoteException </span>&#123;</span><br><span class="line">    <span class="hljs-keyword">if</span> (sRemote != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">        <span class="hljs-keyword">if</span> (LogDebug.LOG) &#123;</span><br><span class="line">            LogDebug.e(TAG, <span class="hljs-string">"connectToServer: Already connected! host="</span> + sRemote);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="hljs-keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-comment">// 该sRemote对象是IPluginManagerServer.Stub.Proxy对象</span></span><br><span class="line">    sRemote = host.fetchManagerServer();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> IPluginManagerServer <span class="hljs-title">fetchManagerServer</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> RemoteException </span>&#123;</span><br><span class="line">    Parcel _data = Parcel.obtain();</span><br><span class="line">    Parcel _reply = Parcel.obtain();</span><br><span class="line"></span><br><span class="line">    IPluginManagerServer _result;</span><br><span class="line">    <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">        _data.writeInterfaceToken(<span class="hljs-string">"com.qihoo360.loader2.IPluginHost"</span>);</span><br><span class="line">        <span class="hljs-keyword">this</span>.mRemote.transact(<span class="hljs-number">29</span>, _data, _reply, <span class="hljs-number">0</span>);</span><br><span class="line">        _reply.readException();</span><br><span class="line">        <span class="hljs-comment">// readStrongBinder会将Binder服务序列化成BinderProxy，然后asInterface后，</span></span><br><span class="line">        返回IPluginManagerServer.Stub.Proxy对象。</span><br><span class="line">        _result = com.qihoo360.replugin.packages.IPluginManagerServer.Stub.asInterface(_reply.readStrongBinder());</span><br><span class="line">    &#125; <span class="hljs-keyword">finally</span> &#123;</span><br><span class="line">        _reply.recycle();</span><br><span class="line">        _data.recycle();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">return</span> _result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h5 id="UI进程-同步插件列表"><a href="#UI进程-同步插件列表" class="headerlink" title="UI进程-同步插件列表"></a>UI进程-同步插件列表</h5><p>然后在第7步中，会同步当前进程加载插件列表到常驻进程服务端<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">syncRunningPlugins</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> RemoteException </span>&#123;</span><br><span class="line">    <span class="hljs-keyword">if</span> (sRunningSynced) &#123;</span><br><span class="line">        <span class="hljs-comment">// 已经同步过，无需再次同步，直到常驻进程挂掉</span></span><br><span class="line">        <span class="hljs-keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">if</span> (!sRunningList.hasRunning()) &#123;</span><br><span class="line">        <span class="hljs-comment">// 没有正在运行的插件，无需同步。若该进程被刚刚加载时会出现此情况</span></span><br><span class="line">        <span class="hljs-keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-comment">// 不判断sRemote在不在，因为本应该在sRemote获取后就马上调用</span></span><br><span class="line">    sRemote.syncRunningPlugins(sRunningList);</span><br><span class="line">    sRunningSynced = <span class="hljs-keyword">true</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">syncRunningPluginsLocked</span><span class="hljs-params">(PluginRunningList list)</span> </span>&#123;</span><br><span class="line">    <span class="hljs-comment">// 复制一份List，这样无论是否为跨进程，都不会因客户端对List的修改而产生影响</span></span><br><span class="line">    PluginRunningList newList = <span class="hljs-keyword">new</span> PluginRunningList(list);</span><br><span class="line">    <span class="hljs-comment">// 所谓同步，就是将该进程的已加载插件列表维护到一个map中，key为进程名。</span></span><br><span class="line">    <span class="hljs-comment">// mProcess2PluginsMap中维护了所有进程已加载插件列表。</span></span><br><span class="line">    mProcess2PluginsMap.put(list.mProcessName, newList);</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h5 id="设置UI进程Binder的死亡代理"><a href="#设置UI进程Binder的死亡代理" class="headerlink" title="设置UI进程Binder的死亡代理"></a>设置UI进程Binder的死亡代理</h5><p>第7步的最后，会将当前进程的信息注册到常驻进程中，并将PluginProcessPer(IPluginClient)服务传到到常驻进程中，在常驻进程中添加对该Binder的死亡代理，当客户端死亡时，通知到常驻进程中进行一系列处理。服务进程也会通过该Binder调用客户进程的服务。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 客户端发起attach，将当前进程的IPluginClient服务传过去</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">final</span> <span class="hljs-keyword">void</span> <span class="hljs-title">attach</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">    <span class="hljs-comment">//</span></span><br><span class="line">    <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">        <span class="hljs-comment">// 此处的getPluginHost拿到的就是从provider处拿到的服务，也就是sPluginHostRemote。</span></span><br><span class="line">        mDefaultPluginName = PluginProcessMain.getPluginHost().attachPluginProcess(IPC.getCurrentProcessName(), PluginManager.sPluginProcessIndex, mClient, mDefaultPluginName);</span><br><span class="line">    &#125; <span class="hljs-keyword">catch</span> (Throwable e) &#123;</span><br><span class="line">        <span class="hljs-keyword">if</span> (LOGR) &#123;</span><br><span class="line">            LogRelease.e(PLUGIN_TAG, <span class="hljs-string">"c.n.a: "</span> + e.getMessage(), e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">// 服务端接受，创建ProcessClientRecord对象未作客户端Binder的死亡代理,此处binder是BinderProxy对象，</span></span><br><span class="line">client是IPluginClient.Stub.Proxy对象，pms是服务端的PluginManagerService子服务对象。</span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> String <span class="hljs-title">attachProcess</span><span class="hljs-params">(<span class="hljs-keyword">int</span> pid, String process, <span class="hljs-keyword">int</span> index, IBinder binder, IPluginClient client, String def, PluginManagerServer pms)</span> </span>&#123;</span><br><span class="line">    <span class="hljs-keyword">synchronized</span> (PROCESSES) &#123;</span><br><span class="line">        <span class="hljs-comment">// 查询插件进程的默认插件，如果是UI进程，则返回'ui'</span></span><br><span class="line">        String plugin = attachProcessLocked(pid, process, index, binder, client, def);</span><br><span class="line">        <span class="hljs-comment">// 构建死亡代理对象</span></span><br><span class="line">        ProcessClientRecord pr = <span class="hljs-keyword">new</span> ProcessClientRecord(pms);</span><br><span class="line">        pr.name = process;</span><br><span class="line">        pr.plugin = plugin;</span><br><span class="line">        pr.pid = pid;</span><br><span class="line">        pr.index = index;</span><br><span class="line">        pr.binder = binder;</span><br><span class="line">        pr.client = client;</span><br><span class="line">        ALL.put(process, pr);</span><br><span class="line">        <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">            <span class="hljs-comment">// 注册死亡代理，当客户端的binder死亡时，会触发该代理的binderDied方法，然后会进行一些数据的销毁。</span></span><br><span class="line">            pr.binder.linkToDeath(pr, <span class="hljs-number">0</span>);</span><br><span class="line">        &#125; <span class="hljs-keyword">catch</span> (Throwable e) &#123;</span><br><span class="line">            ...</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="hljs-keyword">return</span> plugin;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h5 id="UI进程-获取服务端的插件列表"><a href="#UI进程-获取服务端的插件列表" class="headerlink" title="UI进程-获取服务端的插件列表"></a>UI进程-获取服务端的插件列表</h5><p>第7步连接服务端完毕之后，回到第6步，从服务端获取插件列表<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">refreshPluginsFromHostSvc</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">    List&lt;PluginInfo&gt; plugins = <span class="hljs-keyword">null</span>;</span><br><span class="line">    <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">        <span class="hljs-comment">// listPlugins返回的是PluginTable.PLUGINS列表的当前快照(克隆一份新的列表)，</span></span><br><span class="line">        而不是PLUGINS对象。而PLUGINS对象就是在第<span class="hljs-number">9</span>步中初始化的插件列表</span><br><span class="line">        plugins = PluginProcessMain.getPluginHost().listPlugins();</span><br><span class="line">    &#125; <span class="hljs-keyword">catch</span> (Throwable e) &#123;</span><br><span class="line">        ...</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// 判断是否有需要更新的插件</span></span><br><span class="line">    <span class="hljs-comment">// FIXME 执行此操作前，判断下当前插件的运行进程，具体可以限制仅允许该插件运行在一个进程且为自身进程中</span></span><br><span class="line">    List&lt;PluginInfo&gt; updatedPlugins = <span class="hljs-keyword">null</span>;</span><br><span class="line">    <span class="hljs-comment">// 获取插件json信息中是否有upinfo字段</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (isNeedToUpdate(plugins)) &#123;</span><br><span class="line">        ...</span><br><span class="line">        <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">            <span class="hljs-comment">// 调用PluginManagerService的load方法去更新</span></span><br><span class="line">            updatedPlugins = PluginManagerProxy.updateAllPlugins();</span><br><span class="line">        &#125; <span class="hljs-keyword">catch</span> (RemoteException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-comment">// 构建插件对象，保存在客户端的PmBase.mPlugins中</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (updatedPlugins != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">        refreshPluginMap(updatedPlugins);</span><br><span class="line">    &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">        refreshPluginMap(plugins);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h5 id="UI进程-维护本地插件列表"><a href="#UI进程-维护本地插件列表" class="headerlink" title="UI进程-维护本地插件列表"></a>UI进程-维护本地插件列表</h5><p>此时UI进程执行完initClient方法，会继续第5步执行PluginTable.initPlugins(mPlugins),这个mPlugins就是上面从服务端拿到的插件对象。会将所有插件都放到PluginTable.PLUGINS这个静态Map中，key为plugin.alias，方便全局获取。到此，PmBase的初始化基本就完了。（此处其实就是从服务进程的PluginTable.PLUGINS中拷贝一份数据放到客户进程中的PluginTable.PLUGINS中）</p>
+<h5 id="UI进程-Hook应用的ClassLoader"><a href="#UI进程-Hook应用的ClassLoader" class="headerlink" title="UI进程-Hook应用的ClassLoader"></a>UI进程-Hook应用的ClassLoader</h5><p>接下来和常驻进程一样，在初始化PmBase之后，会Hook，将Application.mBase.mPackageInfo.mClassLoader改成RePluginClassLoader对象。并将当前线程的contextClassLoader也改了。此时，PMF初始化完毕，会执行PMF的callAttach方法，该方法中会拿到应用原生的ClassLoader，并将其attach到所有的插件对象上。如果此时是插件子进程，那么就会安装默认的插件。</p>
+<h5 id="UI进程和常驻进程都已经初始化完毕。"><a href="#UI进程和常驻进程都已经初始化完毕。" class="headerlink" title="UI进程和常驻进程都已经初始化完毕。"></a>UI进程和常驻进程都已经初始化完毕。</h5><h4 id="gradle配置"><a href="#gradle配置" class="headerlink" title="gradle配置"></a>gradle配置</h4><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">RepluginConfig</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">/** 自定义进程的数量(除 UI 和 Persistent 进程) */</span></span><br><span class="line">    def countProcess = <span class="hljs-number">3</span></span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">/** 是否使用常驻进程？ */</span></span><br><span class="line">    def persistentEnable = <span class="hljs-keyword">true</span></span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">/** 常驻进程名称（也就是上面说的 Persistent 进程，开发者可自定义）*/</span></span><br><span class="line">    def persistentName = <span class="hljs-string">':GuardService'</span></span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">/** 背景不透明的坑的数量 */</span></span><br><span class="line">    def countNotTranslucentStandard = <span class="hljs-number">6</span></span><br><span class="line">    def countNotTranslucentSingleTop = <span class="hljs-number">2</span></span><br><span class="line">    def countNotTranslucentSingleTask = <span class="hljs-number">3</span></span><br><span class="line">    def countNotTranslucentSingleInstance = <span class="hljs-number">2</span></span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">/** 背景透明的坑的数量 */</span></span><br><span class="line">    def countTranslucentStandard = <span class="hljs-number">2</span></span><br><span class="line">    def countTranslucentSingleTop = <span class="hljs-number">2</span></span><br><span class="line">    def countTranslucentSingleTask = <span class="hljs-number">2</span></span><br><span class="line">    def countTranslucentSingleInstance = <span class="hljs-number">3</span></span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">/** 宿主中声明的 TaskAffinity 的组数 */</span></span><br><span class="line">    def countTask = <span class="hljs-number">2</span></span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">/**</span></span><br><span class="line"><span class="hljs-comment">     * 是否使用 AppCompat 库</span></span><br><span class="line"><span class="hljs-comment">     * com.android.support:appcompat-v7:25.2.0</span></span><br><span class="line"><span class="hljs-comment">     */</span></span><br><span class="line">    def useAppCompat = <span class="hljs-keyword">false</span></span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">/** HOST 向下兼容的插件版本 */</span></span><br><span class="line">    def compatibleVersion = <span class="hljs-number">10</span></span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">/** HOST 插件版本 */</span></span><br><span class="line">    def currentVersion = <span class="hljs-number">12</span></span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">/** plugins-builtin.json 文件名自定义,默认是 "plugins-builtin.json" */</span></span><br><span class="line">    def builtInJsonFileName = <span class="hljs-string">"plugins-builtin.json"</span></span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">/** 是否自动管理 plugins-builtin.json 文件,默认自动管理 */</span></span><br><span class="line">    def autoManageBuiltInJsonFile = <span class="hljs-keyword">true</span></span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">/** assert目录下放置插件文件的目录自定义,默认是 assert 的 "plugins" */</span></span><br><span class="line">    def pluginDir = <span class="hljs-string">"plugins"</span></span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">/** 插件文件的后缀自定义,默认是".jar" 暂时支持 jar 格式*/</span></span><br><span class="line">    def pluginFilePostfix = <span class="hljs-string">".jar"</span></span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">/** 当发现插件目录下面有不合法的插件 jar (有可能是特殊定制 jar)时是否停止构建,默认是 true */</span></span><br><span class="line">    def enablePluginFileIllegalStopBuild = <span class="hljs-keyword">true</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+        </div>
+        
+        <ul class="post-copyright">
+            <li><strong>本文标题：</strong><a href="https://witgao.com/RePlugin之Host进程启动/">RePlugin之Host进程启动</a></li>
+            <li><strong>本文作者：</strong><a href="https://witgao.com">zhenyu</a></li>
+            <li><strong>本文链接：</strong><a href="https://witgao.com/RePlugin之Host进程启动/">https://witgao.com/RePlugin之Host进程启动/</a></li>
+            <li><strong>发布时间：</strong>2018-05-25</li>
+            <li><strong>版权声明：</strong>本博客所有文章除特别声明外，均采用 <a
+                    href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="external nofollow"
+                    target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明出处！
+            </li>
+        </ul>
+        
+        
+        
+        
+    </div>
+</div>
+
+
+
+
+
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        <div class="level-start">
+            <a class="level level-item has-link-grey  article-nav-prev"
+                href="/RePlugin之插件Activity启动/">
+                <i class="level-item fas fa-chevron-left"></i>
+                <span class="level-item">RePlugin之插件Activity启动</span>
+            </a>
+        </div>
+        
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next"
+                href="/Java是解释执行吗/">
+                <span class="level-item">Java是解释执行吗？</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+    </div>
+</div>
+
+
+</div>
+                
+
+
+
+
+<div
+    class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left ">
+    
+    
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered" style="flex-shrink: 1">
+                <div>
+                    
+                    <figure class="image is-128x128 has-mb-6">
+                        <img class="" src="/images/avatar1.png" alt="zhenyu">
+                    </figure>
+                    
+                    <p class="is-size-4 is-block">
+                        zhenyu
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        富贵山庄无富贵，只留欢乐在此间
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>杭州</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        文章
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        38
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        分类
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        9
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        标签
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        0
+                    </p>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="level">
+            <a class="level-item button is-link is-rounded" href="https://github.com/witgao" target="_blank">
+                关注我</a>
+        </div>
+        
+        
+        
+    </div>
+</div>
+    
+    
+<div class="card widget column-left is-sticky" id="toc">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                目录
+            </h3>
+            <ul class="menu-list"><li>
+        <a class="is-flex" href="#常驻进程">
+        <span class="has-mr-6">1</span>
+        <span>常驻进程</span>
+        </a></li><li>
+        <a class="is-flex" href="#启用常驻进程下插件服务的启动">
+        <span class="has-mr-6">2</span>
+        <span>启用常驻进程下插件服务的启动</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#UI进程启动">
+        <span class="has-mr-6">2.1</span>
+        <span>UI进程启动</span>
+        </a></li><li>
+        <a class="is-flex" href="#初始化RePlugin">
+        <span class="has-mr-6">2.2</span>
+        <span>初始化RePlugin</span>
+        </a></li><li>
+        <a class="is-flex" href="#创建PmBase对象">
+        <span class="has-mr-6">2.3</span>
+        <span>创建PmBase对象</span>
+        </a></li><li>
+        <a class="is-flex" href="#创建PluginClient服务">
+        <span class="has-mr-6">2.4</span>
+        <span>创建PluginClient服务</span>
+        </a></li><li>
+        <a class="is-flex" href="#初始化PmBase">
+        <span class="has-mr-6">2.5</span>
+        <span>初始化PmBase</span>
+        </a></li><li>
+        <a class="is-flex" href="#initForClient">
+        <span class="has-mr-6">2.6</span>
+        <span>initForClient</span>
+        </a></li><li>
+        <a class="is-flex" href="#连接服务端，创建常驻进程">
+        <span class="has-mr-6">2.7</span>
+        <span>连接服务端，创建常驻进程</span>
+        </a></li><li>
+        <a class="is-flex" href="#常驻进程初始化，initForServer">
+        <span class="has-mr-6">2.8</span>
+        <span>常驻进程初始化，initForServer</span>
+        </a></li><li>
+        <a class="is-flex" href="#常驻进程-初始化本地插件列表">
+        <span class="has-mr-6">2.9</span>
+        <span>常驻进程-初始化本地插件列表</span>
+        </a></li><li>
+        <a class="is-flex" href="#常驻进程-Hook应用的ClassLoader">
+        <span class="has-mr-6">2.10</span>
+        <span>常驻进程-Hook应用的ClassLoader</span>
+        </a></li><li>
+        <a class="is-flex" href="#provider-query">
+        <span class="has-mr-6">2.11</span>
+        <span>provider.query</span>
+        </a></li><li>
+        <a class="is-flex" href="#UI进程-获取服务端代理">
+        <span class="has-mr-6">2.12</span>
+        <span>UI进程-获取服务端代理</span>
+        </a></li><li>
+        <a class="is-flex" href="#UI进程-客户端连接服务端">
+        <span class="has-mr-6">2.13</span>
+        <span>UI进程-客户端连接服务端</span>
+        </a></li><li>
+        <a class="is-flex" href="#UI进程-同步插件列表">
+        <span class="has-mr-6">2.14</span>
+        <span>UI进程-同步插件列表</span>
+        </a></li><li>
+        <a class="is-flex" href="#设置UI进程Binder的死亡代理">
+        <span class="has-mr-6">2.15</span>
+        <span>设置UI进程Binder的死亡代理</span>
+        </a></li><li>
+        <a class="is-flex" href="#UI进程-获取服务端的插件列表">
+        <span class="has-mr-6">2.16</span>
+        <span>UI进程-获取服务端的插件列表</span>
+        </a></li><li>
+        <a class="is-flex" href="#UI进程-维护本地插件列表">
+        <span class="has-mr-6">2.17</span>
+        <span>UI进程-维护本地插件列表</span>
+        </a></li><li>
+        <a class="is-flex" href="#UI进程-Hook应用的ClassLoader">
+        <span class="has-mr-6">2.18</span>
+        <span>UI进程-Hook应用的ClassLoader</span>
+        </a></li><li>
+        <a class="is-flex" href="#UI进程和常驻进程都已经初始化完毕。">
+        <span class="has-mr-6">2.19</span>
+        <span>UI进程和常驻进程都已经初始化完毕。</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#gradle配置">
+        <span class="has-mr-6">3</span>
+        <span>gradle配置</span>
+        </a></li></ul>
+        </div>
+    </div>
+</div>
+    
+    
+    <div class="column-right-shadow is-hidden-widescreen ">
+        
+    </div>
+    
+</div>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <!-- <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="/images/logo2.png" alt="RePlugin之Host进程启动" height="28">
+                
+                </a> -->
+                <p class="is-size-7">
+                    &copy; 2020 zhenyu&nbsp;
+                    Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a
+                        href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank">Icarus</a>
+                    
+                </p>
+            </div>
+            <div class="level-end">
+                
+            </div>
+        </div>
+    </div>
+</footer>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("zh-CN");</script>
+
+<script>
+var IcarusThemeSettings = {
+    article: {
+        highlight: {
+            clipboard: true,
+            fold: 'unfolded'
+        }
+    }
+};
+</script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+
+
+
+    
+    
+<script src="/js/animation.js"></script>
+
+    
+    
+<script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+<script src="/js/gallery.js" defer></script>
+
+    
+    
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    MathJax.Hub.Config({
+        'HTML-CSS': {
+            matchFontHeight: false
+        },
+        SVG: {
+            matchFontHeight: false
+        },
+        CommonHTML: {
+            matchFontHeight: false
+        },
+        tex2jax: {
+            inlineMath: [
+                ['$','$'],
+                ['\\(','\\)']
+            ]
+        }
+    });
+});
+</script>
+    
+    
+<a id="back-to-top" title="回到顶端" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="想要查找什么..." />
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: '文章',
+                PAGES: '页面',
+                CATEGORIES: '分类',
+                TAGS: '标签',
+                UNTITLED: '(无标题)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+</body>
+
+</html>

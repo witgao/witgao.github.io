@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html  lang="zh">
+
+<head>
+    <meta charset="utf-8" />
+
+<meta name="generator" content="Hexo 3.9.0" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<title>音视频开发之SDL2播放视频 - 富贵山庄</title>
+
+
+    <meta name="description" content="如果熟悉OpenGL，那么SDL来渲染视频就很简单了，Window对象时用来显示的窗口，Renderer是具体渲染的渲染器，Texture可以认为就是一张图像，不断的更新Texture的内容，将其显示在窗口上，这就完成了视频的播放。 创建Window对于渲染视频来说，首先需要创建一个Window对象，这是与Native渲染体系相关联的一个窗口。123456789if (borderless)  f">
+<meta property="og:type" content="article">
+<meta property="og:title" content="音视频开发之SDL2播放视频">
+<meta property="og:url" content="https://witgao.com/音视频开发之SDL2播放视频/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:description" content="如果熟悉OpenGL，那么SDL来渲染视频就很简单了，Window对象时用来显示的窗口，Renderer是具体渲染的渲染器，Texture可以认为就是一张图像，不断的更新Texture的内容，将其显示在窗口上，这就完成了视频的播放。 创建Window对于渲染视频来说，首先需要创建一个Window对象，这是与Native渲染体系相关联的一个窗口。123456789if (borderless)  f">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://witgao.com/images/14.jpg">
+<meta property="og:updated_time" content="2020-08-04T06:06:37.303Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="音视频开发之SDL2播放视频">
+<meta name="twitter:description" content="如果熟悉OpenGL，那么SDL来渲染视频就很简单了，Window对象时用来显示的窗口，Renderer是具体渲染的渲染器，Texture可以认为就是一张图像，不断的更新Texture的内容，将其显示在窗口上，这就完成了视频的播放。 创建Window对于渲染视频来说，首先需要创建一个Window对象，这是与Native渲染体系相关联的一个窗口。123456789if (borderless)  f">
+<meta name="twitter:image" content="https://witgao.com/images/14.jpg">
+
+
+
+
+
+
+
+<link rel="icon" href="/images/favicon1.svg">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/default.css">
+
+
+    
+    
+<style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+    
+    
+    
+    
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+    
+    
+    
+    
+    
+    
+    
+    <link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+    
+    
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body class="is-3-column">
+    <nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="/images/logo2.png" alt="音视频开发之SDL2播放视频" height="28">
+            
+            </a>
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item"
+                href="/">燕子坞</a>
+                
+                <a class="navbar-item"
+                href="/archives">听香水榭</a>
+                
+                <a class="navbar-item"
+                href="/categories">还施水阁</a>
+                
+                <a class="navbar-item"
+                href="/about">思过崖</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    <a class="navbar-item" target="_blank" title="Download on GitHub" href="https://github.com/witgao/blog">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                <a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;">
+                    <i class="fas fa-list-ul"></i>
+                </a>
+                
+                
+                <a class="navbar-item search" title="搜索" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-9-widescreen has-order-2 column-main">
+<div class="card">
+    
+    <div class="card-image">
+        <span  class="image is-7by1">
+        <img class="thumbnail" src="/images/14.jpg" alt="音视频开发之SDL2播放视频">
+        </span>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-07-31T16:00:00.000Z">2020-08-01</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    5 分钟 读完 (大约 732 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            音视频开发之SDL2播放视频
+            
+        </h1>
+        <div class="content">
+            <p>如果熟悉OpenGL，那么SDL来渲染视频就很简单了，Window对象时用来显示的窗口，Renderer是具体渲染的渲染器，Texture可以认为就是一张图像，不断的更新Texture的内容，将其显示在窗口上，这就完成了视频的播放。</p>
+<h4 id="创建Window"><a href="#创建Window" class="headerlink" title="创建Window"></a>创建Window</h4><p>对于渲染视频来说，首先需要创建一个Window对象，这是与Native渲染体系相关联的一个窗口。<br><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">if</span> (borderless)</span><br><span class="line">  flags |= SDL_WINDOW_BORDERLESS;  <span class="hljs-comment">// 去掉窗口状态栏</span></span><br><span class="line"><span class="hljs-keyword">else</span></span><br><span class="line">  flags |= SDL_WINDOW_RESIZABLE;  <span class="hljs-comment">// 窗口是否可缩放</span></span><br><span class="line"><span class="hljs-comment">// 创建SDL窗口</span></span><br><span class="line"><span class="hljs-comment">// 参数（标题，x, y, w, h, 标记）</span></span><br><span class="line">window = SDL_CreateWindow(program_name, SDL_WINDOWPOS_UNDEFINED,</span><br><span class="line">                          SDL_WINDOWPOS_UNDEFINED, default_width,</span><br><span class="line">                          default_height, flags);</span><br></pre></td></tr></table></figure></p>
+<h4 id="创建Renderer"><a href="#创建Renderer" class="headerlink" title="创建Renderer"></a>创建Renderer</h4><p>Renderer负责具体的渲染逻辑<br><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 创建SDL渲染器，SDL_RENDERER_ACCELERATED 使用硬件加速</span></span><br><span class="line"><span class="hljs-comment">// 参数（渲染的Window，渲染驱动索引，标记）</span></span><br><span class="line">renderer = SDL_CreateRenderer(window, <span class="hljs-number">-1</span>, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);</span><br></pre></td></tr></table></figure></p>
+<h4 id="创建纹理"><a href="#创建纹理" class="headerlink" title="创建纹理"></a>创建纹理</h4><p>像素格式:<br>    YUV、RGB<br>纹理访问格式:<br>    SDL_TEXTUREACCESS_STATIC : 纹理不经常变更<br>    SDL_TEXTUREACCESS_STREAMING : 纹理经常变更<br>    SDL_TEXTUREACCESS_TARGET : 纹理可作为渲染的target<br><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 创建纹理 </span></span><br><span class="line"><span class="hljs-comment">// 参数（对应的渲染器，像素格式，纹理访问格式设置，w, h） </span></span><br><span class="line">*texture = SDL_CreateTexture(renderer, new_format,SDL_TEXTUREACCESS_STREAMING, new_width,new_height)</span><br></pre></td></tr></table></figure></p>
+<h5 id="什么是纹理"><a href="#什么是纹理" class="headerlink" title="什么是纹理"></a>什么是纹理</h5><p>纹理是显卡中一段连续的内存，可以用来存储图片数据，也可以用来存储计算过程中的中间结果等任意数据。<br>而视频图像数据则是内存中的像素数组。 </p>
+<p>狭义地讲，纹理是存在于显存的，可以存放任意数据；是视频图像数据存在于内存的，内容是像素数组。纹理存放的不是真正的像素数据，而是存放的图像的描述信息。</p>
+<p>所以可以清楚的明白，为什么要使用纹理，将CPU中的像素数据拷贝到GPU中进行存储，然后在GPU上进行处理后交由显示屏进行显示。</p>
+<h4 id="更新纹理"><a href="#更新纹理" class="headerlink" title="更新纹理"></a>更新纹理</h4><p>更新YUV格式的纹理数据，就是将YUV三个分量的数据和长度一次传入。<br><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ret = SDL_UpdateYUVTexture(</span><br><span class="line">    *tex, <span class="hljs-literal">NULL</span>, frame-&gt;data[<span class="hljs-number">0</span>], frame-&gt;linesize[<span class="hljs-number">0</span>], frame-&gt;data[<span class="hljs-number">1</span>],</span><br><span class="line">    frame-&gt;linesize[<span class="hljs-number">1</span>], frame-&gt;data[<span class="hljs-number">2</span>], frame-&gt;linesize[<span class="hljs-number">2</span>]);</span><br></pre></td></tr></table></figure></p>
+<p>更新RGB格式的纹理数据<br><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ret = SDL_UpdateTexture(*tex, <span class="hljs-literal">NULL</span>, frame-&gt;data[<span class="hljs-number">0</span>], frame-&gt;linesize[<span class="hljs-number">0</span>]);</span><br></pre></td></tr></table></figure></p>
+<h4 id="显示纹理"><a href="#显示纹理" class="headerlink" title="显示纹理"></a>显示纹理</h4><p>Renderer有一个默认的渲染目标，可以通过SDL_SetRenderTarget来更改。要想将纹理的内容显示在屏幕上，需要先将纹理的内容拷贝到Renderer的默认渲染目标上，然后再通过SDL_RenderPresent来刷新屏幕。<br><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 将纹理上的内容拷贝到渲染器的默认渲染目标上</span></span><br><span class="line">SDL_RenderCopy(renderer, texture, <span class="hljs-literal">nullptr</span>, &amp;rect);</span><br><span class="line"><span class="hljs-comment">// 将渲染目标的内容刷新到屏幕上</span></span><br><span class="line">SDL_RenderPresent(renderer);</span><br></pre></td></tr></table></figure></p>
+
+        </div>
+        
+        <ul class="post-copyright">
+            <li><strong>本文标题：</strong><a href="https://witgao.com/音视频开发之SDL2播放视频/">音视频开发之SDL2播放视频</a></li>
+            <li><strong>本文作者：</strong><a href="https://witgao.com">zhenyu</a></li>
+            <li><strong>本文链接：</strong><a href="https://witgao.com/音视频开发之SDL2播放视频/">https://witgao.com/音视频开发之SDL2播放视频/</a></li>
+            <li><strong>发布时间：</strong>2020-08-01</li>
+            <li><strong>版权声明：</strong>本博客所有文章除特别声明外，均采用 <a
+                    href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="external nofollow"
+                    target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明出处！
+            </li>
+        </ul>
+        
+        
+        
+        
+    </div>
+</div>
+
+
+
+
+
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        <div class="level-start">
+            <a class="level level-item has-link-grey  article-nav-prev"
+                href="/音视频开发之ffplay队列分析/">
+                <i class="level-item fas fa-chevron-left"></i>
+                <span class="level-item">音视频开发之ffplay队列分析</span>
+            </a>
+        </div>
+        
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next"
+                href="/音视频开发之SDL2播放音频/">
+                <span class="level-item">音视频开发之SDL2播放音频</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+    </div>
+</div>
+
+
+</div>
+                
+
+
+
+
+<div
+    class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left ">
+    
+    
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered" style="flex-shrink: 1">
+                <div>
+                    
+                    <figure class="image is-128x128 has-mb-6">
+                        <img class="" src="/images/avatar1.png" alt="zhenyu">
+                    </figure>
+                    
+                    <p class="is-size-4 is-block">
+                        zhenyu
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        富贵山庄无富贵，只留欢乐在此间
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>杭州</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        文章
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        38
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        分类
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        9
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        标签
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        0
+                    </p>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="level">
+            <a class="level-item button is-link is-rounded" href="https://github.com/witgao" target="_blank">
+                关注我</a>
+        </div>
+        
+        
+        
+    </div>
+</div>
+    
+    
+<div class="card widget column-left is-sticky" id="toc">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                目录
+            </h3>
+            <ul class="menu-list"><li>
+        <a class="is-flex" href="#创建Window">
+        <span class="has-mr-6">1</span>
+        <span>创建Window</span>
+        </a></li><li>
+        <a class="is-flex" href="#创建Renderer">
+        <span class="has-mr-6">2</span>
+        <span>创建Renderer</span>
+        </a></li><li>
+        <a class="is-flex" href="#创建纹理">
+        <span class="has-mr-6">3</span>
+        <span>创建纹理</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#什么是纹理">
+        <span class="has-mr-6">3.1</span>
+        <span>什么是纹理</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#更新纹理">
+        <span class="has-mr-6">4</span>
+        <span>更新纹理</span>
+        </a></li><li>
+        <a class="is-flex" href="#显示纹理">
+        <span class="has-mr-6">5</span>
+        <span>显示纹理</span>
+        </a></li></ul>
+        </div>
+    </div>
+</div>
+    
+    
+    <div class="column-right-shadow is-hidden-widescreen ">
+        
+    </div>
+    
+</div>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <!-- <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="/images/logo2.png" alt="音视频开发之SDL2播放视频" height="28">
+                
+                </a> -->
+                <p class="is-size-7">
+                    &copy; 2020 zhenyu&nbsp;
+                    Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a
+                        href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank">Icarus</a>
+                    
+                </p>
+            </div>
+            <div class="level-end">
+                
+            </div>
+        </div>
+    </div>
+</footer>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("zh-CN");</script>
+
+<script>
+var IcarusThemeSettings = {
+    article: {
+        highlight: {
+            clipboard: true,
+            fold: 'unfolded'
+        }
+    }
+};
+</script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+
+
+
+    
+    
+<script src="/js/animation.js"></script>
+
+    
+    
+<script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+<script src="/js/gallery.js" defer></script>
+
+    
+    
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    MathJax.Hub.Config({
+        'HTML-CSS': {
+            matchFontHeight: false
+        },
+        SVG: {
+            matchFontHeight: false
+        },
+        CommonHTML: {
+            matchFontHeight: false
+        },
+        tex2jax: {
+            inlineMath: [
+                ['$','$'],
+                ['\\(','\\)']
+            ]
+        }
+    });
+});
+</script>
+    
+    
+<a id="back-to-top" title="回到顶端" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="想要查找什么..." />
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: '文章',
+                PAGES: '页面',
+                CATEGORIES: '分类',
+                TAGS: '标签',
+                UNTITLED: '(无标题)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+</body>
+
+</html>

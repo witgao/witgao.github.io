@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html  lang="zh">
+
+<head>
+    <meta charset="utf-8" />
+
+<meta name="generator" content="Hexo 3.9.0" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<title>Android-ReactNative通信流程 - 富贵山庄</title>
+
+
+    <meta name="description" content="ReactAndroidReactActivity一个ReactActivity对应着一个RN组件(通过AppRegistry.registerComponent注册)，而ReactActivity的功能都包装在ReactActivityDelegate中。 ReactActivity实际上类似于一个浏览器窗口，在一个窗口内对一个网页访问，并进行页面的跳转和回退。 ReactRootViewRea">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android-ReactNative通信流程">
+<meta property="og:url" content="https://witgao.com/Android-ReactNative启动流程/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:description" content="ReactAndroidReactActivity一个ReactActivity对应着一个RN组件(通过AppRegistry.registerComponent注册)，而ReactActivity的功能都包装在ReactActivityDelegate中。 ReactActivity实际上类似于一个浏览器窗口，在一个窗口内对一个网页访问，并进行页面的跳转和回退。 ReactRootViewRea">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://witgao.com/images/og_image.png">
+<meta property="og:updated_time" content="2020-07-13T13:41:12.259Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android-ReactNative通信流程">
+<meta name="twitter:description" content="ReactAndroidReactActivity一个ReactActivity对应着一个RN组件(通过AppRegistry.registerComponent注册)，而ReactActivity的功能都包装在ReactActivityDelegate中。 ReactActivity实际上类似于一个浏览器窗口，在一个窗口内对一个网页访问，并进行页面的跳转和回退。 ReactRootViewRea">
+<meta name="twitter:image" content="https://witgao.com/images/og_image.png">
+
+
+
+
+
+
+
+<link rel="icon" href="/images/favicon1.svg">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/default.css">
+
+
+    
+    
+<style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+    
+    
+    
+    
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+    
+    
+    
+    
+    
+    
+    
+    <link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+    
+    
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body class="is-3-column">
+    <nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="/images/logo2.png" alt="Android-ReactNative通信流程" height="28">
+            
+            </a>
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item"
+                href="/">燕子坞</a>
+                
+                <a class="navbar-item"
+                href="/archives">听香水榭</a>
+                
+                <a class="navbar-item"
+                href="/categories">还施水阁</a>
+                
+                <a class="navbar-item"
+                href="/about">思过崖</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    <a class="navbar-item" target="_blank" title="Download on GitHub" href="https://github.com/witgao/blog">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                <a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;">
+                    <i class="fas fa-list-ul"></i>
+                </a>
+                
+                
+                <a class="navbar-item search" title="搜索" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-9-widescreen has-order-2 column-main">
+<div class="card">
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2018-07-01T16:00:00.000Z">2018-07-02</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/">刀枪棍棒（Android）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/五虎断门刀（Android原生）/">五虎断门刀（Android原生）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    26 分钟 读完 (大约 3908 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            Android-ReactNative通信流程
+            
+        </h1>
+        <div class="content">
+            <h4 id="ReactAndroid"><a href="#ReactAndroid" class="headerlink" title="ReactAndroid"></a>ReactAndroid</h4><h5 id="ReactActivity"><a href="#ReactActivity" class="headerlink" title="ReactActivity"></a>ReactActivity</h5><p>一个ReactActivity对应着一个RN组件(通过AppRegistry.registerComponent注册)，而ReactActivity的功能都包装在ReactActivityDelegate中。</p>
+<p>ReactActivity实际上类似于一个浏览器窗口，在一个窗口内对一个网页访问，并进行页面的跳转和回退。</p>
+<h5 id="ReactRootView"><a href="#ReactRootView" class="headerlink" title="ReactRootView"></a>ReactRootView</h5><p>ReactRootView是ReactNative组件的根布局，是一个ViewGroup(继承自FrameLayout)，所有的RN视图都会被添加到该布局下，然后该布局会被添加到Activity上，因此每个ReactActivity都有着一个ReactRootView。RN组件内的页面跳转实际上就是在该ReactRootView上重绘。</p>
+<h5 id="ReactNativeHost"><a href="#ReactNativeHost" class="headerlink" title="ReactNativeHost"></a>ReactNativeHost</h5><p>每个RN组件的配置，设置jsbundle文件的文件名和js模块名称以及开发模式等。</p>
+<ul>
+<li>getJSMainModuleName : 远程服务获取bundle时，获取的模块名称</li>
+<li>getBundleAssetName : 本地加载bundle时，获取asset文件的文件名</li>
+<li>getUseDeveloperSupport : 是否开启debug模式</li>
+<li>getPackages :  配置js和native通信module，必须包含MainReactPackage</li>
+<li>ReactInstanceManager :  与js通信的管理类，CatalystInstance是一个异步JSC桥梁，提供了调用js方法的JavaAPI</li>
+</ul>
+<p>每个ReactActivity都需要一个Host配置，对应不同的jsbundle配置。在ReactActivity中默认会去获取Application中的ReactNativeHost，默认Application需要继承ReactApplication接口，并实现其getReactNativeHost方法。如果我们不想在Application中实现该接口(必须我们有多个RN组件需要多个ReactNativeHost对象)，就必须重写ReactActivity中getReactNativeHost方法。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">protected</span> ReactNativeHost <span class="hljs-title">getReactNativeHost</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">return</span> ((ReactApplication) getPlainActivity().getApplication()).getReactNativeHost();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="加载RN组件"><a href="#加载RN组件" class="headerlink" title="加载RN组件"></a>加载RN组件</h4><h5 id="启动ReactActivity"><a href="#启动ReactActivity" class="headerlink" title="启动ReactActivity"></a>启动ReactActivity</h5><p>首先启动ReactActivity，创建ReactActivity时会同时创建ReactActivityDelegate，ReactActivity的getMainComponentName方法对应的是js组件的注册名称(js中AppRegistry.registerComponent注册时的appKey)，在ReactActivity的onCreate回调中，开始加载该js组件。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onCreate</span><span class="hljs-params">(Bundle savedInstanceState)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">if</span> (mMainComponentName != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">    loadApp(mMainComponentName);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title">loadApp</span><span class="hljs-params">(String appKey)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">if</span> (mReactRootView != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalStateException(<span class="hljs-string">"Cannot loadApp while app is already running."</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// 创建根布局</span></span><br><span class="line">  mReactRootView = createRootView();</span><br><span class="line">  <span class="hljs-comment">// 启动该js组件，加载jsbundle文件，并通过jsc来构建virtualDom来解析js组件</span></span><br><span class="line">  <span class="hljs-comment">// 将js控件解析成对应的View，并添加到根布局上，组成视图树。</span></span><br><span class="line">  mReactRootView.startReactApplication(</span><br><span class="line">    <span class="hljs-comment">// 创建js通信管理器</span></span><br><span class="line">    getReactNativeHost().getReactInstanceManager(),</span><br><span class="line">    appKey,</span><br><span class="line">    getLaunchOptions());</span><br><span class="line">  <span class="hljs-comment">// 将解析完成的布局放到Activity中渲染</span></span><br><span class="line">  getPlainActivity().setContentView(mReactRootView);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="创建ReactRootView"><a href="#创建ReactRootView" class="headerlink" title="创建ReactRootView"></a>创建ReactRootView</h5><p>ReactRootView继承FrameLayout，是整个RN组件的根布局，解析出来的View都会添加到该布局上。该View主要处理了测量和事件的分发拦截，包括触摸、手势、焦点等。还设置了OnGlobalLayout监听，该方法会在布局重新layout或者系统UI发生改变时触发(具体在ViewRootImpl.performTraversals中)，在该监听中将发生的改变通知给js模块。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta">@Override</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onGlobalLayout</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">if</span> (mReactInstanceManager == <span class="hljs-keyword">null</span> || !mIsAttachedToInstance ||</span><br><span class="line">    mReactInstanceManager.getCurrentReactContext() == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">    <span class="hljs-keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// 键盘状态改变</span></span><br><span class="line">  checkForKeyboardEvents();</span><br><span class="line">  <span class="hljs-comment">// 屏幕方向改变</span></span><br><span class="line">  checkForDeviceOrientationChanges();</span><br><span class="line">  <span class="hljs-comment">// 屏幕分辨率改变</span></span><br><span class="line">  checkForDeviceDimensionsChanges();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="创建ReactInstanceManager"><a href="#创建ReactInstanceManager" class="headerlink" title="创建ReactInstanceManager"></a>创建ReactInstanceManager</h5><p>ReactInstanceManager是一个CatalystInstance实例的管理者，而CatalysInstance是一个异步的JSC桥梁，负责与js进行通信，调用js方法。</p>
+ <a id="more"></a>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">protected</span> ReactInstanceManager <span class="hljs-title">createReactInstanceManager</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">  <span class="hljs-comment">// 获取ReactNativeHost中的配置来创建</span></span><br><span class="line">  ReactInstanceManagerBuilder builder = ReactInstanceManager.builder()</span><br><span class="line">    .setApplication(mApplication)</span><br><span class="line">    .setJSMainModulePath(getJSMainModuleName())</span><br><span class="line">    .setUseDeveloperSupport(getUseDeveloperSupport())</span><br><span class="line">    .setRedBoxHandler(getRedBoxHandler())</span><br><span class="line">    .setJavaScriptExecutorFactory(getJavaScriptExecutorFactory())</span><br><span class="line">    .setUIImplementationProvider(getUIImplementationProvider())</span><br><span class="line">    .setJSIModulesPackage(getJSIModulePackage())</span><br><span class="line">    .setInitialLifecycleState(LifecycleState.BEFORE_CREATE);</span><br><span class="line">  <span class="hljs-keyword">for</span> (ReactPackage reactPackage : getPackages()) &#123;</span><br><span class="line">    builder.addPackage(reactPackage);</span><br><span class="line">  &#125;</span><br><span class="line">  String jsBundleFile = getJSBundleFile();</span><br><span class="line">  <span class="hljs-keyword">if</span> (jsBundleFile != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">    builder.setJSBundleFile(jsBundleFile);</span><br><span class="line">  &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">    builder.setBundleAssetName(Assertions.assertNotNull(getBundleAssetName()));</span><br><span class="line">  &#125;</span><br><span class="line">  ReactInstanceManager reactInstanceManager = builder.build();</span><br><span class="line">  <span class="hljs-keyword">return</span> reactInstanceManager;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> ReactInstanceManager <span class="hljs-title">build</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">  <span class="hljs-comment">// 创建ReactInstanceManager</span></span><br><span class="line">  <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> ReactInstanceManager(</span><br><span class="line">      mApplication,  <span class="hljs-comment">// 应用Application</span></span><br><span class="line">      mCurrentActivity, <span class="hljs-comment">// 当前ReactActivity</span></span><br><span class="line">      mDefaultHardwareBackBtnHandler, <span class="hljs-comment">// 处理js不处理的硬件回退事件</span></span><br><span class="line">      mJavaScriptExecutorFactory == <span class="hljs-keyword">null</span> <span class="hljs-comment">// JSC执行器</span></span><br><span class="line">      	<span class="hljs-comment">// 用来创建JSC执行器的工厂</span></span><br><span class="line">          ? <span class="hljs-keyword">new</span> JSCJavaScriptExecutorFactory(appName, deviceName)</span><br><span class="line">          : mJavaScriptExecutorFactory,</span><br><span class="line">      (mJSBundleLoader == <span class="hljs-keyword">null</span> &amp;&amp; mJSBundleAssetUrl != <span class="hljs-keyword">null</span>) <span class="hljs-comment">// JSBundle加载器</span></span><br><span class="line">          ? JSBundleLoader.createAssetLoader(</span><br><span class="line">              <span class="hljs-comment">// 创建一个匿名实例，从Assets中加载jsbundle</span></span><br><span class="line">              mApplication, mJSBundleAssetUrl, <span class="hljs-keyword">false</span> <span class="hljs-comment">/*Asynchronous*/</span>)</span><br><span class="line">          : mJSBundleLoader,</span><br><span class="line">      mJSMainModulePath, <span class="hljs-comment">// Host中配置的js模块名称</span></span><br><span class="line">      mPackages, <span class="hljs-comment">// Host中配置的通信module</span></span><br><span class="line">      mUseDeveloperSupport, <span class="hljs-comment">// Host中配置的debug</span></span><br><span class="line">      mBridgeIdleDebugListener, <span class="hljs-comment">// Bridge空闲状态监听</span></span><br><span class="line">      Assertions.assertNotNull(mInitialLifecycleState, <span class="hljs-string">"Initial lifecycle state was not set"</span>),</span><br><span class="line">      mUIImplementationProvider, <span class="hljs-comment">// 用来在UIManagerModule中创建UIImplementation</span></span><br><span class="line">      mNativeModuleCallExceptionHandler, <span class="hljs-comment">// JS调用native出异常的处理类</span></span><br><span class="line">      mRedBoxHandler, <span class="hljs-comment">// RedBox就是JS错误的红色页面，该接口可以拦截和处理其页面上的错误信息。</span></span><br><span class="line">      mLazyNativeModulesEnabled,</span><br><span class="line">      mLazyViewManagersEnabled,</span><br><span class="line">      mDevBundleDownloadListener,</span><br><span class="line">      mMinNumShakes,</span><br><span class="line">      mMinTimeLeftInFrameForNonBatchedOperationMs,</span><br><span class="line">    mJSIModulesPackage);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当使用JSBundleLoader去加载jsbundle文件时，就会调用该匿名实例的loadScript方法从assets中加载。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> JSBundleLoader <span class="hljs-title">createAssetLoader</span><span class="hljs-params">(</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    <span class="hljs-keyword">final</span> Context context,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    <span class="hljs-keyword">final</span> String assetUrl,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    <span class="hljs-keyword">final</span> <span class="hljs-keyword">boolean</span> loadSynchronously)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> JSBundleLoader() &#123;</span><br><span class="line">    <span class="hljs-meta">@Override</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">loadScript</span><span class="hljs-params">(CatalystInstanceImpl instance)</span> </span>&#123;</span><br><span class="line">      instance.loadScriptFromAssets(context.getAssets(), assetUrl, loadSynchronously);</span><br><span class="line">      <span class="hljs-keyword">return</span> assetUrl;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">ReactInstanceManager(...) &#123;</span><br><span class="line">    <span class="hljs-comment">// 构造函数</span></span><br><span class="line">    ...</span><br><span class="line">    <span class="hljs-keyword">synchronized</span> (mPackages) &#123;</span><br><span class="line">      PrinterHolder.getPrinter()</span><br><span class="line">          .logMessage(ReactDebugOverlayTags.RN_CORE, <span class="hljs-string">"RNCore: Use Split Packages"</span>);</span><br><span class="line">      mPackages.add(</span><br><span class="line">          <span class="hljs-comment">// 添加CoreModulePackage通信模块</span></span><br><span class="line">          <span class="hljs-keyword">new</span> CoreModulesPackage(</span><br><span class="line">              <span class="hljs-keyword">this</span>,</span><br><span class="line">              <span class="hljs-keyword">new</span> DefaultHardwareBackBtnHandler() &#123;</span><br><span class="line">                <span class="hljs-meta">@Override</span></span><br><span class="line">                <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">invokeDefaultOnBackPressed</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">                  ReactInstanceManager.<span class="hljs-keyword">this</span>.invokeDefaultOnBackPressed();</span><br><span class="line">                &#125;</span><br><span class="line">              &#125;,</span><br><span class="line">              uiImplementationProvider,</span><br><span class="line">              lazyViewManagersEnabled,</span><br><span class="line">              minTimeLeftInFrameForNonBatchedOperationMs));</span><br><span class="line">      <span class="hljs-keyword">if</span> (mUseDeveloperSupport) &#123;</span><br><span class="line">        mPackages.add(<span class="hljs-keyword">new</span> DebugCorePackage());</span><br><span class="line">      &#125;</span><br><span class="line">      mPackages.addAll(packages);</span><br><span class="line">    &#125;</span><br><span class="line">    mJSIModulePackage = jsiModulePackage;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// ReactChoreographer是对Choreographer的包装，用来在绘制一帧的时候执行一些自定义的回调</span></span><br><span class="line">    ReactChoreographer.initialize();</span><br><span class="line">    <span class="hljs-keyword">if</span> (mUseDeveloperSupport) &#123;</span><br><span class="line">      mDevSupportManager.startInspector();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<h5 id="启动jsbundle组件"><a href="#启动jsbundle组件" class="headerlink" title="启动jsbundle组件"></a>启动jsbundle组件</h5><p>在创建完ReactInstanceManager后，会通过它在后台异步创建ReactContext，最终逻辑在ReactInstanceManager.runCreateReactContextOnNewThread中。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta">@ThreadConfined</span>(UI)</span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">recreateReactContextInBackground</span><span class="hljs-params">(</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">  JavaScriptExecutorFactory jsExecutorFactory,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">  JSBundleLoader jsBundleLoader)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="hljs-keyword">final</span> ReactContextInitParams initParams = <span class="hljs-keyword">new</span> ReactContextInitParams(</span><br><span class="line">    jsExecutorFactory,</span><br><span class="line">    jsBundleLoader);</span><br><span class="line">  <span class="hljs-keyword">if</span> (mCreateReactContextThread == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">    <span class="hljs-comment">// 此时代表ReactContext已经创建过程已经结束或未开始，可以直接重新创建</span></span><br><span class="line">    runCreateReactContextOnNewThread(initParams);</span><br><span class="line">  &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">    <span class="hljs-comment">// 此时代表正在创建ReactContext，需要等待</span></span><br><span class="line">    mPendingReactContextInitParams = initParams;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line">  <span class="hljs-meta">@ThreadConfined</span>(UI)</span><br><span class="line">  <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">runCreateReactContextOnNewThread</span><span class="hljs-params">(<span class="hljs-keyword">final</span> ReactContextInitParams initParams)</span> </span>&#123;</span><br><span class="line">    UiThreadUtil.assertOnUiThread();</span><br><span class="line">    mCreateReactContextThread =</span><br><span class="line">        <span class="hljs-keyword">new</span> Thread(</span><br><span class="line">            <span class="hljs-keyword">new</span> Runnable() &#123;</span><br><span class="line">              <span class="hljs-meta">@Override</span></span><br><span class="line">              <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">run</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">                ...</span><br><span class="line">                mHasStartedCreatingInitialContext = <span class="hljs-keyword">true</span>;</span><br><span class="line">                <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">                  <span class="hljs-comment">// 提高线程的优先级，避免被UI线程中途抢占</span></span><br><span class="line">                  Process.setThreadPriority(Process.THREAD_PRIORITY_DISPLAY);</span><br><span class="line">                  <span class="hljs-comment">// 创建ReactApplicationContext</span></span><br><span class="line">                  <span class="hljs-keyword">final</span> ReactApplicationContext reactApplicationContext =</span><br><span class="line">                      createReactContext(</span><br><span class="line">                      	  <span class="hljs-comment">// 通过工厂创建JSCScriptExecutor</span></span><br><span class="line">                          initParams.getJsExecutorFactory().create(),</span><br><span class="line">                      	  <span class="hljs-comment">// 此处的Loader就是上面的匿名Loader</span></span><br><span class="line">                          initParams.getJsBundleLoader());</span><br><span class="line">				  <span class="hljs-comment">// 在此之前如果其他地方需要重新创建Context，那么会先将参数放入mPendingReactContextInitParams中，再讲其放到主线程消息队列中稍后再次执行该方法。</span></span><br><span class="line">                  <span class="hljs-comment">// 在此之后如果需要重建，则重新创建一个线程启动就行</span></span><br><span class="line">                  mCreateReactContextThread = <span class="hljs-keyword">null</span>;</span><br><span class="line">                  <span class="hljs-keyword">final</span> Runnable maybeRecreateReactContextRunnable =</span><br><span class="line">                      <span class="hljs-keyword">new</span> Runnable() &#123;</span><br><span class="line">                        <span class="hljs-meta">@Override</span></span><br><span class="line">                        <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">run</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">                          <span class="hljs-keyword">if</span> (mPendingReactContextInitParams != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">                              <span class="hljs-comment">//看见标记还在，重新创建ReactContext</span></span><br><span class="line">                              runCreateReactContextOnNewThread(mPendingReactContextInitParams);</span><br><span class="line">                            mPendingReactContextInitParams = <span class="hljs-keyword">null</span>;</span><br><span class="line">                          &#125;</span><br><span class="line">                        &#125;</span><br><span class="line">                      &#125;;</span><br><span class="line">                  Runnable setupReactContextRunnable =</span><br><span class="line">                      <span class="hljs-keyword">new</span> Runnable() &#123;</span><br><span class="line">                        <span class="hljs-meta">@Override</span></span><br><span class="line">                        <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">run</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">                          <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">                            <span class="hljs-comment">// 启动ReactContext</span></span><br><span class="line">                            setupReactContext(reactApplicationContext);</span><br><span class="line">                          &#125; <span class="hljs-keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                            mDevSupportManager.handleException(e);</span><br><span class="line">                          &#125;</span><br><span class="line">                        &#125;</span><br><span class="line">                      &#125;;</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">// 在native线程中执行启动ReactContext任务</span></span><br><span class="line">                    reactApplicationContext.runOnNativeModulesQueueThread(setupReactContextRunnable);</span><br><span class="line">                  <span class="hljs-comment">// 在主线程中启动重新创建任务</span></span><br><span class="line">                  UiThreadUtil.runOnUiThread(maybeRecreateReactContextRunnable);</span><br><span class="line">                &#125; <span class="hljs-keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                  mDevSupportManager.handleException(e);</span><br><span class="line">                &#125;</span><br><span class="line">              &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">    mCreateReactContextThread.start();</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<h6 id="创建ReactContext"><a href="#创建ReactContext" class="headerlink" title="创建ReactContext"></a>创建ReactContext</h6><p>ReactContext是对ContextWrapper的再次包装，实际上就是一个上下文，而ReactApplicationContext实际上就是ApplicationContext。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"> <span class="hljs-function"><span class="hljs-keyword">private</span> ReactApplicationContext <span class="hljs-title">createReactContext</span><span class="hljs-params">(</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">     JavaScriptExecutor jsExecutor,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">     JSBundleLoader jsBundleLoader)</span> </span>&#123;</span><br><span class="line">   <span class="hljs-keyword">final</span> ReactApplicationContext reactContext = <span class="hljs-keyword">new</span> ReactApplicationContext(mApplicationContext);</span><br><span class="line"></span><br><span class="line">   NativeModuleCallExceptionHandler exceptionHandler = mNativeModuleCallExceptionHandler != <span class="hljs-keyword">null</span></span><br><span class="line">       ? mNativeModuleCallExceptionHandler</span><br><span class="line">       : mDevSupportManager;</span><br><span class="line">   reactContext.setNativeModuleCallExceptionHandler(exceptionHandler);</span><br><span class="line"><span class="hljs-comment">// 解析mPackages中包含的module</span></span><br><span class="line">   NativeModuleRegistry nativeModuleRegistry = processPackages(reactContext, mPackages, <span class="hljs-keyword">false</span>);</span><br><span class="line"><span class="hljs-comment">// 创建CatalysInstance的实现类实例</span></span><br><span class="line">   CatalystInstanceImpl.Builder catalystInstanceBuilder = <span class="hljs-keyword">new</span> CatalystInstanceImpl.Builder()</span><br><span class="line">      <span class="hljs-comment">// 创建js和native消息执行的线程命名配置</span></span><br><span class="line">     .setReactQueueConfigurationSpec(ReactQueueConfigurationSpec.createDefault())</span><br><span class="line">     .setJSExecutor(jsExecutor)</span><br><span class="line">     .setRegistry(nativeModuleRegistry) <span class="hljs-comment">// 解析mPackages后得到的已注册的module集合</span></span><br><span class="line">     .setJSBundleLoader(jsBundleLoader)</span><br><span class="line">     .setNativeModuleCallExceptionHandler(exceptionHandler);</span><br><span class="line"></span><br><span class="line">   <span class="hljs-keyword">final</span> CatalystInstance catalystInstance;</span><br><span class="line">   <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">     catalystInstance = catalystInstanceBuilder.build();</span><br><span class="line">   &#125; <span class="hljs-keyword">finally</span> &#123;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="hljs-keyword">if</span> (mJSIModulePackage != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">     catalystInstance.addJSIModules(mJSIModulePackage</span><br><span class="line">       .getJSIModules(reactContext, catalystInstance.getJavaScriptContextHolder()));</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="hljs-keyword">if</span> (mBridgeIdleDebugListener != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">     catalystInstance.addBridgeIdleDebugListener(mBridgeIdleDebugListener);</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="hljs-keyword">if</span> (Systrace.isTracing(TRACE_TAG_REACT_APPS | TRACE_TAG_REACT_JS_VM_CALLS)) &#123;</span><br><span class="line">     catalystInstance.setGlobalVariable(<span class="hljs-string">"__RCTProfileIsProfiling"</span>, <span class="hljs-string">"true"</span>);</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="hljs-comment">// 加载jsbundle</span></span><br><span class="line">   catalystInstance.runJSBundle();</span><br><span class="line">   <span class="hljs-comment">// 将CatalystInstance实例和ReactContext关联</span></span><br><span class="line">   reactContext.initializeWithInstance(catalystInstance);</span><br><span class="line"></span><br><span class="line">   <span class="hljs-keyword">return</span> reactContext;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<h6 id="创建CatalysInstanceImpl"><a href="#创建CatalysInstanceImpl" class="headerlink" title="创建CatalysInstanceImpl"></a>创建CatalysInstanceImpl</h6><p>CatalysInstanceImpl是与js通信的bridge的真正实现。ReactQueueConfigurationImpl中保存了三个线程，分别是UI线程，native执行的线程，js执行的线程。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"> <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-title">CatalystInstanceImpl</span><span class="hljs-params">(</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">     <span class="hljs-keyword">final</span> ReactQueueConfigurationSpec reactQueueConfigurationSpec,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">     <span class="hljs-keyword">final</span> JavaScriptExecutor jsExecutor,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">     <span class="hljs-keyword">final</span> NativeModuleRegistry nativeModuleRegistry,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">     <span class="hljs-keyword">final</span> JSBundleLoader jsBundleLoader,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">     NativeModuleCallExceptionHandler nativeModuleCallExceptionHandler)</span> </span>&#123;</span><br><span class="line">   mHybridData = initHybrid(); <span class="hljs-comment">// 调用jni方法创建HybridData对象</span></span><br><span class="line"><span class="hljs-comment">// 根据上面的js和native消息执行的线程命名配置，创建真正的线程实现MessageQueueThreadImpl，并启动这些线程，每个线程中都有一个looper在轮训消息。在MessageQueueThreadImpl中有一个mHandler，负责向这些线程的looper发送消息。</span></span><br><span class="line">   mReactQueueConfiguration = ReactQueueConfigurationImpl.create(</span><br><span class="line">       reactQueueConfigurationSpec,</span><br><span class="line">       <span class="hljs-keyword">new</span> NativeExceptionHandler());</span><br><span class="line">   mBridgeIdleListeners = <span class="hljs-keyword">new</span> CopyOnWriteArrayList&lt;&gt;();</span><br><span class="line">   mNativeModuleRegistry = nativeModuleRegistry;</span><br><span class="line">   mJSModuleRegistry = <span class="hljs-keyword">new</span> JavaScriptModuleRegistry();</span><br><span class="line">   mJSBundleLoader = jsBundleLoader;</span><br><span class="line">   mNativeModuleCallExceptionHandler = nativeModuleCallExceptionHandler;</span><br><span class="line">   mNativeModulesQueueThread = mReactQueueConfiguration.getNativeModulesQueueThread();</span><br><span class="line">   mTraceListener = <span class="hljs-keyword">new</span> JSProfilerTraceListener(<span class="hljs-keyword">this</span>);</span><br><span class="line"><span class="hljs-comment">// 调用jni方法</span></span><br><span class="line">   initializeBridge(</span><br><span class="line">     <span class="hljs-keyword">new</span> BridgeCallback(<span class="hljs-keyword">this</span>),</span><br><span class="line">     jsExecutor,</span><br><span class="line">     mReactQueueConfiguration.getJSQueueThread(),</span><br><span class="line">     mNativeModulesQueueThread,</span><br><span class="line">     mNativeModuleRegistry.getJavaModules(<span class="hljs-keyword">this</span>),</span><br><span class="line">     mNativeModuleRegistry.getCxxModules());</span><br><span class="line"></span><br><span class="line">   mJavaScriptContextHolder = <span class="hljs-keyword">new</span> JavaScriptContextHolder(getJavaScriptContext());</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>在加载CatalystInstanceImpl类时，加载了HybridData类，就会加载libfb.so，然后会执行上面说的动态注册jni方法。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">HybridData</span> </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">static</span> &#123;</span><br><span class="line">    SoLoader.loadLibrary(<span class="hljs-string">"fb"</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h6 id="initHybrid-C-层"><a href="#initHybrid-C-层" class="headerlink" title="initHybrid (C++层)"></a>initHybrid (C++层)</h6><p>根据注册信息，我们知道会执行CatalysInstanceImpl.cpp中的initHybrid函数。该函数会在c++层创建一个com/facebook/jni/HybridData.java对象，然后将其返回保存在java层的CatalysInstanceImpl对象中。然后还会创建一个Hybrid.h/BaseHybridClass对象，然后将其对象指针设置给刚刚创建的HybridData对象(HybridData.mDestructor.mNativePointer)。</p>
+<p>mNativePointer变量只是用来维护当前HybridData实例是否可用的标记(通过HybridData.isValid方法)，当退出等操作时，会执行HybridData.resetNative来清空释放标记。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"> <span class="hljs-meta"># src/main/jni/react/jni/CatalysInstanceImpl.cpp </span></span><br><span class="line"> jni::local_ref&lt;CatalystInstanceImpl::jhybriddata&gt; CatalystInstanceImpl::initHybrid(</span><br><span class="line">   jni::alias_ref&lt;jclass&gt;) &#123;</span><br><span class="line"> <span class="hljs-keyword">return</span> makeCxxInstance();</span><br><span class="line"> &#125;</span><br><span class="line"> </span><br><span class="line"> <span class="hljs-meta"># src/main/jni/first-party/fb/<span class="hljs-meta-keyword">include</span>/fb/fbjni/Hybrid.h  </span></span><br><span class="line"> <span class="hljs-keyword">static</span> local_ref&lt;detail::HybridData&gt; makeHybridData(<span class="hljs-built_in">std</span>::<span class="hljs-built_in">unique_ptr</span>&lt;T&gt; cxxPart) &#123;</span><br><span class="line">   <span class="hljs-comment">// 创建一个com/facebook/jni/HybridData.java对象</span></span><br><span class="line">   <span class="hljs-keyword">auto</span> hybridData = detail::HybridData::create(); </span><br><span class="line">   setNativePointer(hybridData, <span class="hljs-built_in">std</span>::move(cxxPart)); </span><br><span class="line">   <span class="hljs-keyword">return</span> hybridData;</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-meta"># src/main/jni/first-party/fb/<span class="hljs-meta-keyword">include</span>/fb/fbjni/CoreClasses-inl.h  </span></span><br><span class="line"><span class="hljs-keyword">static</span> local_ref&lt;JC&gt; newInstance(Args... args) &#123;</span><br><span class="line">  <span class="hljs-comment">// 获取com/facebook/jni/HybridData的class引用</span></span><br><span class="line">  <span class="hljs-keyword">static</span> <span class="hljs-keyword">auto</span> cls = JC::javaClassStatic();</span><br><span class="line">  <span class="hljs-keyword">static</span> <span class="hljs-keyword">auto</span> constructor = cls-&gt;<span class="hljs-keyword">template</span> getConstructor&lt;<span class="hljs-keyword">typename</span> JC::javaobject(Args...)&gt;();</span><br><span class="line">  <span class="hljs-comment">// 创建该class实例</span></span><br><span class="line">  <span class="hljs-keyword">return</span> cls-&gt;newObject(constructor, args...);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta"># src/main/jni/first-party/fb/<span class="hljs-meta-keyword">include</span>/fb/fbjni/Hybrid.h </span></span><br><span class="line"><span class="hljs-keyword">template</span>&lt;<span class="hljs-keyword">typename</span> T&gt;</span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">setNativePointer</span><span class="hljs-params">(T t, <span class="hljs-built_in">std</span>::<span class="hljs-built_in">unique_ptr</span>&lt;detail::BaseHybridClass&gt; new_value)</span> </span>&#123;</span><br><span class="line">  getHolder(t)-&gt;setNativePointer(<span class="hljs-built_in">std</span>::move(new_value));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">template</span>&lt;<span class="hljs-keyword">typename</span> T&gt;</span><br><span class="line">local_ref&lt;HybridDestructor&gt; getHolder(T t) &#123;</span><br><span class="line">  <span class="hljs-comment">// 获取com/facebook/jni/HybridData.java类中的mDestructor字段的值</span></span><br><span class="line">  <span class="hljs-keyword">static</span> <span class="hljs-keyword">auto</span> holderField = t-&gt;getClass()-&gt;<span class="hljs-keyword">template</span> getField&lt;HybridDestructor::javaobject&gt;(<span class="hljs-string">"mDestructor"</span>);</span><br><span class="line">  <span class="hljs-comment">// 返回的是转换后的HybridDestructor对象</span></span><br><span class="line">  <span class="hljs-keyword">return</span> t-&gt;getFieldValue(holderField);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">typename</span> T=detail::BaseHybridClass&gt;</span><br><span class="line"><span class="hljs-keyword">void</span> setNativePointer(<span class="hljs-built_in">std</span>::<span class="hljs-built_in">unique_ptr</span>&lt;T&gt; new_value) &#123;</span><br><span class="line">  <span class="hljs-comment">// 获取com/facebook/jni/HybridData$Destructor类中的mNativePointer字段引用</span></span><br><span class="line">  <span class="hljs-keyword">static</span> <span class="hljs-keyword">auto</span> pointerField = javaClassStatic()-&gt;getField&lt;jlong&gt;(<span class="hljs-string">"mNativePointer"</span>);</span><br><span class="line">  <span class="hljs-comment">// 获取当前对象中该字段的值</span></span><br><span class="line">  <span class="hljs-keyword">auto</span> old_value = <span class="hljs-built_in">std</span>::<span class="hljs-built_in">unique_ptr</span>&lt;T&gt;(<span class="hljs-keyword">reinterpret_cast</span>&lt;T*&gt;(getFieldValue(pointerField)));</span><br><span class="line">  <span class="hljs-keyword">if</span> (new_value &amp;&amp; old_value) &#123;</span><br><span class="line">      FBCRASH(<span class="hljs-string">"Attempt to set C++ native pointer twice"</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// new_value是BaseHybridClass对象实例的指针，将该指针设置到mNativePointer字段中</span></span><br><span class="line">  <span class="hljs-comment">// 也就是设置到com/facebook/jni/HybridData$Destructor.mNativePointer中</span></span><br><span class="line">  setFieldValue(pointerField, <span class="hljs-keyword">reinterpret_cast</span>&lt;jlong&gt;(new_value.release()));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="initializeBridge-C-层"><a href="#initializeBridge-C-层" class="headerlink" title="initializeBridge (C++层)"></a>initializeBridge (C++层)</h6><p>在initializeBridge方法中，主要是创建了NativeToJsBridge对象，并将其实例保存在CatalystInstanceImpl.instance.nativeToJsBridge_中。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta"># src/main/jni/react/jni/CatalysInstanceImpl.cpp</span></span><br><span class="line"><span class="hljs-keyword">void</span> CatalystInstanceImpl::initializeBridge(</span><br><span class="line">    jni::alias_ref&lt;ReactCallback::javaobject&gt; callback,</span><br><span class="line">    <span class="hljs-comment">// This executor is actually a factory holder.</span></span><br><span class="line">    JavaScriptExecutorHolder* jseh,</span><br><span class="line">    jni::alias_ref&lt;JavaMessageQueueThread::javaobject&gt; jsQueue,</span><br><span class="line">    jni::alias_ref&lt;JavaMessageQueueThread::javaobject&gt; nativeModulesQueue,</span><br><span class="line">    jni::alias_ref&lt;jni::JCollection&lt;JavaModuleWrapper::javaobject&gt;::javaobject&gt; javaModules,</span><br><span class="line">    jni::alias_ref&lt;jni::JCollection&lt;ModuleHolder::javaobject&gt;::javaobject&gt; cxxModules) &#123;</span><br><span class="line">  <span class="hljs-comment">// 创建c++层的native消息线程</span></span><br><span class="line">  moduleMessageQueue_ = <span class="hljs-built_in">std</span>::make_shared&lt;JMessageQueueThread&gt;(nativeModulesQueue);</span><br><span class="line">  <span class="hljs-comment">// 将modules中的module转换成NativeModule对象，并绑定了module执行的线程也就是上面的native消息线程</span></span><br><span class="line">  <span class="hljs-comment">// 创建ModuleRegistry对象，内部维护modules列表</span></span><br><span class="line">  moduleRegistry_ = <span class="hljs-built_in">std</span>::make_shared&lt;ModuleRegistry&gt;(</span><br><span class="line">    buildNativeModuleList(</span><br><span class="line">       <span class="hljs-built_in">std</span>::weak_ptr&lt;Instance&gt;(instance_),</span><br><span class="line">       javaModules,</span><br><span class="line">       cxxModules,</span><br><span class="line">       moduleMessageQueue_));</span><br><span class="line">  <span class="hljs-comment">// instance 是cxxreact/Instance.h中定义的，在CatalystInstanceImpl创建时创建该对象并赋值给instance。</span></span><br><span class="line">  instance_-&gt;initializeBridge</span><br><span class="line">    <span class="hljs-comment">// 创建JInstanceCallback对象，绑定传进来的callback和所执行的线程(native消息线程)</span></span><br><span class="line">    folly::make_unique&lt;JInstanceCallback&gt;(</span><br><span class="line">    callback,</span><br><span class="line">    moduleMessageQueue_),</span><br><span class="line">    jseh-&gt;getExecutorFactory(), <span class="hljs-comment">// 得到JSCExecutorFactory</span></span><br><span class="line">    folly::make_unique&lt;JMessageQueueThread&gt;(jsQueue),<span class="hljs-comment">//创建c++层的js消息线程</span></span><br><span class="line">    moduleRegistry_);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta"># cxxreact/Instance.cpp</span></span><br><span class="line"><span class="hljs-keyword">void</span> Instance::initializeBridge(</span><br><span class="line">    <span class="hljs-built_in">std</span>::<span class="hljs-built_in">unique_ptr</span>&lt;InstanceCallback&gt; callback,</span><br><span class="line">    <span class="hljs-built_in">std</span>::<span class="hljs-built_in">shared_ptr</span>&lt;JSExecutorFactory&gt; jsef,</span><br><span class="line">    <span class="hljs-built_in">std</span>::<span class="hljs-built_in">shared_ptr</span>&lt;MessageQueueThread&gt; jsQueue,</span><br><span class="line">    <span class="hljs-built_in">std</span>::<span class="hljs-built_in">shared_ptr</span>&lt;ModuleRegistry&gt; moduleRegistry) &#123;</span><br><span class="line">  callback_ = <span class="hljs-built_in">std</span>::move(callback);</span><br><span class="line">  moduleRegistry_ = <span class="hljs-built_in">std</span>::move(moduleRegistry);</span><br><span class="line">  <span class="hljs-comment">// 在js消息线程中创建NativeToJsBridge对象</span></span><br><span class="line">  jsQueue-&gt;runOnQueueSync([<span class="hljs-keyword">this</span>, &amp;jsef, jsQueue]() <span class="hljs-keyword">mutable</span> &#123;</span><br><span class="line">    <span class="hljs-comment">// 在js消息线程中执行下列代码</span></span><br><span class="line">    <span class="hljs-comment">// 创建NativeToJsBridge对象</span></span><br><span class="line">    nativeToJsBridge_ = folly::make_unique&lt;NativeToJsBridge&gt;(</span><br><span class="line">        jsef.get(), moduleRegistry_, jsQueue, callback_);</span><br><span class="line"></span><br><span class="line">    <span class="hljs-built_in">std</span>::lock_guard&lt;<span class="hljs-built_in">std</span>::mutex&gt; lock(m_syncMutex);</span><br><span class="line">    m_syncReady = <span class="hljs-literal">true</span>;</span><br><span class="line">    m_syncCV.notify_all();</span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  CHECK(nativeToJsBridge_);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-meta"># src/main/jni/react/jni/JMessageQueueThread.cpp</span></span><br><span class="line"><span class="hljs-keyword">void</span> JMessageQueueThread::runOnQueueSync(<span class="hljs-built_in">std</span>::function&lt;<span class="hljs-keyword">void</span>()&gt;&amp;&amp; runnable) &#123;</span><br><span class="line">  <span class="hljs-comment">// 获取com/facebook/react/bridge/queue/MessageQueueThread.java对象的class引用，然后拿到其isOnThread方法引用</span></span><br><span class="line">  <span class="hljs-keyword">static</span> <span class="hljs-keyword">auto</span> jIsOnThread = JavaMessageQueueThread::javaClassStatic()-&gt;</span><br><span class="line">    getMethod&lt;jboolean()&gt;(<span class="hljs-string">"isOnThread"</span>);</span><br><span class="line"></span><br><span class="line">  <span class="hljs-keyword">if</span> (jIsOnThread(m_jobj)) &#123;</span><br><span class="line">    wrapRunnable(<span class="hljs-built_in">std</span>::move(runnable))();</span><br><span class="line">  &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">    <span class="hljs-built_in">std</span>::mutex signalMutex;</span><br><span class="line">    <span class="hljs-built_in">std</span>::condition_variable signalCv;</span><br><span class="line">    <span class="hljs-keyword">bool</span> runnableComplete = <span class="hljs-literal">false</span>;</span><br><span class="line">	<span class="hljs-comment">// 如果当前不是在主线程，通过获取方法引用来调用</span></span><br><span class="line">    <span class="hljs-comment">// com/facebook/react/bridge/queue/MessageQueueThread.java对象的runOnQueue方法</span></span><br><span class="line">    <span class="hljs-comment">// 该方法会将runnable通过Handler发送到js消息线程的消息队列中</span></span><br><span class="line">    runOnQueue([&amp;] () <span class="hljs-keyword">mutable</span> &#123;</span><br><span class="line">      <span class="hljs-built_in">std</span>::lock_guard&lt;<span class="hljs-built_in">std</span>::mutex&gt; lock(signalMutex);</span><br><span class="line"></span><br><span class="line">      runnable();</span><br><span class="line">      runnableComplete = <span class="hljs-literal">true</span>;</span><br><span class="line"></span><br><span class="line">      signalCv.notify_one();</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="hljs-built_in">std</span>::unique_lock&lt;<span class="hljs-built_in">std</span>::mutex&gt; lock(signalMutex);</span><br><span class="line">    <span class="hljs-comment">// 当前线程等待js线程执行完该runnable</span></span><br><span class="line">    signalCv.wait(lock, [&amp;runnableComplete] &#123; <span class="hljs-keyword">return</span> runnableComplete; &#125;);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="加载并运行jsbundle"><a href="#加载并运行jsbundle" class="headerlink" title="加载并运行jsbundle"></a>加载并运行jsbundle</h6><p>通过JSBundleLoader去加载jsbundle.js文件，默认是从assets中加载，可以通过在ReactInstanceManagerBuilder中提前设置自己的JSBundleLoader，实现自己的加载逻辑。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta">@Override</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">runJSBundle</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">  <span class="hljs-comment">// 此处的Loader是上面的匿名Loader</span></span><br><span class="line">  mJSBundleLoader.loadScript(CatalystInstanceImpl.<span class="hljs-keyword">this</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>所以执行的是instance.loadScriptFromAssets(context.getAssets(), assetUrl, loadSynchronously);最终调用的是jni方法jniLoadScriptFromAssets去加载。</p>
+<h6 id="jniLoadScriptFromAssets-C-层"><a href="#jniLoadScriptFromAssets-C-层" class="headerlink" title="jniLoadScriptFromAssets (C++层)"></a>jniLoadScriptFromAssets (C++层)</h6><p>所谓unbundle，是是对bundle的优化，当一个bundle非常大时，如果一次性全部加载整个可能非常慢，也占内存，可以通过编译时开启unbundle特性来解决，将bundle分割成多个文件，使用时加载需要的。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta"># src/main/jni/react/jni/CatalysInstanceImpl.cpp</span></span><br><span class="line"><span class="hljs-keyword">void</span> CatalystInstanceImpl::jniLoadScriptFromAssets(</span><br><span class="line">    <span class="hljs-comment">// AssetManager引用</span></span><br><span class="line">    jni::alias_ref&lt;JAssetManager::javaobject&gt; assetManager,</span><br><span class="line">    <span class="hljs-comment">// 文件名称</span></span><br><span class="line">    <span class="hljs-keyword">const</span> <span class="hljs-built_in">std</span>::<span class="hljs-built_in">string</span>&amp; assetURL,</span><br><span class="line">    <span class="hljs-comment">// 是否同步加载，默认不同步加载</span></span><br><span class="line">    <span class="hljs-keyword">bool</span> loadSynchronously) &#123;</span><br><span class="line">  <span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> kAssetsLength = <span class="hljs-number">9</span>;  <span class="hljs-comment">// strlen("assets://");</span></span><br><span class="line">  <span class="hljs-keyword">auto</span> sourceURL = assetURL.substr(kAssetsLength);</span><br><span class="line">  <span class="hljs-comment">// 通过AssetManager.open加载文件流</span></span><br><span class="line">  <span class="hljs-keyword">auto</span> manager = extractAssetManager(assetManager);</span><br><span class="line">  <span class="hljs-keyword">auto</span> script = loadScriptFromAssets(manager, sourceURL);</span><br><span class="line">  <span class="hljs-keyword">if</span> (JniJSModulesUnbundle::isUnbundle(manager, sourceURL)) &#123;</span><br><span class="line">    <span class="hljs-comment">// 加载的是unbundle</span></span><br><span class="line">    <span class="hljs-keyword">auto</span> bundle = JniJSModulesUnbundle::fromEntryFile(manager, sourceURL);</span><br><span class="line">    <span class="hljs-keyword">auto</span> registry = RAMBundleRegistry::singleBundleRegistry(<span class="hljs-built_in">std</span>::move(bundle));</span><br><span class="line">    instance_-&gt;loadRAMBundle(</span><br><span class="line">      <span class="hljs-built_in">std</span>::move(registry),</span><br><span class="line">      <span class="hljs-built_in">std</span>::move(script),</span><br><span class="line">      sourceURL,</span><br><span class="line">      loadSynchronously);</span><br><span class="line">    <span class="hljs-keyword">return</span>;</span><br><span class="line">  &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">    instance_-&gt;loadScriptFromString(<span class="hljs-built_in">std</span>::move(script), sourceURL, loadSynchronously);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-meta"># cxxreact/NativeToJsBridge.cpp</span></span><br><span class="line"><span class="hljs-keyword">void</span> NativeToJsBridge::loadApplication(</span><br><span class="line">    <span class="hljs-built_in">std</span>::<span class="hljs-built_in">unique_ptr</span>&lt;RAMBundleRegistry&gt; bundleRegistry,</span><br><span class="line">    <span class="hljs-built_in">std</span>::<span class="hljs-built_in">unique_ptr</span>&lt;<span class="hljs-keyword">const</span> JSBigString&gt; startupScript,</span><br><span class="line">    <span class="hljs-built_in">std</span>::<span class="hljs-built_in">string</span> startupScriptSourceURL) &#123;</span><br><span class="line">  <span class="hljs-comment">// 将消息发送到js消息线程中处理</span></span><br><span class="line">  runOnExecutorQueue(</span><br><span class="line">      [bundleRegistryWrap=folly::makeMoveWrapper(<span class="hljs-built_in">std</span>::move(bundleRegistry)),</span><br><span class="line">       startupScript=folly::makeMoveWrapper(<span class="hljs-built_in">std</span>::move(startupScript)),</span><br><span class="line">       startupScriptSourceURL=<span class="hljs-built_in">std</span>::move(startupScriptSourceURL)]</span><br><span class="line">        (JSExecutor* executor) <span class="hljs-keyword">mutable</span> &#123;</span><br><span class="line">    <span class="hljs-keyword">auto</span> bundleRegistry = bundleRegistryWrap.move();</span><br><span class="line">    <span class="hljs-keyword">if</span> (bundleRegistry) &#123;</span><br><span class="line">      executor-&gt;setBundleRegistry(<span class="hljs-built_in">std</span>::move(bundleRegistry));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-comment">// 在js消息线程中去解析js文件流</span></span><br><span class="line">    executor-&gt;loadApplicationScript(<span class="hljs-built_in">std</span>::move(*startupScript),</span><br><span class="line">                                    <span class="hljs-built_in">std</span>::move(startupScriptSourceURL));</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta"># cxxreact/JSCExecutor.cpp</span></span><br><span class="line"><span class="hljs-keyword">void</span> JSCExecutor::loadApplicationScript(</span><br><span class="line">    <span class="hljs-built_in">std</span>::<span class="hljs-built_in">unique_ptr</span>&lt;<span class="hljs-keyword">const</span> JSBigString&gt; script,</span><br><span class="line">    <span class="hljs-built_in">std</span>::<span class="hljs-built_in">string</span> sourceURL) &#123;</span><br><span class="line">  <span class="hljs-function">SystraceSection <span class="hljs-title">s</span><span class="hljs-params">(</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">      <span class="hljs-string">"JSCExecutor::loadApplicationScript"</span>, <span class="hljs-string">"sourceURL"</span>, sourceURL)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="hljs-built_in">std</span>::<span class="hljs-built_in">string</span> scriptName = simpleBasename(sourceURL);</span><br><span class="line">  ReactMarker::logTaggedMarker(</span><br><span class="line">      ReactMarker::RUN_JS_BUNDLE_START, scriptName.c_str());</span><br><span class="line">  String jsSourceURL(m_context, sourceURL.c_str());</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">// TODO t15069155: reduce the number of overrides here</span></span><br><span class="line"><span class="hljs-meta">#<span class="hljs-meta-keyword">ifdef</span> WITH_FBJSCEXTENSIONS</span></span><br><span class="line">  <span class="hljs-comment">// WITH_FBJSCEXTENSIONS宏是否被定义，rn的jsc走这</span></span><br><span class="line">  <span class="hljs-keyword">if</span> (<span class="hljs-keyword">auto</span> fileStr = <span class="hljs-keyword">dynamic_cast</span>&lt;<span class="hljs-keyword">const</span> JSBigFileString*&gt;(script.get())) &#123;</span><br><span class="line">    <span class="hljs-function">JSContextLock <span class="hljs-title">lock</span><span class="hljs-params">(m_context)</span></span>;</span><br><span class="line">    JSLoadSourceStatus jsStatus;</span><br><span class="line">    </span><br><span class="line">    <span class="hljs-keyword">auto</span> bcSourceCode = JSCreateSourceCodeFromFile(</span><br><span class="line">        fileStr-&gt;fd(), jsSourceURL, <span class="hljs-literal">nullptr</span>, &amp;jsStatus);</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">switch</span> (jsStatus) &#123;</span><br><span class="line">      <span class="hljs-keyword">case</span> JSLoadSourceIsCompiled:</span><br><span class="line">        <span class="hljs-comment">// 如果js代码已经编译过</span></span><br><span class="line">        <span class="hljs-keyword">if</span> (!bcSourceCode) &#123;</span><br><span class="line">          <span class="hljs-keyword">throw</span> <span class="hljs-built_in">std</span>::runtime_error(<span class="hljs-string">"Unexpected error opening compiled bundle"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="hljs-comment">// 运行js代码</span></span><br><span class="line">        evaluateSourceCode(m_context, bcSourceCode, jsSourceURL);</span><br><span class="line">		<span class="hljs-comment">// js调用native请求处理</span></span><br><span class="line">        flush();</span><br><span class="line"></span><br><span class="line">        ReactMarker::logMarker(ReactMarker::CREATE_REACT_CONTEXT_STOP);</span><br><span class="line">        ReactMarker::logTaggedMarker(</span><br><span class="line">            ReactMarker::RUN_JS_BUNDLE_STOP, scriptName.c_str());</span><br><span class="line">        <span class="hljs-keyword">return</span>;</span><br><span class="line"></span><br><span class="line">      <span class="hljs-keyword">case</span> JSLoadSourceErrorVersionMismatch:</span><br><span class="line">        <span class="hljs-keyword">throw</span> RecoverableError(explainLoadSourceStatus(jsStatus));</span><br><span class="line"></span><br><span class="line">      <span class="hljs-keyword">case</span> JSLoadSourceErrorOnRead:</span><br><span class="line">      <span class="hljs-keyword">case</span> JSLoadSourceIsNotCompiled:</span><br><span class="line">        <span class="hljs-comment">// Not bytecode, fall through.</span></span><br><span class="line">        <span class="hljs-keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"><span class="hljs-meta">#<span class="hljs-meta-keyword">elif</span> defined(__APPLE__)</span></span><br><span class="line">  <span class="hljs-comment">// IOS使用系统的JSC</span></span><br><span class="line">  ...</span><br><span class="line"><span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span></span><br><span class="line">  &#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="flush-C-层"><a href="#flush-C-层" class="headerlink" title="flush (C++层)"></a>flush (C++层)</h6><p>flush方法用于处理js中对native模块调用请求，m_flushedQueueJS执行的是MessageQueue.js中的flushedQueue方法，获取_queue数组，该数组中保存了js中对native模块的调用请求。在callNativeModules中会对请求列表一一处理。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta"># cxxreact/JSCExecutor.cpp</span></span><br><span class="line"><span class="hljs-keyword">void</span> JSCExecutor::flush() &#123;</span><br><span class="line">  <span class="hljs-function">SystraceSection <span class="hljs-title">s</span><span class="hljs-params">(<span class="hljs-string">"JSCExecutor::flush"</span>)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="hljs-keyword">if</span> (m_flushedQueueJS) &#123;</span><br><span class="line">    callNativeModules(m_flushedQueueJS-&gt;callAsFunction(&#123;&#125;));</span><br><span class="line">    <span class="hljs-keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-keyword">auto</span> global = Object::getGlobalObject(m_context);</span><br><span class="line">  <span class="hljs-keyword">auto</span> batchedBridgeValue = global.getProperty(<span class="hljs-string">"__fbBatchedBridge"</span>);</span><br><span class="line">  <span class="hljs-keyword">if</span> (!batchedBridgeValue.isUndefined()) &#123;</span><br><span class="line">    bindBridge();</span><br><span class="line">    <span class="hljs-comment">// 从js的调用队列中获取调用请求，然后依次调用指定module的方法</span></span><br><span class="line">    callNativeModules(m_flushedQueueJS-&gt;callAsFunction(&#123;&#125;));</span><br><span class="line">  &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (m_delegate) &#123;</span><br><span class="line">    callNativeModules(Value::makeNull(m_context));</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="启动ReactContext"><a href="#启动ReactContext" class="headerlink" title="启动ReactContext"></a>启动ReactContext</h6><p>在native消息线程中执行。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"> <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">setupReactContext</span><span class="hljs-params">(<span class="hljs-keyword">final</span> ReactApplicationContext reactContext)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">   CatalystInstance catalystInstance =</span><br><span class="line">     Assertions.assertNotNull(reactContext.getCatalystInstance());</span><br><span class="line"><span class="hljs-comment">// 安装所有的NativeModule,调用NativeModule.initialize</span></span><br><span class="line">   catalystInstance.initialize();</span><br><span class="line">   mDevSupportManager.onNewReactContextCreated(reactContext);</span><br><span class="line">   mMemoryPressureRouter.addMemoryPressureListener(catalystInstance);</span><br><span class="line">   moveReactContextToCurrentLifecycleState();</span><br><span class="line"></span><br><span class="line">   <span class="hljs-keyword">synchronized</span> (mAttachedRootViews) &#123;</span><br><span class="line">     <span class="hljs-keyword">for</span> (ReactRootView rootView : mAttachedRootViews) &#123;</span><br><span class="line">       <span class="hljs-comment">// 将ReactRootView添加到UIManager中作为RootView,并启动js组件</span></span><br><span class="line">       attachRootViewToInstance(rootView, catalystInstance);</span><br><span class="line">     &#125;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   ReactInstanceEventListener[] listeners =</span><br><span class="line">     <span class="hljs-keyword">new</span> ReactInstanceEventListener[mReactInstanceEventListeners.size()];</span><br><span class="line">   <span class="hljs-keyword">final</span> ReactInstanceEventListener[] finalListeners =</span><br><span class="line">       mReactInstanceEventListeners.toArray(listeners);</span><br><span class="line"></span><br><span class="line">   UiThreadUtil.runOnUiThread(</span><br><span class="line">       <span class="hljs-keyword">new</span> Runnable() &#123;</span><br><span class="line">         <span class="hljs-meta">@Override</span></span><br><span class="line">         <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">run</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">           <span class="hljs-keyword">for</span> (ReactInstanceEventListener listener : finalListeners) &#123;</span><br><span class="line">             listener.onReactContextInitialized(reactContext);</span><br><span class="line">           &#125;</span><br><span class="line">         &#125;</span><br><span class="line">       &#125;);</span><br><span class="line">   <span class="hljs-comment">// 将js线程和native线程的优先级恢复默认</span></span><br><span class="line">   reactContext.runOnJSQueueThread(</span><br><span class="line">       <span class="hljs-keyword">new</span> Runnable() &#123;</span><br><span class="line">         <span class="hljs-meta">@Override</span></span><br><span class="line">         <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">run</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">           Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);</span><br><span class="line">         &#125;</span><br><span class="line">       &#125;);</span><br><span class="line">   reactContext.runOnNativeModulesQueueThread(</span><br><span class="line">       <span class="hljs-keyword">new</span> Runnable() &#123;</span><br><span class="line">         <span class="hljs-meta">@Override</span></span><br><span class="line">         <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">run</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">           Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);</span><br><span class="line">         &#125;</span><br><span class="line">       &#125;);</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<h6 id="启动js组件"><a href="#启动js组件" class="headerlink" title="启动js组件"></a>启动js组件</h6><p>将RootView添加到UIManager中后，就调用js组件的进入点，启动js组件。具体调用原理可以看上一篇的<a href="/Android-ReactNative通信流程/" title="Android-ReactNative通信流程">Android-ReactNative通信流程</a>。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">defaultJSEntryPoint</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">    <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">      <span class="hljs-keyword">if</span> (mReactInstanceManager == <span class="hljs-keyword">null</span> || !mIsAttachedToInstance) &#123;</span><br><span class="line">        <span class="hljs-keyword">return</span>;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      ReactContext reactContext = mReactInstanceManager.getCurrentReactContext();</span><br><span class="line">      <span class="hljs-keyword">if</span> (reactContext == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">        <span class="hljs-keyword">return</span>;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      CatalystInstance catalystInstance = reactContext.getCatalystInstance();</span><br><span class="line"></span><br><span class="line">      WritableNativeMap appParams = <span class="hljs-keyword">new</span> WritableNativeMap();</span><br><span class="line">      appParams.putDouble(<span class="hljs-string">"rootTag"</span>, getRootViewTag());</span><br><span class="line">      <span class="hljs-meta">@Nullable</span> Bundle appProperties = getAppProperties();</span><br><span class="line">      <span class="hljs-keyword">if</span> (appProperties != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">        appParams.putMap(<span class="hljs-string">"initialProps"</span>, Arguments.fromBundle(appProperties));</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="hljs-keyword">if</span> (getUIManagerType() == FABRIC) &#123;</span><br><span class="line">        appParams.putBoolean(<span class="hljs-string">"fabric"</span>, <span class="hljs-keyword">true</span>);</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      mShouldLogContentAppeared = <span class="hljs-keyword">true</span>;</span><br><span class="line"></span><br><span class="line">      String jsAppModuleName = getJSModuleName();</span><br><span class="line">      <span class="hljs-comment">// 获取AppRegistry这个js模块，运行期runApplication方法，实际上运行的是AppRegistry.js的runApplication函数</span></span><br><span class="line">      catalystInstance.getJSModule(AppRegistry.class).runApplication(jsAppModuleName, appParams);</span><br><span class="line">    &#125; <span class="hljs-keyword">finally</span> &#123;</span><br><span class="line">      Systrace.endSection(TRACE_TAG_REACT_JAVA_BRIDGE);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="js组件运行-JS层"><a href="#js组件运行-JS层" class="headerlink" title="js组件运行 (JS层)"></a>js组件运行 (JS层)</h6><figure class="highlight js hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">runApplication(appKey: string, <span class="hljs-attr">appParameters</span>: any): <span class="hljs-keyword">void</span> &#123;</span><br><span class="line">  <span class="hljs-keyword">const</span> msg =</span><br><span class="line">    <span class="hljs-string">'Running application "'</span> +</span><br><span class="line">    appKey +</span><br><span class="line">    <span class="hljs-string">'" with appParams: '</span> +</span><br><span class="line">    <span class="hljs-built_in">JSON</span>.stringify(appParameters) +</span><br><span class="line">    <span class="hljs-string">'. '</span> +</span><br><span class="line">    <span class="hljs-string">'__DEV__ === '</span> +</span><br><span class="line">    <span class="hljs-built_in">String</span>(__DEV__) +</span><br><span class="line">    <span class="hljs-string">', development-level warning are '</span> +</span><br><span class="line">    (__DEV__ ? <span class="hljs-string">'ON'</span> : <span class="hljs-string">'OFF'</span>) +</span><br><span class="line">    <span class="hljs-string">', performance optimizations are '</span> +</span><br><span class="line">    (__DEV__ ? <span class="hljs-string">'OFF'</span> : <span class="hljs-string">'ON'</span>);</span><br><span class="line">  infoLog(msg);</span><br><span class="line">  BugReporting.addSource(</span><br><span class="line">    <span class="hljs-string">'AppRegistry.runApplication'</span> + runCount++,</span><br><span class="line">    () =&gt; msg,</span><br><span class="line">  );</span><br><span class="line">  ...</span><br><span class="line">  <span class="hljs-comment">// 运行</span></span><br><span class="line">  runnables[appKey].run(appParameters);</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
+
+        </div>
+        
+        <ul class="post-copyright">
+            <li><strong>本文标题：</strong><a href="https://witgao.com/Android-ReactNative启动流程/">Android-ReactNative通信流程</a></li>
+            <li><strong>本文作者：</strong><a href="https://witgao.com">zhenyu</a></li>
+            <li><strong>本文链接：</strong><a href="https://witgao.com/Android-ReactNative启动流程/">https://witgao.com/Android-ReactNative启动流程/</a></li>
+            <li><strong>发布时间：</strong>2018-07-02</li>
+            <li><strong>版权声明：</strong>本博客所有文章除特别声明外，均采用 <a
+                    href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="external nofollow"
+                    target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明出处！
+            </li>
+        </ul>
+        
+        
+        
+        
+    </div>
+</div>
+
+
+
+
+
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        <div class="level-start">
+            <a class="level level-item has-link-grey  article-nav-prev"
+                href="/Android-ReactNative渲染流程/">
+                <i class="level-item fas fa-chevron-left"></i>
+                <span class="level-item">Android-ReactNative渲染流程</span>
+            </a>
+        </div>
+        
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next"
+                href="/Android-ReactNative通信流程/">
+                <span class="level-item">Android-ReactNative通信流程</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+    </div>
+</div>
+
+
+</div>
+                
+
+
+
+
+<div
+    class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left ">
+    
+    
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered" style="flex-shrink: 1">
+                <div>
+                    
+                    <figure class="image is-128x128 has-mb-6">
+                        <img class="" src="/images/avatar1.png" alt="zhenyu">
+                    </figure>
+                    
+                    <p class="is-size-4 is-block">
+                        zhenyu
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        富贵山庄无富贵，只留欢乐在此间
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>杭州</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        文章
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        38
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        分类
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        9
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        标签
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        0
+                    </p>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="level">
+            <a class="level-item button is-link is-rounded" href="https://github.com/witgao" target="_blank">
+                关注我</a>
+        </div>
+        
+        
+        
+    </div>
+</div>
+    
+    
+<div class="card widget column-left is-sticky" id="toc">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                目录
+            </h3>
+            <ul class="menu-list"><li>
+        <a class="is-flex" href="#ReactAndroid">
+        <span class="has-mr-6">1</span>
+        <span>ReactAndroid</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#ReactActivity">
+        <span class="has-mr-6">1.1</span>
+        <span>ReactActivity</span>
+        </a></li><li>
+        <a class="is-flex" href="#ReactRootView">
+        <span class="has-mr-6">1.2</span>
+        <span>ReactRootView</span>
+        </a></li><li>
+        <a class="is-flex" href="#ReactNativeHost">
+        <span class="has-mr-6">1.3</span>
+        <span>ReactNativeHost</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#加载RN组件">
+        <span class="has-mr-6">2</span>
+        <span>加载RN组件</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#启动ReactActivity">
+        <span class="has-mr-6">2.1</span>
+        <span>启动ReactActivity</span>
+        </a></li><li>
+        <a class="is-flex" href="#创建ReactRootView">
+        <span class="has-mr-6">2.2</span>
+        <span>创建ReactRootView</span>
+        </a></li><li>
+        <a class="is-flex" href="#创建ReactInstanceManager">
+        <span class="has-mr-6">2.3</span>
+        <span>创建ReactInstanceManager</span>
+        </a></li><li>
+        <a class="is-flex" href="#启动jsbundle组件">
+        <span class="has-mr-6">2.4</span>
+        <span>启动jsbundle组件</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#创建ReactContext">
+        <span class="has-mr-6">2.4.1</span>
+        <span>创建ReactContext</span>
+        </a></li><li>
+        <a class="is-flex" href="#创建CatalysInstanceImpl">
+        <span class="has-mr-6">2.4.2</span>
+        <span>创建CatalysInstanceImpl</span>
+        </a></li><li>
+        <a class="is-flex" href="#initHybrid-C-层">
+        <span class="has-mr-6">2.4.3</span>
+        <span>initHybrid (C++层)</span>
+        </a></li><li>
+        <a class="is-flex" href="#initializeBridge-C-层">
+        <span class="has-mr-6">2.4.4</span>
+        <span>initializeBridge (C++层)</span>
+        </a></li><li>
+        <a class="is-flex" href="#加载并运行jsbundle">
+        <span class="has-mr-6">2.4.5</span>
+        <span>加载并运行jsbundle</span>
+        </a></li><li>
+        <a class="is-flex" href="#jniLoadScriptFromAssets-C-层">
+        <span class="has-mr-6">2.4.6</span>
+        <span>jniLoadScriptFromAssets (C++层)</span>
+        </a></li><li>
+        <a class="is-flex" href="#flush-C-层">
+        <span class="has-mr-6">2.4.7</span>
+        <span>flush (C++层)</span>
+        </a></li><li>
+        <a class="is-flex" href="#启动ReactContext">
+        <span class="has-mr-6">2.4.8</span>
+        <span>启动ReactContext</span>
+        </a></li><li>
+        <a class="is-flex" href="#启动js组件">
+        <span class="has-mr-6">2.4.9</span>
+        <span>启动js组件</span>
+        </a></li><li>
+        <a class="is-flex" href="#js组件运行-JS层">
+        <span class="has-mr-6">2.4.10</span>
+        <span>js组件运行 (JS层)</span>
+        </a></li></ul></li></ul></li></ul>
+        </div>
+    </div>
+</div>
+    
+    
+    <div class="column-right-shadow is-hidden-widescreen ">
+        
+    </div>
+    
+</div>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <!-- <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="/images/logo2.png" alt="Android-ReactNative通信流程" height="28">
+                
+                </a> -->
+                <p class="is-size-7">
+                    &copy; 2020 zhenyu&nbsp;
+                    Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a
+                        href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank">Icarus</a>
+                    
+                </p>
+            </div>
+            <div class="level-end">
+                
+            </div>
+        </div>
+    </div>
+</footer>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("zh-CN");</script>
+
+<script>
+var IcarusThemeSettings = {
+    article: {
+        highlight: {
+            clipboard: true,
+            fold: 'unfolded'
+        }
+    }
+};
+</script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+
+
+
+    
+    
+<script src="/js/animation.js"></script>
+
+    
+    
+<script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+<script src="/js/gallery.js" defer></script>
+
+    
+    
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    MathJax.Hub.Config({
+        'HTML-CSS': {
+            matchFontHeight: false
+        },
+        SVG: {
+            matchFontHeight: false
+        },
+        CommonHTML: {
+            matchFontHeight: false
+        },
+        tex2jax: {
+            inlineMath: [
+                ['$','$'],
+                ['\\(','\\)']
+            ]
+        }
+    });
+});
+</script>
+    
+    
+<a id="back-to-top" title="回到顶端" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="想要查找什么..." />
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: '文章',
+                PAGES: '页面',
+                CATEGORIES: '分类',
+                TAGS: '标签',
+                UNTITLED: '(无标题)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+</body>
+
+</html>

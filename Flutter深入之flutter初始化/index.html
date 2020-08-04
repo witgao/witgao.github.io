@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html  lang="zh">
+
+<head>
+    <meta charset="utf-8" />
+
+<meta name="generator" content="Hexo 3.9.0" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<title>Flutter深入之flutter初始化 - 富贵山庄</title>
+
+
+    <meta name="description" content="开篇前面两篇我们讲到了Flutter应用如何编译，并将编译结果如何放入APK中。那么当应用启动时，又是如何执行到main.dart中的main方法呢？Flutter的绘制内容又是如何被显示的呢？  FlutterApplication在应用启动的Application中会执行一些初始化操作，比如初始化一些路径文件夹等配置，搬移flutter资源，最为重要的是安装flutter.so。在前面的编译讲">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flutter深入之flutter初始化">
+<meta property="og:url" content="https://witgao.com/Flutter深入之flutter初始化/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:description" content="开篇前面两篇我们讲到了Flutter应用如何编译，并将编译结果如何放入APK中。那么当应用启动时，又是如何执行到main.dart中的main方法呢？Flutter的绘制内容又是如何被显示的呢？  FlutterApplication在应用启动的Application中会执行一些初始化操作，比如初始化一些路径文件夹等配置，搬移flutter资源，最为重要的是安装flutter.so。在前面的编译讲">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://witgao.com/images/og_image.png">
+<meta property="og:updated_time" content="2020-07-13T13:45:29.612Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Flutter深入之flutter初始化">
+<meta name="twitter:description" content="开篇前面两篇我们讲到了Flutter应用如何编译，并将编译结果如何放入APK中。那么当应用启动时，又是如何执行到main.dart中的main方法呢？Flutter的绘制内容又是如何被显示的呢？  FlutterApplication在应用启动的Application中会执行一些初始化操作，比如初始化一些路径文件夹等配置，搬移flutter资源，最为重要的是安装flutter.so。在前面的编译讲">
+<meta name="twitter:image" content="https://witgao.com/images/og_image.png">
+
+
+
+
+
+
+
+<link rel="icon" href="/images/favicon1.svg">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/default.css">
+
+
+    
+    
+<style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+    
+    
+    
+    
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+    
+    
+    
+    
+    
+    
+    
+    <link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+    
+    
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body class="is-3-column">
+    <nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="/images/logo2.png" alt="Flutter深入之flutter初始化" height="28">
+            
+            </a>
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item"
+                href="/">燕子坞</a>
+                
+                <a class="navbar-item"
+                href="/archives">听香水榭</a>
+                
+                <a class="navbar-item"
+                href="/categories">还施水阁</a>
+                
+                <a class="navbar-item"
+                href="/about">思过崖</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    <a class="navbar-item" target="_blank" title="Download on GitHub" href="https://github.com/witgao/blog">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                <a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;">
+                    <i class="fas fa-list-ul"></i>
+                </a>
+                
+                
+                <a class="navbar-item search" title="搜索" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-9-widescreen has-order-2 column-main">
+<div class="card">
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2018-11-03T16:00:00.000Z">2018-11-04</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/">刀枪棍棒（Android）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/伏魔杖法（Flutter）/">伏魔杖法（Flutter）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    27 分钟 读完 (大约 4031 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            Flutter深入之flutter初始化
+            
+        </h1>
+        <div class="content">
+            <h4 id="开篇"><a href="#开篇" class="headerlink" title="开篇"></a>开篇</h4><p>前面两篇我们讲到了Flutter应用如何编译，并将编译结果如何放入APK中。那么当应用启动时，又是如何执行到main.dart中的main方法呢？Flutter的绘制内容又是如何被显示的呢？</p>
+<p><img src="/images/Flutter启动流程.png" alt="flutter-启动流程"></p>
+<h4 id="FlutterApplication"><a href="#FlutterApplication" class="headerlink" title="FlutterApplication"></a>FlutterApplication</h4><p>在应用启动的Application中会执行一些初始化操作，比如初始化一些路径文件夹等配置，搬移flutter资源，最为重要的是安装flutter.so。在前面的编译讲解中，我们知道该so就是flutter-engine。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"># FlutterMain.java</span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">startInitialization</span><span class="hljs-params">(Context applicationContext, Settings settings)</span> </span>&#123;</span><br><span class="line">        ...</span><br><span class="line">        sSettings = settings;</span><br><span class="line">        <span class="hljs-keyword">long</span> initStartTimestampMillis = SystemClock.uptimeMillis();</span><br><span class="line">        <span class="hljs-comment">// 初始化路径等配置</span></span><br><span class="line">        initConfig(applicationContext);</span><br><span class="line">    	<span class="hljs-comment">// 检测aot</span></span><br><span class="line">        initAot(applicationContext);</span><br><span class="line">    	<span class="hljs-comment">// 搬移flutter资源</span></span><br><span class="line">        initResources(applicationContext);</span><br><span class="line">        <span class="hljs-comment">// 加载so</span></span><br><span class="line">        System.loadLibrary(<span class="hljs-string">"flutter"</span>);</span><br><span class="line"></span><br><span class="line">        <span class="hljs-comment">// initTimeMicros是java层初始化loadLibrary所花费的时间。</span></span><br><span class="line">    	<span class="hljs-comment">// 因为so库中需要记录flutter开始的时间，但是在加载so库之前，</span></span><br><span class="line">    	<span class="hljs-comment">// 是无法调用so中的api，所以将加载so库所花费的时间传下去，然后so库中使用当前时间回退该花费时间，就是应用启动的真正时间。</span></span><br><span class="line">        <span class="hljs-keyword">long</span> initTimeMillis = SystemClock.uptimeMillis() - initStartTimestampMillis;</span><br><span class="line">        nativeRecordStartTimestamp(initTimeMillis);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"># flutter_main.cc</span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">RecordStartTimestamp</span><span class="hljs-params">(JNIEnv* env,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">                                 jclass jcaller,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">                                 jlong initTimeMillis)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">int64_t</span> initTimeMicros =</span><br><span class="line">      <span class="hljs-keyword">static_cast</span>&lt;<span class="hljs-keyword">int64_t</span>&gt;(initTimeMillis) * <span class="hljs-keyword">static_cast</span>&lt;<span class="hljs-keyword">int64_t</span>&gt;(<span class="hljs-number">1000</span>);</span><br><span class="line">  <span class="hljs-comment">// initTimeMicros是java层初始化所花费的时间，使用当前时间回退该花费时间，就是应用启动的真正时间。</span></span><br><span class="line">  blink::engine_main_enter_ts = Dart_TimelineGetMicros() - initTimeMicros;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在加载so库完成后，会触发JNI回调JNI_OnLoad，开始动态注册JNI方法。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"># library_loader.cc</span><br><span class="line"><span class="hljs-function">JNIEXPORT jint <span class="hljs-title">JNI_OnLoad</span><span class="hljs-params">(JavaVM* vm, <span class="hljs-keyword">void</span>* reserved)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-comment">// 将javaVM保存成全局变量</span></span><br><span class="line">  fml::jni::InitJavaVM(vm);</span><br><span class="line">  <span class="hljs-comment">// 获取JNIEnv,通过JNIEnv.RegisterNatives来动态注册</span></span><br><span class="line">  JNIEnv* env = fml::jni::AttachCurrentThread();</span><br><span class="line">  <span class="hljs-keyword">bool</span> result = <span class="hljs-literal">false</span>;</span><br><span class="line"></span><br><span class="line">  <span class="hljs-comment">// 注册FlutterMain.java中的native方法</span></span><br><span class="line">  result = shell::FlutterMain::Register(env);</span><br><span class="line">  FML_CHECK(result);</span><br><span class="line"></span><br><span class="line">  <span class="hljs-comment">// 注册FlutterCallbackInformation.java、FlutterView.java、FlutterNativeView.java中的native方法</span></span><br><span class="line">  result = shell::PlatformViewAndroid::Register(env);</span><br><span class="line">  FML_CHECK(result);</span><br><span class="line"></span><br><span class="line">  <span class="hljs-comment">// 注册VsyncWaiter.java中的native方法</span></span><br><span class="line">  result = shell::VsyncWaiterAndroid::Register(env);</span><br><span class="line">  FML_CHECK(result);</span><br><span class="line"></span><br><span class="line">  <span class="hljs-keyword">return</span> JNI_VERSION_1_4;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+ <a id="more"></a>
+<h4 id="FlutterActivity"><a href="#FlutterActivity" class="headerlink" title="FlutterActivity"></a>FlutterActivity</h4><p>一个Flutter应用是依附在一个Android的View上的，也就是FlutterView，而FlutterActivity会将FlutterView添加到自己的布局上。</p>
+<p>FlutterView是一个SurfaceView</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"># FlutterActivityDelegate.java</span><br><span class="line"><span class="hljs-meta">@Override</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onCreate</span><span class="hljs-params">(Bundle savedInstanceState)</span> </span>&#123;</span><br><span class="line">        <span class="hljs-comment">// 通过flutter run启动时，是通过 shell am start 来启动，在启动时候会设置一些参数，这些参数会放入到Activity的intent中</span></span><br><span class="line">        String[] args = getArgsFromIntent(activity.getIntent());</span><br><span class="line">        <span class="hljs-comment">// 调用JNI方法nativeInit去初始化</span></span><br><span class="line">        FlutterMain.ensureInitializationComplete(activity.getApplicationContext(), args);</span><br><span class="line">		<span class="hljs-comment">// 默认为null，可以在Activity中重写createFlutterView方法，实现自己的FlutterView</span></span><br><span class="line">        flutterView = viewFactory.createFlutterView(activity);</span><br><span class="line">        <span class="hljs-keyword">if</span> (flutterView == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">        	<span class="hljs-comment">// 默认为null，可以在Activity中重写createFlutterNativeView方法，实现自己的FlutterNativeView</span></span><br><span class="line">            FlutterNativeView nativeView = viewFactory.createFlutterNativeView();</span><br><span class="line">            <span class="hljs-comment">// 创建FlutterView</span></span><br><span class="line">            flutterView = <span class="hljs-keyword">new</span> FlutterView(activity, <span class="hljs-keyword">null</span>, nativeView);</span><br><span class="line">            flutterView.setLayoutParams(matchParent);</span><br><span class="line">            <span class="hljs-comment">// 将FlutterView放入Activity中</span></span><br><span class="line">            activity.setContentView(flutterView);</span><br><span class="line">            <span class="hljs-comment">// 创建一个view，背景色设置为windowBackground中的颜色，作为Flutter项目启动之前的视图</span></span><br><span class="line">            launchView = createLaunchView();</span><br><span class="line">            <span class="hljs-keyword">if</span> (launchView != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">            	<span class="hljs-comment">// 添加到Activity中，</span></span><br><span class="line">            	<span class="hljs-comment">// 并设置FirstFrameListener监听，当Surface创建完成时，移除这个view</span></span><br><span class="line">                addLaunchView();</span><br><span class="line">            &#125;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="hljs-comment">// 如果是通过flutter run启动的，则从intent中解析bundle参数，直接运行</span></span><br><span class="line">        <span class="hljs-keyword">if</span> (loadIntent(activity.getIntent())) &#123;</span><br><span class="line">            <span class="hljs-keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="hljs-keyword">if</span> (!flutterView.getFlutterNativeView().isApplicationRunning()) &#123;</span><br><span class="line">          <span class="hljs-comment">// 获取flutter项目地址，默认是flutter_assets目录</span></span><br><span class="line">          String appBundlePath = FlutterMain.findAppBundlePath(activity.getApplicationContext());</span><br><span class="line">          <span class="hljs-keyword">if</span> (appBundlePath != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">            FlutterRunArguments arguments = <span class="hljs-keyword">new</span> FlutterRunArguments();</span><br><span class="line">            arguments.bundlePath = appBundlePath;</span><br><span class="line">            arguments.entrypoint = <span class="hljs-string">"main"</span>;</span><br><span class="line">            <span class="hljs-comment">// 运行flutter项目</span></span><br><span class="line">            flutterView.runFromBundle(arguments);</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h5 id="nativeInit"><a href="#nativeInit" class="headerlink" title="nativeInit"></a>nativeInit</h5><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"># flutter_main.cc</span><br><span class="line"><span class="hljs-keyword">void</span> FlutterMain::Init(JNIEnv* env,</span><br><span class="line">                       jclass clazz,</span><br><span class="line">                       jobject context,</span><br><span class="line">                       jobjectArray jargs,</span><br><span class="line">                       jstring bundlePath,</span><br><span class="line">                       jstring appStoragePath,</span><br><span class="line">                       jstring engineCachesPath) &#123;</span><br><span class="line">  <span class="hljs-comment">// 处理启动命令参数</span></span><br><span class="line">  <span class="hljs-keyword">auto</span> command_line = fml::CommandLineFromIterators(args.begin(), args.end());</span><br><span class="line">  </span><br><span class="line">  <span class="hljs-keyword">auto</span> settings = SettingsFromCommandLine(command_line);</span><br><span class="line">  <span class="hljs-comment">// 默认是flutter_assets目录，可以通过在manifest中meta里面使用PUBLIC_FLUTTER_ASSETS_DIR_KEY来设置</span></span><br><span class="line">  settings.assets_path = fml::jni::JavaStringToString(env, bundlePath);</span><br><span class="line">  ...</span><br><span class="line">  <span class="hljs-comment">// 如果是debug模式</span></span><br><span class="line">  <span class="hljs-keyword">if</span> (!blink::DartVM::IsRunningPrecompiledCode()) &#123;</span><br><span class="line">    <span class="hljs-comment">// kernel_blob.bin文件就是dart工程编译后生成的二进制文件</span></span><br><span class="line">    <span class="hljs-keyword">auto</span> application_kernel_path =</span><br><span class="line">        fml::paths::JoinPaths(&#123;settings.assets_path, <span class="hljs-string">"kernel_blob.bin"</span>&#125;);</span><br><span class="line">    <span class="hljs-keyword">if</span> (fml::IsFile(application_kernel_path)) &#123;</span><br><span class="line">      settings.application_kernel_asset = application_kernel_path;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">  <span class="hljs-comment">// 创建FlutterMain</span></span><br><span class="line">  g_flutter_main.reset(<span class="hljs-keyword">new</span> FlutterMain(<span class="hljs-built_in">std</span>::move(settings)));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="创建FlutterView"><a href="#创建FlutterView" class="headerlink" title="创建FlutterView"></a>创建FlutterView</h5><p>FlutterView与Flutter代码进行通信则是通过FlutterNativeView来进行</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"># FlutterView.java    </span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">FlutterView</span><span class="hljs-params">(Context context, AttributeSet attrs, FlutterNativeView nativeView)</span> </span>&#123;</span><br><span class="line">        <span class="hljs-keyword">super</span>(context, attrs);</span><br><span class="line">		<span class="hljs-comment">// 是否使用skia渲染，只有在模拟器上并且开启了才会使用，默认情况下，在真机上会优先使用OpenGL或者Vulkan</span></span><br><span class="line">        <span class="hljs-comment">// 在flutter run时可以加上参数--enable-software-rendering来开启</span></span><br><span class="line">        mIsSoftwareRenderingEnabled = nativeGetIsSoftwareRenderingEnabled();</span><br><span class="line">        <span class="hljs-comment">// 监听系统级别的Activity过渡动画属性是否开启，随时改变</span></span><br><span class="line">        mAnimationScaleObserver = <span class="hljs-keyword">new</span> AnimationScaleObserver(<span class="hljs-keyword">new</span> Handler());</span><br><span class="line">        mMetrics = <span class="hljs-keyword">new</span> ViewportMetrics();</span><br><span class="line">        mMetrics.devicePixelRatio = context.getResources().getDisplayMetrics().density;</span><br><span class="line">        setFocusable(<span class="hljs-keyword">true</span>);</span><br><span class="line">        setFocusableInTouchMode(<span class="hljs-keyword">true</span>);</span><br><span class="line"></span><br><span class="line">        Activity activity = (Activity) getContext();</span><br><span class="line">        <span class="hljs-keyword">if</span> (nativeView == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">            <span class="hljs-comment">// 创建默认的FlutterNativeView</span></span><br><span class="line">            mNativeView = <span class="hljs-keyword">new</span> FlutterNativeView(activity.getApplicationContext());</span><br><span class="line">        &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">            mNativeView = nativeView;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="hljs-comment">// 在PlatformViewsController中注册了一个MethodChannel插件，名字为flutter/platform_views</span></span><br><span class="line">        mNativeView.attachViewAndActivity(<span class="hljs-keyword">this</span>, activity);</span><br><span class="line"></span><br><span class="line">        mSurfaceCallback = <span class="hljs-keyword">new</span> SurfaceHolder.Callback() &#123;</span><br><span class="line">            <span class="hljs-meta">@Override</span></span><br><span class="line">            <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">surfaceCreated</span><span class="hljs-params">(SurfaceHolder holder)</span> </span>&#123;</span><br><span class="line">                assertAttached();</span><br><span class="line">                <span class="hljs-comment">// 通知native层 surface创建</span></span><br><span class="line">                <span class="hljs-comment">// mNativeView.get()得到的就是nativeAttach返回的AndroidShellHolder对象指针</span></span><br><span class="line">                nativeSurfaceCreated(mNativeView.get(), holder.getSurface());</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="hljs-meta">@Override</span></span><br><span class="line">            <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">surfaceChanged</span><span class="hljs-params">(SurfaceHolder holder, <span class="hljs-keyword">int</span> format, <span class="hljs-keyword">int</span> width, <span class="hljs-keyword">int</span> height)</span> </span>&#123;</span><br><span class="line">                assertAttached();</span><br><span class="line">                <span class="hljs-comment">// 通知native层 surface改变，需重新创建</span></span><br><span class="line">                nativeSurfaceChanged(mNativeView.get(), width, height);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="hljs-meta">@Override</span></span><br><span class="line">            <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">surfaceDestroyed</span><span class="hljs-params">(SurfaceHolder holder)</span> </span>&#123;</span><br><span class="line">                assertAttached();</span><br><span class="line">                <span class="hljs-comment">// 通知native层 surface销毁 </span></span><br><span class="line">                nativeSurfaceDestroyed(mNativeView.get());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">        getHolder().addCallback(mSurfaceCallback);</span><br><span class="line"></span><br><span class="line">        mAccessibilityManager = (AccessibilityManager) getContext().getSystemService(Context.ACCESSIBILITY_SERVICE);</span><br><span class="line"></span><br><span class="line">        mActivityLifecycleListeners = <span class="hljs-keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        mFirstFrameListeners = <span class="hljs-keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">        <span class="hljs-comment">// 创建各种插件调用，这些插件已经在engine.cc中和system_channels.dart实现，</span></span><br><span class="line">        <span class="hljs-comment">// 通过这些插件，可以调用Flutter Engine中的指定方法</span></span><br><span class="line">        mFlutterLocalizationChannel = <span class="hljs-keyword">new</span> MethodChannel(<span class="hljs-keyword">this</span>, <span class="hljs-string">"flutter/localization"</span>, JSONMethodCodec.INSTANCE);</span><br><span class="line">        mFlutterNavigationChannel = <span class="hljs-keyword">new</span> MethodChannel(<span class="hljs-keyword">this</span>, <span class="hljs-string">"flutter/navigation"</span>, JSONMethodCodec.INSTANCE);</span><br><span class="line">        mFlutterKeyEventChannel = <span class="hljs-keyword">new</span> BasicMessageChannel&lt;&gt;(<span class="hljs-keyword">this</span>, <span class="hljs-string">"flutter/keyevent"</span>, JSONMessageCodec.INSTANCE);</span><br><span class="line">        mFlutterLifecycleChannel = <span class="hljs-keyword">new</span> BasicMessageChannel&lt;&gt;(<span class="hljs-keyword">this</span>, <span class="hljs-string">"flutter/lifecycle"</span>, StringCodec.INSTANCE);</span><br><span class="line">        mFlutterSystemChannel = <span class="hljs-keyword">new</span> BasicMessageChannel&lt;&gt;(<span class="hljs-keyword">this</span>, <span class="hljs-string">"flutter/system"</span>, JSONMessageCodec.INSTANCE);</span><br><span class="line">        mFlutterSettingsChannel = <span class="hljs-keyword">new</span> BasicMessageChannel&lt;&gt;(<span class="hljs-keyword">this</span>, <span class="hljs-string">"flutter/settings"</span>, JSONMessageCodec.INSTANCE);</span><br><span class="line">		<span class="hljs-comment">// 创建插件flutter/platform，提供给dart中使用</span></span><br><span class="line">        PlatformPlugin platformPlugin = <span class="hljs-keyword">new</span> PlatformPlugin(activity);</span><br><span class="line">        MethodChannel flutterPlatformChannel = <span class="hljs-keyword">new</span> MethodChannel(<span class="hljs-keyword">this</span>, <span class="hljs-string">"flutter/platform"</span>, JSONMethodCodec.INSTANCE);</span><br><span class="line">        flutterPlatformChannel.setMethodCallHandler(platformPlugin);</span><br><span class="line">        addActivityLifecycleListener(platformPlugin);</span><br><span class="line">        mImm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);</span><br><span class="line">        mTextInputPlugin = <span class="hljs-keyword">new</span> TextInputPlugin(<span class="hljs-keyword">this</span>);</span><br><span class="line">		<span class="hljs-comment">// 将当前的locale信息设置给dart</span></span><br><span class="line">        setLocale(getResources().getConfiguration().locale);</span><br><span class="line">        <span class="hljs-comment">// 将系统字体缩放和时间格式设置给dart</span></span><br><span class="line">        setUserSettings();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h6 id="nativeSurfaceCreated"><a href="#nativeSurfaceCreated" class="headerlink" title="nativeSurfaceCreated"></a>nativeSurfaceCreated</h6><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">SurfaceCreated</span><span class="hljs-params">(JNIEnv* env,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">                           jobject jcaller,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">                           jlong shell_holder,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">                           jobject jsurface)</span> </span>&#123;</span><br><span class="line">  fml::jni::<span class="hljs-function">ScopedJavaLocalFrame <span class="hljs-title">scoped_local_reference_frame</span><span class="hljs-params">(env)</span></span>;</span><br><span class="line">  <span class="hljs-comment">// 通过ndk获取Android中surface对象对应的NativeWindow对象，将其放入AndroidNativeWindow中维护。</span></span><br><span class="line">  <span class="hljs-keyword">auto</span> window = fml::MakeRefCounted&lt;AndroidNativeWindow&gt;(</span><br><span class="line">      ANativeWindow_fromSurface(env, jsurface));</span><br><span class="line">  ANDROID_SHELL_HOLDER-&gt;GetPlatformView()-&gt;NotifyCreated(<span class="hljs-built_in">std</span>::move(window));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">void</span> PlatformViewAndroid::NotifyCreated(</span><br><span class="line">    fml::RefPtr&lt;AndroidNativeWindow&gt; native_window) &#123;</span><br><span class="line">  <span class="hljs-keyword">if</span> (android_surface_) &#123;</span><br><span class="line">    <span class="hljs-comment">// 通过jni调用上层FlutterNativeView.onFirstFrame方法，执行上层注册的FirstFrameListener;</span></span><br><span class="line">    InstallFirstFrameCallback();</span><br><span class="line">    <span class="hljs-comment">// 给AndroidSurface设置window</span></span><br><span class="line">    <span class="hljs-comment">// 比如AndroidSurfaceGL实现就会通过eglCreateWindowSurface来创建一个基于该window的surface</span></span><br><span class="line">    android_surface_-&gt;SetNativeWindow(native_window);</span><br><span class="line">  &#125;</span><br><span class="line">  PlatformView::NotifyCreated();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="nativeSurfaceChanged"><a href="#nativeSurfaceChanged" class="headerlink" title="nativeSurfaceChanged"></a>nativeSurfaceChanged</h6><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">SurfaceChanged</span><span class="hljs-params">(JNIEnv* env,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">                           jobject jcaller,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">                           jlong shell_holder,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">                           jint width,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">                           jint height)</span> </span>&#123;</span><br><span class="line">  ANDROID_SHELL_HOLDER-&gt;GetPlatformView()-&gt;NotifyChanged(</span><br><span class="line">      SkISize::Make(width, height));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">void</span> PlatformViewAndroid::NotifyChanged(<span class="hljs-keyword">const</span> SkISize&amp; size) &#123;</span><br><span class="line">  <span class="hljs-keyword">if</span> (!android_surface_) &#123;</span><br><span class="line">    <span class="hljs-keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  fml::AutoResetWaitableEvent latch;</span><br><span class="line">  fml::TaskRunner::RunNowOrPostTask(</span><br><span class="line">      task_runners_.GetGPUTaskRunner(),  <span class="hljs-comment">//</span></span><br><span class="line">      <span class="hljs-comment">// 在GPU线程中执行，通知AndroidSurface对象去重新创建Surface</span></span><br><span class="line">      <span class="hljs-comment">// 比如AndroidSurfaceGL就会</span></span><br><span class="line">      <span class="hljs-comment">//	先通过eglMakeCurrent EGL_NO_SURFACE 来解除绑定</span></span><br><span class="line">      <span class="hljs-comment">// 	再通过eglDestroySurface销毁当前surface，</span></span><br><span class="line">      <span class="hljs-comment">// 	然后再调用eglCreateWindowSurface重新创建一个surface</span></span><br><span class="line">      [&amp;latch, surface = android_surface_.get(), size]() &#123;</span><br><span class="line">        surface-&gt;OnScreenSurfaceResize(size);</span><br><span class="line">        latch.Signal();</span><br><span class="line">      &#125;);</span><br><span class="line">  latch.Wait();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="nativeSurfaceDestroyed"><a href="#nativeSurfaceDestroyed" class="headerlink" title="nativeSurfaceDestroyed"></a>nativeSurfaceDestroyed</h6><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">SurfaceDestroyed</span><span class="hljs-params">(JNIEnv* env, jobject jcaller, jlong shell_holder)</span> </span>&#123;</span><br><span class="line">  ANDROID_SHELL_HOLDER-&gt;GetPlatformView()-&gt;NotifyDestroyed();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">void</span> PlatformViewAndroid::NotifyDestroyed() &#123;</span><br><span class="line">  PlatformView::NotifyDestroyed();</span><br><span class="line">  <span class="hljs-keyword">if</span> (android_surface_) &#123;</span><br><span class="line">    <span class="hljs-comment">// 直接在当前线程通知AndroidSurface销毁Surface</span></span><br><span class="line">    <span class="hljs-comment">// 比如AndroidSurfaceGL</span></span><br><span class="line">    <span class="hljs-comment">// 		会调用eglMakeCurrent EGL_NO_SURFACE 来解除绑定</span></span><br><span class="line">    android_surface_-&gt;TeardownOnScreenContext();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="创建FlutterNativeView"><a href="#创建FlutterNativeView" class="headerlink" title="创建FlutterNativeView"></a>创建FlutterNativeView</h5><p>FlutterNativeView是一个与Flutter异步通信的工具，在FlutterNativeView创建的时候，通过nativeAttach将对象实例传给native层。</p>
+<p>具体通信就是FlutterNativeView通过jni与c++通信，然后c++通过其封装的Tonic库调用dart代码；dart代码通过native方法与c++通信，然后c++通过attach中传入的Java对象实例，以及JNIEnv对象，调用Java对象的方法。从而实现了Java与Dart的互相调用。</p>
+<h6 id="nativeAttacch"><a href="#nativeAttacch" class="headerlink" title="nativeAttacch"></a>nativeAttacch</h6><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"># FlutterNativeView.java</span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">FlutterNativeView</span><span class="hljs-params">(Context context, <span class="hljs-keyword">boolean</span> isBackgroundView)</span> </span>&#123;</span><br><span class="line">    mContext = context;</span><br><span class="line">    <span class="hljs-comment">// 用来注册plugin</span></span><br><span class="line">    mPluginRegistry = <span class="hljs-keyword">new</span> FlutterPluginRegistry(<span class="hljs-keyword">this</span>, context);</span><br><span class="line">    attach(<span class="hljs-keyword">this</span>, isBackgroundView);</span><br><span class="line">    assertAttached();</span><br><span class="line">    mMessageHandlers = <span class="hljs-keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"># platform_view_android_jni.cc</span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> jlong <span class="hljs-title">Attach</span><span class="hljs-params">(JNIEnv* env,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">                    jclass clazz,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">                    jobject flutterView,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">                    jboolean is_background_view)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-comment">// 使用FlutterNativeView实例引用创建一个全局弱引用保存</span></span><br><span class="line">  fml::jni::<span class="hljs-function">JavaObjectWeakGlobalRef <span class="hljs-title">java_object</span><span class="hljs-params">(env, flutterView)</span></span>;</span><br><span class="line">  <span class="hljs-comment">// 创建AndroidShellHolder对象，并返回其指针</span></span><br><span class="line">  <span class="hljs-keyword">auto</span> shell_holder = <span class="hljs-built_in">std</span>::make_unique&lt;AndroidShellHolder&gt;(</span><br><span class="line">      FlutterMain::Get().GetSettings(), java_object, is_background_view);</span><br><span class="line">  <span class="hljs-keyword">if</span> (shell_holder-&gt;IsValid()) &#123;</span><br><span class="line">    <span class="hljs-keyword">return</span> <span class="hljs-keyword">reinterpret_cast</span>&lt;jlong&gt;(shell_holder.release());</span><br><span class="line">  &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="创建AndroidShellHolder"><a href="#创建AndroidShellHolder" class="headerlink" title="创建AndroidShellHolder"></a>创建AndroidShellHolder</h6><p>在engine中有四种线程，分别是paltform、ui、gpu、io。其中会把当前初始化的线程作为platform线程，并维护一个当前线程的Android Loop对象。每一个线程对象中都有一个TaskRunner对象，用来执行操作任务。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br></pre></td><td class="code"><pre><span class="line"># android_shell_holder.cc</span><br><span class="line">AndroidShellHolder::AndroidShellHolder(</span><br><span class="line">    blink::Settings settings,</span><br><span class="line">    fml::jni::JavaObjectWeakGlobalRef java_object,</span><br><span class="line">    <span class="hljs-keyword">bool</span> is_background_view)</span><br><span class="line">    : settings_(<span class="hljs-built_in">std</span>::move(settings)), java_object_(java_object) &#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="hljs-keyword">if</span> (is_background_view) &#123;</span><br><span class="line">    <span class="hljs-comment">// 如果是后台视图，则只创建ui线程</span></span><br><span class="line">    thread_host_ = &#123;thread_label, ThreadHost::Type::UI&#125;;</span><br><span class="line">  &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">    <span class="hljs-comment">// 默认创建的FlutterNativeView，is_background_view = false</span></span><br><span class="line">    <span class="hljs-comment">// 则创建ui线程，gpu线程，io线程</span></span><br><span class="line">    thread_host_ = &#123;thread_label, ThreadHost::Type::UI | ThreadHost::Type::GPU |</span><br><span class="line">                                      ThreadHost::Type::IO&#125;;</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">  fml::WeakPtr&lt;PlatformViewAndroid&gt; weak_platform_view;</span><br><span class="line">  <span class="hljs-comment">// 通过模板函数一个回调，在回调中创建PlatFormViewAndroid</span></span><br><span class="line">  Shell::CreateCallback&lt;PlatformView&gt; on_create_platform_view =</span><br><span class="line">      [is_background_view, java_object, &amp;weak_platform_view](Shell&amp; shell) &#123;</span><br><span class="line">        <span class="hljs-comment">// 创建PlatformViewAndroid</span></span><br><span class="line">        <span class="hljs-built_in">std</span>::<span class="hljs-built_in">unique_ptr</span>&lt;PlatformViewAndroid&gt; platform_view_android;</span><br><span class="line">        <span class="hljs-comment">// 如果是后台视图，则一定不使用软件渲染;否则就看配置中是否开启</span></span><br><span class="line">        <span class="hljs-keyword">if</span> (is_background_view) &#123;</span><br><span class="line">          platform_view_android = <span class="hljs-built_in">std</span>::make_unique&lt;PlatformViewAndroid&gt;(</span><br><span class="line">              shell,                   <span class="hljs-comment">// delegate</span></span><br><span class="line">              shell.GetTaskRunners(),  <span class="hljs-comment">// task runners</span></span><br><span class="line">              java_object              <span class="hljs-comment">// java object handle for JNI interop</span></span><br><span class="line">          );</span><br><span class="line">        &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">          platform_view_android = <span class="hljs-built_in">std</span>::make_unique&lt;PlatformViewAndroid&gt;(</span><br><span class="line">              shell,                   <span class="hljs-comment">// delegate</span></span><br><span class="line">              shell.GetTaskRunners(),  <span class="hljs-comment">// task runners</span></span><br><span class="line">              java_object,             <span class="hljs-comment">// java object handle for JNI interop</span></span><br><span class="line">              shell.GetSettings()</span><br><span class="line">                  .enable_software_rendering  <span class="hljs-comment">// use software rendering</span></span><br><span class="line">          );</span><br><span class="line">        &#125;</span><br><span class="line">        weak_platform_view = platform_view_android-&gt;GetWeakPtr();</span><br><span class="line">        <span class="hljs-keyword">return</span> platform_view_android;</span><br><span class="line">      &#125;;</span><br><span class="line">  <span class="hljs-comment">// 通过模板函数创建一个回调，在回调中创建Rasterizer</span></span><br><span class="line">  Shell::CreateCallback&lt;Rasterizer&gt; on_create_rasterizer = [](Shell&amp; shell) &#123;</span><br><span class="line">    <span class="hljs-keyword">return</span> <span class="hljs-built_in">std</span>::make_unique&lt;Rasterizer&gt;(shell.GetTaskRunners());</span><br><span class="line">  &#125;;</span><br><span class="line">  <span class="hljs-comment">// 创建当前线程的messageLoop，并创建一个taskRunner</span></span><br><span class="line">  <span class="hljs-comment">// 在MessageLoop和TaskRunner中都维护了一个Loop对象，该对象是根据平台来获取。对于Android来说，则是通过ndk从Android系统中获取当前线程中的Android Loop对象。如果当前线程不是主线程，没有初始化loop，则会通过ndk为当前线程创建一个loop，返回新创建的loop。</span></span><br><span class="line">  fml::MessageLoop::EnsureInitializedForCurrentThread();</span><br><span class="line">  fml::RefPtr&lt;fml::TaskRunner&gt; gpu_runner;</span><br><span class="line">  fml::RefPtr&lt;fml::TaskRunner&gt; ui_runner;</span><br><span class="line">  fml::RefPtr&lt;fml::TaskRunner&gt; io_runner;</span><br><span class="line">  <span class="hljs-comment">// 上面创建的taskRunner作为paltform_runner，所以platform_runner中维护的是Android当前线程的loop对象。</span></span><br><span class="line">  fml::RefPtr&lt;fml::TaskRunner&gt; platform_runner =</span><br><span class="line">      fml::MessageLoop::GetCurrent().GetTaskRunner();</span><br><span class="line">  <span class="hljs-keyword">if</span> (is_background_view) &#123;</span><br><span class="line">    <span class="hljs-comment">// 如果是后台视图，则只有一个ui线程，所以四大TaskRunner都等于UITaskRunner</span></span><br><span class="line">    <span class="hljs-keyword">auto</span> single_task_runner = thread_host_.ui_thread-&gt;GetTaskRunner();</span><br><span class="line">    gpu_runner = single_task_runner;</span><br><span class="line">    ui_runner = single_task_runner;</span><br><span class="line">    io_runner = single_task_runner;</span><br><span class="line">  &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">    <span class="hljs-comment">// 拿到其它三个线程的三个TaskRunner</span></span><br><span class="line">    gpu_runner = thread_host_.gpu_thread-&gt;GetTaskRunner();</span><br><span class="line">    ui_runner = thread_host_.ui_thread-&gt;GetTaskRunner();</span><br><span class="line">    io_runner = thread_host_.io_thread-&gt;GetTaskRunner();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// 使用四大TaskRunner创建TaskRunners对象</span></span><br><span class="line">  blink::<span class="hljs-function">TaskRunners <span class="hljs-title">task_runners</span><span class="hljs-params">(thread_label,     <span class="hljs-comment">// label</span></span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">                                  platform_runner,  <span class="hljs-comment">// platform</span></span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">                                  gpu_runner,       <span class="hljs-comment">// gpu</span></span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">                                  ui_runner,        <span class="hljs-comment">// ui</span></span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">                                  io_runner         <span class="hljs-comment">// io</span></span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">  )</span></span>;</span><br><span class="line">  <span class="hljs-comment">// 创建Shell对象</span></span><br><span class="line">  shell_ =</span><br><span class="line">      Shell::Create(task_runners,             <span class="hljs-comment">// task runners</span></span><br><span class="line">                    settings_,                <span class="hljs-comment">// settings</span></span><br><span class="line">                    on_create_platform_view,  <span class="hljs-comment">// platform view create callback</span></span><br><span class="line">                    on_create_rasterizer      <span class="hljs-comment">// rasterizer create callback</span></span><br><span class="line">      );</span><br><span class="line"></span><br><span class="line">  platform_view_ = weak_platform_view;</span><br><span class="line">  FML_DCHECK(platform_view_);</span><br><span class="line"></span><br><span class="line">  is_valid_ = shell_ != <span class="hljs-literal">nullptr</span>;</span><br><span class="line"></span><br><span class="line">  <span class="hljs-keyword">if</span> (is_valid_) &#123;</span><br><span class="line">    task_runners.GetGPUTaskRunner()-&gt;PostTask([]() &#123;</span><br><span class="line">      <span class="hljs-comment">// 在Android中线程优先级-8是最高级别的，所以GPU线程的级别稍微低一点，设为-5</span></span><br><span class="line">      <span class="hljs-comment">// 详情请看 Proces.THREAD_PRIORITY_URGENT_DISPLAY</span></span><br><span class="line">      <span class="hljs-keyword">if</span> (::setpriority(PRIO_PROCESS, gettid(), <span class="hljs-number">-5</span>) != <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        <span class="hljs-comment">// 如果失败，则改成-2</span></span><br><span class="line">        <span class="hljs-keyword">if</span> (::setpriority(PRIO_PROCESS, gettid(), <span class="hljs-number">-2</span>) != <span class="hljs-number">0</span>) &#123;</span><br><span class="line">          FML_LOG(ERROR) &lt;&lt; <span class="hljs-string">"Failed to set GPU task runner priority"</span>;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">    task_runners.GetUITaskRunner()-&gt;PostTask([]() &#123;</span><br><span class="line">      <span class="hljs-comment">// 将UI线程的优先级设为-1</span></span><br><span class="line">      <span class="hljs-keyword">if</span> (::setpriority(PRIO_PROCESS, gettid(), <span class="hljs-number">-1</span>) != <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        FML_LOG(ERROR) &lt;&lt; <span class="hljs-string">"Failed to set UI task runner priority"</span>;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="创建Shell"><a href="#创建Shell" class="headerlink" title="创建Shell"></a>创建Shell</h6><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta"># shell.cc</span></span><br><span class="line"><span class="hljs-built_in">std</span>::<span class="hljs-built_in">unique_ptr</span>&lt;Shell&gt; Shell::Create(</span><br><span class="line">    blink::TaskRunners task_runners,</span><br><span class="line">    blink::Settings settings,</span><br><span class="line">    Shell::CreateCallback&lt;PlatformView&gt; on_create_platform_view,</span><br><span class="line">    Shell::CreateCallback&lt;Rasterizer&gt; on_create_rasterizer) &#123;</span><br><span class="line">  <span class="hljs-comment">// 初始化Skia库、初始化ICU库</span></span><br><span class="line">  PerformInitializationTasks(settings);</span><br><span class="line">  <span class="hljs-comment">// 创建DartVM</span></span><br><span class="line">  <span class="hljs-keyword">auto</span> vm = blink::DartVM::ForProcess(settings);</span><br><span class="line">  FML_CHECK(vm) &lt;&lt; <span class="hljs-string">"Must be able to initialize the VM."</span>;</span><br><span class="line">  <span class="hljs-comment">// 在platform线程中创建Shell</span></span><br><span class="line">  <span class="hljs-keyword">return</span> Shell::Create(<span class="hljs-built_in">std</span>::move(task_runners),             <span class="hljs-comment">//</span></span><br><span class="line">                       <span class="hljs-built_in">std</span>::move(settings),                 <span class="hljs-comment">//</span></span><br><span class="line">                       vm-&gt;GetIsolateSnapshot(),            <span class="hljs-comment">//</span></span><br><span class="line">                       blink::DartSnapshot::Empty(),        <span class="hljs-comment">//</span></span><br><span class="line">                       <span class="hljs-built_in">std</span>::move(on_create_platform_view),  <span class="hljs-comment">//</span></span><br><span class="line">                       <span class="hljs-built_in">std</span>::move(on_create_rasterizer)      <span class="hljs-comment">//</span></span><br><span class="line">  );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta"># shell.cc</span></span><br><span class="line"><span class="hljs-built_in">std</span>::<span class="hljs-built_in">unique_ptr</span>&lt;Shell&gt; Shell::CreateShellOnPlatformThread(</span><br><span class="line">    blink::TaskRunners task_runners,</span><br><span class="line">    blink::Settings settings,</span><br><span class="line">    fml::RefPtr&lt;blink::DartSnapshot&gt; isolate_snapshot,</span><br><span class="line">    fml::RefPtr&lt;blink::DartSnapshot&gt; shared_snapshot,</span><br><span class="line">    Shell::CreateCallback&lt;PlatformView&gt; on_create_platform_view,</span><br><span class="line">    Shell::CreateCallback&lt;Rasterizer&gt; on_create_rasterizer) &#123;</span><br><span class="line">  <span class="hljs-keyword">if</span> (!task_runners.IsValid()) &#123;</span><br><span class="line">    <span class="hljs-keyword">return</span> <span class="hljs-literal">nullptr</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// 创建Shell对象，并安装提供的服务的协议处理</span></span><br><span class="line">  <span class="hljs-comment">// _flutter.screenshot 、 _flutter.screenshotSkp 、_flutter.runInView</span></span><br><span class="line">  <span class="hljs-comment">// _flutter.flushUIThreadTasks 、 _flutter.setAssetBundlePath</span></span><br><span class="line">  <span class="hljs-keyword">auto</span> shell = <span class="hljs-built_in">std</span>::<span class="hljs-built_in">unique_ptr</span>&lt;Shell&gt;(<span class="hljs-keyword">new</span> Shell(task_runners, settings));</span><br><span class="line"></span><br><span class="line">  <span class="hljs-comment">// 在platform线程创建PlatformView</span></span><br><span class="line">  <span class="hljs-comment">// 执行回调，创建PlatFormViewAndroid对象，因为各个平台不同，所以使用回调来创建不同对象</span></span><br><span class="line">  <span class="hljs-keyword">auto</span> platform_view = on_create_platform_view(*shell.get());</span><br><span class="line">  </span><br><span class="line">  <span class="hljs-comment">// 创建一个垂直同步工具，在Android层进行doFrame时，执行动画等操作。</span></span><br><span class="line">  <span class="hljs-comment">// 具体实现是在c++层，调用该工具的AwaitVSync方法，</span></span><br><span class="line">  <span class="hljs-comment">// 会通过jni调用上层VsyncWaiter.asyncWaitForVsync方法，</span></span><br><span class="line">  <span class="hljs-comment">// 该方法会添加一个回调Choreographer.getInstance().postFrameCallback();</span></span><br><span class="line">  <span class="hljs-comment">// 在回调doFrame时，会执行nativeOnVsync方法，执行该同步工具的OnNativeVsync方法</span></span><br><span class="line">  <span class="hljs-keyword">auto</span> vsync_waiter = platform_view-&gt;CreateVSyncWaiter();</span><br><span class="line">  <span class="hljs-keyword">if</span> (!vsync_waiter) &#123;</span><br><span class="line">    <span class="hljs-keyword">return</span> <span class="hljs-literal">nullptr</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="hljs-comment">// 在IO线程创建一个IOManager</span></span><br><span class="line">  <span class="hljs-keyword">auto</span> io_task_runner = shell-&gt;GetTaskRunners().GetIOTaskRunner();</span><br><span class="line">  fml::TaskRunner::RunNowOrPostTask(</span><br><span class="line">      io_task_runner,</span><br><span class="line">      ...</span><br><span class="line">      () &#123;</span><br><span class="line">        io_manager = <span class="hljs-built_in">std</span>::make_unique&lt;IOManager&gt;(</span><br><span class="line">            platform_view-&gt;CreateResourceContext(), io_task_runner);</span><br><span class="line">          ...</span><br><span class="line">      &#125;);</span><br><span class="line"></span><br><span class="line">  <span class="hljs-comment">// 在GPU线程创建一个Rasterizer</span></span><br><span class="line">  fml::TaskRunner::RunNowOrPostTask(</span><br><span class="line">      task_runners.GetGPUTaskRunner(), ...() &#123;</span><br><span class="line">        <span class="hljs-comment">// 执行回调，创建Rasterizer对象</span></span><br><span class="line">        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">auto</span> new_rasterizer = on_create_rasterizer(*shell)) &#123;</span><br><span class="line">          rasterizer = <span class="hljs-built_in">std</span>::move(new_rasterizer);</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;);</span><br><span class="line"></span><br><span class="line">  <span class="hljs-comment">// 在UI线程中创建Engine</span></span><br><span class="line">  fml::TaskRunner::RunNowOrPostTask(</span><br><span class="line">      shell-&gt;GetTaskRunners().GetUITaskRunner(),</span><br><span class="line">      fml::MakeCopyable(...() <span class="hljs-keyword">mutable</span> &#123;</span><br><span class="line">        <span class="hljs-keyword">const</span> <span class="hljs-keyword">auto</span>&amp; task_runners = shell-&gt;GetTaskRunners();</span><br><span class="line"></span><br><span class="line">        <span class="hljs-comment">// 创建animator，并持有上面创建的垂直同步工具</span></span><br><span class="line">        <span class="hljs-keyword">auto</span> animator = <span class="hljs-built_in">std</span>::make_unique&lt;Animator&gt;(*shell, task_runners,</span><br><span class="line">                                                   <span class="hljs-built_in">std</span>::move(vsync_waiter));</span><br><span class="line">		<span class="hljs-comment">// 创建engine</span></span><br><span class="line">        engine = <span class="hljs-built_in">std</span>::make_unique&lt;Engine&gt;(*shell,                       <span class="hljs-comment">//</span></span><br><span class="line">                                          shell-&gt;GetDartVM(),           <span class="hljs-comment">//</span></span><br><span class="line">                                          <span class="hljs-built_in">std</span>::move(isolate_snapshot),  <span class="hljs-comment">//</span></span><br><span class="line">                                          <span class="hljs-built_in">std</span>::move(shared_snapshot),   <span class="hljs-comment">//</span></span><br><span class="line">                                          task_runners,                 <span class="hljs-comment">//</span></span><br><span class="line">                                          shell-&gt;GetSettings(),         <span class="hljs-comment">//</span></span><br><span class="line">                                          <span class="hljs-built_in">std</span>::move(animator),          <span class="hljs-comment">//</span></span><br><span class="line">                                          <span class="hljs-built_in">std</span>::move(resource_context),  <span class="hljs-comment">//</span></span><br><span class="line">                                          <span class="hljs-built_in">std</span>::move(unref_queue)        <span class="hljs-comment">//</span></span><br><span class="line">        );</span><br><span class="line">      &#125;));</span><br><span class="line">    </span><br><span class="line">  <span class="hljs-comment">// 启动</span></span><br><span class="line">  <span class="hljs-keyword">if</span> (!shell-&gt;Setup(<span class="hljs-built_in">std</span>::move(platform_view),  <span class="hljs-comment">//</span></span><br><span class="line">                    <span class="hljs-built_in">std</span>::move(engine),         <span class="hljs-comment">//</span></span><br><span class="line">                    <span class="hljs-built_in">std</span>::move(rasterizer),     <span class="hljs-comment">//</span></span><br><span class="line">                    <span class="hljs-built_in">std</span>::move(io_manager))     <span class="hljs-comment">//</span></span><br><span class="line">  ) &#123;</span><br><span class="line">    <span class="hljs-keyword">return</span> <span class="hljs-literal">nullptr</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="hljs-keyword">return</span> shell;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="创建DartVM"><a href="#创建DartVM" class="headerlink" title="创建DartVM"></a>创建DartVM</h6><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">fml::RefPtr&lt;DartVM&gt; DartVM::ForProcess(</span><br><span class="line">    Settings settings,</span><br><span class="line">    fml::RefPtr&lt;DartSnapshot&gt; vm_snapshot,</span><br><span class="line">    fml::RefPtr&lt;DartSnapshot&gt; isolate_snapshot,</span><br><span class="line">    fml::RefPtr&lt;DartSnapshot&gt; shared_snapshot) &#123;</span><br><span class="line">  <span class="hljs-built_in">std</span>::lock_guard&lt;<span class="hljs-built_in">std</span>::mutex&gt; lock(gVMMutex);</span><br><span class="line">  <span class="hljs-built_in">std</span>::call_once(gVMInitialization, [settings,          <span class="hljs-comment">//</span></span><br><span class="line">                                     vm_snapshot,       <span class="hljs-comment">//</span></span><br><span class="line">                                     isolate_snapshot,  <span class="hljs-comment">//</span></span><br><span class="line">                                     shared_snapshot    <span class="hljs-comment">//</span></span><br><span class="line">  ]() <span class="hljs-keyword">mutable</span> &#123;</span><br><span class="line">    <span class="hljs-keyword">if</span> (!vm_snapshot) &#123;</span><br><span class="line">      <span class="hljs-comment">// 加载vm_snapshot_instr文件和vm_snapshot_data文件，创建DartSnapshot对象</span></span><br><span class="line">      vm_snapshot = DartSnapshot::VMSnapshotFromSettings(settings);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">if</span> (!(vm_snapshot &amp;&amp; vm_snapshot-&gt;IsValid())) &#123;</span><br><span class="line">      FML_LOG(ERROR) &lt;&lt; <span class="hljs-string">"VM snapshot must be valid."</span>;</span><br><span class="line">      <span class="hljs-keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">if</span> (!isolate_snapshot) &#123;</span><br><span class="line">      <span class="hljs-comment">// 加载isolate_snapshot_data和isolate_snapshot_instr,创建DartSnapshot对象</span></span><br><span class="line">      isolate_snapshot = DartSnapshot::IsolateSnapshotFromSettings(settings);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">if</span> (!(isolate_snapshot &amp;&amp; isolate_snapshot-&gt;IsValid())) &#123;</span><br><span class="line">      FML_LOG(ERROR) &lt;&lt; <span class="hljs-string">"Isolate snapshot must be valid."</span>;</span><br><span class="line">      <span class="hljs-keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">if</span> (!shared_snapshot) &#123;</span><br><span class="line">      <span class="hljs-comment">// 使用空文件创建一个DartSnapshot对象</span></span><br><span class="line">      shared_snapshot = DartSnapshot::Empty();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-comment">// 创建DartVM</span></span><br><span class="line">    gVM = fml::MakeRefCounted&lt;DartVM&gt;(settings,                     <span class="hljs-comment">//</span></span><br><span class="line">                                      <span class="hljs-built_in">std</span>::move(vm_snapshot),       <span class="hljs-comment">//</span></span><br><span class="line">                                      <span class="hljs-built_in">std</span>::move(isolate_snapshot),  <span class="hljs-comment">//</span></span><br><span class="line">                                      <span class="hljs-built_in">std</span>::move(shared_snapshot)    <span class="hljs-comment">//</span></span><br><span class="line">    );</span><br><span class="line">  &#125;);</span><br><span class="line">  <span class="hljs-keyword">return</span> gVM;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="创建AndroidSurface"><a href="#创建AndroidSurface" class="headerlink" title="创建AndroidSurface"></a>创建AndroidSurface</h6><p>在创建PatformViewANdroid的时候，会根据use_software_rendering来创建AndroidSurface来处理真正的绘制</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">PlatformViewAndroid::PlatformViewAndroid(</span><br><span class="line">    PlatformView::Delegate&amp; delegate,</span><br><span class="line">    blink::TaskRunners task_runners,</span><br><span class="line">    fml::jni::JavaObjectWeakGlobalRef java_object,</span><br><span class="line">    <span class="hljs-keyword">bool</span> use_software_rendering)</span><br><span class="line">    : PlatformView(delegate, <span class="hljs-built_in">std</span>::move(task_runners)),</span><br><span class="line">      java_object_(java_object),</span><br><span class="line">      android_surface_(AndroidSurface::Create(use_software_rendering)) &#123;</span><br><span class="line">  FML_CHECK(android_surface_)</span><br><span class="line">      &lt;&lt; <span class="hljs-string">"Could not create an OpenGL, Vulkan or Software surface to setup "</span></span><br><span class="line">         <span class="hljs-string">"rendering."</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果use_software_rendering=true，则说明开启软件渲染，则会创建AndroidSurfaceSoftware对象，该对象中使用skia库来绘制。而如果没有开启，则如果系统支持valkan，则就创建AndroidSurfaceVulkan，如果不支持则只能使用AndroidSurfaceGL。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="hljs-built_in">std</span>::<span class="hljs-built_in">unique_ptr</span>&lt;AndroidSurface&gt; AndroidSurface::Create(</span><br><span class="line">    <span class="hljs-keyword">bool</span> use_software_rendering) &#123;</span><br><span class="line">  <span class="hljs-keyword">if</span> (use_software_rendering) &#123;</span><br><span class="line">    <span class="hljs-keyword">auto</span> software_surface = <span class="hljs-built_in">std</span>::make_unique&lt;AndroidSurfaceSoftware&gt;();</span><br><span class="line">    <span class="hljs-keyword">return</span> software_surface-&gt;IsValid() ? <span class="hljs-built_in">std</span>::move(software_surface) : <span class="hljs-literal">nullptr</span>;</span><br><span class="line">  &#125;</span><br><span class="line"><span class="hljs-meta">#<span class="hljs-meta-keyword">if</span> SHELL_ENABLE_VULKAN</span></span><br><span class="line">  <span class="hljs-keyword">auto</span> vulkan_surface = <span class="hljs-built_in">std</span>::make_unique&lt;AndroidSurfaceVulkan&gt;();</span><br><span class="line">  <span class="hljs-keyword">return</span> vulkan_surface-&gt;IsValid() ? <span class="hljs-built_in">std</span>::move(vulkan_surface) : <span class="hljs-literal">nullptr</span>;</span><br><span class="line"><span class="hljs-meta">#<span class="hljs-meta-keyword">else</span>   <span class="hljs-comment">// SHELL_ENABLE_VULKAN</span></span></span><br><span class="line">  <span class="hljs-keyword">auto</span> gl_surface = <span class="hljs-built_in">std</span>::make_unique&lt;AndroidSurfaceGL&gt;();</span><br><span class="line">  <span class="hljs-keyword">return</span> gl_surface-&gt;IsOffscreenContextValid() ? <span class="hljs-built_in">std</span>::move(gl_surface)</span><br><span class="line">                                               : <span class="hljs-literal">nullptr</span>;</span><br><span class="line"><span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span>  <span class="hljs-comment">// SHELL_ENABLE_VULKAN</span></span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="启动Bundle"><a href="#启动Bundle" class="headerlink" title="启动Bundle"></a>启动Bundle</h5><h6 id="nativeRunBundleAndSnapshotFromLibrary"><a href="#nativeRunBundleAndSnapshotFromLibrary" class="headerlink" title="nativeRunBundleAndSnapshotFromLibrary"></a>nativeRunBundleAndSnapshotFromLibrary</h6><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"># platform_view_android_jni.cc</span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">RunBundleAndSnapshotFromLibrary</span><span class="hljs-params">(JNIEnv* env,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">                                            jobject jcaller,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">                                            jlong shell_holder,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">                                            jstring jbundlepath,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">                                            jstring jdefaultPath,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">                                            jstring jEntrypoint,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">                                            jstring jLibraryUrl,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">                                            jobject jAssetManager)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">auto</span> asset_manager = fml::MakeRefCounted&lt;blink::AssetManager&gt;();</span><br><span class="line">  <span class="hljs-comment">// flutter代码目录，默认是flutter_assets</span></span><br><span class="line">  <span class="hljs-keyword">const</span> <span class="hljs-keyword">auto</span> bundlepath = fml::jni::JavaStringToString(env, jbundlepath);</span><br><span class="line">  <span class="hljs-keyword">if</span> (bundlepath.size() &gt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">    <span class="hljs-keyword">const</span> <span class="hljs-keyword">auto</span> file_ext_index = bundlepath.rfind(<span class="hljs-string">"."</span>);</span><br><span class="line">    <span class="hljs-keyword">if</span> (bundlepath.substr(file_ext_index) == <span class="hljs-string">".zip"</span>) &#123;</span><br><span class="line">      <span class="hljs-comment">// 如果路径是个zip文件，创建一个ZipAssetStore对象</span></span><br><span class="line">      asset_manager-&gt;PushBack(</span><br><span class="line">          <span class="hljs-built_in">std</span>::make_unique&lt;blink::ZipAssetStore&gt;(bundlepath));</span><br><span class="line">    &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">      <span class="hljs-comment">// 如果路径是个目录，创建一个DirectoryAssetBundle对象</span></span><br><span class="line">      asset_manager-&gt;PushBack(</span><br><span class="line">          <span class="hljs-built_in">std</span>::make_unique&lt;blink::DirectoryAssetBundle&gt;(fml::OpenDirectory(</span><br><span class="line">              bundlepath.c_str(), <span class="hljs-literal">false</span>, fml::FilePermission::kRead)));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// 从该路径推到出APK的Assets路径</span></span><br><span class="line">    <span class="hljs-keyword">const</span> <span class="hljs-keyword">auto</span> last_slash_index = bundlepath.rfind(<span class="hljs-string">"/"</span>, bundlepath.size());</span><br><span class="line">    <span class="hljs-keyword">if</span> (last_slash_index != <span class="hljs-built_in">std</span>::<span class="hljs-built_in">string</span>::npos) &#123;</span><br><span class="line">      <span class="hljs-keyword">auto</span> apk_asset_dir = bundlepath.substr(</span><br><span class="line">          last_slash_index + <span class="hljs-number">1</span>, bundlepath.size() - last_slash_index);</span><br><span class="line">	  <span class="hljs-comment">// 创建一个APKAssetProvider对象</span></span><br><span class="line">      asset_manager-&gt;PushBack(<span class="hljs-built_in">std</span>::make_unique&lt;blink::APKAssetProvider&gt;(</span><br><span class="line">          env,                       <span class="hljs-comment">// jni environment</span></span><br><span class="line">          jAssetManager,             <span class="hljs-comment">// asset manager</span></span><br><span class="line">          <span class="hljs-built_in">std</span>::move(apk_asset_dir))  <span class="hljs-comment">// apk asset dir</span></span><br><span class="line">      );</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  ...</span><br><span class="line">  <span class="hljs-keyword">auto</span> isolate_configuration = CreateIsolateConfiguration(*asset_manager);</span><br><span class="line">  ...</span><br><span class="line"></span><br><span class="line">  RunConfiguration config(std::move(isolate_configuration),</span><br><span class="line">                          <span class="hljs-built_in">std</span>::move(asset_manager));</span><br><span class="line"></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="hljs-keyword">auto</span> entrypoint = fml::jni::JavaStringToString(env, jEntrypoint);</span><br><span class="line">    <span class="hljs-keyword">auto</span> libraryUrl = fml::jni::JavaStringToString(env, jLibraryUrl);</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> ((entrypoint.size() &gt; <span class="hljs-number">0</span>) &amp;&amp; (libraryUrl.size() &gt; <span class="hljs-number">0</span>)) &#123;</span><br><span class="line">      config.SetEntrypointAndLibrary(<span class="hljs-built_in">std</span>::move(entrypoint),</span><br><span class="line">                                     <span class="hljs-built_in">std</span>::move(libraryUrl));</span><br><span class="line">    &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (entrypoint.size() &gt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">      <span class="hljs-comment">// 设置进入点，默认为main</span></span><br><span class="line">      config.SetEntrypoint(<span class="hljs-built_in">std</span>::move(entrypoint));</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// 启动</span></span><br><span class="line">  ANDROID_SHELL_HOLDER-&gt;Launch(<span class="hljs-built_in">std</span>::move(config));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="Launch"><a href="#Launch" class="headerlink" title="Launch"></a>Launch</h6><p>最终调用dart运行时来加载dart代码，然后通过Tonic库来执行dart代码中的entrypoint方法，也就是main方法</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">void</span> AndroidShellHolder::Launch(RunConfiguration config) &#123;</span><br><span class="line">  shell_-&gt;GetTaskRunners().GetUITaskRunner()-&gt;PostTask(</span><br><span class="line">      fml::MakeCopyable([engine = shell_-&gt;GetEngine(),  <span class="hljs-comment">//</span></span><br><span class="line">                         config = <span class="hljs-built_in">std</span>::move(config)     <span class="hljs-comment">//</span></span><br><span class="line">  ]() <span class="hljs-keyword">mutable</span> &#123;</span><br><span class="line">        <span class="hljs-comment">// 真正是在UI线程中启动</span></span><br><span class="line">        <span class="hljs-keyword">if</span> (!engine || engine-&gt;Run(<span class="hljs-built_in">std</span>::move(config)) ==</span><br><span class="line">                           shell::Engine::RunStatus::Failure) &#123;</span><br><span class="line">        &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="main方法执行"><a href="#main方法执行" class="headerlink" title="main方法执行"></a>main方法执行</h6><p>最终在main方法中通过runApp来进行视图绘制显示。</p>
+
+        </div>
+        
+        <ul class="post-copyright">
+            <li><strong>本文标题：</strong><a href="https://witgao.com/Flutter深入之flutter初始化/">Flutter深入之flutter初始化</a></li>
+            <li><strong>本文作者：</strong><a href="https://witgao.com">zhenyu</a></li>
+            <li><strong>本文链接：</strong><a href="https://witgao.com/Flutter深入之flutter初始化/">https://witgao.com/Flutter深入之flutter初始化/</a></li>
+            <li><strong>发布时间：</strong>2018-11-04</li>
+            <li><strong>版权声明：</strong>本博客所有文章除特别声明外，均采用 <a
+                    href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="external nofollow"
+                    target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明出处！
+            </li>
+        </ul>
+        
+        
+        
+        
+    </div>
+</div>
+
+
+
+
+
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        <div class="level-start">
+            <a class="level level-item has-link-grey  article-nav-prev"
+                href="/Flutter深入之flutter-run命令究竟做了什么/">
+                <i class="level-item fas fa-chevron-left"></i>
+                <span class="level-item">Flutter深入之flutter run命令究竟做了什么?</span>
+            </a>
+        </div>
+        
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next"
+                href="/Android-ReactNative渲染流程/">
+                <span class="level-item">Android-ReactNative渲染流程</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+    </div>
+</div>
+
+
+</div>
+                
+
+
+
+
+<div
+    class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left ">
+    
+    
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered" style="flex-shrink: 1">
+                <div>
+                    
+                    <figure class="image is-128x128 has-mb-6">
+                        <img class="" src="/images/avatar1.png" alt="zhenyu">
+                    </figure>
+                    
+                    <p class="is-size-4 is-block">
+                        zhenyu
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        富贵山庄无富贵，只留欢乐在此间
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>杭州</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        文章
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        38
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        分类
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        9
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        标签
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        0
+                    </p>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="level">
+            <a class="level-item button is-link is-rounded" href="https://github.com/witgao" target="_blank">
+                关注我</a>
+        </div>
+        
+        
+        
+    </div>
+</div>
+    
+    
+<div class="card widget column-left is-sticky" id="toc">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                目录
+            </h3>
+            <ul class="menu-list"><li>
+        <a class="is-flex" href="#开篇">
+        <span class="has-mr-6">1</span>
+        <span>开篇</span>
+        </a></li><li>
+        <a class="is-flex" href="#FlutterApplication">
+        <span class="has-mr-6">2</span>
+        <span>FlutterApplication</span>
+        </a></li><li>
+        <a class="is-flex" href="#FlutterActivity">
+        <span class="has-mr-6">3</span>
+        <span>FlutterActivity</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#nativeInit">
+        <span class="has-mr-6">3.1</span>
+        <span>nativeInit</span>
+        </a></li><li>
+        <a class="is-flex" href="#创建FlutterView">
+        <span class="has-mr-6">3.2</span>
+        <span>创建FlutterView</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#nativeSurfaceCreated">
+        <span class="has-mr-6">3.2.1</span>
+        <span>nativeSurfaceCreated</span>
+        </a></li><li>
+        <a class="is-flex" href="#nativeSurfaceChanged">
+        <span class="has-mr-6">3.2.2</span>
+        <span>nativeSurfaceChanged</span>
+        </a></li><li>
+        <a class="is-flex" href="#nativeSurfaceDestroyed">
+        <span class="has-mr-6">3.2.3</span>
+        <span>nativeSurfaceDestroyed</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#创建FlutterNativeView">
+        <span class="has-mr-6">3.3</span>
+        <span>创建FlutterNativeView</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#nativeAttacch">
+        <span class="has-mr-6">3.3.1</span>
+        <span>nativeAttacch</span>
+        </a></li><li>
+        <a class="is-flex" href="#创建AndroidShellHolder">
+        <span class="has-mr-6">3.3.2</span>
+        <span>创建AndroidShellHolder</span>
+        </a></li><li>
+        <a class="is-flex" href="#创建Shell">
+        <span class="has-mr-6">3.3.3</span>
+        <span>创建Shell</span>
+        </a></li><li>
+        <a class="is-flex" href="#创建DartVM">
+        <span class="has-mr-6">3.3.4</span>
+        <span>创建DartVM</span>
+        </a></li><li>
+        <a class="is-flex" href="#创建AndroidSurface">
+        <span class="has-mr-6">3.3.5</span>
+        <span>创建AndroidSurface</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#启动Bundle">
+        <span class="has-mr-6">3.4</span>
+        <span>启动Bundle</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#nativeRunBundleAndSnapshotFromLibrary">
+        <span class="has-mr-6">3.4.1</span>
+        <span>nativeRunBundleAndSnapshotFromLibrary</span>
+        </a></li><li>
+        <a class="is-flex" href="#Launch">
+        <span class="has-mr-6">3.4.2</span>
+        <span>Launch</span>
+        </a></li><li>
+        <a class="is-flex" href="#main方法执行">
+        <span class="has-mr-6">3.4.3</span>
+        <span>main方法执行</span>
+        </a></li></ul></li></ul></li></ul>
+        </div>
+    </div>
+</div>
+    
+    
+    <div class="column-right-shadow is-hidden-widescreen ">
+        
+    </div>
+    
+</div>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <!-- <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="/images/logo2.png" alt="Flutter深入之flutter初始化" height="28">
+                
+                </a> -->
+                <p class="is-size-7">
+                    &copy; 2020 zhenyu&nbsp;
+                    Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a
+                        href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank">Icarus</a>
+                    
+                </p>
+            </div>
+            <div class="level-end">
+                
+            </div>
+        </div>
+    </div>
+</footer>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("zh-CN");</script>
+
+<script>
+var IcarusThemeSettings = {
+    article: {
+        highlight: {
+            clipboard: true,
+            fold: 'unfolded'
+        }
+    }
+};
+</script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+
+
+
+    
+    
+<script src="/js/animation.js"></script>
+
+    
+    
+<script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+<script src="/js/gallery.js" defer></script>
+
+    
+    
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    MathJax.Hub.Config({
+        'HTML-CSS': {
+            matchFontHeight: false
+        },
+        SVG: {
+            matchFontHeight: false
+        },
+        CommonHTML: {
+            matchFontHeight: false
+        },
+        tex2jax: {
+            inlineMath: [
+                ['$','$'],
+                ['\\(','\\)']
+            ]
+        }
+    });
+});
+</script>
+    
+    
+<a id="back-to-top" title="回到顶端" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="想要查找什么..." />
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: '文章',
+                PAGES: '页面',
+                CATEGORIES: '分类',
+                TAGS: '标签',
+                UNTITLED: '(无标题)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+</body>
+
+</html>

@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html  lang="zh">
+
+<head>
+    <meta charset="utf-8" />
+
+<meta name="generator" content="Hexo 3.9.0" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<title>音视频开发之OpenGL-ES入门 - 富贵山庄</title>
+
+
+    <meta name="description" content="名词解释OpenGL通俗来讲，OpenGL是一个图形库，提供了一系列操作图形图像的API。因为OpenGL只是一个规范，具体的实现一般是由显卡提供。类似的图形库还有Windows平台的DirectX。 OpenGL-ESOpenGL-ES是专为嵌入式设备准备的一个OpenGL的裁剪版（去除了一些复杂的图元）。OpenGL-ES支持Android、iOS等平台，并且它也是WebGL的基础。 EGLE">
+<meta property="og:type" content="article">
+<meta property="og:title" content="音视频开发之OpenGL-ES入门">
+<meta property="og:url" content="https://witgao.com/音视频开发之OpenGL-ES入门/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:description" content="名词解释OpenGL通俗来讲，OpenGL是一个图形库，提供了一系列操作图形图像的API。因为OpenGL只是一个规范，具体的实现一般是由显卡提供。类似的图形库还有Windows平台的DirectX。 OpenGL-ESOpenGL-ES是专为嵌入式设备准备的一个OpenGL的裁剪版（去除了一些复杂的图元）。OpenGL-ES支持Android、iOS等平台，并且它也是WebGL的基础。 EGLE">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://witgao.com/images/1.jpeg">
+<meta property="og:updated_time" content="2020-07-13T13:40:35.322Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="音视频开发之OpenGL-ES入门">
+<meta name="twitter:description" content="名词解释OpenGL通俗来讲，OpenGL是一个图形库，提供了一系列操作图形图像的API。因为OpenGL只是一个规范，具体的实现一般是由显卡提供。类似的图形库还有Windows平台的DirectX。 OpenGL-ESOpenGL-ES是专为嵌入式设备准备的一个OpenGL的裁剪版（去除了一些复杂的图元）。OpenGL-ES支持Android、iOS等平台，并且它也是WebGL的基础。 EGLE">
+<meta name="twitter:image" content="https://witgao.com/images/1.jpeg">
+
+
+
+
+
+
+
+<link rel="icon" href="/images/favicon1.svg">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/default.css">
+
+
+    
+    
+<style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+    
+    
+    
+    
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+    
+    
+    
+    
+    
+    
+    
+    <link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+    
+    
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body class="is-3-column">
+    <nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="/images/logo2.png" alt="音视频开发之OpenGL-ES入门" height="28">
+            
+            </a>
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item"
+                href="/">燕子坞</a>
+                
+                <a class="navbar-item"
+                href="/archives">听香水榭</a>
+                
+                <a class="navbar-item"
+                href="/categories">还施水阁</a>
+                
+                <a class="navbar-item"
+                href="/about">思过崖</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    <a class="navbar-item" target="_blank" title="Download on GitHub" href="https://github.com/witgao/blog">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                <a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;">
+                    <i class="fas fa-list-ul"></i>
+                </a>
+                
+                
+                <a class="navbar-item search" title="搜索" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-9-widescreen has-order-2 column-main">
+<div class="card">
+    
+    <div class="card-image">
+        <span  class="image is-7by1">
+        <img class="thumbnail" src="/images/1.jpeg" alt="音视频开发之OpenGL-ES入门">
+        </span>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-07-01T16:00:00.000Z">2020-07-02</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    21 分钟 读完 (大约 3186 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            音视频开发之OpenGL-ES入门
+            
+        </h1>
+        <div class="content">
+            <h4 id="名词解释"><a href="#名词解释" class="headerlink" title="名词解释"></a>名词解释</h4><h5 id="OpenGL"><a href="#OpenGL" class="headerlink" title="OpenGL"></a>OpenGL</h5><p>通俗来讲，OpenGL是一个图形库，提供了一系列操作图形图像的API。因为OpenGL只是一个规范，具体的实现一般是由显卡提供。类似的图形库还有Windows平台的DirectX。</p>
+<h5 id="OpenGL-ES"><a href="#OpenGL-ES" class="headerlink" title="OpenGL-ES"></a>OpenGL-ES</h5><p>OpenGL-ES是专为嵌入式设备准备的一个OpenGL的裁剪版（去除了一些复杂的图元）。OpenGL-ES支持Android、iOS等平台，并且它也是WebGL的基础。</p>
+<h5 id="EGL"><a href="#EGL" class="headerlink" title="EGL"></a>EGL</h5><p>EGL是OpenGL-ES与本地窗口系统之间的一个中间层API，一般由系统实现。EGL作为OpenGL-ES与设备之间的桥梁，将OpenGL-ES绘制在设备上。</p>
+<h5 id="WebGL"><a href="#WebGL" class="headerlink" title="WebGL"></a>WebGL</h5><p>WebGL是OpenGL-ES在浏览器上的实现，WebGL1.0基于OpenGL-ES2.0实现，WebGL2.0基于OpenGl-ES3.0实现。</p>
+<h4 id="图形渲染管线"><a href="#图形渲染管线" class="headerlink" title="图形渲染管线"></a>图形渲染管线</h4><p>图形渲染管线也叫做渲染流水线，指的是将输入的原始图形数据经过渲染管线处理，输出一帧想要的图像的过程。</p>
+<p>在OpenGL-ES中，任何事物都在3D空间中，而屏幕和窗口却都是2D的。所以图形渲染管线主要是在将输入的3D坐标转换成2D坐标，再讲2D坐标转换成实际有颜色的像素。(将输入的3D坐标画在3D坐标系中，然后根据视锥范围截取一个2D平面，将截取的平面转换为平面坐标显示)</p>
+<blockquote>
+<p>2D坐标精确的表示一个点在2D空间的位置；而像素是这个点的近似值，像素的显示收到屏幕分辨率的限制</p>
+</blockquote>
+<blockquote>
+<p>与CPU不同，GPU适合处理的问题都有这样的特征，一个问题可以分解为多个相同的小问题，每个问题之间相互独立不影响，所以GPU拥有大量的处理单元，处理单元数量越多，性能也就越好。而每个单元都可以并行处理，所以GPU的并行能力非常强。</p>
+</blockquote>
+<h5 id="可编程的渲染管线"><a href="#可编程的渲染管线" class="headerlink" title="可编程的渲染管线"></a>可编程的渲染管线</h5><p>自OpenGL-ES 2.0开始，采用的都是可编程的渲染管线，也就是开发者可以自定义部分流水线中的着色器，使得可以更细致的控制图形渲染管线。</p>
+<p>着色器是运行在GPU上的小程序，这些小程序在图形渲染管线的某个特定部分运行，着色器是一个非常独立的程序，是一种把输入转化为输出的程序，着色器与着色器之间无法通信。</p>
+<p>开发者可编程的阶段有两个，一个是顶点着色器，一个是片段着色器。</p>
+<p><img src="/images/opengl-es-pipeline.png" alt="OpenGL-ES渲染管线"><br> <a id="more"></a></p>
+<h5 id="顶点着色器"><a href="#顶点着色器" class="headerlink" title="顶点着色器"></a>顶点着色器</h5><p>着色器可以看成是一个纯函数，输入的所有顶点，都会依次执行该函数，在该函数中对输入的顶点进行处理，然后输出新的顶点位置。</p>
+<h5 id="图元装配"><a href="#图元装配" class="headerlink" title="图元装配"></a>图元装配</h5><p>所谓图元就是几何形状，OpenGL-ES支持的图元有三种：点、线、三角形。而图元装配就是根据定义的图元类型将顶点着色器输出的顶点渲染成单独的图元，然后会图元进行裁剪、透视分割、视口变换。</p>
+<p>裁剪：图元根据视锥体进行裁剪。根据视锥体的六个平面进行裁剪，超出视锥体之外的图元都将被裁剪抛弃（并不会真正裁剪，只是标记，x、y、z的绝对值大于1则表示不在视锥体内，会被裁剪）。裁剪后得到的坐标体系为(x，y，z，w)，其中w用来在透视分割是处理远近效果。</p>
+<p><img src="/images/webgl_perspective_projection.png" alt="透视投影-视锥体"></p>
+<p><img src="/images/webgl_orthogonal_projection.png" alt="正交投影-视锥体"></p>
+<p>透视分割：将裁剪后的坐标转换为规范化设备坐标。在该转换中会使用w坐标来进行处理，正交投影中w为1，而透视投影中w会根据远近值来生成，越远值越大。透视分割就是讲x、y、z坐标分别除以w，得到新的x、y、z坐标，由于坐标值都是小于w的，所以最终得到的值都是位于[-1，1]之间，这也就是所谓的规范化设备坐标。而对于透视投影来说，w的值越远越大，所以转换后，越远的坐标，转换后值越小，就会形成近大远小的效果。</p>
+<p>视口变换：将设备坐标转换为窗口坐标，每个坐标都关联屏幕上的一个点。</p>
+<p>光栅化</p>
+<p>为装配后的图元生成对应的片段，每个片段代表着一个指定的像素位置。这些片段就是片段着色器中使用的片段。</p>
+<h5 id="片段着色器"><a href="#片段着色器" class="headerlink" title="片段着色器"></a>片段着色器</h5><p>定义每个像素应该输出什么颜色。在片段着色器中可以接收到顶点着色器输出的变量。</p>
+<h5 id="逐片段"><a href="#逐片段" class="headerlink" title="逐片段"></a>逐片段</h5><p>片段着色器输出每个片段的颜色和深度，在最终加入到缓冲区前需要进过一系列测试和操作，这些操作称为逐片段。包括裁剪测试、模板测试、深度测试、混合、抖动等。最终通过的片段都会被加入到帧缓冲区中。</p>
+<h5 id="帧缓冲区"><a href="#帧缓冲区" class="headerlink" title="帧缓冲区"></a>帧缓冲区</h5><p>缓冲区是在EGL创建surface的时候生成的，缓冲区包含颜色缓冲区和深度缓冲区等。</p>
+<h4 id="GLSL"><a href="#GLSL" class="headerlink" title="GLSL"></a>GLSL</h4><p>着色器编写语言，类C风格。</p>
+<h5 id="变量类型"><a href="#变量类型" class="headerlink" title="变量类型"></a>变量类型</h5><figure class="highlight plain hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">OpenGL-ES 2.0 中变量类型为</span><br><span class="line">	uniform 可以在着色器中共享的变量，并且在着色器中只能读不能修改。</span><br><span class="line">	attribute 属性（数据可以放入到缓冲区中）顶点着色器中使用，类似in。</span><br><span class="line">	varying 顶点着色器和片段着色器中通信，在顶点着色器中的varying类似out,在片段着色器中的varying类似in。</span><br><span class="line">	</span><br><span class="line">OpenGL-ES 3.0 中变量类型</span><br><span class="line">	uniform</span><br><span class="line">	in</span><br><span class="line">	out</span><br></pre></td></tr></table></figure>
+<h5 id="内建变量"><a href="#内建变量" class="headerlink" title="内建变量"></a>内建变量</h5><figure class="highlight plain hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">顶点着色器：</span><br><span class="line">    - gl_VertexID: 输入变量，用于保存顶点的整数索引。</span><br><span class="line">    - gl_InstanceID: 输入变量，用于保存实例化绘图调用中图元的实例编号。</span><br><span class="line">    - gl_Position: 输出变量，输出顶点位置的裁剪坐标。该值在裁剪和视口阶段用于执行相应的图元裁剪以及从裁剪坐标到屏幕坐标的顶点位置转换。</span><br><span class="line">    - gl_PointSize: 输出变量，输出点精灵尺寸。</span><br><span class="line">    - gl_FrontFacing: 不能直接写入，根据顶点位置和图元类型生成。</span><br><span class="line">    - gl_DepthRange: 窗口坐标的深度范围。</span><br><span class="line">            该变量类型为struct gl_DepthRangeParameters&#123;</span><br><span class="line">                highp float near;</span><br><span class="line">                highp float far;</span><br><span class="line">                highp float diff;</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">片段着色器：</span><br><span class="line">    - gl_FragCoord: 只读变量，保存片段的窗口相对坐标。</span><br><span class="line">    - gl_FrontFacing: 只读变量，片段是正面图元的一部分时为true，否则为false。</span><br><span class="line">    - gl_PointCoord: 只读变量，保存点精灵的纹理坐标，该坐标在点光栅化期间自动生成。</span><br><span class="line">    - gl_FragDepth：输出变量，用于覆盖片段的固定功能深度值。</span><br><span class="line">    - gl_FragColor：输出变量，输出该片段的颜色。(该变量在3.0中已删除，需要自行定义)</span><br><span class="line">    </span><br><span class="line">    - texture2D(sampler2D, vec2 coord)：从标准纹理中获取纹理数据。</span><br><span class="line">    - textureCube(samplerCube, vec3 coord：从立方体贴图纹理中获取纹理数据。</span><br><span class="line">    (3.0中上面两个函数被合成了一个函数)</span><br><span class="line">    - texture(sampler,coord): 内建函数，从纹理贴图中读取，sampler是绑定到纹理单元的采样器，制定纹理为读取来源。coord是从纹理贴图中读取的2d纹理坐标。该函数返回一个代表从纹理贴图中读取颜色的vec4，默认格式为RGBA。</span><br></pre></td></tr></table></figure>
+<h5 id="精度限定符"><a href="#精度限定符" class="headerlink" title="精度限定符"></a>精度限定符</h5><figure class="highlight plain hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">顶点着色器有默认的精度，是highp，但是片段着色器没有默认的精度。</span><br><span class="line"> - highp</span><br><span class="line"> - mediump</span><br><span class="line"> - lowp</span><br></pre></td></tr></table></figure>
+<p>顶点着色器样例</p>
+<figure class="highlight plain hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">// 3.0版本 需要特别声明版本信息</span><br><span class="line">#version 300 es</span><br><span class="line">// 定义两个属性，通过location指定该属性的索引值</span><br><span class="line">layout(location = 0) in vec4 vPosition;</span><br><span class="line">layout(location = 1) in vec4 aTextureCoord;</span><br><span class="line">// 定义一个全局常量</span><br><span class="line">uniform mat4 uTextureMatrix;</span><br><span class="line">// 输出一个属性给片段着色器</span><br><span class="line">out vec2 yuvTexCoords;</span><br><span class="line">void main() &#123;</span><br><span class="line">		// 输出顶点坐标</span><br><span class="line">    gl_Position = uTextureMatrix * vPosition;</span><br><span class="line">    yuvTexCoords = aTextureCoord;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 2.0版本</span><br><span class="line">attribute vec4 vPosition;</span><br><span class="line">attribute vec2 aTextureCoord;</span><br><span class="line">uniform mat4 uTextureMatrix;</span><br><span class="line">varying vec2 yuvTexCoords;</span><br><span class="line">void main() &#123;</span><br><span class="line">    gl_Position = uTextureMatrix * vPosition;</span><br><span class="line">    yuvTexCoords =  aTextureCoord;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="片段着色器样例"><a href="#片段着色器样例" class="headerlink" title="片段着色器样例"></a>片段着色器样例</h5><figure class="highlight plain hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">// 3.0版本</span><br><span class="line">#version 300 es</span><br><span class="line">#extension GL_OES_EGL_image_external_essl3 : require</span><br><span class="line">precision mediump float;</span><br><span class="line">uniform samplerExternalOES yuvTexSampler;</span><br><span class="line">in vec2 yuvTexCoords;</span><br><span class="line">out vec4 fragColor;</span><br><span class="line">void main() &#123;</span><br><span class="line">    fragColor = texture(yuvTexSampler,yuvTexCoords);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 2.0版本</span><br><span class="line">precision mediump float;</span><br><span class="line">uniform sampler2D yuvTexSampler;</span><br><span class="line">varying vec2 yuvTexCoords;</span><br><span class="line"></span><br><span class="line">void main() &#123;</span><br><span class="line">    gl_FragColor = texture2D(yuvTexSampler,yuvTexCoords);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="EGL-1"><a href="#EGL-1" class="headerlink" title="EGL"></a>EGL</h4><p>通过Surface对象创建一个EGLSurface，将其连接到Surface的BufferQueue上，EGLSurface将会作为一个生产方，会将OpenGL-ES生产的缓冲区加入到该BufferQueue中，然后由该Surface的消费方进行处理。</p>
+<p>Surface是一个生产方，EGLSurface也是一个独立的生产方。</p>
+<p>一个Surface一次只能和一个EGLSurface进行连接，可以通过断开，然后重新连接另一个EGLSurface。</p>
+<h5 id="eglGetDisplay"><a href="#eglGetDisplay" class="headerlink" title="eglGetDisplay"></a>eglGetDisplay</h5><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 获取当前设备中默认屏幕的handle，display对象可以认为就是一块物理的屏幕，如果没有对应的display，则返回EGL_NO_DISPLAY。</span></span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">if</span> ((display = eglGetDisplay(EGL_DEFAULT_DISPLAY)) == EGL_NO_DISPLAY) &#123;</span><br><span class="line">    LOGE(<span class="hljs-string">"witgao"</span>, <span class="hljs-string">"eglGetDisplay"</span>);</span><br><span class="line">    <span class="hljs-keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="eglInitialize"><a href="#eglInitialize" class="headerlink" title="eglInitialize"></a>eglInitialize</h5><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 针对获取的屏幕对egl进行初始化（display，返回的主版本号,返回的次版本号）</span></span><br><span class="line">EGLint major, minor;</span><br><span class="line"><span class="hljs-keyword">if</span> (!eglInitialize(display, &amp;major, &amp;minor) || major == <span class="hljs-literal">NULL</span> || minor == <span class="hljs-literal">NULL</span>) &#123;</span><br><span class="line">	LOGE(<span class="hljs-string">"witgao"</span>, <span class="hljs-string">"eglInitialize"</span>);</span><br><span class="line">	<span class="hljs-keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="eglChooseConfig"><a href="#eglChooseConfig" class="headerlink" title="eglChooseConfig"></a>eglChooseConfig</h5><p> surface类型有三种，window_surface、pbuffer_surface、pixmap_surface，只有window_surface和window有关联，可以在window上显示。</p>
+<p>绘制模式有两种，back buffer、single buffer，window_surface使用的是back buffer，back buffer是一块GPU中的buffer，可以通过EGL显示在屏幕上；而single buffer 是保存在内存中的位图，不支持显示在屏幕上。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">const</span> EGLint attribs[] = &#123;</span><br><span class="line">     <span class="hljs-comment">// 设置surface类型</span></span><br><span class="line">    EGL_SURFACE_TYPE, EGL_WINDOW_BIT,</span><br><span class="line">    <span class="hljs-comment">// 指定opengl-es版本为2.0</span></span><br><span class="line">    EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,</span><br><span class="line">    EGL_BLUE_SIZE, <span class="hljs-number">8</span>,</span><br><span class="line">    EGL_GREEN_SIZE, <span class="hljs-number">8</span>,</span><br><span class="line">    EGL_RED_SIZE, <span class="hljs-number">8</span>,</span><br><span class="line">    EGL_NONE</span><br><span class="line">&#125;;</span><br><span class="line">EGLConfig config;</span><br><span class="line">EGLint numConfigs;</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">// 获取设备中支持指定属性的配置集合（display，指定的属性，输出的配置，输出配置的个数，所有支持指定属性的配置的个数）</span></span><br><span class="line"><span class="hljs-keyword">if</span> (!eglChooseConfig(display, attribs, &amp;config, <span class="hljs-number">1</span>, &amp;numConfigs)) &#123;</span><br><span class="line">     LOGE(<span class="hljs-string">"witgao"</span>, <span class="hljs-string">"eglChooseConfig"</span>);</span><br><span class="line">     <span class="hljs-keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="eglCreateWindowSurface"><a href="#eglCreateWindowSurface" class="headerlink" title="eglCreateWindowSurface"></a>eglCreateWindowSurface</h5><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 创建一个提供给opengl-es绘制的surface（display，配置，原生window，指定属性）</span></span><br><span class="line"><span class="hljs-keyword">if</span> (!(eglSurface = eglCreateWindowSurface(display, config, aNativeWindow, <span class="hljs-number">0</span>))) &#123;</span><br><span class="line">    LOGE(<span class="hljs-string">"witgao"</span>, <span class="hljs-string">"eglCreateWindowSurface"</span>);</span><br><span class="line">    <span class="hljs-keyword">return</span>;</span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">// android中创建NativeWindow</span></span><br><span class="line">ANativeWindow *pNativeWindow = ANativeWindow_fromSurface(jenv, surface);</span><br></pre></td></tr></table></figure>
+<h5 id="eglCreateContext"><a href="#eglCreateContext" class="headerlink" title="eglCreateContext"></a>eglCreateContext</h5><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">const</span> EGLint context_attribs[] = &#123;</span><br><span class="line">    <span class="hljs-comment">// 设置context针对的opengl-es的版本，（EGL_NONE设置的是默认值，为1）</span></span><br><span class="line">    <span class="hljs-comment">// 此处的版本需要和上面的EGL_RENDERABLE_TYPE 对应</span></span><br><span class="line">    EGL_CONTEXT_CLIENT_VERSION, <span class="hljs-number">2</span>, EGL_NONE</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">// 创建context，在context中保存了opengl-es的状态信息 （display，配置，共享context的handle 一般设为null，属性）</span></span><br><span class="line"><span class="hljs-comment">// 一个display可以创建多个context</span></span><br><span class="line"><span class="hljs-keyword">if</span> (!(context = eglCreateContext(display, config, <span class="hljs-number">0</span>, context_attribs))) &#123;</span><br><span class="line">     LOGE(<span class="hljs-string">"witgao"</span>, <span class="hljs-string">"eglCreateContext"</span>);</span><br><span class="line">     <span class="hljs-keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="eglMakeCurrent"><a href="#eglMakeCurrent" class="headerlink" title="eglMakeCurrent"></a>eglMakeCurrent</h5><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 将上面创建的context绑定到当前线程上，并将context与surface进行关联。当makeCurrent执行后，就可以调用opengl-es的api对context中的状态集进行设定，</span></span><br><span class="line"><span class="hljs-comment">// 然后进而向surface中绘制内容，再把surface中的内容读取出来。</span></span><br><span class="line"><span class="hljs-comment">// 一个线程中enable状态的context只能有一个，如果当前线程已经有了一个enable状态的context，那么会先执行其flush操作，将没有执行完成的命令全部执行完成，然后将其改为disable状态，将新传入的context改为enable状态。</span></span><br><span class="line"><span class="hljs-comment">// 如果想要释放当前的context,也就是将当前的context disable,那么将第二个和第三个参数设置为 EGL_NO_SURFACE,第四个参数设置为 EGL_NO_CONTEXT即可。</span></span><br><span class="line"><span class="hljs-comment">// context enable后，视口大小和裁剪大小都会被设置为surface的尺寸</span></span><br><span class="line"><span class="hljs-keyword">if</span> (!eglMakeCurrent(display, eglSurface, eglSurface, context)) &#123;</span><br><span class="line">     LOGE(<span class="hljs-string">"witgao"</span>, <span class="hljs-string">"eglMakeCurrent"</span>);</span><br><span class="line">     <span class="hljs-keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="eglSwapBuffers"><a href="#eglSwapBuffers" class="headerlink" title="eglSwapBuffers"></a>eglSwapBuffers</h5><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 当opengl-es将内容绘制完成，调用该方法将该缓冲区加入到Surface的BufferQueue中</span></span><br><span class="line"><span class="hljs-keyword">if</span> (!eglSwapBuffers(display, eglSurface)) &#123;</span><br><span class="line">     LOGE(<span class="hljs-string">"witgao"</span>, <span class="hljs-string">"eglSwapBuffers"</span>);</span><br><span class="line">     <span class="hljs-keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+        </div>
+        
+        <ul class="post-copyright">
+            <li><strong>本文标题：</strong><a href="https://witgao.com/音视频开发之OpenGL-ES入门/">音视频开发之OpenGL-ES入门</a></li>
+            <li><strong>本文作者：</strong><a href="https://witgao.com">zhenyu</a></li>
+            <li><strong>本文链接：</strong><a href="https://witgao.com/音视频开发之OpenGL-ES入门/">https://witgao.com/音视频开发之OpenGL-ES入门/</a></li>
+            <li><strong>发布时间：</strong>2020-07-02</li>
+            <li><strong>版权声明：</strong>本博客所有文章除特别声明外，均采用 <a
+                    href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="external nofollow"
+                    target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明出处！
+            </li>
+        </ul>
+        
+        
+        
+        
+    </div>
+</div>
+
+
+
+
+
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        <div class="level-start">
+            <a class="level level-item has-link-grey  article-nav-prev"
+                href="/音视频开发之FFmpeg录制音频/">
+                <i class="level-item fas fa-chevron-left"></i>
+                <span class="level-item">音视频开发之FFmpeg录制音频</span>
+            </a>
+        </div>
+        
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next"
+                href="/音视频开发之Android硬件编解码/">
+                <span class="level-item">音视频开发之Android硬件编解码</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+    </div>
+</div>
+
+
+</div>
+                
+
+
+
+
+<div
+    class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left ">
+    
+    
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered" style="flex-shrink: 1">
+                <div>
+                    
+                    <figure class="image is-128x128 has-mb-6">
+                        <img class="" src="/images/avatar1.png" alt="zhenyu">
+                    </figure>
+                    
+                    <p class="is-size-4 is-block">
+                        zhenyu
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        富贵山庄无富贵，只留欢乐在此间
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>杭州</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        文章
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        38
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        分类
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        9
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        标签
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        0
+                    </p>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="level">
+            <a class="level-item button is-link is-rounded" href="https://github.com/witgao" target="_blank">
+                关注我</a>
+        </div>
+        
+        
+        
+    </div>
+</div>
+    
+    
+<div class="card widget column-left is-sticky" id="toc">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                目录
+            </h3>
+            <ul class="menu-list"><li>
+        <a class="is-flex" href="#名词解释">
+        <span class="has-mr-6">1</span>
+        <span>名词解释</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#OpenGL">
+        <span class="has-mr-6">1.1</span>
+        <span>OpenGL</span>
+        </a></li><li>
+        <a class="is-flex" href="#OpenGL-ES">
+        <span class="has-mr-6">1.2</span>
+        <span>OpenGL-ES</span>
+        </a></li><li>
+        <a class="is-flex" href="#EGL">
+        <span class="has-mr-6">1.3</span>
+        <span>EGL</span>
+        </a></li><li>
+        <a class="is-flex" href="#WebGL">
+        <span class="has-mr-6">1.4</span>
+        <span>WebGL</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#图形渲染管线">
+        <span class="has-mr-6">2</span>
+        <span>图形渲染管线</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#可编程的渲染管线">
+        <span class="has-mr-6">2.1</span>
+        <span>可编程的渲染管线</span>
+        </a></li><li>
+        <a class="is-flex" href="#顶点着色器">
+        <span class="has-mr-6">2.2</span>
+        <span>顶点着色器</span>
+        </a></li><li>
+        <a class="is-flex" href="#图元装配">
+        <span class="has-mr-6">2.3</span>
+        <span>图元装配</span>
+        </a></li><li>
+        <a class="is-flex" href="#片段着色器">
+        <span class="has-mr-6">2.4</span>
+        <span>片段着色器</span>
+        </a></li><li>
+        <a class="is-flex" href="#逐片段">
+        <span class="has-mr-6">2.5</span>
+        <span>逐片段</span>
+        </a></li><li>
+        <a class="is-flex" href="#帧缓冲区">
+        <span class="has-mr-6">2.6</span>
+        <span>帧缓冲区</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#GLSL">
+        <span class="has-mr-6">3</span>
+        <span>GLSL</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#变量类型">
+        <span class="has-mr-6">3.1</span>
+        <span>变量类型</span>
+        </a></li><li>
+        <a class="is-flex" href="#内建变量">
+        <span class="has-mr-6">3.2</span>
+        <span>内建变量</span>
+        </a></li><li>
+        <a class="is-flex" href="#精度限定符">
+        <span class="has-mr-6">3.3</span>
+        <span>精度限定符</span>
+        </a></li><li>
+        <a class="is-flex" href="#片段着色器样例">
+        <span class="has-mr-6">3.4</span>
+        <span>片段着色器样例</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#EGL-1">
+        <span class="has-mr-6">4</span>
+        <span>EGL</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#eglGetDisplay">
+        <span class="has-mr-6">4.1</span>
+        <span>eglGetDisplay</span>
+        </a></li><li>
+        <a class="is-flex" href="#eglInitialize">
+        <span class="has-mr-6">4.2</span>
+        <span>eglInitialize</span>
+        </a></li><li>
+        <a class="is-flex" href="#eglChooseConfig">
+        <span class="has-mr-6">4.3</span>
+        <span>eglChooseConfig</span>
+        </a></li><li>
+        <a class="is-flex" href="#eglCreateWindowSurface">
+        <span class="has-mr-6">4.4</span>
+        <span>eglCreateWindowSurface</span>
+        </a></li><li>
+        <a class="is-flex" href="#eglCreateContext">
+        <span class="has-mr-6">4.5</span>
+        <span>eglCreateContext</span>
+        </a></li><li>
+        <a class="is-flex" href="#eglMakeCurrent">
+        <span class="has-mr-6">4.6</span>
+        <span>eglMakeCurrent</span>
+        </a></li><li>
+        <a class="is-flex" href="#eglSwapBuffers">
+        <span class="has-mr-6">4.7</span>
+        <span>eglSwapBuffers</span>
+        </a></li></ul></li></ul>
+        </div>
+    </div>
+</div>
+    
+    
+    <div class="column-right-shadow is-hidden-widescreen ">
+        
+    </div>
+    
+</div>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <!-- <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="/images/logo2.png" alt="音视频开发之OpenGL-ES入门" height="28">
+                
+                </a> -->
+                <p class="is-size-7">
+                    &copy; 2020 zhenyu&nbsp;
+                    Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a
+                        href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank">Icarus</a>
+                    
+                </p>
+            </div>
+            <div class="level-end">
+                
+            </div>
+        </div>
+    </div>
+</footer>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("zh-CN");</script>
+
+<script>
+var IcarusThemeSettings = {
+    article: {
+        highlight: {
+            clipboard: true,
+            fold: 'unfolded'
+        }
+    }
+};
+</script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+
+
+
+    
+    
+<script src="/js/animation.js"></script>
+
+    
+    
+<script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+<script src="/js/gallery.js" defer></script>
+
+    
+    
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    MathJax.Hub.Config({
+        'HTML-CSS': {
+            matchFontHeight: false
+        },
+        SVG: {
+            matchFontHeight: false
+        },
+        CommonHTML: {
+            matchFontHeight: false
+        },
+        tex2jax: {
+            inlineMath: [
+                ['$','$'],
+                ['\\(','\\)']
+            ]
+        }
+    });
+});
+</script>
+    
+    
+<a id="back-to-top" title="回到顶端" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="想要查找什么..." />
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: '文章',
+                PAGES: '页面',
+                CATEGORIES: '分类',
+                TAGS: '标签',
+                UNTITLED: '(无标题)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+</body>
+
+</html>

@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html  lang="zh">
+
+<head>
+    <meta charset="utf-8" />
+
+<meta name="generator" content="Hexo 3.9.0" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<title>音视频开发之Android硬件编解码 - 富贵山庄</title>
+
+
+    <meta name="description" content="MediaCodec介绍MediaCodec是Android平台上用来访问编码器和解码器的组件。 工作流程 MediaCodec中维护了两个BufferQueue，一个用来存放输入数据，一个用来存放输出数据。对于编码来说，InputBufferQueue用来接收视频原始YUV数据，经过Codec编码处理后，将编码后的数据放入到OutputBufferQueue中输出。而对于解码来说，InputBu">
+<meta property="og:type" content="article">
+<meta property="og:title" content="音视频开发之Android硬件编解码">
+<meta property="og:url" content="https://witgao.com/音视频开发之Android硬件编解码/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:description" content="MediaCodec介绍MediaCodec是Android平台上用来访问编码器和解码器的组件。 工作流程 MediaCodec中维护了两个BufferQueue，一个用来存放输入数据，一个用来存放输出数据。对于编码来说，InputBufferQueue用来接收视频原始YUV数据，经过Codec编码处理后，将编码后的数据放入到OutputBufferQueue中输出。而对于解码来说，InputBu">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://witgao.com/images/6.jpeg">
+<meta property="og:updated_time" content="2020-07-13T13:40:11.556Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="音视频开发之Android硬件编解码">
+<meta name="twitter:description" content="MediaCodec介绍MediaCodec是Android平台上用来访问编码器和解码器的组件。 工作流程 MediaCodec中维护了两个BufferQueue，一个用来存放输入数据，一个用来存放输出数据。对于编码来说，InputBufferQueue用来接收视频原始YUV数据，经过Codec编码处理后，将编码后的数据放入到OutputBufferQueue中输出。而对于解码来说，InputBu">
+<meta name="twitter:image" content="https://witgao.com/images/6.jpeg">
+
+
+
+
+
+
+
+<link rel="icon" href="/images/favicon1.svg">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/default.css">
+
+
+    
+    
+<style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+    
+    
+    
+    
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+    
+    
+    
+    
+    
+    
+    
+    <link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+    
+    
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body class="is-3-column">
+    <nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="/images/logo2.png" alt="音视频开发之Android硬件编解码" height="28">
+            
+            </a>
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item"
+                href="/">燕子坞</a>
+                
+                <a class="navbar-item"
+                href="/archives">听香水榭</a>
+                
+                <a class="navbar-item"
+                href="/categories">还施水阁</a>
+                
+                <a class="navbar-item"
+                href="/about">思过崖</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    <a class="navbar-item" target="_blank" title="Download on GitHub" href="https://github.com/witgao/blog">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                <a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;">
+                    <i class="fas fa-list-ul"></i>
+                </a>
+                
+                
+                <a class="navbar-item search" title="搜索" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-9-widescreen has-order-2 column-main">
+<div class="card">
+    
+    <div class="card-image">
+        <span  class="image is-7by1">
+        <img class="thumbnail" src="/images/6.jpeg" alt="音视频开发之Android硬件编解码">
+        </span>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-04-21T16:00:00.000Z">2020-04-22</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    22 分钟 读完 (大约 3288 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            音视频开发之Android硬件编解码
+            
+        </h1>
+        <div class="content">
+            <h2 id="MediaCodec介绍"><a href="#MediaCodec介绍" class="headerlink" title="MediaCodec介绍"></a>MediaCodec介绍</h2><p>MediaCodec是Android平台上用来访问编码器和解码器的组件。</p>
+<h3 id="工作流程"><a href="#工作流程" class="headerlink" title="工作流程"></a>工作流程</h3><p><img src="/images/mediacodec-processes.png" alt="mediacodec-processes"></p>
+<p>MediaCodec中维护了两个BufferQueue，一个用来存放输入数据，一个用来存放输出数据。对于编码来说，InputBufferQueue用来接收视频原始YUV数据，经过Codec编码处理后，将编码后的数据放入到OutputBufferQueue中输出。而对于解码来说，InputBufferQueue用来接收视频编码数据，经过Codec解码处理后，将解码后的视频原始YUV数据放入到OutputBufferQueue中输出。</p>
+<p>BufferQueue的数量是有限的，每次通过dequeueInputBuffer从InputBufferQueue中获取一个空的buffer索引，将输入数据填充到该buffer，通过queueInputBuffer通知Codec该索引位置的buffer已经填充了数据，可以开始处理了。然后通过dequeueOutputBuffer从OutputBufferQueue中获取处理完毕的buffer索引，获取到该buffer中的数据进行渲染或封装，使用完后，通过releaseOutputBuffer通知Codec释放该buffer中的数据（也可以让Codec进行数据的渲染）。</p>
+<p>MediaCodec的数据分为两种，一种是原始音视频数据，一种是压缩数据。上面讲到这两种数据都是使用bytebuffer来处理的，输入层获取到空的buffer后需要将数据copy到该buffer中，而输出层获取到buffer后也需要将数据copy出来进行消费，大量的数据copy是很影响性能的。</p>
+<p>针对原始音视频数据，MediaCodec提供了更加高效的方式来避免了数据的copy，那就是Surface。对于解码器来说，可以通过在configure的时候，设置OutputSurface来接收输出的Buffer，这样就不需要从OutputBufferQueue中copy数据了。而对于编码器来说，可以通过createInputSurface方法创建一个用来输入的Surface，这样就不需要往InputBufferQueue里copy数据了。</p>
+<p><img src="/images/mediacodec-surface-processes.png" alt="mediacodec-surface-processes"></p>
+<h3 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h3><h4 id="原始数据"><a href="#原始数据" class="headerlink" title="原始数据"></a>原始数据</h4><p>音频原始数据类型是一个PCM音频数据帧，视频原始数据类型由color_format决定，常用的有以下两种：</p>
+<ul>
+<li><strong>Surface Format</strong> ：这种类型的format数据，表明使用的GraphicBuffer，这是一个内存共享的缓冲区。（CodecCapabilities#COLOR_FormatSurface ）。</li>
+<li><strong>YUV Format</strong> ：YUV颜色格式，支持多种YUV格式（CodecCapabilities#COLOR_FormatYUV420Flexible ）。</li>
+</ul>
+<blockquote>
+<p>在configure的时候，对于编码器来说可以指定编码器输出的数据的format，对于解码器来说可以指定解码器输入的format。</p>
+<p>对于编码器，如果输入的时候使用的是Surface，则format需要设置为COLOR_FormatSurface。而对于解码器来说输入的format一般从媒体文件中读取。</p>
+</blockquote>
+<h4 id="压缩数据"><a href="#压缩数据" class="headerlink" title="压缩数据"></a>压缩数据</h4><p>对于视频来说，buffer中是一帧的压缩数据，对于音频来说，buffer中是一个单元的压缩数据，buffer中包含的都是完整的一帧或一个单元的数据。</p>
+ <a id="more"></a>
+<h3 id="组件状态"><a href="#组件状态" class="headerlink" title="组件状态"></a>组件状态</h3><p><img src="/images/mediacodec-status.png" alt="mediacodec-status" style="zoom:80%;"></p>
+<p><strong>Stopped</strong>：创建了一个MediaCodec对象后，默认为Uninitialized状态，调用configure方法后，状态变为Configured，通过reset可以重新配置。</p>
+<p><strong>Executing</strong>：调用start方法后，状态就变为了Flushed，第一次调用dequeueInputBuffer时，状态变为Running，当通过queueInputBuffer写入了一个EOS标记后，则状态变为End of Stream，可以通过flush方法重新回到Flushed状态。</p>
+<p><strong>Released</strong>：调用release进入到Released状态。</p>
+<h2 id="使用指南"><a href="#使用指南" class="headerlink" title="使用指南"></a>使用指南</h2><h3 id="创建编解码器"><a href="#创建编解码器" class="headerlink" title="创建编解码器"></a>创建编解码器</h3><h4 id="编码器"><a href="#编码器" class="headerlink" title="编码器"></a>编码器</h4><p>通过制定的mimeType创建一个编码器，比如 “video/avc” ，如果当前设备不支持该type则会抛IllegalArgumentException异常。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mVideoEncoder = MediaCodec.createEncoderByType(<span class="hljs-string">"mimeType"</span>);</span><br></pre></td></tr></table></figure>
+<p>通过<strong>MediaCodecList</strong>查询当前设备是否支持该mimeType的编码。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> numCodecs = MediaCodecList.getCodecCount();</span><br><span class="line"><span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; numCodecs; i++) &#123;</span><br><span class="line">     <span class="hljs-keyword">final</span> MediaCodecInfo codecInfo = MediaCodecList.getCodecInfoAt(i);</span><br><span class="line">     <span class="hljs-keyword">if</span> (!codecInfo.isEncoder()) &#123;   </span><br><span class="line">          <span class="hljs-keyword">continue</span>;</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="hljs-comment">// select first codec that match a specific MIME type and color format</span></span><br><span class="line">     <span class="hljs-keyword">final</span> String[] types = codecInfo.getSupportedTypes();</span><br><span class="line">     <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> j = <span class="hljs-number">0</span>; j &lt; types.length; j++) &#123;</span><br><span class="line">     <span class="hljs-keyword">if</span> (types[j].equalsIgnoreCase(mimeType)) &#123;</span><br><span class="line">          ...</span><br><span class="line">     &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="解码器"><a href="#解码器" class="headerlink" title="解码器"></a>解码器</h4><p>通过mimeType就可以快速的创建一个解码器，关于媒体文件的mimeType获取可以使用<strong>MediaExtractor.getTrackFormat</strong>，如果当前设备不支持该type则会抛IllegalArgumentException异常。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mVideoDecoder = MediaCodec.createDecoderByType(<span class="hljs-string">"mimeType"</span>)</span><br></pre></td></tr></table></figure>
+<p>通过<strong>MediaCodecList</strong>查询当前设备是否支持该mimeType的解码。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> numCodecs = MediaCodecList.getCodecCount();</span><br><span class="line"><span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; numCodecs; i++) &#123;</span><br><span class="line">     <span class="hljs-keyword">final</span> MediaCodecInfo codecInfo = MediaCodecList.getCodecInfoAt(i);</span><br><span class="line">     <span class="hljs-keyword">if</span> (codecInfo.isEncoder()) &#123;   </span><br><span class="line">          <span class="hljs-keyword">continue</span>;</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="hljs-comment">// select first codec that match a specific MIME type and color format</span></span><br><span class="line">     <span class="hljs-keyword">final</span> String[] types = codecInfo.getSupportedTypes();</span><br><span class="line">     <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> j = <span class="hljs-number">0</span>; j &lt; types.length; j++) &#123;</span><br><span class="line">     <span class="hljs-keyword">if</span> (types[j].equalsIgnoreCase(mimeType)) &#123;</span><br><span class="line">          ...</span><br><span class="line">     &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h3><h4 id="编码器-1"><a href="#编码器-1" class="headerlink" title="编码器"></a>编码器</h4><p>在创建完编码器之后，需要对编码器进行confiigure。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"> <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">configure</span><span class="hljs-params">(</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">            @Nullable MediaFormat format,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">            @Nullable Surface surface, @Nullable MediaCrypto crypto,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">            @ConfigureFlag <span class="hljs-keyword">int</span> flags)</span> </span>&#123;</span><br><span class="line">       </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对于编码器来说</p>
+<p>第一个参数MediaFormat是指定编码器输出的数据格式。这个格式需要我们自己去计算制定，</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 配置编码器输出格式</span></span><br><span class="line">mVideoEncoderFormat = MediaFormat.createVideoFormat(MIME_TYPE, mNewWidth, mNewHeight);</span><br><span class="line"><span class="hljs-comment">// 设置color_format，如果使用的是InputSurface，则设置为FormatSurface</span></span><br><span class="line">mVideoEncoderFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);</span><br><span class="line"><span class="hljs-comment">// 码率</span></span><br><span class="line">mVideoEncoderFormat.setInteger(MediaFormat.KEY_BIT_RATE, mNewBitRate);</span><br><span class="line"><span class="hljs-comment">// 帧率</span></span><br><span class="line">mVideoEncoderFormat.setInteger(MediaFormat.KEY_FRAME_RATE, OUTPUT_FRAME_RATE);</span><br><span class="line"><span class="hljs-comment">// gop</span></span><br><span class="line">mVideoEncoderFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, OUTPUT_IFRAME_INTERVAL);</span><br></pre></td></tr></table></figure>
+<p>第二个参数是OutputSurface，对于编码器来说忽略。</p>
+<p>第三个参数是加密相关，可忽略。</p>
+<p>第四个参数是编码标记，编码器需要加上 MediaCodec.CONFIGURE_FLAG_ENCODE 标记。</p>
+<h4 id="解码器-1"><a href="#解码器-1" class="headerlink" title="解码器"></a>解码器</h4><p>在创建完解码器之后，需要对解码器进行configure。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"> <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">configure</span><span class="hljs-params">(</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">            @Nullable MediaFormat format,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">            @Nullable Surface surface, @Nullable MediaCrypto crypto,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">            @ConfigureFlag <span class="hljs-keyword">int</span> flags)</span> </span>&#123;</span><br><span class="line">       </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对于解码器来说</p>
+<p>第一个参数MediaFormat是指定解码器输入的数据格式。一般来说是通过<strong>MediaExtractor.getTrackFormat</strong>从媒体文件中获取，但是其中有几点需要注意。</p>
+<ol>
+<li>最好先将KEY_LEVEL的值设置为null（<code>MediaFormat.setString(KEY_LEVEL, null)</code>），因为这个值经常不准。</li>
+<li>在5.0的设备上，MediaCodecList.findDecoder<code>/</code>EncoderForFormat<code>不得包含frame rate。使用</code>（<code>MediaFormat.setString(MediaFormat.KEY_FRAME_RATE, null)</code>）清除格式中的任何现有帧率设置。</li>
+</ol>
+<p>第二个参数是OutputSurface，解码完成后，通过releaseOutputBuffer可将解码后数据直接输出到该Surface中。</p>
+<p>第三个参数是加密相关，可忽略。</p>
+<p>第四个参数是解码器也可忽略。</p>
+<h3 id="Codec-specific-Data"><a href="#Codec-specific-Data" class="headerlink" title="Codec-specific Data"></a>Codec-specific Data</h3><p>对于某些格式，特别是AAC音频和H.264和H.265视频格式要求实际数据前需要包含设置数据或编解码器特定数据的多个缓冲区。 处理这种压缩格式时，必须在<code>start()</code>之后和任何帧数据之前将此数据提交给编解码器。 此类数据必须在输入时<code>queueInputBuffer</code>使用标<strong>BUFFER_FLAG_CODEC_CONFIG</strong>进行标记。</p>
+<p>关于CSD，其实在封装篇讲过，在muxer写入第一帧之前，需要写入CSD数据。</p>
+<p><img src="/images/mediacodec-csd.png" alt="mediacodec-csd"></p>
+<p>对于解码器来说，<strong>MediaExtractor.getTrackFormat</strong>可以直接获取到媒体文件的CSD信息。</p>
+<p>对于编码器来说，在MediaCodec.INFO_OUTPUT_FORMAT_CHANGED回调时，使用mVideoEncoder.getOutputFormat() 可以获取到附带CSD信息的Format。</p>
+<h3 id="处理"><a href="#处理" class="headerlink" title="处理"></a>处理</h3><p>根据API历史，MediaCodec提供了三套处理API。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Processing Mode</th>
+<th style="text-align:left">API version &lt;= 20</th>
+<th style="text-align:left">API version &gt;= 21</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Synchronous API using buffer arrays</td>
+<td style="text-align:left">Supported</td>
+<td style="text-align:left">已过时</td>
+</tr>
+<tr>
+<td style="text-align:left">Synchronous API using buffers</td>
+<td style="text-align:left">Not Available</td>
+<td style="text-align:left">Supported</td>
+</tr>
+<tr>
+<td style="text-align:left">Asynchronous API using buffers</td>
+<td style="text-align:left">Not Available</td>
+<td style="text-align:left">Supported</td>
+</tr>
+</tbody>
+</table>
+<h4 id="同步API"><a href="#同步API" class="headerlink" title="同步API"></a>同步API</h4><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 创建</span></span><br><span class="line">MediaCodec codec = MediaCodec.createByCodecName(name);</span><br><span class="line"><span class="hljs-comment">// 初始化</span></span><br><span class="line">codec.configure(format, …);</span><br><span class="line">MediaFormat outputFormat = codec.getOutputFormat(); </span><br><span class="line"><span class="hljs-comment">// 启动</span></span><br><span class="line">codec.start();</span><br><span class="line"><span class="hljs-keyword">for</span> (;;) &#123;</span><br><span class="line">  <span class="hljs-comment">// 从InputBufferQueue中获取空闲索引</span></span><br><span class="line">  <span class="hljs-keyword">int</span> inputBufferId = codec.dequeueInputBuffer(timeoutUs);</span><br><span class="line">  <span class="hljs-keyword">if</span> (inputBufferId &gt;= <span class="hljs-number">0</span>) &#123;</span><br><span class="line">    <span class="hljs-comment">// 获取空闲索引对应的buffer</span></span><br><span class="line">    ByteBuffer inputBuffer = codec.getInputBuffer(…);</span><br><span class="line">    <span class="hljs-comment">// 向buffer中写入数据</span></span><br><span class="line">    …</span><br><span class="line">    <span class="hljs-keyword">if</span> (inputDown) &#123;</span><br><span class="line">      	<span class="hljs-comment">// 输入结束的时候，向InputBufferQueue中写入一个EOS的标记，通知编码器。</span></span><br><span class="line">    		codec.queueInputBuffer(inputBufferId, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, 		<span class="hljs-number">0L</span>,MediaCodec.BUFFER_FLAG_END_OF_STREAM);</span><br><span class="line">    &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">        <span class="hljs-comment">// 通知Codec数据写入</span></span><br><span class="line">        codec.queueInputBuffer(inputBufferId, …);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// 从OutputBufferQueue中获取处理完成的索引</span></span><br><span class="line">  <span class="hljs-keyword">int</span> outputBufferId = codec.dequeueOutputBuffer(…);</span><br><span class="line">  <span class="hljs-keyword">if</span> (outputBufferId &gt;= <span class="hljs-number">0</span>) &#123;</span><br><span class="line">    <span class="hljs-comment">// 获取到处理完成的数据和格式</span></span><br><span class="line">    ByteBuffer outputBuffer = codec.getOutputBuffer(outputBufferId);</span><br><span class="line">    MediaFormat bufferFormat = codec.getOutputFormat(outputBufferId); </span><br><span class="line">    <span class="hljs-comment">// 封装或渲染</span></span><br><span class="line">    …</span><br><span class="line">    <span class="hljs-comment">// 释放该buffer</span></span><br><span class="line">    codec.releaseOutputBuffer(outputBufferId, …);</span><br><span class="line">  &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (outputBufferId == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) &#123;</span><br><span class="line">    <span class="hljs-comment">// 数据格式发生变化</span></span><br><span class="line">    outputFormat = codec.getOutputFormat(); </span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">codec.stop();</span><br><span class="line">codec.release();</span><br></pre></td></tr></table></figure>
+<h4 id="异步API"><a href="#异步API" class="headerlink" title="异步API"></a>异步API</h4><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 创建</span></span><br><span class="line">MediaCodec codec = MediaCodec.createByCodecName(name);</span><br><span class="line">MediaFormat mOutputFormat; </span><br><span class="line"><span class="hljs-comment">// 异步回调</span></span><br><span class="line">codec.setCallback(<span class="hljs-keyword">new</span> MediaCodec.Callback() &#123;</span><br><span class="line">  <span class="hljs-meta">@Override</span></span><br><span class="line">  <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">onInputBufferAvailable</span><span class="hljs-params">(MediaCodec mc, <span class="hljs-keyword">int</span> inputBufferId)</span> </span>&#123;</span><br><span class="line">    <span class="hljs-comment">// InputBufferQueue有空闲buffer回调</span></span><br><span class="line">    ByteBuffer inputBuffer = codec.getInputBuffer(inputBufferId);</span><br><span class="line">    <span class="hljs-comment">// 写入数据</span></span><br><span class="line">    …</span><br><span class="line">    <span class="hljs-comment">// 通知Codec</span></span><br><span class="line">    codec.queueInputBuffer(inputBufferId, …);</span><br><span class="line">  &#125;</span><br><span class="line"> </span><br><span class="line">  <span class="hljs-meta">@Override</span></span><br><span class="line">  <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">onOutputBufferAvailable</span><span class="hljs-params">(MediaCodec mc, <span class="hljs-keyword">int</span> outputBufferId, …)</span> </span>&#123;</span><br><span class="line">    <span class="hljs-comment">// OutputBufferQueue有处理完成的buffer回调</span></span><br><span class="line">    ByteBuffer outputBuffer = codec.getOutputBuffer(outputBufferId);</span><br><span class="line">    MediaFormat bufferFormat = codec.getOutputFormat(outputBufferId); </span><br><span class="line">    <span class="hljs-comment">// 处理数据</span></span><br><span class="line">    …</span><br><span class="line">    <span class="hljs-comment">// 释放buffer</span></span><br><span class="line">    codec.releaseOutputBuffer(outputBufferId, …);</span><br><span class="line">  &#125;</span><br><span class="line"> </span><br><span class="line">  <span class="hljs-meta">@Override</span></span><br><span class="line">  <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">onOutputFormatChanged</span><span class="hljs-params">(MediaCodec mc, MediaFormat format)</span> </span>&#123;</span><br><span class="line">    <span class="hljs-comment">// Codec数据格式发生变化</span></span><br><span class="line">    mOutputFormat = format;</span><br><span class="line">  &#125;</span><br><span class="line"> </span><br><span class="line">  <span class="hljs-meta">@Override</span></span><br><span class="line">  <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">onError</span><span class="hljs-params">(…)</span> </span>&#123;</span><br><span class="line">    …</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="hljs-comment">// 初始化</span></span><br><span class="line">codec.configure(format, …);</span><br><span class="line">mOutputFormat = codec.getOutputFormat(); </span><br><span class="line"><span class="hljs-comment">// 启动</span></span><br><span class="line">codec.start();</span><br><span class="line"><span class="hljs-comment">// 等待处理</span></span><br><span class="line">…</span><br><span class="line">codec.stop();</span><br><span class="line">codec.release();</span><br></pre></td></tr></table></figure>
+<blockquote>
+<ol>
+<li><p>在输入结束后，需要写入EOS标记，此时buffer可为空，需要注意的是一旦写入EOS标记后，就不可以再向InputBufferQueue中写入数据了。</p>
+</li>
+<li><p>一旦设置了OutputSurface，则不可以访问OutputBufferQueue，对应API会返回null。</p>
+</li>
+<li>一旦设置了InputSurface，则不可以访问InputBufferQueue，对应API会抛异常或返回null。</li>
+<li>在<code>M</code>版本之前，软件解码器在渲染到Surface上时可能未应用旋转。</li>
+<li>Codec在处理的第一帧的数据一定要是关键帧。</li>
+</ol>
+</blockquote>
+<h2 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h2><h3 id="创建"><a href="#创建" class="headerlink" title="创建"></a>创建</h3><h4 id="MediaCodec-创建"><a href="#MediaCodec-创建" class="headerlink" title="MediaCodec 创建"></a>MediaCodec 创建</h4><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// static</span></span><br><span class="line">sp&lt;MediaCodec&gt; MediaCodec::CreateByType(</span><br><span class="line">        <span class="hljs-keyword">const</span> sp&lt;ALooper&gt; &amp;looper, <span class="hljs-keyword">const</span> AString &amp;mime, <span class="hljs-keyword">bool</span> encoder, <span class="hljs-keyword">status_t</span> *err, <span class="hljs-keyword">pid_t</span> pid,</span><br><span class="line">        <span class="hljs-keyword">uid_t</span> uid) &#123;</span><br><span class="line">    Vector&lt;AString&gt; matchingCodecs;</span><br><span class="line">		<span class="hljs-comment">// 查找该mimeType对应的编解码器</span></span><br><span class="line">    MediaCodecList::findMatchingCodecs(</span><br><span class="line">            mime.c_str(),</span><br><span class="line">            encoder,</span><br><span class="line">            <span class="hljs-number">0</span>,</span><br><span class="line">            &amp;matchingCodecs);</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (err != <span class="hljs-literal">NULL</span>) &#123;</span><br><span class="line">        *err = NAME_NOT_FOUND;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">size_t</span> i = <span class="hljs-number">0</span>; i &lt; matchingCodecs.size(); ++i) &#123;</span><br><span class="line">      	<span class="hljs-comment">// 创建MediaCodec</span></span><br><span class="line">        sp&lt;MediaCodec&gt; codec = <span class="hljs-keyword">new</span> MediaCodec(looper, pid, uid);</span><br><span class="line">        AString componentName = matchingCodecs[i];</span><br><span class="line">        <span class="hljs-comment">// 初始化编解码器</span></span><br><span class="line">        <span class="hljs-keyword">status_t</span> ret = codec-&gt;init(componentName);</span><br><span class="line">        <span class="hljs-keyword">if</span> (err != <span class="hljs-literal">NULL</span>) &#123;</span><br><span class="line">            *err = ret;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="hljs-keyword">if</span> (ret == OK) &#123;</span><br><span class="line">            <span class="hljs-keyword">return</span> codec;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">return</span> <span class="hljs-literal">NULL</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="ACode-创建"><a href="#ACode-创建" class="headerlink" title="ACode 创建"></a>ACode 创建</h4><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">status_t</span> MediaCodec::init(<span class="hljs-keyword">const</span> AString &amp;name) &#123;</span><br><span class="line">    mResourceManagerService-&gt;init();</span><br><span class="line">		<span class="hljs-comment">// 编解码器名称</span></span><br><span class="line">    mInitName = name;</span><br><span class="line">    AString tmp = name;</span><br><span class="line">  </span><br><span class="line">    <span class="hljs-keyword">const</span> sp&lt;IMediaCodecList&gt; mcl = MediaCodecList::getInstance();</span><br><span class="line">		...</span><br><span class="line">    <span class="hljs-comment">// 查找该编解码器</span></span><br><span class="line">    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> AString &amp;codecName : &#123; name, tmp &#125;) &#123;</span><br><span class="line">        <span class="hljs-keyword">ssize_t</span> codecIdx = mcl-&gt;findCodecByName(codecName.c_str());</span><br><span class="line">        <span class="hljs-keyword">if</span> (codecIdx &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">            <span class="hljs-keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="hljs-comment">// 获取该编解码器信息</span></span><br><span class="line">        mCodecInfo = mcl-&gt;getCodecInfo(codecIdx);</span><br><span class="line">        ...</span><br><span class="line">        <span class="hljs-keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br><span class="line">    <span class="hljs-comment">// 创建ACodec</span></span><br><span class="line">    mCodec = GetCodecBase(name, mCodecInfo-&gt;getOwnerName());</span><br><span class="line">		...</span><br><span class="line">    mLooper-&gt;registerHandler(<span class="hljs-keyword">this</span>);</span><br><span class="line"></span><br><span class="line">    mCodec-&gt;setCallback(</span><br><span class="line">            <span class="hljs-built_in">std</span>::<span class="hljs-built_in">unique_ptr</span>&lt;CodecBase::CodecCallback&gt;(</span><br><span class="line">                    <span class="hljs-keyword">new</span> CodecCallback(<span class="hljs-keyword">new</span> AMessage(kWhatCodecNotify, <span class="hljs-keyword">this</span>))));</span><br><span class="line">    mBufferChannel = mCodec-&gt;getBufferChannel();</span><br><span class="line">    mBufferChannel-&gt;setCallback(</span><br><span class="line">            <span class="hljs-built_in">std</span>::<span class="hljs-built_in">unique_ptr</span>&lt;CodecBase::BufferCallback&gt;(</span><br><span class="line">                    <span class="hljs-keyword">new</span> BufferCallback(<span class="hljs-keyword">new</span> AMessage(kWhatCodecNotify, <span class="hljs-keyword">this</span>))));</span><br><span class="line">		<span class="hljs-comment">// 创建Init消息</span></span><br><span class="line">    sp&lt;AMessage&gt; msg = <span class="hljs-keyword">new</span> AMessage(kWhatInit, <span class="hljs-keyword">this</span>);</span><br><span class="line">    msg-&gt;setObject(<span class="hljs-string">"codecInfo"</span>, mCodecInfo);</span><br><span class="line">    msg-&gt;setString(<span class="hljs-string">"name"</span>, name);</span><br><span class="line">		...</span><br><span class="line">    <span class="hljs-keyword">status_t</span> err;</span><br><span class="line">    Vector&lt;MediaResource&gt; resources;</span><br><span class="line">    MediaResource::Type type =</span><br><span class="line">            secureCodec ? MediaResource::kSecureCodec : MediaResource::kNonSecureCodec;</span><br><span class="line">    MediaResource::SubType subtype =</span><br><span class="line">            mIsVideo ? MediaResource::kVideoCodec : MediaResource::kAudioCodec;</span><br><span class="line">    resources.push_back(MediaResource(type, subtype, <span class="hljs-number">1</span>));</span><br><span class="line">    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt;= kMaxRetry; ++i) &#123;</span><br><span class="line">        <span class="hljs-keyword">if</span> (i &gt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">            <span class="hljs-comment">// Don't try to reclaim resource for the first time.</span></span><br><span class="line">            <span class="hljs-keyword">if</span> (!mResourceManagerService-&gt;reclaimResource(resources)) &#123;</span><br><span class="line">                <span class="hljs-keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        sp&lt;AMessage&gt; response;</span><br><span class="line">        <span class="hljs-comment">// 发送Init消息，连接OMX服务，创建解码器实例</span></span><br><span class="line">        err = PostAndAwaitResponse(msg, &amp;response);</span><br><span class="line">        <span class="hljs-keyword">if</span> (!isResourceError(err)) &#123;</span><br><span class="line">            <span class="hljs-keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">return</span> err;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="OMX-Codec-创建"><a href="#OMX-Codec-创建" class="headerlink" title="OMX Codec 创建"></a>OMX Codec 创建</h4><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">bool</span> ACodec::UninitializedState::onAllocateComponent(<span class="hljs-keyword">const</span> sp&lt;AMessage&gt; &amp;msg) &#123;</span><br><span class="line">    ALOGV(<span class="hljs-string">"onAllocateComponent"</span>);</span><br><span class="line"></span><br><span class="line">    CHECK(mCodec-&gt;mOMXNode == <span class="hljs-literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">    sp&lt;AMessage&gt; notify = <span class="hljs-keyword">new</span> AMessage(kWhatOMXMessageList, mCodec);</span><br><span class="line">    notify-&gt;setInt32(<span class="hljs-string">"generation"</span>, mCodec-&gt;mNodeGeneration + <span class="hljs-number">1</span>);</span><br><span class="line"></span><br><span class="line">    sp&lt;RefBase&gt; obj;</span><br><span class="line">    CHECK(msg-&gt;findObject(<span class="hljs-string">"codecInfo"</span>, &amp;obj));</span><br><span class="line">    sp&lt;MediaCodecInfo&gt; info = (MediaCodecInfo *)obj.get();</span><br><span class="line">    <span class="hljs-keyword">if</span> (info == <span class="hljs-literal">nullptr</span>) &#123;</span><br><span class="line">        ALOGE(<span class="hljs-string">"Unexpected nullptr for codec information"</span>);</span><br><span class="line">        mCodec-&gt;signalError(OMX_ErrorUndefined, UNKNOWN_ERROR);</span><br><span class="line">        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    AString owner = (info-&gt;getOwnerName() == <span class="hljs-literal">nullptr</span>) ? <span class="hljs-string">"default"</span> : info-&gt;getOwnerName();</span><br><span class="line"></span><br><span class="line">    AString componentName;</span><br><span class="line">    CHECK(msg-&gt;findString(<span class="hljs-string">"componentName"</span>, &amp;componentName));</span><br><span class="line"></span><br><span class="line">    sp&lt;CodecObserver&gt; observer = <span class="hljs-keyword">new</span> CodecObserver(notify);</span><br><span class="line">    sp&lt;IOMX&gt; omx;</span><br><span class="line">    sp&lt;IOMXNode&gt; omxNode;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">status_t</span> err = NAME_NOT_FOUND;</span><br><span class="line">    OMXClient client;</span><br><span class="line">    <span class="hljs-comment">// 连接OMX服务</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (client.connect(owner.c_str()) != OK) &#123;</span><br><span class="line">        mCodec-&gt;signalError(OMX_ErrorUndefined, NO_INIT);</span><br><span class="line">        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    omx = client.interface();</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">pid_t</span> tid = gettid();</span><br><span class="line">    <span class="hljs-keyword">int</span> prevPriority = androidGetThreadPriority(tid);</span><br><span class="line">    androidSetThreadPriority(tid, ANDROID_PRIORITY_FOREGROUND);</span><br><span class="line">  	<span class="hljs-comment">// 创建编解码器实例</span></span><br><span class="line">    err = omx-&gt;allocateNode(componentName.c_str(), observer, &amp;omxNode);</span><br><span class="line">    androidSetThreadPriority(tid, prevPriority);</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (err != OK) &#123;</span><br><span class="line">        ALOGE(<span class="hljs-string">"Unable to instantiate codec '%s' with err %#x."</span>, componentName.c_str(), err);</span><br><span class="line"></span><br><span class="line">        mCodec-&gt;signalError((OMX_ERRORTYPE)err, makeNoSideEffectStatus(err));</span><br><span class="line">        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    mDeathNotifier = <span class="hljs-keyword">new</span> DeathNotifier(<span class="hljs-keyword">new</span> AMessage(kWhatOMXDied, mCodec));</span><br><span class="line">    <span class="hljs-keyword">auto</span> tOmxNode = omxNode-&gt;getHalInterface&lt;IOmxNode&gt;();</span><br><span class="line">    <span class="hljs-keyword">if</span> (tOmxNode &amp;&amp; !tOmxNode-&gt;linkToDeath(mDeathNotifier, <span class="hljs-number">0</span>)) &#123;</span><br><span class="line">        mDeathNotifier.clear();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ++mCodec-&gt;mNodeGeneration;</span><br><span class="line"></span><br><span class="line">    mCodec-&gt;mComponentName = componentName;</span><br><span class="line">    mCodec-&gt;mRenderTracker.setComponentName(componentName);</span><br><span class="line">    mCodec-&gt;mFlags = <span class="hljs-number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (componentName.endsWith(<span class="hljs-string">".secure"</span>)) &#123;</span><br><span class="line">        mCodec-&gt;mFlags |= kFlagIsSecure;</span><br><span class="line">        mCodec-&gt;mFlags |= kFlagIsGrallocUsageProtected;</span><br><span class="line">        mCodec-&gt;mFlags |= kFlagPushBlankBuffersToNativeWindowOnShutdown;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    mCodec-&gt;mOMX = omx;</span><br><span class="line">    mCodec-&gt;mOMXNode = omxNode;</span><br><span class="line">    mCodec-&gt;mCallback-&gt;onComponentAllocated(mCodec-&gt;mComponentName.c_str());</span><br><span class="line">    mCodec-&gt;changeState(mCodec-&gt;mLoadedState);</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Omx 创建</p>
+<figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Omx::Omx() :</span><br><span class="line">    mMaster(<span class="hljs-keyword">new</span> OMXMaster()),</span><br><span class="line">    mParser() &#123;</span><br><span class="line">    (<span class="hljs-keyword">void</span>)mParser.parseXmlFilesInSearchDirs();</span><br><span class="line">    (<span class="hljs-keyword">void</span>)mParser.parseXmlPath(mParser.defaultProfilingResultsXmlPath);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>OMXMaster 创建</p>
+<figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">	OMXMaster::OMXMaster() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">pid_t</span> pid = getpid();</span><br><span class="line">    <span class="hljs-keyword">char</span> filename[<span class="hljs-number">20</span>];</span><br><span class="line">    <span class="hljs-built_in">snprintf</span>(filename, <span class="hljs-keyword">sizeof</span>(filename), <span class="hljs-string">"/proc/%d/comm"</span>, pid);</span><br><span class="line">    <span class="hljs-keyword">int</span> fd = open(filename, O_RDONLY);</span><br><span class="line">    <span class="hljs-keyword">if</span> (fd &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">      ALOGW(<span class="hljs-string">"couldn't determine process name"</span>);</span><br><span class="line">      strlcpy(mProcessName, <span class="hljs-string">"&lt;unknown&gt;"</span>, <span class="hljs-keyword">sizeof</span>(mProcessName));</span><br><span class="line">    &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">      <span class="hljs-keyword">ssize_t</span> len = read(fd, mProcessName, <span class="hljs-keyword">sizeof</span>(mProcessName));</span><br><span class="line">      <span class="hljs-keyword">if</span> (len &lt; <span class="hljs-number">2</span>) &#123;</span><br><span class="line">        ALOGW(<span class="hljs-string">"couldn't determine process name"</span>);</span><br><span class="line">        strlcpy(mProcessName, <span class="hljs-string">"&lt;unknown&gt;"</span>, <span class="hljs-keyword">sizeof</span>(mProcessName));</span><br><span class="line">      &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">        <span class="hljs-comment">// the name is newline terminated, so erase the newline</span></span><br><span class="line">        mProcessName[len - <span class="hljs-number">1</span>] = <span class="hljs-number">0</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      close(fd);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    addVendorPlugin();</span><br><span class="line">    addPlatformPlugin();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">void</span> OMXMaster::addVendorPlugin() &#123;</span><br><span class="line">    addPlugin(<span class="hljs-string">"libstagefrighthw.so"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">void</span> OMXMaster::addPlatformPlugin() &#123;</span><br><span class="line">    addPlugin(<span class="hljs-string">"libstagefright_softomx_plugin.so"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">void</span> OMXMaster::addPlugin(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *libname) &#123;</span><br><span class="line">    <span class="hljs-keyword">void</span> *libHandle = android_load_sphal_library(libname, RTLD_NOW);</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (libHandle == <span class="hljs-literal">NULL</span>) &#123;</span><br><span class="line">        <span class="hljs-keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">typedef</span> OMXPluginBase *(*CreateOMXPluginFunc)();</span><br><span class="line">    CreateOMXPluginFunc createOMXPlugin =</span><br><span class="line">        (CreateOMXPluginFunc)dlsym(</span><br><span class="line">                libHandle, <span class="hljs-string">"createOMXPlugin"</span>);</span><br><span class="line">    <span class="hljs-keyword">if</span> (!createOMXPlugin)</span><br><span class="line">        createOMXPlugin = (CreateOMXPluginFunc)dlsym(</span><br><span class="line">                libHandle, <span class="hljs-string">"_ZN7android15createOMXPluginEv"</span>);</span><br><span class="line"></span><br><span class="line">    OMXPluginBase *plugin = <span class="hljs-literal">nullptr</span>;</span><br><span class="line">    <span class="hljs-keyword">if</span> (createOMXPlugin) &#123;</span><br><span class="line">        plugin = (*createOMXPlugin)();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (plugin) &#123;</span><br><span class="line">        mPlugins.push_back(&#123; plugin, libHandle &#125;);</span><br><span class="line">        addPlugin(plugin);</span><br><span class="line">    &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">        android_unload_sphal_library(libHandle);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>创建 编解码器实例</p>
+<figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line">Return&lt;<span class="hljs-keyword">void</span>&gt; Omx::allocateNode(</span><br><span class="line">        <span class="hljs-keyword">const</span> hidl_string&amp; name,</span><br><span class="line">        <span class="hljs-keyword">const</span> sp&lt;IOmxObserver&gt;&amp; observer,</span><br><span class="line">        allocateNode_cb _hidl_cb) &#123;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">using</span> ::android::IOMXNode;</span><br><span class="line">    <span class="hljs-keyword">using</span> ::android::IOMXObserver;</span><br><span class="line"></span><br><span class="line">    sp&lt;OMXNodeInstance&gt; instance;</span><br><span class="line">    &#123;</span><br><span class="line">        Mutex::<span class="hljs-function">Autolock <span class="hljs-title">autoLock</span><span class="hljs-params">(mLock)</span></span>;</span><br><span class="line">        <span class="hljs-keyword">if</span> (mLiveNodes.size() == kMaxNodeInstances) &#123;</span><br><span class="line">            _hidl_cb(toStatus(NO_MEMORY), <span class="hljs-literal">nullptr</span>);</span><br><span class="line">            <span class="hljs-keyword">return</span> Void();</span><br><span class="line">        &#125;</span><br><span class="line">				<span class="hljs-comment">// 创建编解码器实例</span></span><br><span class="line">        instance = <span class="hljs-keyword">new</span> OMXNodeInstance(</span><br><span class="line">                <span class="hljs-keyword">this</span>, <span class="hljs-keyword">new</span> LWOmxObserver(observer), name.c_str());</span><br><span class="line"></span><br><span class="line">        OMX_COMPONENTTYPE *handle;</span><br><span class="line">      	<span class="hljs-comment">// 生成实例</span></span><br><span class="line">        OMX_ERRORTYPE err = mMaster-&gt;makeComponentInstance(</span><br><span class="line">                name.c_str(), &amp;OMXNodeInstance::kCallbacks,</span><br><span class="line">                instance.get(), &amp;handle);</span><br><span class="line"></span><br><span class="line">        <span class="hljs-keyword">if</span> (err != OMX_ErrorNone) &#123;</span><br><span class="line">            LOG(ERROR) &lt;&lt; <span class="hljs-string">"Failed to allocate omx component "</span></span><br><span class="line">                    <span class="hljs-string">"'"</span> &lt;&lt; name.c_str() &lt;&lt; <span class="hljs-string">"' "</span></span><br><span class="line">                    <span class="hljs-string">" err="</span> &lt;&lt; asString(err) &lt;&lt;</span><br><span class="line">                    <span class="hljs-string">"(0x"</span> &lt;&lt; <span class="hljs-built_in">std</span>::hex &lt;&lt; <span class="hljs-keyword">unsigned</span>(err) &lt;&lt; <span class="hljs-string">")"</span>;</span><br><span class="line">            _hidl_cb(toStatus(StatusFromOMXError(err)), <span class="hljs-literal">nullptr</span>);</span><br><span class="line">            <span class="hljs-keyword">return</span> Void();</span><br><span class="line">        &#125;</span><br><span class="line">        instance-&gt;setHandle(handle);</span><br><span class="line"></span><br><span class="line">        <span class="hljs-comment">// Find quirks from mParser</span></span><br><span class="line">        <span class="hljs-keyword">const</span> <span class="hljs-keyword">auto</span>&amp; codec = mParser.getCodecMap().find(name.c_str());</span><br><span class="line">        <span class="hljs-keyword">if</span> (codec == mParser.getCodecMap().cend()) &#123;</span><br><span class="line">            LOG(WARNING) &lt;&lt; <span class="hljs-string">"Failed to obtain quirks for omx component "</span></span><br><span class="line">                    <span class="hljs-string">"'"</span> &lt;&lt; name.c_str() &lt;&lt; <span class="hljs-string">"' "</span></span><br><span class="line">                    <span class="hljs-string">"from XML files"</span>;</span><br><span class="line">        &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">            <span class="hljs-keyword">uint32_t</span> quirks = <span class="hljs-number">0</span>;</span><br><span class="line">            <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> <span class="hljs-keyword">auto</span>&amp; quirk : codec-&gt;second.quirkSet) &#123;</span><br><span class="line">                <span class="hljs-keyword">if</span> (quirk == <span class="hljs-string">"quirk::requires-allocate-on-input-ports"</span>) &#123;</span><br><span class="line">                    quirks |= OMXNodeInstance::</span><br><span class="line">                            kRequiresAllocateBufferOnInputPorts;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="hljs-keyword">if</span> (quirk == <span class="hljs-string">"quirk::requires-allocate-on-output-ports"</span>) &#123;</span><br><span class="line">                    quirks |= OMXNodeInstance::</span><br><span class="line">                            kRequiresAllocateBufferOnOutputPorts;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            instance-&gt;setQuirks(quirks);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        mLiveNodes.add(observer.get(), instance);</span><br><span class="line">        mNode2Observer.add(instance.get(), observer.get());</span><br><span class="line">    &#125;</span><br><span class="line">    observer-&gt;linkToDeath(<span class="hljs-keyword">this</span>, <span class="hljs-number">0</span>);</span><br><span class="line"></span><br><span class="line">    _hidl_cb(toStatus(OK), <span class="hljs-keyword">new</span> TWOmxNode(instance));</span><br><span class="line">    <span class="hljs-keyword">return</span> Void();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+        </div>
+        
+        <ul class="post-copyright">
+            <li><strong>本文标题：</strong><a href="https://witgao.com/音视频开发之Android硬件编解码/">音视频开发之Android硬件编解码</a></li>
+            <li><strong>本文作者：</strong><a href="https://witgao.com">zhenyu</a></li>
+            <li><strong>本文链接：</strong><a href="https://witgao.com/音视频开发之Android硬件编解码/">https://witgao.com/音视频开发之Android硬件编解码/</a></li>
+            <li><strong>发布时间：</strong>2020-04-22</li>
+            <li><strong>版权声明：</strong>本博客所有文章除特别声明外，均采用 <a
+                    href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="external nofollow"
+                    target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明出处！
+            </li>
+        </ul>
+        
+        
+        
+        
+    </div>
+</div>
+
+
+
+
+
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        <div class="level-start">
+            <a class="level level-item has-link-grey  article-nav-prev"
+                href="/音视频开发之OpenGL-ES入门/">
+                <i class="level-item fas fa-chevron-left"></i>
+                <span class="level-item">音视频开发之OpenGL-ES入门</span>
+            </a>
+        </div>
+        
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next"
+                href="/音视频开发之Android硬件解封装/">
+                <span class="level-item">音视频开发之Android硬件解封装</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+    </div>
+</div>
+
+
+</div>
+                
+
+
+
+
+<div
+    class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left ">
+    
+    
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered" style="flex-shrink: 1">
+                <div>
+                    
+                    <figure class="image is-128x128 has-mb-6">
+                        <img class="" src="/images/avatar1.png" alt="zhenyu">
+                    </figure>
+                    
+                    <p class="is-size-4 is-block">
+                        zhenyu
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        富贵山庄无富贵，只留欢乐在此间
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>杭州</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        文章
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        38
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        分类
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        9
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        标签
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        0
+                    </p>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="level">
+            <a class="level-item button is-link is-rounded" href="https://github.com/witgao" target="_blank">
+                关注我</a>
+        </div>
+        
+        
+        
+    </div>
+</div>
+    
+    
+<div class="card widget column-left is-sticky" id="toc">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                目录
+            </h3>
+            <ul class="menu-list"><li>
+        <a class="is-flex" href="#MediaCodec介绍">
+        <span class="has-mr-6">1</span>
+        <span>MediaCodec介绍</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#工作流程">
+        <span class="has-mr-6">1.1</span>
+        <span>工作流程</span>
+        </a></li><li>
+        <a class="is-flex" href="#数据类型">
+        <span class="has-mr-6">1.2</span>
+        <span>数据类型</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#原始数据">
+        <span class="has-mr-6">1.2.1</span>
+        <span>原始数据</span>
+        </a></li><li>
+        <a class="is-flex" href="#压缩数据">
+        <span class="has-mr-6">1.2.2</span>
+        <span>压缩数据</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#组件状态">
+        <span class="has-mr-6">1.3</span>
+        <span>组件状态</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#使用指南">
+        <span class="has-mr-6">2</span>
+        <span>使用指南</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#创建编解码器">
+        <span class="has-mr-6">2.1</span>
+        <span>创建编解码器</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#编码器">
+        <span class="has-mr-6">2.1.1</span>
+        <span>编码器</span>
+        </a></li><li>
+        <a class="is-flex" href="#解码器">
+        <span class="has-mr-6">2.1.2</span>
+        <span>解码器</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#初始化">
+        <span class="has-mr-6">2.2</span>
+        <span>初始化</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#编码器-1">
+        <span class="has-mr-6">2.2.1</span>
+        <span>编码器</span>
+        </a></li><li>
+        <a class="is-flex" href="#解码器-1">
+        <span class="has-mr-6">2.2.2</span>
+        <span>解码器</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#Codec-specific-Data">
+        <span class="has-mr-6">2.3</span>
+        <span>Codec-specific Data</span>
+        </a></li><li>
+        <a class="is-flex" href="#处理">
+        <span class="has-mr-6">2.4</span>
+        <span>处理</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#同步API">
+        <span class="has-mr-6">2.4.1</span>
+        <span>同步API</span>
+        </a></li><li>
+        <a class="is-flex" href="#异步API">
+        <span class="has-mr-6">2.4.2</span>
+        <span>异步API</span>
+        </a></li></ul></li></ul></li><li>
+        <a class="is-flex" href="#源码分析">
+        <span class="has-mr-6">3</span>
+        <span>源码分析</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#创建">
+        <span class="has-mr-6">3.1</span>
+        <span>创建</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#MediaCodec-创建">
+        <span class="has-mr-6">3.1.1</span>
+        <span>MediaCodec 创建</span>
+        </a></li><li>
+        <a class="is-flex" href="#ACode-创建">
+        <span class="has-mr-6">3.1.2</span>
+        <span>ACode 创建</span>
+        </a></li><li>
+        <a class="is-flex" href="#OMX-Codec-创建">
+        <span class="has-mr-6">3.1.3</span>
+        <span>OMX Codec 创建</span>
+        </a></li></ul></li></ul></li></ul>
+        </div>
+    </div>
+</div>
+    
+    
+    <div class="column-right-shadow is-hidden-widescreen ">
+        
+    </div>
+    
+</div>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <!-- <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="/images/logo2.png" alt="音视频开发之Android硬件编解码" height="28">
+                
+                </a> -->
+                <p class="is-size-7">
+                    &copy; 2020 zhenyu&nbsp;
+                    Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a
+                        href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank">Icarus</a>
+                    
+                </p>
+            </div>
+            <div class="level-end">
+                
+            </div>
+        </div>
+    </div>
+</footer>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("zh-CN");</script>
+
+<script>
+var IcarusThemeSettings = {
+    article: {
+        highlight: {
+            clipboard: true,
+            fold: 'unfolded'
+        }
+    }
+};
+</script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+
+
+
+    
+    
+<script src="/js/animation.js"></script>
+
+    
+    
+<script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+<script src="/js/gallery.js" defer></script>
+
+    
+    
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    MathJax.Hub.Config({
+        'HTML-CSS': {
+            matchFontHeight: false
+        },
+        SVG: {
+            matchFontHeight: false
+        },
+        CommonHTML: {
+            matchFontHeight: false
+        },
+        tex2jax: {
+            inlineMath: [
+                ['$','$'],
+                ['\\(','\\)']
+            ]
+        }
+    });
+});
+</script>
+    
+    
+<a id="back-to-top" title="回到顶端" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="想要查找什么..." />
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: '文章',
+                PAGES: '页面',
+                CATEGORIES: '分类',
+                TAGS: '标签',
+                UNTITLED: '(无标题)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+</body>
+
+</html>

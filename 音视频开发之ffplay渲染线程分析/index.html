@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html  lang="zh">
+
+<head>
+    <meta charset="utf-8" />
+
+<meta name="generator" content="Hexo 3.9.0" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<title>音视频开发之ffplay渲染线程分析 - 富贵山庄</title>
+
+
+    <meta name="description" content="视频渲染线程视频渲染线程实际就是main线程。 初始化初始化SDL12345678// SDL初始化flags = SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER;if (SDL_Init(flags)) &amp;#123;  av_log(NULL, AV_LOG_FATAL, &quot;Could not initialize SDL - %s\n&quot;,">
+<meta property="og:type" content="article">
+<meta property="og:title" content="音视频开发之ffplay渲染线程分析">
+<meta property="og:url" content="https://witgao.com/音视频开发之ffplay渲染线程分析/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:description" content="视频渲染线程视频渲染线程实际就是main线程。 初始化初始化SDL12345678// SDL初始化flags = SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER;if (SDL_Init(flags)) &amp;#123;  av_log(NULL, AV_LOG_FATAL, &quot;Could not initialize SDL - %s\n&quot;,">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://witgao.com/images/18.jpg">
+<meta property="og:updated_time" content="2020-08-04T06:06:09.703Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="音视频开发之ffplay渲染线程分析">
+<meta name="twitter:description" content="视频渲染线程视频渲染线程实际就是main线程。 初始化初始化SDL12345678// SDL初始化flags = SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER;if (SDL_Init(flags)) &amp;#123;  av_log(NULL, AV_LOG_FATAL, &quot;Could not initialize SDL - %s\n&quot;,">
+<meta name="twitter:image" content="https://witgao.com/images/18.jpg">
+
+
+
+
+
+
+
+<link rel="icon" href="/images/favicon1.svg">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/default.css">
+
+
+    
+    
+<style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+    
+    
+    
+    
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+    
+    
+    
+    
+    
+    
+    
+    <link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+    
+    
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body class="is-3-column">
+    <nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="/images/logo2.png" alt="音视频开发之ffplay渲染线程分析" height="28">
+            
+            </a>
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item"
+                href="/">燕子坞</a>
+                
+                <a class="navbar-item"
+                href="/archives">听香水榭</a>
+                
+                <a class="navbar-item"
+                href="/categories">还施水阁</a>
+                
+                <a class="navbar-item"
+                href="/about">思过崖</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    <a class="navbar-item" target="_blank" title="Download on GitHub" href="https://github.com/witgao/blog">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                <a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;">
+                    <i class="fas fa-list-ul"></i>
+                </a>
+                
+                
+                <a class="navbar-item search" title="搜索" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-9-widescreen has-order-2 column-main">
+<div class="card">
+    
+    <div class="card-image">
+        <span  class="image is-7by1">
+        <img class="thumbnail" src="/images/18.jpg" alt="音视频开发之ffplay渲染线程分析">
+        </span>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-08-04T16:00:00.000Z">2020-08-05</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    24 分钟 读完 (大约 3549 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            音视频开发之ffplay渲染线程分析
+            
+        </h1>
+        <div class="content">
+            <h3 id="视频渲染线程"><a href="#视频渲染线程" class="headerlink" title="视频渲染线程"></a>视频渲染线程</h3><p>视频渲染线程实际就是main线程。</p>
+<h4 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h4><h5 id="初始化SDL"><a href="#初始化SDL" class="headerlink" title="初始化SDL"></a>初始化SDL</h5><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// SDL初始化</span></span><br><span class="line">flags = SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER;</span><br><span class="line"><span class="hljs-keyword">if</span> (SDL_Init(flags)) &#123;</span><br><span class="line">  av_log(<span class="hljs-literal">NULL</span>, AV_LOG_FATAL, <span class="hljs-string">"Could not initialize SDL - %s\n"</span>,</span><br><span class="line">         SDL_GetError());</span><br><span class="line">  av_log(<span class="hljs-literal">NULL</span>, AV_LOG_FATAL, <span class="hljs-string">"(Did you set the DISPLAY variable?)\n"</span>);</span><br><span class="line">  <span class="hljs-built_in">exit</span>(<span class="hljs-number">1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="创建Window和Renderer"><a href="#创建Window和Renderer" class="headerlink" title="创建Window和Renderer"></a>创建Window和Renderer</h5><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">if</span> (borderless)</span><br><span class="line">  flags |= SDL_WINDOW_BORDERLESS;  <span class="hljs-comment">// 去掉窗口状态栏</span></span><br><span class="line"><span class="hljs-keyword">else</span></span><br><span class="line">  flags |= SDL_WINDOW_RESIZABLE;  <span class="hljs-comment">// 窗口是否可缩放</span></span><br><span class="line"><span class="hljs-comment">// 创建SDL窗口</span></span><br><span class="line">window = SDL_CreateWindow(program_name, SDL_WINDOWPOS_UNDEFINED,</span><br><span class="line">                          SDL_WINDOWPOS_UNDEFINED, default_width,</span><br><span class="line">                          default_height, flags);</span><br><span class="line">SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, <span class="hljs-string">"linear"</span>);</span><br><span class="line"><span class="hljs-keyword">if</span> (window) &#123;</span><br><span class="line">  <span class="hljs-comment">// 创建SDL渲染器，SDL_RENDERER_ACCELERATED 使用硬件加速</span></span><br><span class="line">  renderer = SDL_CreateRenderer(</span><br><span class="line">      window, <span class="hljs-number">-1</span>, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);</span><br><span class="line">  <span class="hljs-keyword">if</span> (!renderer) &#123;</span><br><span class="line">    av_log(<span class="hljs-literal">NULL</span>, AV_LOG_WARNING,</span><br><span class="line">           <span class="hljs-string">"Failed to initialize a hardware accelerated renderer: %s\n"</span>,</span><br><span class="line">           SDL_GetError());</span><br><span class="line">    <span class="hljs-comment">// 如果创建SDL渲染器失败，则去掉标记再重试，可能是当前设备不支持该标记</span></span><br><span class="line">    renderer = SDL_CreateRenderer(window, <span class="hljs-number">-1</span>, <span class="hljs-number">0</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-keyword">if</span> (renderer) &#123;</span><br><span class="line">    <span class="hljs-comment">// 输出渲染器信息</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (!SDL_GetRendererInfo(renderer, &amp;renderer_info))</span><br><span class="line">      av_log(<span class="hljs-literal">NULL</span>, AV_LOG_VERBOSE, <span class="hljs-string">"Initialized %s renderer.\n"</span>,</span><br><span class="line">             renderer_info.name);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="hljs-keyword">if</span> (!window || !renderer || !renderer_info.num_texture_formats) &#123;</span><br><span class="line">  <span class="hljs-comment">// 如果窗口或者渲染器创建失败，或者渲染器中可用的纹理格式为0，则退出</span></span><br><span class="line">  av_log(<span class="hljs-literal">NULL</span>, AV_LOG_FATAL, <span class="hljs-string">"Failed to create window or renderer: %s"</span>,</span><br><span class="line">         SDL_GetError());</span><br><span class="line">  do_exit(<span class="hljs-literal">NULL</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="轮询"><a href="#轮询" class="headerlink" title="轮询"></a>轮询</h4><p>主线程在开启解复用线程后，就会开始轮询处理SDL事件<br><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">event_loop</span><span class="hljs-params">(VideoState *cur_stream)</span> </span>&#123;</span><br><span class="line">  SDL_Event event;</span><br><span class="line">  <span class="hljs-keyword">double</span> incr, pos, frac;</span><br><span class="line">  <span class="hljs-comment">// 开始轮询SDL消息</span></span><br><span class="line">  <span class="hljs-keyword">for</span> (;;) &#123;</span><br><span class="line">    <span class="hljs-keyword">double</span> x;</span><br><span class="line">    <span class="hljs-comment">// 获取事件，如果有，则执行下面的switch，如果没有，则会尝试刷新视频渲染</span></span><br><span class="line">    refresh_loop_wait_event(cur_stream, &amp;event);</span><br><span class="line">    ...</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+ <a id="more"></a>
+<p>在refresh_loop_wait_event中，会尝试获取SDL事件，如果获取成功，则返回，如果获取失败，则会执行while中的视频刷新操作。SDL事件会优先处理，在没有SDL事件的时候，就会轮询刷新视频</p>
+<p>remaining_time的时间默认是0.01，当video_refresh刷新时，如果继续显示当前帧，则remaining_time的值等于当前帧结束的时间差，如果是显示下一帧，则不改变remaining_time的值，依旧是0.01。<br><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">refresh_loop_wait_event</span><span class="hljs-params">(VideoState *is, SDL_Event *event)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">double</span> remaining_time = <span class="hljs-number">0.0</span>;</span><br><span class="line">  SDL_PumpEvents();</span><br><span class="line">  <span class="hljs-comment">// 如果获取到事件，则会直接返回，不会进入while</span></span><br><span class="line">  <span class="hljs-keyword">while</span> (</span><br><span class="line">      !SDL_PeepEvents(event, <span class="hljs-number">1</span>, SDL_GETEVENT, SDL_FIRSTEVENT, SDL_LASTEVENT)) &#123;</span><br><span class="line">    <span class="hljs-comment">// 如果没有获取到事件，则会尝试更新视频渲染</span></span><br><span class="line">    </span><br><span class="line">    <span class="hljs-keyword">if</span> (!cursor_hidden &amp;&amp;</span><br><span class="line">        av_gettime_relative() - cursor_last_shown &gt; CURSOR_HIDE_DELAY) &#123;</span><br><span class="line">      SDL_ShowCursor(<span class="hljs-number">0</span>);</span><br><span class="line">      cursor_hidden = <span class="hljs-number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-comment">// 第二次之后刷新时，就会先睡个一定时间，这个时间由音视频同步机制计算得出</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (remaining_time &gt; <span class="hljs-number">0.0</span>) av_usleep((<span class="hljs-keyword">int64_t</span>)(remaining_time * <span class="hljs-number">1000000.0</span>));</span><br><span class="line">    <span class="hljs-comment">// 默认刷新间隔是0.01s</span></span><br><span class="line">    remaining_time = REFRESH_RATE;</span><br><span class="line">    <span class="hljs-comment">// 如果当前是显示视频模式，并且 当前没有暂停或者当前强制刷新</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (is-&gt;show_mode != SHOW_MODE_NONE &amp;&amp; (!is-&gt;paused || is-&gt;force_refresh))</span><br><span class="line">      video_refresh(is, &amp;remaining_time); <span class="hljs-comment">// 刷新视频</span></span><br><span class="line">    SDL_PumpEvents();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h5 id="刷新视频"><a href="#刷新视频" class="headerlink" title="刷新视频"></a>刷新视频</h5><p>主要逻辑是计算当前显示的帧是否显示结束，如果显示结束，那么下一帧是否应该显示，根据音视频同步机制，进行丢帧或者对当前帧的结束时间进行缩短和增长。</p>
+<p>音视频同步机制就是通过两个时钟的差值，来调整当前显示帧的结束时间，也就是frame_timer的值，进而调整remaining_time的值，也就是线程等待的时间。当视频时钟慢，则减小当前帧显示的时间，当视频时钟快，则加大当前帧显示的时间。</p>
+<figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">video_refresh</span><span class="hljs-params">(<span class="hljs-keyword">void</span> *opaque, <span class="hljs-keyword">double</span> *remaining_time)</span> </span>&#123;</span><br><span class="line">  VideoState *is = opaque;</span><br><span class="line">  <span class="hljs-keyword">double</span> time;</span><br><span class="line"></span><br><span class="line">  Frame *sp, *sp2;</span><br><span class="line">  ...</span><br><span class="line"></span><br><span class="line">  <span class="hljs-keyword">if</span> (is-&gt;video_st) &#123;</span><br><span class="line">  retry:</span><br><span class="line">    <span class="hljs-keyword">if</span> (frame_queue_nb_remaining(&amp;is-&gt;pictq) == <span class="hljs-number">0</span>) &#123;</span><br><span class="line">      <span class="hljs-comment">// 如果当前Frame队列中没有数据，则什么也不干</span></span><br><span class="line">      <span class="hljs-comment">// nothing to do, no picture to display in the queue</span></span><br><span class="line">    &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">      <span class="hljs-keyword">double</span> last_duration, duration, delay;</span><br><span class="line">      Frame *vp, *lastvp;</span><br><span class="line"></span><br><span class="line">      <span class="hljs-comment">/* dequeue the picture */</span></span><br><span class="line">      <span class="hljs-comment">// 获取当前已经在显示的帧，可以认为是上一帧</span></span><br><span class="line">      lastvp = frame_queue_peek_last(&amp;is-&gt;pictq);</span><br><span class="line">      <span class="hljs-comment">// 获取当前帧</span></span><br><span class="line">      vp = frame_queue_peek(&amp;is-&gt;pictq);</span><br><span class="line">      <span class="hljs-comment">// 如果当前帧的序号不符合，则丢弃</span></span><br><span class="line">      <span class="hljs-keyword">if</span> (vp-&gt;serial != is-&gt;videoq.serial) &#123;</span><br><span class="line">        <span class="hljs-comment">// 读取移动到下一位，并重试</span></span><br><span class="line">        frame_queue_next(&amp;is-&gt;pictq);</span><br><span class="line">        <span class="hljs-keyword">goto</span> retry;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="hljs-comment">// 如果上一帧与当前帧的序号不符合，重新更新播放时间frame_timer为当前系统时间</span></span><br><span class="line">      <span class="hljs-keyword">if</span> (lastvp-&gt;serial != vp-&gt;serial)</span><br><span class="line">        is-&gt;frame_timer = av_gettime_relative() / <span class="hljs-number">1000000.0</span>;</span><br><span class="line">      <span class="hljs-comment">// 如果暂停了，则继续显示当前显示的帧</span></span><br><span class="line">      <span class="hljs-keyword">if</span> (is-&gt;paused) <span class="hljs-keyword">goto</span> display;</span><br><span class="line">      </span><br><span class="line">      <span class="hljs-comment">/* compute nominal last_duration */</span></span><br><span class="line">      <span class="hljs-comment">// 获取上一帧要显示的时长</span></span><br><span class="line">      last_duration = vp_duration(is, lastvp, vp);</span><br><span class="line">      <span class="hljs-comment">// 计算音视频同步的延迟时差</span></span><br><span class="line">      delay = compute_target_delay(last_duration, is);</span><br><span class="line"></span><br><span class="line">      time = av_gettime_relative() / <span class="hljs-number">1000000.0</span>;</span><br><span class="line">      <span class="hljs-comment">// frame_timer 当前显示的帧要结束的时间</span></span><br><span class="line">      <span class="hljs-comment">// frame_timer + delay = 当前显示的帧真正要结束的时间</span></span><br><span class="line">      <span class="hljs-comment">// 如果上一帧还没有结束，则继续显示上一帧</span></span><br><span class="line">      <span class="hljs-keyword">if</span> (time &lt; is-&gt;frame_timer + delay) &#123;</span><br><span class="line">        <span class="hljs-comment">// frame_timer + delay - time 就是当前显示的帧结束的时间与当前时间的差值，也就是线程要wait的时间</span></span><br><span class="line">        *remaining_time =</span><br><span class="line">            FFMIN(is-&gt;frame_timer + delay - time, *remaining_time);</span><br><span class="line">        <span class="hljs-keyword">goto</span> display;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="hljs-comment">// 如果上一帧帧的显示时间已经过去了</span></span><br><span class="line"></span><br><span class="line">      <span class="hljs-comment">// 更新frame_timer，指向的是当前显示的帧结束的时间</span></span><br><span class="line">      is-&gt;frame_timer += delay;</span><br><span class="line">      <span class="hljs-keyword">if</span> (delay &gt; <span class="hljs-number">0</span> &amp;&amp; time - is-&gt;frame_timer &gt; AV_SYNC_THRESHOLD_MAX)</span><br><span class="line">        is-&gt;frame_timer = time; <span class="hljs-comment">// 与系统时间偏离太大，则更新为系统时间</span></span><br><span class="line"></span><br><span class="line">      SDL_LockMutex(is-&gt;pictq.mutex);</span><br><span class="line">      <span class="hljs-keyword">if</span> (!isnan(vp-&gt;pts)) update_video_pts(is, vp-&gt;pts, vp-&gt;pos, vp-&gt;serial);</span><br><span class="line">      SDL_UnlockMutex(is-&gt;pictq.mutex);</span><br><span class="line">      <span class="hljs-comment">// 如果队列中还有剩余的帧</span></span><br><span class="line">      <span class="hljs-keyword">if</span> (frame_queue_nb_remaining(&amp;is-&gt;pictq) &gt; <span class="hljs-number">1</span>) &#123;</span><br><span class="line">        <span class="hljs-comment">// 获取下一个帧</span></span><br><span class="line">        Frame *nextvp = frame_queue_peek_next(&amp;is-&gt;pictq);</span><br><span class="line">        <span class="hljs-comment">// 计算当前帧的显示时长</span></span><br><span class="line">        duration = vp_duration(is, vp, nextvp);</span><br><span class="line">        <span class="hljs-comment">// time &gt; is-&gt;frame_timer + duration</span></span><br><span class="line">        <span class="hljs-comment">// 如果下一帧的时间还没有过去，则丢弃当前帧，队列读索引向后移动一位，重试</span></span><br><span class="line">        <span class="hljs-keyword">if</span> (!is-&gt;step &amp;&amp;</span><br><span class="line">            (framedrop &gt; <span class="hljs-number">0</span> ||</span><br><span class="line">             (framedrop &amp;&amp; get_master_sync_type(is) != AV_SYNC_VIDEO_MASTER)) &amp;&amp;</span><br><span class="line">            time &gt; is-&gt;frame_timer + duration) &#123;</span><br><span class="line">          is-&gt;frame_drops_late++;</span><br><span class="line">          frame_queue_next(&amp;is-&gt;pictq);</span><br><span class="line">          <span class="hljs-keyword">goto</span> retry;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      ...</span><br><span class="line">      </span><br><span class="line">      <span class="hljs-comment">// 队列向后移动一位</span></span><br><span class="line">      frame_queue_next(&amp;is-&gt;pictq);</span><br><span class="line">      <span class="hljs-comment">// 强制刷新</span></span><br><span class="line">      is-&gt;force_refresh = <span class="hljs-number">1</span>;</span><br><span class="line"></span><br><span class="line">      <span class="hljs-keyword">if</span> (is-&gt;step &amp;&amp; !is-&gt;paused) stream_toggle_pause(is);</span><br><span class="line">    &#125;</span><br><span class="line">  display:</span><br><span class="line">    <span class="hljs-comment">/* display picture */</span></span><br><span class="line">    <span class="hljs-comment">// 显示当前帧</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (!display_disable &amp;&amp; is-&gt;force_refresh &amp;&amp;</span><br><span class="line">        is-&gt;show_mode == SHOW_MODE_VIDEO &amp;&amp; is-&gt;pictq.rindex_shown)</span><br><span class="line">      video_display(is);</span><br><span class="line">  &#125;</span><br><span class="line">  is-&gt;force_refresh = <span class="hljs-number">0</span>;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="显示视频"><a href="#显示视频" class="headerlink" title="显示视频"></a>显示视频</h5><p>更新纹理数据，刷新屏幕<br><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">video_display</span><span class="hljs-params">(VideoState *is)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">if</span> (!is-&gt;width) video_open(is);</span><br><span class="line">  <span class="hljs-comment">// 设置颜色 黑色</span></span><br><span class="line">  SDL_SetRenderDrawColor(renderer, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">255</span>);</span><br><span class="line">  <span class="hljs-comment">// 使用黑色清空缓冲区</span></span><br><span class="line">  SDL_RenderClear(renderer);</span><br><span class="line">  </span><br><span class="line">  <span class="hljs-keyword">if</span> (is-&gt;audio_st &amp;&amp; is-&gt;show_mode != SHOW_MODE_VIDEO)</span><br><span class="line">    video_audio_display(is); <span class="hljs-comment">// 如果是音频播放模式，显示音频声波图</span></span><br><span class="line">  <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (is-&gt;video_st)</span><br><span class="line">    video_image_display(is);<span class="hljs-comment">// 更新纹理数据</span></span><br><span class="line">  <span class="hljs-comment">// 将渲染的内容刷新到屏幕上</span></span><br><span class="line">  SDL_RenderPresent(renderer);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h6 id="更新纹理数据"><a href="#更新纹理数据" class="headerlink" title="更新纹理数据"></a>更新纹理数据</h6><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">video_image_display</span><span class="hljs-params">(VideoState *is)</span> </span>&#123;</span><br><span class="line">  Frame *vp;</span><br><span class="line">  Frame *sp = <span class="hljs-literal">NULL</span>;</span><br><span class="line">  SDL_Rect rect;</span><br><span class="line">  <span class="hljs-comment">// 从视频原始数据队列中取出一帧，这里没有调用frame_queue_peek</span></span><br><span class="line">  <span class="hljs-comment">// 是因为更新纹理有两种情况：一种是继续显示当前帧，这种使用frame_queue_peek_last正好，另一种是显示下一帧，在这种情况下，会提前调用frame_queue_next移动，所以这里直接调用frame_queue_peek_last，不管哪种情况都是合适的。</span></span><br><span class="line">  vp = frame_queue_peek_last(&amp;is-&gt;pictq);</span><br><span class="line">  </span><br><span class="line">  ...</span><br><span class="line">  </span><br><span class="line">  <span class="hljs-comment">// 计算显示的矩阵</span></span><br><span class="line">  calculate_display_rect(&amp;rect, is-&gt;xleft, is-&gt;ytop, is-&gt;width, is-&gt;height,</span><br><span class="line">                         vp-&gt;width, vp-&gt;height, vp-&gt;sar);</span><br><span class="line">  <span class="hljs-comment">// 重复显示当前在显示的帧时，没必要重复上传数据到纹理中</span></span><br><span class="line">  <span class="hljs-keyword">if</span> (!vp-&gt;uploaded) &#123;</span><br><span class="line">    <span class="hljs-comment">// 如果视频帧还有没更新到纹理上</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (upload_texture(&amp;is-&gt;vid_texture, vp-&gt;frame, &amp;is-&gt;img_convert_ctx) &lt; <span class="hljs-number">0</span>)</span><br><span class="line">      <span class="hljs-keyword">return</span>;</span><br><span class="line">    <span class="hljs-comment">// 标记已经更新</span></span><br><span class="line">    vp-&gt;uploaded = <span class="hljs-number">1</span>;</span><br><span class="line">    <span class="hljs-comment">// TODO</span></span><br><span class="line">    vp-&gt;flip_v = vp-&gt;frame-&gt;linesize[<span class="hljs-number">0</span>] &lt; <span class="hljs-number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// 设置YUV转换RGB的转换公式</span></span><br><span class="line">  set_sdl_yuv_conversion_mode(vp-&gt;frame);</span><br><span class="line">  <span class="hljs-comment">// 将纹理上的内容拷贝到渲染器的默认渲染目标上</span></span><br><span class="line">  SDL_RenderCopyEx(renderer, is-&gt;vid_texture, <span class="hljs-literal">NULL</span>, &amp;rect, <span class="hljs-number">0</span>, <span class="hljs-literal">NULL</span>,</span><br><span class="line">                   vp-&gt;flip_v ? SDL_FLIP_VERTICAL : <span class="hljs-number">0</span>);</span><br><span class="line">  set_sdl_yuv_conversion_mode(<span class="hljs-literal">NULL</span>);</span><br><span class="line">  </span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="音频渲染线程"><a href="#音频渲染线程" class="headerlink" title="音频渲染线程"></a>音频渲染线程</h3><p>音频渲染线程是由SDL创建的，会在该线程中执行我们设置的回调函数。</p>
+<h4 id="回调函数"><a href="#回调函数" class="headerlink" title="回调函数"></a>回调函数</h4><p>在回调函数中主要处理两件事，一件就是从FrameQueue中取出len长度的数据放入到stream中，交给音频设备进行播放；另一件事就是更新音频时钟。</p>
+<figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">/**</span></span><br><span class="line"><span class="hljs-comment"> * 音频渲染线程 </span></span><br><span class="line"><span class="hljs-comment"> */</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">sdl_audio_callback</span><span class="hljs-params">(<span class="hljs-keyword">void</span> *opaque, Uint8 *stream, <span class="hljs-keyword">int</span> len)</span> </span>&#123;</span><br><span class="line">  VideoState *is = opaque;</span><br><span class="line">  <span class="hljs-keyword">int</span> audio_size, len1;</span><br><span class="line"></span><br><span class="line">  audio_callback_time = av_gettime_relative();</span><br><span class="line">    </span><br><span class="line">  <span class="hljs-keyword">while</span> (len &gt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">    <span class="hljs-comment">// 如果audio_buf中数据已经全部读完，则说明需要加入更多的数据</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (is-&gt;audio_buf_index &gt;= is-&gt;audio_buf_size) &#123;</span><br><span class="line">      <span class="hljs-comment">// 获取buffer到 is-&gt;audio_buf 中，返回获取的buffer大小</span></span><br><span class="line">      audio_size = audio_decode_frame(is);</span><br><span class="line">      <span class="hljs-keyword">if</span> (audio_size &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        <span class="hljs-comment">/* if error, just output silence */</span></span><br><span class="line">        is-&gt;audio_buf = <span class="hljs-literal">NULL</span>;</span><br><span class="line">        is-&gt;audio_buf_size = SDL_AUDIO_MIN_BUFFER_SIZE /</span><br><span class="line">                             is-&gt;audio_tgt.frame_size *</span><br><span class="line">                             is-&gt;audio_tgt.frame_size;</span><br><span class="line">      &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">        <span class="hljs-keyword">if</span> (is-&gt;show_mode != SHOW_MODE_VIDEO)</span><br><span class="line">          update_sample_display(is, (<span class="hljs-keyword">int16_t</span> *)is-&gt;audio_buf, audio_size);</span><br><span class="line">        <span class="hljs-comment">// 读取的buffer大小  </span></span><br><span class="line">        is-&gt;audio_buf_size = audio_size;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="hljs-comment">// 已经读取的buffer位置重置</span></span><br><span class="line">      is-&gt;audio_buf_index = <span class="hljs-number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-comment">// 计算还未读取的字节大小</span></span><br><span class="line">    len1 = is-&gt;audio_buf_size - is-&gt;audio_buf_index;</span><br><span class="line">    <span class="hljs-comment">// 如果为读取的字节大小大于音频设备想要的大小，则使用音频设备想要的大小</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (len1 &gt; len) len1 = len;</span><br><span class="line">    <span class="hljs-comment">// 将audio_buf中的数据copy到stream中</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (!is-&gt;muted &amp;&amp; is-&gt;audio_buf &amp;&amp; is-&gt;audio_volume == SDL_MIX_MAXVOLUME)</span><br><span class="line">      <span class="hljs-built_in">memcpy</span>(stream, (<span class="hljs-keyword">uint8_t</span> *)is-&gt;audio_buf + is-&gt;audio_buf_index, len1);</span><br><span class="line">    <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">      <span class="hljs-built_in">memset</span>(stream, <span class="hljs-number">0</span>, len1);</span><br><span class="line">      <span class="hljs-keyword">if</span> (!is-&gt;muted &amp;&amp; is-&gt;audio_buf)</span><br><span class="line">        SDL_MixAudioFormat(stream,</span><br><span class="line">                           (<span class="hljs-keyword">uint8_t</span> *)is-&gt;audio_buf + is-&gt;audio_buf_index,</span><br><span class="line">                           AUDIO_S16SYS, len1, is-&gt;audio_volume);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-comment">// 减去已经传递给音频设备的buffer大小，如果剩下的还有，则再次读取传递</span></span><br><span class="line">    len -= len1;</span><br><span class="line">    <span class="hljs-comment">// stream加上偏移量</span></span><br><span class="line">    stream += len1;</span><br><span class="line">    <span class="hljs-comment">// 更新audio_buf的偏移量</span></span><br><span class="line">    is-&gt;audio_buf_index += len1;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="hljs-comment">// 记录audio_buf中还剩余的大小</span></span><br><span class="line">  is-&gt;audio_write_buf_size = is-&gt;audio_buf_size - is-&gt;audio_buf_index;</span><br><span class="line">  <span class="hljs-comment">/* Let's assume the audio driver that is used by SDL has two periods. */</span></span><br><span class="line">  <span class="hljs-comment">// 更新音频时钟</span></span><br><span class="line">  <span class="hljs-keyword">if</span> (!isnan(is-&gt;audio_clock)) &#123;</span><br><span class="line">    <span class="hljs-comment">// 音频时钟中保存的是当前audio_buf开始的时间+时长，也就是结束的时间</span></span><br><span class="line">    <span class="hljs-comment">// 真正播放的准确时间应该要减去缓冲区中未使用的数据的时长，才是真正当前播放的时长</span></span><br><span class="line">    <span class="hljs-comment">// 缓冲区中未使用的字节大小 = 2 * is-&gt;audio_hw_buf_size 音频设备的缓冲区大小 + is-&gt;audio_write_buf_size audio_buf中还剩余的大小</span></span><br><span class="line">    <span class="hljs-comment">// 缓冲区中未使用的时长 = 缓冲区中未使用的字节大小 / （音频设备）1s数据的字节大小</span></span><br><span class="line">    <span class="hljs-comment">// 音频时钟准确时间 = 当前音频包结束时长 - 音频缓冲中剩余的数据时长</span></span><br><span class="line">    set_clock_at(&amp;is-&gt;audclk,</span><br><span class="line">                 is-&gt;audio_clock - (<span class="hljs-keyword">double</span>)(<span class="hljs-number">2</span> * is-&gt;audio_hw_buf_size +</span><br><span class="line">                                            is-&gt;audio_write_buf_size) /</span><br><span class="line">                                       is-&gt;audio_tgt.bytes_per_sec,</span><br><span class="line">                 is-&gt;audio_clock_serial, audio_callback_time / <span class="hljs-number">1000000.0</span>);</span><br><span class="line">    sync_clock_to_slave(&amp;is-&gt;extclk, &amp;is-&gt;audclk);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="重采样"><a href="#重采样" class="headerlink" title="重采样"></a>重采样</h5><p>如果音频数据参数与开启音频设备的参数不一致，那么是无法播放的，需要进行重采样<br><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">int</span> <span class="hljs-title">audio_decode_frame</span><span class="hljs-params">(VideoState *is)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">int</span> data_size, resampled_data_size;</span><br><span class="line">  <span class="hljs-keyword">int64_t</span> dec_channel_layout;</span><br><span class="line">  av_unused <span class="hljs-keyword">double</span> audio_clock0;</span><br><span class="line">  <span class="hljs-keyword">int</span> wanted_nb_samples;</span><br><span class="line">  Frame *af;</span><br><span class="line"></span><br><span class="line">  <span class="hljs-keyword">if</span> (is-&gt;paused) <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;</span><br><span class="line">  <span class="hljs-comment">// 循环从音频原始数据列表中获取一个可读帧，如果帧的序号与音频编码数据队列中的序号不一样，则丢帧</span></span><br><span class="line">  <span class="hljs-keyword">do</span> &#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="hljs-comment">// 从音频原始数据列表中获取一个可读帧</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (!(af = frame_queue_peek_readable(&amp;is-&gt;sampq))) <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;</span><br><span class="line">    <span class="hljs-comment">// 队列移动到下一个可读帧</span></span><br><span class="line">    frame_queue_next(&amp;is-&gt;sampq);</span><br><span class="line">  &#125; <span class="hljs-keyword">while</span> (af-&gt;serial != is-&gt;audioq.serial);</span><br><span class="line">  <span class="hljs-comment">// 根据音频参数计算一帧的字节大小  </span></span><br><span class="line">  data_size = av_samples_get_buffer_size(</span><br><span class="line">      <span class="hljs-literal">NULL</span>, af-&gt;frame-&gt;channels, af-&gt;frame-&gt;nb_samples, af-&gt;frame-&gt;format, <span class="hljs-number">1</span>);</span><br><span class="line"></span><br><span class="line">  dec_channel_layout =</span><br><span class="line">      (af-&gt;frame-&gt;channel_layout &amp;&amp;</span><br><span class="line">       af-&gt;frame-&gt;channels ==</span><br><span class="line">           av_get_channel_layout_nb_channels(af-&gt;frame-&gt;channel_layout))</span><br><span class="line">          ? af-&gt;frame-&gt;channel_layout</span><br><span class="line">          : av_get_default_channel_layout(af-&gt;frame-&gt;channels);</span><br><span class="line">  wanted_nb_samples = synchronize_audio(is, af-&gt;frame-&gt;nb_samples);</span><br><span class="line">  <span class="hljs-comment">// 如果音频数据的参数发生了变化， audio_src 默认是音频设备开启时的参数</span></span><br><span class="line">  <span class="hljs-comment">// 只有当音频数据参数发生了变化才会重新创建重采样上下文</span></span><br><span class="line">  <span class="hljs-keyword">if</span> (af-&gt;frame-&gt;format != is-&gt;audio_src.fmt ||</span><br><span class="line">      dec_channel_layout != is-&gt;audio_src.channel_layout ||</span><br><span class="line">      af-&gt;frame-&gt;sample_rate != is-&gt;audio_src.freq ||</span><br><span class="line">      (wanted_nb_samples != af-&gt;frame-&gt;nb_samples &amp;&amp; !is-&gt;swr_ctx)) &#123;</span><br><span class="line">    swr_free(&amp;is-&gt;swr_ctx);</span><br><span class="line">    <span class="hljs-comment">// 创建重采样上下文，将音频重采样成音频设备开启的参数</span></span><br><span class="line">    is-&gt;swr_ctx = swr_alloc_set_opts(<span class="hljs-literal">NULL</span>, is-&gt;audio_tgt.channel_layout,</span><br><span class="line">                                     is-&gt;audio_tgt.fmt, is-&gt;audio_tgt.freq,</span><br><span class="line">                                     dec_channel_layout, af-&gt;frame-&gt;format,</span><br><span class="line">                                     af-&gt;frame-&gt;sample_rate, <span class="hljs-number">0</span>, <span class="hljs-literal">NULL</span>);</span><br><span class="line">    </span><br><span class="line">    ...</span><br><span class="line">    </span><br><span class="line">    <span class="hljs-comment">// 记录当前帧的参数作为音频源的参数，如果后面的帧的参数发生了变化，则会重新创建重采样上下文</span></span><br><span class="line">    is-&gt;audio_src.channel_layout = dec_channel_layout;</span><br><span class="line">    is-&gt;audio_src.channels = af-&gt;frame-&gt;channels;</span><br><span class="line">    is-&gt;audio_src.freq = af-&gt;frame-&gt;sample_rate;</span><br><span class="line">    is-&gt;audio_src.fmt = af-&gt;frame-&gt;format;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// 重采样</span></span><br><span class="line">  <span class="hljs-keyword">if</span> (is-&gt;swr_ctx) &#123;</span><br><span class="line">    <span class="hljs-comment">// 输入</span></span><br><span class="line">    <span class="hljs-keyword">const</span> <span class="hljs-keyword">uint8_t</span> **in = (<span class="hljs-keyword">const</span> <span class="hljs-keyword">uint8_t</span> **)af-&gt;frame-&gt;extended_data;</span><br><span class="line">    <span class="hljs-comment">// 输出</span></span><br><span class="line">    <span class="hljs-keyword">uint8_t</span> **out = &amp;is-&gt;audio_buf1;</span><br><span class="line">    <span class="hljs-comment">// 计算重采样后AVFrame中具体有几帧数据</span></span><br><span class="line">    <span class="hljs-keyword">int</span> out_count = (<span class="hljs-keyword">int64_t</span>)wanted_nb_samples * is-&gt;audio_tgt.freq /</span><br><span class="line">                        af-&gt;frame-&gt;sample_rate +</span><br><span class="line">                    <span class="hljs-number">256</span>;</span><br><span class="line">    <span class="hljs-comment">// 计算重采样后的数据大小</span></span><br><span class="line">    <span class="hljs-keyword">int</span> out_size = av_samples_get_buffer_size(<span class="hljs-literal">NULL</span>, is-&gt;audio_tgt.channels,</span><br><span class="line">                                              out_count, is-&gt;audio_tgt.fmt, <span class="hljs-number">0</span>);</span><br><span class="line">    <span class="hljs-keyword">int</span> len2;</span><br><span class="line">    <span class="hljs-keyword">if</span> (out_size &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">      av_log(<span class="hljs-literal">NULL</span>, AV_LOG_ERROR, <span class="hljs-string">"av_samples_get_buffer_size() failed\n"</span>);</span><br><span class="line">      <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-comment">// 如果想要的帧数和AVFrame中的帧数不符合</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (wanted_nb_samples != af-&gt;frame-&gt;nb_samples) &#123;</span><br><span class="line">      <span class="hljs-keyword">if</span> (swr_set_compensation(is-&gt;swr_ctx,</span><br><span class="line">                               (wanted_nb_samples - af-&gt;frame-&gt;nb_samples) *</span><br><span class="line">                                   is-&gt;audio_tgt.freq / af-&gt;frame-&gt;sample_rate,</span><br><span class="line">                               wanted_nb_samples * is-&gt;audio_tgt.freq /</span><br><span class="line">                                   af-&gt;frame-&gt;sample_rate) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        av_log(<span class="hljs-literal">NULL</span>, AV_LOG_ERROR, <span class="hljs-string">"swr_set_compensation() failed\n"</span>);</span><br><span class="line">        <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-comment">// 分配输出buffer的内存</span></span><br><span class="line">    av_fast_malloc(&amp;is-&gt;audio_buf1, &amp;is-&gt;audio_buf1_size, out_size);</span><br><span class="line">    <span class="hljs-keyword">if</span> (!is-&gt;audio_buf1) <span class="hljs-keyword">return</span> AVERROR(ENOMEM);</span><br><span class="line">    <span class="hljs-comment">// 重采样</span></span><br><span class="line">    len2 = swr_convert(is-&gt;swr_ctx, out, out_count, in, af-&gt;frame-&gt;nb_samples);</span><br><span class="line">    <span class="hljs-keyword">if</span> (len2 &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">      av_log(<span class="hljs-literal">NULL</span>, AV_LOG_ERROR, <span class="hljs-string">"swr_convert() failed\n"</span>);</span><br><span class="line">      <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">if</span> (len2 == out_count) &#123;</span><br><span class="line">      av_log(<span class="hljs-literal">NULL</span>, AV_LOG_WARNING, <span class="hljs-string">"audio buffer is probably too small\n"</span>);</span><br><span class="line">      <span class="hljs-keyword">if</span> (swr_init(is-&gt;swr_ctx) &lt; <span class="hljs-number">0</span>) swr_free(&amp;is-&gt;swr_ctx);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-comment">// 获取buffer</span></span><br><span class="line">    is-&gt;audio_buf = is-&gt;audio_buf1;</span><br><span class="line">    <span class="hljs-comment">// 计算重采样后数据大小</span></span><br><span class="line">    resampled_data_size = len2 * is-&gt;audio_tgt.channels *</span><br><span class="line">                          av_get_bytes_per_sample(is-&gt;audio_tgt.fmt);</span><br><span class="line">  &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">    <span class="hljs-comment">// 不需要重采样，则直接使用AVFrame中的data</span></span><br><span class="line">    <span class="hljs-comment">// 获取buffer</span></span><br><span class="line">    is-&gt;audio_buf = af-&gt;frame-&gt;data[<span class="hljs-number">0</span>];</span><br><span class="line">    <span class="hljs-comment">// 获取buffer大小</span></span><br><span class="line">    resampled_data_size = data_size;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  audio_clock0 = is-&gt;audio_clock;</span><br><span class="line">  <span class="hljs-comment">/* update the audio clock with the pts */</span></span><br><span class="line">  <span class="hljs-comment">// 更新音频时钟，音频时钟 = 当前帧的PTS + （样本数量 / 每秒采样率） 也就是这些数据时长是多少秒</span></span><br><span class="line">  <span class="hljs-keyword">if</span> (!isnan(af-&gt;pts))</span><br><span class="line">    is-&gt;audio_clock =</span><br><span class="line">        af-&gt;pts + (<span class="hljs-keyword">double</span>)af-&gt;frame-&gt;nb_samples / af-&gt;frame-&gt;sample_rate;</span><br><span class="line">  <span class="hljs-keyword">else</span></span><br><span class="line">    is-&gt;audio_clock = NAN;</span><br><span class="line">  <span class="hljs-comment">// 更新音频时钟序号</span></span><br><span class="line">  is-&gt;audio_clock_serial = af-&gt;serial;</span><br><span class="line"></span><br><span class="line">  <span class="hljs-keyword">return</span> resampled_data_size;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+
+        </div>
+        
+        <ul class="post-copyright">
+            <li><strong>本文标题：</strong><a href="https://witgao.com/音视频开发之ffplay渲染线程分析/">音视频开发之ffplay渲染线程分析</a></li>
+            <li><strong>本文作者：</strong><a href="https://witgao.com">zhenyu</a></li>
+            <li><strong>本文链接：</strong><a href="https://witgao.com/音视频开发之ffplay渲染线程分析/">https://witgao.com/音视频开发之ffplay渲染线程分析/</a></li>
+            <li><strong>发布时间：</strong>2020-08-05</li>
+            <li><strong>版权声明：</strong>本博客所有文章除特别声明外，均采用 <a
+                    href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="external nofollow"
+                    target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明出处！
+            </li>
+        </ul>
+        
+        
+        
+        
+    </div>
+</div>
+
+
+
+
+
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next"
+                href="/音视频开发之ffplay解码线程分析/">
+                <span class="level-item">音视频开发之ffplay解码线程分析</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+    </div>
+</div>
+
+
+</div>
+                
+
+
+
+
+<div
+    class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left ">
+    
+    
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered" style="flex-shrink: 1">
+                <div>
+                    
+                    <figure class="image is-128x128 has-mb-6">
+                        <img class="" src="/images/avatar1.png" alt="zhenyu">
+                    </figure>
+                    
+                    <p class="is-size-4 is-block">
+                        zhenyu
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        富贵山庄无富贵，只留欢乐在此间
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>杭州</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        文章
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        38
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        分类
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        9
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        标签
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        0
+                    </p>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="level">
+            <a class="level-item button is-link is-rounded" href="https://github.com/witgao" target="_blank">
+                关注我</a>
+        </div>
+        
+        
+        
+    </div>
+</div>
+    
+    
+<div class="card widget column-left is-sticky" id="toc">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                目录
+            </h3>
+            <ul class="menu-list"><li>
+        <a class="is-flex" href="#视频渲染线程">
+        <span class="has-mr-6">1</span>
+        <span>视频渲染线程</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#初始化">
+        <span class="has-mr-6">1.1</span>
+        <span>初始化</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#初始化SDL">
+        <span class="has-mr-6">1.1.1</span>
+        <span>初始化SDL</span>
+        </a></li><li>
+        <a class="is-flex" href="#创建Window和Renderer">
+        <span class="has-mr-6">1.1.2</span>
+        <span>创建Window和Renderer</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#轮询">
+        <span class="has-mr-6">1.2</span>
+        <span>轮询</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#刷新视频">
+        <span class="has-mr-6">1.2.1</span>
+        <span>刷新视频</span>
+        </a></li><li>
+        <a class="is-flex" href="#显示视频">
+        <span class="has-mr-6">1.2.2</span>
+        <span>显示视频</span>
+        </a></li></ul></li></ul></li><li>
+        <a class="is-flex" href="#音频渲染线程">
+        <span class="has-mr-6">2</span>
+        <span>音频渲染线程</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#回调函数">
+        <span class="has-mr-6">2.1</span>
+        <span>回调函数</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#重采样">
+        <span class="has-mr-6">2.1.1</span>
+        <span>重采样</span>
+        </a></li></ul></li></ul></li></ul>
+        </div>
+    </div>
+</div>
+    
+    
+    <div class="column-right-shadow is-hidden-widescreen ">
+        
+    </div>
+    
+</div>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <!-- <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="/images/logo2.png" alt="音视频开发之ffplay渲染线程分析" height="28">
+                
+                </a> -->
+                <p class="is-size-7">
+                    &copy; 2020 zhenyu&nbsp;
+                    Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a
+                        href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank">Icarus</a>
+                    
+                </p>
+            </div>
+            <div class="level-end">
+                
+            </div>
+        </div>
+    </div>
+</footer>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("zh-CN");</script>
+
+<script>
+var IcarusThemeSettings = {
+    article: {
+        highlight: {
+            clipboard: true,
+            fold: 'unfolded'
+        }
+    }
+};
+</script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+
+
+
+    
+    
+<script src="/js/animation.js"></script>
+
+    
+    
+<script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+<script src="/js/gallery.js" defer></script>
+
+    
+    
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    MathJax.Hub.Config({
+        'HTML-CSS': {
+            matchFontHeight: false
+        },
+        SVG: {
+            matchFontHeight: false
+        },
+        CommonHTML: {
+            matchFontHeight: false
+        },
+        tex2jax: {
+            inlineMath: [
+                ['$','$'],
+                ['\\(','\\)']
+            ]
+        }
+    });
+});
+</script>
+    
+    
+<a id="back-to-top" title="回到顶端" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="想要查找什么..." />
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: '文章',
+                PAGES: '页面',
+                CATEGORIES: '分类',
+                TAGS: '标签',
+                UNTITLED: '(无标题)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+</body>
+
+</html>

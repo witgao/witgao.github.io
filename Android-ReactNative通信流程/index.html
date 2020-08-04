@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html  lang="zh">
+
+<head>
+    <meta charset="utf-8" />
+
+<meta name="generator" content="Hexo 3.9.0" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<title>Android-ReactNative通信流程 - 富贵山庄</title>
+
+
+    <meta name="description" content="JNI注册Android中注册JNI方法有两种方式，一种是静态注册，一种是动态注册。 动态注册因为JNI允许我们提供一个函数映射表(native函数和jni函数对应表)。而在执行System.loadLibrary加载so库时，会执行该so的JNI_OnLoad函数，利用这个时机可以动态注册JIN方法。具体实现的话是通过JNINativeMethod结构保存映射关系，然后通过RegisterNat">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android-ReactNative通信流程">
+<meta property="og:url" content="https://witgao.com/Android-ReactNative通信流程/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:description" content="JNI注册Android中注册JNI方法有两种方式，一种是静态注册，一种是动态注册。 动态注册因为JNI允许我们提供一个函数映射表(native函数和jni函数对应表)。而在执行System.loadLibrary加载so库时，会执行该so的JNI_OnLoad函数，利用这个时机可以动态注册JIN方法。具体实现的话是通过JNINativeMethod结构保存映射关系，然后通过RegisterNat">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://witgao.com/images/og_image.png">
+<meta property="og:updated_time" content="2020-07-13T13:41:26.774Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android-ReactNative通信流程">
+<meta name="twitter:description" content="JNI注册Android中注册JNI方法有两种方式，一种是静态注册，一种是动态注册。 动态注册因为JNI允许我们提供一个函数映射表(native函数和jni函数对应表)。而在执行System.loadLibrary加载so库时，会执行该so的JNI_OnLoad函数，利用这个时机可以动态注册JIN方法。具体实现的话是通过JNINativeMethod结构保存映射关系，然后通过RegisterNat">
+<meta name="twitter:image" content="https://witgao.com/images/og_image.png">
+
+
+
+
+
+
+
+<link rel="icon" href="/images/favicon1.svg">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/default.css">
+
+
+    
+    
+<style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+    
+    
+    
+    
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+    
+    
+    
+    
+    
+    
+    
+    <link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+    
+    
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body class="is-3-column">
+    <nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="/images/logo2.png" alt="Android-ReactNative通信流程" height="28">
+            
+            </a>
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item"
+                href="/">燕子坞</a>
+                
+                <a class="navbar-item"
+                href="/archives">听香水榭</a>
+                
+                <a class="navbar-item"
+                href="/categories">还施水阁</a>
+                
+                <a class="navbar-item"
+                href="/about">思过崖</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    <a class="navbar-item" target="_blank" title="Download on GitHub" href="https://github.com/witgao/blog">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                <a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;">
+                    <i class="fas fa-list-ul"></i>
+                </a>
+                
+                
+                <a class="navbar-item search" title="搜索" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-9-widescreen has-order-2 column-main">
+<div class="card">
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2018-06-27T16:00:00.000Z">2018-06-28</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/">刀枪棍棒（Android）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/五虎断门刀（Android原生）/">五虎断门刀（Android原生）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    24 分钟 读完 (大约 3656 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            Android-ReactNative通信流程
+            
+        </h1>
+        <div class="content">
+            <h4 id="JNI注册"><a href="#JNI注册" class="headerlink" title="JNI注册"></a>JNI注册</h4><p>Android中注册JNI方法有两种方式，一种是静态注册，一种是动态注册。</p>
+<h5 id="动态注册"><a href="#动态注册" class="headerlink" title="动态注册"></a>动态注册</h5><p>因为JNI允许我们提供一个函数映射表(native函数和jni函数对应表)。而在执行System.loadLibrary加载so库时，会执行该so的JNI_OnLoad函数，利用这个时机可以动态注册JIN方法。具体实现的话是通过JNINativeMethod结构保存映射关系，然后通过RegisterNatives函数来将该映射关系注册。</p>
+<h5 id="静态注册"><a href="#静态注册" class="headerlink" title="静态注册"></a>静态注册</h5><p>如果没有在JNI_OnLoad中将JNI方法注册(将方法在进程中的地址增加到ClassObject-&gt;directMethods中)，则在调用的时候解析javah风格的函数(比如Java_com_example_hellojni_HelloJni_stringFromJNI)，进行静态注册。静态注册根据函数名来建立java方法和jni函数的对应关系。静态注册需要根据方法名本地搜索，比较耗时。</p>
+<h5 id="RN中的JNI注册"><a href="#RN中的JNI注册" class="headerlink" title="RN中的JNI注册"></a>RN中的JNI注册</h5><h6 id="JNI-OnLoad"><a href="#JNI-OnLoad" class="headerlink" title="JNI_OnLoad"></a>JNI_OnLoad</h6><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta"># src/main/jni/react/jni/OnLoad.cpp</span></span><br><span class="line"><span class="hljs-keyword">extern</span> <span class="hljs-string">"C"</span> <span class="hljs-function">JNIEXPORT jint <span class="hljs-title">JNI_OnLoad</span><span class="hljs-params">(JavaVM* vm, <span class="hljs-keyword">void</span>* reserved)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-comment">// 调用各个类的注册方法</span></span><br><span class="line">  <span class="hljs-keyword">return</span> initialize(vm, [] &#123;</span><br><span class="line">    gloginit::initialize();</span><br><span class="line">    JSCJavaScriptExecutorHolder::registerNatives();</span><br><span class="line">    ProxyJavaScriptExecutorHolder::registerNatives();</span><br><span class="line">    CatalystInstanceImpl::registerNatives();</span><br><span class="line">    CxxModuleWrapperBase::registerNatives();</span><br><span class="line">    CxxModuleWrapper::registerNatives();</span><br><span class="line">    JCxxCallbackImpl::registerNatives();</span><br><span class="line">    NativeArray::registerNatives();</span><br><span class="line">    NativeDeltaClient::registerNatives();</span><br><span class="line">    ReadableNativeArray::registerNatives();</span><br><span class="line">    WritableNativeArray::registerNatives();</span><br><span class="line">    NativeMap::registerNatives();</span><br><span class="line">    ReadableNativeMap::registerNatives();</span><br><span class="line">    WritableNativeMap::registerNatives();</span><br><span class="line">    ReadableNativeMapKeySetIterator::registerNatives();</span><br><span class="line"></span><br><span class="line">    #ifdef WITH_INSPECTOR</span><br><span class="line">    JInspector::registerNatives();</span><br><span class="line">    #endif</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="CatalystInstanceImpl-registerNatives"><a href="#CatalystInstanceImpl-registerNatives" class="headerlink" title="CatalystInstanceImpl.registerNatives"></a>CatalystInstanceImpl.registerNatives</h6><p>先拿CatalystInstanceImpl来举例子，先准备好映射数据，然后构建映射表，再通过FindClass获取对应java类的引用，通过这些参数使用RegisterNatives函数来注册。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta"># src/main/jni/react/jni/CatalystInstanceImpl.h </span></span><br><span class="line"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CatalystInstanceImpl</span> :</span> <span class="hljs-keyword">public</span> jni::HybridClass&lt;CatalystInstanceImpl&gt; &#123;</span><br><span class="line"> <span class="hljs-comment">// 该类对应的Java类，通过该路径来加载java类的class引用</span></span><br><span class="line"> <span class="hljs-keyword">public</span>:</span><br><span class="line">  <span class="hljs-keyword">static</span> <span class="hljs-keyword">constexpr</span> <span class="hljs-keyword">auto</span> kJavaDescriptor = <span class="hljs-string">"Lcom/facebook/react/bridge/CatalystInstanceImpl;"</span>;</span><br><span class="line"></span><br><span class="line">  <span class="hljs-keyword">static</span> jni::local_ref&lt;jhybriddata&gt; initHybrid(jni::alias_ref&lt;jclass&gt;);</span><br><span class="line">  ~CatalystInstanceImpl() override;</span><br><span class="line"></span><br><span class="line">  <span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">registerNatives</span><span class="hljs-params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta"># src/main/jni/react/jni/CatalysInstanceImpl.cpp </span></span><br><span class="line"><span class="hljs-keyword">void</span> CatalystInstanceImpl::registerNatives() &#123;</span><br><span class="line">  registerHybrid(&#123;</span><br><span class="line">    <span class="hljs-comment">// 返回&#123;java方法名，java类命名空间(CatalysInstanceImpl.kJavaDescriptor),JNIMethod指针&#125;</span></span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"initHybrid"</span>, CatalystInstanceImpl::initHybrid),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"initializeBridge"</span>, CatalystInstanceImpl::initializeBridge),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"jniExtendNativeModules"</span>, CatalystInstanceImpl::extendNativeModules),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"jniSetSourceURL"</span>, CatalystInstanceImpl::jniSetSourceURL),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"jniRegisterSegment"</span>, CatalystInstanceImpl::jniRegisterSegment),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"jniLoadScriptFromAssets"</span>, CatalystInstanceImpl::jniLoadScriptFromAssets),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"jniLoadScriptFromFile"</span>, CatalystInstanceImpl::jniLoadScriptFromFile),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"jniLoadScriptFromDeltaBundle"</span>, CatalystInstanceImpl::jniLoadScriptFromDeltaBundle),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"jniCallJSFunction"</span>, CatalystInstanceImpl::jniCallJSFunction),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"jniCallJSCallback"</span>, CatalystInstanceImpl::jniCallJSCallback),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"setGlobalVariable"</span>, CatalystInstanceImpl::setGlobalVariable),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"getJavaScriptContext"</span>, CatalystInstanceImpl::getJavaScriptContext),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"jniHandleMemoryPressure"</span>, CatalystInstanceImpl::handleMemoryPressure),</span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  JNativeRunnable::registerNatives();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+ <a id="more"></a>
+<h6 id="registerHybrid"><a href="#registerHybrid" class="headerlink" title="registerHybrid"></a>registerHybrid</h6><p>javaClassStatic函数是通过FindClass(name)来加载对应java类的class引用(加载的类名就是上面定义的kJavaDescriptor)，得到jclass对象，而JClass是对它的包装。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">registerHybrid</span><span class="hljs-params">(<span class="hljs-built_in">std</span>::<span class="hljs-built_in">initializer_list</span>&lt;NativeMethod&gt; methods)</span> </span>&#123;</span><br><span class="line">  javaClassStatic()-&gt;registerNatives(methods);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="JClass-registerNatives"><a href="#JClass-registerNatives" class="headerlink" title="JClass.registerNatives"></a>JClass.registerNatives</h6><p>将JNI函数映射表与该jclass对象绑定</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta"># src/main/jni/first-party/fb/<span class="hljs-meta-keyword">include</span>/fb/fbjni/CoreClases-inl.h</span></span><br><span class="line"><span class="hljs-keyword">inline</span> <span class="hljs-keyword">void</span> JClass::registerNatives(<span class="hljs-built_in">std</span>::<span class="hljs-built_in">initializer_list</span>&lt;NativeMethod&gt; methods) &#123;</span><br><span class="line">  <span class="hljs-keyword">const</span> <span class="hljs-keyword">auto</span> env = internal::getEnv();</span><br><span class="line">  <span class="hljs-comment">// 构建native和jni方法的映射关系表</span></span><br><span class="line">  JNINativeMethod jnimethods[methods.size()];</span><br><span class="line">  <span class="hljs-keyword">size_t</span> i = <span class="hljs-number">0</span>;</span><br><span class="line">  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">auto</span> it = methods.begin(); it &lt; methods.end(); ++it, ++i) &#123;</span><br><span class="line">    <span class="hljs-comment">// JNINativeMethod结构包含方法名、方法签名、jni函数指针</span></span><br><span class="line">    jnimethods[i].name = it-&gt;name;</span><br><span class="line">    jnimethods[i].signature = it-&gt;descriptor.c_str();</span><br><span class="line">    jnimethods[i].fnPtr = <span class="hljs-keyword">reinterpret_cast</span>&lt;<span class="hljs-keyword">void</span>*&gt;(it-&gt;wrapper);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// 通过RegisterNatives函数来注册，参数为(java class引用，映射表，方法数)</span></span><br><span class="line">  <span class="hljs-comment">// 所以这里的self()就是jclass</span></span><br><span class="line">  <span class="hljs-keyword">auto</span> result = env-&gt;RegisterNatives(self(), jnimethods, methods.size());</span><br><span class="line">  FACEBOOK_JNI_THROW_EXCEPTION_IF(result != JNI_OK);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="Java调用Js"><a href="#Java调用Js" class="headerlink" title="Java调用Js"></a>Java调用Js</h4><p><img src="/images/JavaToJs.png" alt="JavaToJs流程"></p>
+<h5 id="在Java层注册Js层module"><a href="#在Java层注册Js层module" class="headerlink" title="在Java层注册Js层module"></a>在Java层注册Js层module</h5><p>在Java层提供了一系列的Js层module的接口类，里面定义了可以调用Js层module的方法。在Java层中通过代理创建这些接口的实例，让外层直接调用这些接口的方法。而方法的真正实现都会通过jni转向c++层，而后转向js层。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 这就是AppRegistry.js的接口类，里面定义了Java层可以调用的三个方法</span></span><br><span class="line"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">AppRegistry</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">JavaScriptModule</span> </span>&#123;</span><br><span class="line">  <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">runApplication</span><span class="hljs-params">(String appKey, WritableMap appParameters)</span></span>;</span><br><span class="line">  <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">unmountApplicationComponentAtRootTag</span><span class="hljs-params">(<span class="hljs-keyword">int</span> rootNodeTag)</span></span>;</span><br><span class="line">  <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">startHeadlessTask</span><span class="hljs-params">(<span class="hljs-keyword">int</span> taskId, String taskKey, WritableMap data)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="Java层"><a href="#Java层" class="headerlink" title="Java层"></a>Java层</h5><h6 id="CatalystInstanceImpl-getJSModule"><a href="#CatalystInstanceImpl-getJSModule" class="headerlink" title="CatalystInstanceImpl.getJSModule"></a>CatalystInstanceImpl.getJSModule</h6><p>getJSModule方法是通过动态代理生成指定接口实例。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">public</span> <span class="hljs-keyword">synchronized</span> &lt;T extends JavaScriptModule&gt; <span class="hljs-function">T <span class="hljs-title">getJavaScriptModule</span><span class="hljs-params">(</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    CatalystInstance instance,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    Class&lt;T&gt; moduleInterface)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-comment">// moduleInterface 就是对应JSModule的Java接口</span></span><br><span class="line">  <span class="hljs-comment">// 取缓存</span></span><br><span class="line">  JavaScriptModule <span class="hljs-keyword">module</span> = mModuleInstances.get(moduleInterface);</span><br><span class="line">  <span class="hljs-keyword">if</span> (<span class="hljs-keyword">module</span> != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">    <span class="hljs-keyword">return</span> (T) <span class="hljs-keyword">module</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// 通过Proxy创建动态代理对象</span></span><br><span class="line">  JavaScriptModule interfaceProxy = (JavaScriptModule) Proxy.newProxyInstance(</span><br><span class="line">      moduleInterface.getClassLoader(),</span><br><span class="line">      <span class="hljs-keyword">new</span> Class[]&#123;moduleInterface&#125;,</span><br><span class="line">      <span class="hljs-comment">// 代理对象的具体实现是在InvocationHandler中</span></span><br><span class="line">      <span class="hljs-keyword">new</span> JavaScriptModuleInvocationHandler(instance, moduleInterface));</span><br><span class="line">  <span class="hljs-comment">// 缓存</span></span><br><span class="line">  mModuleInstances.put(moduleInterface, interfaceProxy);</span><br><span class="line">  <span class="hljs-keyword">return</span> (T) interfaceProxy;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>代理对象的真正实现是在InvocationHandler的invoke方法中。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta">@Override</span></span><br><span class="line"><span class="hljs-keyword">public</span> <span class="hljs-meta">@Nullable</span> <span class="hljs-function">Object <span class="hljs-title">invoke</span><span class="hljs-params">(Object proxy, Method method, @Nullable Object[] args)</span> <span class="hljs-keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">  NativeArray jsArgs = args != <span class="hljs-keyword">null</span></span><br><span class="line">    ? Arguments.fromJavaArgs(args)</span><br><span class="line">    : <span class="hljs-keyword">new</span> WritableNativeArray();</span><br><span class="line">  mCatalystInstance.callFunction(getJSModuleName(), method.getName(), jsArgs);</span><br><span class="line">  <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="CatalystInstanceImpl-callFunction"><a href="#CatalystInstanceImpl-callFunction" class="headerlink" title="CatalystInstanceImpl.callFunction"></a>CatalystInstanceImpl.callFunction</h6><p>将JSModuleName、MethodName、Args这三个参数传给C++层，通过C++层来传递给JS层。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">callFunction</span><span class="hljs-params">(PendingJSCall function)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">if</span> (!mAcceptCalls) &#123;</span><br><span class="line">    <span class="hljs-keyword">synchronized</span> (mJSCallsPendingInitLock) &#123;</span><br><span class="line">      <span class="hljs-keyword">if</span> (!mAcceptCalls) &#123;</span><br><span class="line">        mJSCallsPendingInit.add(function);</span><br><span class="line">        <span class="hljs-keyword">return</span>;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// 调用了JNI方法</span></span><br><span class="line">  function.call(<span class="hljs-keyword">this</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="CatalystInstanceImpl-jniCallJSFunction"><a href="#CatalystInstanceImpl-jniCallJSFunction" class="headerlink" title="CatalystInstanceImpl.jniCallJSFunction"></a>CatalystInstanceImpl.jniCallJSFunction</h6><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">native</span> <span class="hljs-keyword">void</span> <span class="hljs-title">jniCallJSFunction</span><span class="hljs-params">(String <span class="hljs-keyword">module</span>,String method,NativeArray arguments)</span></span>;</span><br></pre></td></tr></table></figure>
+<h5 id="C-层"><a href="#C-层" class="headerlink" title="C++层"></a>C++层</h5><h6 id="CatalystInstanceImpl-jniCallJSFunction-1"><a href="#CatalystInstanceImpl-jniCallJSFunction-1" class="headerlink" title="CatalystInstanceImpl.jniCallJSFunction"></a>CatalystInstanceImpl.jniCallJSFunction</h6><p>最终会调用到NativeToJsBridge，它专门负责Native对Js的调用。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">void</span> CatalystInstanceImpl::jniCallJSFunction(<span class="hljs-built_in">std</span>::<span class="hljs-built_in">string</span> <span class="hljs-keyword">module</span>, <span class="hljs-built_in">std</span>::<span class="hljs-built_in">string</span> method, NativeArray* arguments) &#123;</span><br><span class="line">  instance_-&gt;callJSFunction(<span class="hljs-built_in">std</span>::move(<span class="hljs-keyword">module</span>),</span><br><span class="line">                            <span class="hljs-built_in">std</span>::move(method),</span><br><span class="line">                            arguments-&gt;consume());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="NativeToJsBridge-callFunction"><a href="#NativeToJsBridge-callFunction" class="headerlink" title="NativeToJsBridge.callFunction"></a>NativeToJsBridge.callFunction</h6><p>所有的Native对Js的调用都由NativeToJsBridge来负责调度，所有Native对Js的调用都会发到JS消息线程中处理。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">void</span> NativeToJsBridge::callFunction(</span><br><span class="line">    <span class="hljs-built_in">std</span>::<span class="hljs-built_in">string</span>&amp;&amp; <span class="hljs-keyword">module</span>,</span><br><span class="line">    <span class="hljs-built_in">std</span>::<span class="hljs-built_in">string</span>&amp;&amp; method,</span><br><span class="line">    folly::dynamic&amp;&amp; arguments) &#123;</span><br><span class="line">    ...</span><br><span class="line">  <span class="hljs-comment">// 将消息发送到JS消息线程中处理</span></span><br><span class="line">  runOnExecutorQueue([<span class="hljs-keyword">module</span> = <span class="hljs-built_in">std</span>::move(<span class="hljs-keyword">module</span>), method = <span class="hljs-built_in">std</span>::move(method), arguments = <span class="hljs-built_in">std</span>::move(arguments), systraceCookie]</span><br><span class="line">    (JSExecutor* executor) &#123;</span><br><span class="line">      ...</span><br><span class="line">      executor-&gt;callFunction(<span class="hljs-keyword">module</span>, method, arguments);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="JSCExecutor-callFunction"><a href="#JSCExecutor-callFunction" class="headerlink" title="JSCExecutor.callFunction"></a>JSCExecutor.callFunction</h6><p>JSCExecutor负责与Js进行真正的接触，在JSCExecutor中保存了JS运行环境的全局变量MessageQueue对象的引用，以及其相关方法的引用。通过该对象的引用和方法引用，可以调用该对象的方法。这就是c++调用js方法的真相。</p>
+<p>而m_callFunctionReturnFlushedQueueJS就是获取的MessageQueue.callFunctionReturenFlushedQueue函数引用。这些对象引用都是在bindBridge中进行的。</p>
+<p>在callAsFunction中会通过JSC引擎来调用m_callFunctionReturnFlushedQueueJS这个函数。此时代码就进入了JS层。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">void</span> JSCExecutor::callFunction(</span><br><span class="line">    <span class="hljs-keyword">const</span> <span class="hljs-built_in">std</span>::<span class="hljs-built_in">string</span>&amp; moduleId,</span><br><span class="line">    <span class="hljs-keyword">const</span> <span class="hljs-built_in">std</span>::<span class="hljs-built_in">string</span>&amp; methodId,</span><br><span class="line">    <span class="hljs-keyword">const</span> folly::dynamic&amp; arguments) &#123;</span><br><span class="line">  </span><br><span class="line">  <span class="hljs-keyword">auto</span> result = [&amp;] &#123;</span><br><span class="line">    JSContextLock lock(m_context);</span><br><span class="line">    <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">      <span class="hljs-keyword">if</span> (!m_callFunctionReturnResultAndFlushedQueueJS) &#123;</span><br><span class="line">        <span class="hljs-comment">// 绑定JS运行环境中的MessageQueue对象引用</span></span><br><span class="line">        bindBridge();</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="hljs-comment">// 调用MessageQueue.callFunctionReturenFlushedQueue函数</span></span><br><span class="line">      <span class="hljs-keyword">return</span> m_callFunctionReturnFlushedQueueJS-&gt;callAsFunction(</span><br><span class="line">          &#123;Value(m_context, String::createExpectingAscii(m_context, moduleId)),</span><br><span class="line">           Value(m_context, String::createExpectingAscii(m_context, methodId)),</span><br><span class="line">           Value::fromDynamic(m_context, <span class="hljs-built_in">std</span>::move(arguments))&#125;);</span><br><span class="line">    &#125; <span class="hljs-keyword">catch</span> (...) &#123;</span><br><span class="line">      <span class="hljs-built_in">std</span>::throw_with_nested(</span><br><span class="line">          <span class="hljs-built_in">std</span>::runtime_error(<span class="hljs-string">"Error calling "</span> + moduleId + <span class="hljs-string">"."</span> + methodId));</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;();</span><br><span class="line">  <span class="hljs-comment">// 返回的结果是js调用native方法的请求队列，处理这些请求</span></span><br><span class="line">  callNativeModules(<span class="hljs-built_in">std</span>::move(result));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="JSCExecutor-bindBridge"><a href="#JSCExecutor-bindBridge" class="headerlink" title="JSCExecutor.bindBridge"></a>JSCExecutor.bindBridge</h6><p>获取js环境中的全局属性 MessageQueue，以及MessageQueue中一些函数引用。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">void</span> JSCExecutor::bindBridge() <span class="hljs-keyword">throw</span>(JSException) &#123;</span><br><span class="line">  SystraceSection s(<span class="hljs-string">"JSCExecutor::bindBridge"</span>);</span><br><span class="line">  <span class="hljs-built_in">std</span>::call_once(m_bindFlag, [<span class="hljs-keyword">this</span>] &#123;</span><br><span class="line">    <span class="hljs-keyword">auto</span> global = Object::getGlobalObject(m_context);</span><br><span class="line">    <span class="hljs-comment">// 获取js运行环境的全局变量__fbBatchedBridge的引用</span></span><br><span class="line">    <span class="hljs-comment">// __fbBatchedBridge就是MessageQueue对象实例</span></span><br><span class="line">    <span class="hljs-keyword">auto</span> batchedBridgeValue = global.getProperty(<span class="hljs-string">"__fbBatchedBridge"</span>);</span><br><span class="line">    <span class="hljs-keyword">if</span> (batchedBridgeValue.isUndefined()) &#123;</span><br><span class="line">      <span class="hljs-keyword">auto</span> requireBatchedBridge =</span><br><span class="line">          global.getProperty(<span class="hljs-string">"__fbRequireBatchedBridge"</span>);</span><br><span class="line">      <span class="hljs-keyword">if</span> (!requireBatchedBridge.isUndefined()) &#123;</span><br><span class="line">        batchedBridgeValue = requireBatchedBridge.asObject().callAsFunction(&#123;&#125;);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="hljs-keyword">if</span> (batchedBridgeValue.isUndefined()) &#123;</span><br><span class="line">        <span class="hljs-keyword">throw</span> JSException(</span><br><span class="line">            <span class="hljs-string">"Could not get BatchedBridge, make sure your bundle is packaged correctly"</span>);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">auto</span> batchedBridge = batchedBridgeValue.asObject();</span><br><span class="line">    <span class="hljs-comment">// 获取MessageQueue的各个方法引用</span></span><br><span class="line">    <span class="hljs-comment">// 获取MessageQueue.callFunctionReturnFlushedQueue函数引用</span></span><br><span class="line">    m_callFunctionReturnFlushedQueueJS =</span><br><span class="line">        batchedBridge.getProperty(<span class="hljs-string">"callFunctionReturnFlushedQueue"</span>).asObject();</span><br><span class="line">    <span class="hljs-comment">// 获取MessageQueue.invokeCallbackAndReturnFlushedQueue函数引用</span></span><br><span class="line">    m_invokeCallbackAndReturnFlushedQueueJS =</span><br><span class="line">        batchedBridge.getProperty(<span class="hljs-string">"invokeCallbackAndReturnFlushedQueue"</span>)</span><br><span class="line">            .asObject();</span><br><span class="line">    <span class="hljs-comment">// 获取MessageQueue.flushedQueue函数引用</span></span><br><span class="line">    m_flushedQueueJS = batchedBridge.getProperty(<span class="hljs-string">"flushedQueue"</span>).asObject();</span><br><span class="line">    <span class="hljs-comment">// 获取MessageQueue.callFunctionReturnResultAndFlushedQueue函数引用</span></span><br><span class="line">    m_callFunctionReturnResultAndFlushedQueueJS =</span><br><span class="line">        batchedBridge.getProperty(<span class="hljs-string">"callFunctionReturnResultAndFlushedQueue"</span>)</span><br><span class="line">            .asObject();</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="Js层"><a href="#Js层" class="headerlink" title="Js层"></a>Js层</h5><h6 id="MessageQueue-callFunctionReturnResultAndFlushedQueue"><a href="#MessageQueue-callFunctionReturnResultAndFlushedQueue" class="headerlink" title="MessageQueue.callFunctionReturnResultAndFlushedQueue"></a>MessageQueue.callFunctionReturnResultAndFlushedQueue</h6><figure class="highlight js hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">callFunctionReturnResultAndFlushedQueue(</span><br><span class="line">  <span class="hljs-built_in">module</span>: string,</span><br><span class="line">  method: string,</span><br><span class="line">  args: any[],</span><br><span class="line">) &#123;</span><br><span class="line">  <span class="hljs-keyword">let</span> result;</span><br><span class="line">  <span class="hljs-keyword">this</span>.__guard(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="hljs-comment">// 执行JS方法</span></span><br><span class="line">    result = <span class="hljs-keyword">this</span>.__callFunction(<span class="hljs-built_in">module</span>, method, args);</span><br><span class="line">  &#125;);</span><br><span class="line">  <span class="hljs-comment">// 返回JS对Native方法调用请求的请求队列</span></span><br><span class="line">  <span class="hljs-keyword">return</span> [result, <span class="hljs-keyword">this</span>.flushedQueue()];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="MessageQueue-callFunction"><a href="#MessageQueue-callFunction" class="headerlink" title="MessageQueue.__callFunction"></a>MessageQueue.__callFunction</h6><p>getCallableModule会从所有注册的module列表中找到指定name的module。注册是通过MessageQueue.registerCallableModule来注册的。</p>
+<figure class="highlight js hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">__callFunction(<span class="hljs-built_in">module</span>: string, <span class="hljs-attr">method</span>: string, <span class="hljs-attr">args</span>: any[]): any &#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="hljs-comment">// 获取到指定Module对象</span></span><br><span class="line">  <span class="hljs-keyword">const</span> moduleMethods = <span class="hljs-keyword">this</span>.getCallableModule(<span class="hljs-built_in">module</span>);</span><br><span class="line">  <span class="hljs-comment">// 执行该对象的指定方法，这样就完成了Java层对JS方法的调用</span></span><br><span class="line">  <span class="hljs-keyword">const</span> result = moduleMethods[method].apply(moduleMethods, args);</span><br><span class="line">  Systrace.endEvent();</span><br><span class="line">  <span class="hljs-keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight js hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 比如这就是AppRegistry Module的注册</span></span><br><span class="line">BatchedBridge.registerCallableModule(<span class="hljs-string">'AppRegistry'</span>, AppRegistry);</span><br></pre></td></tr></table></figure>
+<h6 id="MessageQueue全局属性"><a href="#MessageQueue全局属性" class="headerlink" title="MessageQueue全局属性"></a>MessageQueue全局属性</h6><p>在c++层获取的全局属性__fbBatchedBridge，就是在这里注册的，其值就是MessageQueue对象实例。</p>
+<figure class="highlight js hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">const</span> BatchedBridge = <span class="hljs-keyword">new</span> MessageQueue();</span><br><span class="line"></span><br><span class="line"><span class="hljs-built_in">Object</span>.defineProperty(global, <span class="hljs-string">'__fbBatchedBridge'</span>, &#123;</span><br><span class="line">  configurable: <span class="hljs-literal">true</span>,</span><br><span class="line">  value: BatchedBridge,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h4 id="Js调用Java"><a href="#Js调用Java" class="headerlink" title="Js调用Java"></a>Js调用Java</h4><p><img src="/images/JsToJava.png" alt="JsToJava流程"></p>
+<h5 id="在Js层注册Java层module"><a href="#在Js层注册Java层module" class="headerlink" title="在Js层注册Java层module"></a>在Js层注册Java层module</h5><h6 id="NativeModules-JS层"><a href="#NativeModules-JS层" class="headerlink" title="NativeModules (JS层)"></a>NativeModules (JS层)</h6><p>global.nativeModuleProxy是在c++层的JSCExecutor创建的时候设置的，值是所有Java层module列表。</p>
+<figure class="highlight js hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 将genModule设置成全局属性，方便c++层调用该方法创建js层的java module对象。</span></span><br><span class="line">global.__fbGenNativeModule = genModule;</span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">let</span> NativeModules: &#123;[moduleName: string]: <span class="hljs-built_in">Object</span>&#125; = &#123;&#125;;</span><br><span class="line"><span class="hljs-keyword">if</span> (global.nativeModuleProxy) &#123;</span><br><span class="line">  <span class="hljs-comment">// 获取全局变量nativeModuleProxy，将其导出</span></span><br><span class="line">  NativeModules = global.nativeModuleProxy;</span><br><span class="line">&#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (!global.nativeExtensions) &#123;</span><br><span class="line">  <span class="hljs-comment">// 如果c++层并没有设置该值，则自己手动创建</span></span><br><span class="line">  <span class="hljs-comment">// __fbBatchedBridgeConfig是在c++层设置的Java层module的配置列表</span></span><br><span class="line">  <span class="hljs-keyword">const</span> bridgeConfig = global.__fbBatchedBridgeConfig;</span><br><span class="line">  <span class="hljs-keyword">const</span> defineLazyObjectProperty = <span class="hljs-built_in">require</span>(<span class="hljs-string">'defineLazyObjectProperty'</span>);</span><br><span class="line">  (bridgeConfig.remoteModuleConfig || []).forEach(</span><br><span class="line">    (config: ModuleConfig, <span class="hljs-attr">moduleID</span>: number) =&gt; &#123;</span><br><span class="line">      <span class="hljs-comment">// 创建js层java module对象</span></span><br><span class="line">      <span class="hljs-keyword">const</span> info = genModule(config, moduleID);</span><br><span class="line">      <span class="hljs-keyword">if</span> (!info) &#123;</span><br><span class="line">        <span class="hljs-keyword">return</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="hljs-keyword">if</span> (info.module) &#123;</span><br><span class="line">        NativeModules[info.name] = info.module;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">        defineLazyObjectProperty(NativeModules, info.name, &#123;</span><br><span class="line">          get: <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> loadModule(info.name, moduleID),</span><br><span class="line">        &#125;);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">  );</span><br><span class="line">&#125;</span><br><span class="line"><span class="hljs-built_in">module</span>.exports = NativeModules;</span><br></pre></td></tr></table></figure>
+<h6 id="设置nativeModuleProxy-C-层"><a href="#设置nativeModuleProxy-C-层" class="headerlink" title="设置nativeModuleProxy (C++层)"></a>设置nativeModuleProxy (C++层)</h6><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">JSCExecutor::JSCExecutor(</span><br><span class="line">    <span class="hljs-built_in">std</span>::<span class="hljs-built_in">shared_ptr</span>&lt;ExecutorDelegate&gt; delegate,</span><br><span class="line">    <span class="hljs-built_in">std</span>::<span class="hljs-built_in">shared_ptr</span>&lt;MessageQueueThread&gt; messageQueueThread,</span><br><span class="line">    <span class="hljs-keyword">const</span> folly::dynamic&amp; jscConfig) <span class="hljs-keyword">throw</span>(JSException)</span><br><span class="line">    : m_delegate(delegate),</span><br><span class="line">      m_messageQueueThread(messageQueueThread),</span><br><span class="line">      m_nativeModules(delegate ? delegate-&gt;getModuleRegistry() : <span class="hljs-literal">nullptr</span>),</span><br><span class="line">      m_jscConfig(jscConfig) &#123;</span><br><span class="line">  initOnJSVMThread();</span><br><span class="line"></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="hljs-comment">// 设置js运行环境全局属性nativeModuleProxy</span></span><br><span class="line">    installGlobalProxy(</span><br><span class="line">        m_context,</span><br><span class="line">        <span class="hljs-string">"nativeModuleProxy"</span>,</span><br><span class="line">        exceptionWrapMethod&lt;&amp;JSCExecutor::getNativeModule&gt;());</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="JSCNativeModules-getModule-C-层"><a href="#JSCNativeModules-getModule-C-层" class="headerlink" title="JSCNativeModules.getModule (C++层)"></a>JSCNativeModules.getModule (C++层)</h6><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">JSValueRef JSCNativeModules::getModule(JSContextRef context, JSStringRef jsName) &#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="hljs-comment">// 创建module</span></span><br><span class="line">  <span class="hljs-keyword">auto</span> <span class="hljs-keyword">module</span> = createModule(moduleName, context);</span><br><span class="line">  ...</span><br><span class="line">  <span class="hljs-keyword">auto</span> result = m_objects.emplace(<span class="hljs-built_in">std</span>::move(moduleName), <span class="hljs-built_in">std</span>::move(*<span class="hljs-keyword">module</span>)).first;</span><br><span class="line">  <span class="hljs-keyword">return</span> <span class="hljs-keyword">static_cast</span>&lt;JSObjectRef&gt;(result-&gt;second);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="JSCNativeModules-createModule-C-层"><a href="#JSCNativeModules-createModule-C-层" class="headerlink" title="JSCNativeModules.createModule (C++层)"></a>JSCNativeModules.createModule (C++层)</h6><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">folly::Optional&lt;Object&gt; JSCNativeModules::createModule(<span class="hljs-keyword">const</span> <span class="hljs-built_in">std</span>::<span class="hljs-built_in">string</span>&amp; name, JSContextRef context) &#123;</span><br><span class="line">  <span class="hljs-keyword">if</span> (!m_genNativeModuleJS) &#123;</span><br><span class="line">    <span class="hljs-comment">// 获取NativeModules.genModule函数</span></span><br><span class="line">    <span class="hljs-keyword">auto</span> global = Object::getGlobalObject(context);</span><br><span class="line">    m_genNativeModuleJS = global.getProperty(<span class="hljs-string">"__fbGenNativeModule"</span>).asObject();</span><br><span class="line">    m_genNativeModuleJS-&gt;makeProtected();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// 获取该module的配置信息，方法描述签名集合等</span></span><br><span class="line">  <span class="hljs-keyword">auto</span> result = m_moduleRegistry-&gt;getConfig(name);</span><br><span class="line">  <span class="hljs-keyword">if</span> (!result.hasValue()) &#123;</span><br><span class="line">    <span class="hljs-keyword">return</span> <span class="hljs-literal">nullptr</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// 根据module的配置信息，调用genModule函数创建js层的java module对象</span></span><br><span class="line">  Value moduleInfo = m_genNativeModuleJS-&gt;callAsFunction(&#123;</span><br><span class="line">    Value::fromDynamic(context, result-&gt;config),</span><br><span class="line">    Value::makeNumber(context, result-&gt;index)</span><br><span class="line">  &#125;);</span><br><span class="line">    </span><br><span class="line">  folly::Optional&lt;Object&gt; <span class="hljs-keyword">module</span>(moduleInfo.asObject().getProperty(<span class="hljs-string">"module"</span>).asObject());</span><br><span class="line"></span><br><span class="line">  ReactMarker::logTaggedMarker(ReactMarker::NATIVE_MODULE_SETUP_STOP, name.c_str());</span><br><span class="line">  <span class="hljs-keyword">return</span> <span class="hljs-keyword">module</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="ModuleRegistry-getConfig-C-层"><a href="#ModuleRegistry-getConfig-C-层" class="headerlink" title="ModuleRegistry.getConfig (C++层)"></a>ModuleRegistry.getConfig (C++层)</h6><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">folly::Optional&lt;ModuleConfig&gt; ModuleRegistry::getConfig(<span class="hljs-keyword">const</span> <span class="hljs-built_in">std</span>::<span class="hljs-built_in">string</span>&amp; name) &#123;</span><br><span class="line">  <span class="hljs-keyword">auto</span> it = modulesByName_.find(name);</span><br><span class="line">  <span class="hljs-keyword">size_t</span> index = it-&gt;second;</span><br><span class="line">  NativeModule *<span class="hljs-keyword">module</span> = modules_[index].get();</span><br><span class="line"></span><br><span class="line">  folly::dynamic config = folly::dynamic::<span class="hljs-built_in">array</span>(name);</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="hljs-comment">// 获取module中定义的常亮</span></span><br><span class="line">    config.push_back(<span class="hljs-keyword">module</span>-&gt;getConstants());</span><br><span class="line">  &#125;</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="hljs-comment">// 获取module中定义的方法</span></span><br><span class="line">    <span class="hljs-built_in">std</span>::<span class="hljs-built_in">vector</span>&lt;MethodDescriptor&gt; methods = <span class="hljs-keyword">module</span>-&gt;getMethods();</span><br><span class="line"></span><br><span class="line">    folly::dynamic methodNames = folly::dynamic::<span class="hljs-built_in">array</span>;</span><br><span class="line">    folly::dynamic promiseMethodIds = folly::dynamic::<span class="hljs-built_in">array</span>;</span><br><span class="line">    folly::dynamic syncMethodIds = folly::dynamic::<span class="hljs-built_in">array</span>;</span><br><span class="line">    ...</span><br><span class="line">  <span class="hljs-keyword">if</span> (config.size() == <span class="hljs-number">2</span> &amp;&amp; config[<span class="hljs-number">1</span>].empty()) &#123;</span><br><span class="line">    <span class="hljs-keyword">return</span> <span class="hljs-literal">nullptr</span>;</span><br><span class="line">  &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">    <span class="hljs-keyword">return</span> ModuleConfig&#123;index, config&#125;;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="JavaNativeModule-getConstants-C-层"><a href="#JavaNativeModule-getConstants-C-层" class="headerlink" title="JavaNativeModule.getConstants (C++层)"></a>JavaNativeModule.getConstants (C++层)</h6><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">folly::dynamic JavaNativeModule::getConstants() &#123;</span><br><span class="line">  <span class="hljs-comment">// 调用Java层的JavaModuleWrapper的getConstants方法</span></span><br><span class="line">  <span class="hljs-keyword">static</span> <span class="hljs-keyword">auto</span> constantsMethod =</span><br><span class="line">    wrapper_-&gt;getClass()-&gt;getMethod&lt;NativeMap::javaobject()&gt;(<span class="hljs-string">"getConstants"</span>);</span><br><span class="line">  <span class="hljs-keyword">auto</span> constants = constantsMethod(wrapper_);</span><br><span class="line">  <span class="hljs-keyword">if</span> (!constants) &#123;</span><br><span class="line">    <span class="hljs-keyword">return</span> <span class="hljs-literal">nullptr</span>;</span><br><span class="line">  &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">    <span class="hljs-keyword">return</span> cthis(constants)-&gt;consume();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="JavaNativeModule-getMethods-C-层"><a href="#JavaNativeModule-getMethods-C-层" class="headerlink" title="JavaNativeModule.getMethods (C++层)"></a>JavaNativeModule.getMethods (C++层)</h6><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-built_in">std</span>::<span class="hljs-built_in">vector</span>&lt;MethodDescriptor&gt; JavaNativeModule::getMethods() &#123;</span><br><span class="line">  <span class="hljs-built_in">std</span>::<span class="hljs-built_in">vector</span>&lt;MethodDescriptor&gt; ret;</span><br><span class="line">  syncMethods_.clear();</span><br><span class="line">  <span class="hljs-comment">// 调用Java层的JavaModuleWrapper获取所有由ReactMethod注解标记的方法</span></span><br><span class="line">  <span class="hljs-keyword">auto</span> descs = wrapper_-&gt;getMethodDescriptors();</span><br><span class="line">  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> <span class="hljs-keyword">auto</span>&amp; desc : *descs) &#123;</span><br><span class="line">    <span class="hljs-keyword">auto</span> methodName = desc-&gt;getName();</span><br><span class="line">    <span class="hljs-keyword">auto</span> methodType = desc-&gt;getType();</span><br><span class="line">    ...</span><br><span class="line">    ret.emplace_back(</span><br><span class="line">      <span class="hljs-built_in">std</span>::move(methodName),</span><br><span class="line">      <span class="hljs-built_in">std</span>::move(methodType)</span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-keyword">return</span> ret;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="JavaModuleWrapper-getMethodDescriptors-Java层"><a href="#JavaModuleWrapper-getMethodDescriptors-Java层" class="headerlink" title="JavaModuleWrapper.getMethodDescriptors (Java层)"></a>JavaModuleWrapper.getMethodDescriptors (Java层)</h6><p>获取该module中所有拥有ReactMethod注解标记的方法</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">findMethods</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">  Set&lt;String&gt; methodNames = <span class="hljs-keyword">new</span> HashSet&lt;&gt;();</span><br><span class="line"></span><br><span class="line">  Class&lt;? extends NativeModule&gt; classForMethods = mModuleClass;</span><br><span class="line">  Class&lt;? extends NativeModule&gt; superClass =</span><br><span class="line">      (Class&lt;? extends NativeModule&gt;) mModuleClass.getSuperclass();</span><br><span class="line">  <span class="hljs-keyword">if</span> (ReactModuleWithSpec.class.isAssignableFrom(superClass)) &#123;</span><br><span class="line">    classForMethods = superClass;</span><br><span class="line">  &#125;</span><br><span class="line">  Method[] targetMethods = classForMethods.getDeclaredMethods();</span><br><span class="line"></span><br><span class="line">  <span class="hljs-keyword">for</span> (Method targetMethod : targetMethods) &#123;</span><br><span class="line">    <span class="hljs-comment">// 该方法是否拥有ReactMethod注解</span></span><br><span class="line">    ReactMethod annotation = targetMethod.getAnnotation(ReactMethod.class);</span><br><span class="line">    <span class="hljs-keyword">if</span> (annotation != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">      String methodName = targetMethod.getName();</span><br><span class="line">      MethodDescriptor md = <span class="hljs-keyword">new</span> MethodDescriptor();</span><br><span class="line">      JavaMethodWrapper method = <span class="hljs-keyword">new</span> JavaMethodWrapper(<span class="hljs-keyword">this</span>, targetMethod, annotation.isBlockingSynchronousMethod());</span><br><span class="line">      md.name = methodName;</span><br><span class="line">      md.type = method.getType();</span><br><span class="line">      <span class="hljs-keyword">if</span> (md.type == BaseJavaModule.METHOD_TYPE_SYNC) &#123;</span><br><span class="line">        md.signature = method.getSignature();</span><br><span class="line">        md.method = targetMethod;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="hljs-comment">// 加入方法列表</span></span><br><span class="line">      mMethods.add(method);</span><br><span class="line">      mDescs.add(md);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="NativeModules-genModule-JS层"><a href="#NativeModules-genModule-JS层" class="headerlink" title="NativeModules.genModule (JS层)"></a>NativeModules.genModule (JS层)</h6><figure class="highlight js hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">genModule</span>(<span class="hljs-params"></span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">  config: ?ModuleConfig,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">  moduleID: number,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params"></span>): ?</span>&#123;name: string, <span class="hljs-built_in">module</span>?: <span class="hljs-built_in">Object</span>&#125; &#123;</span><br><span class="line"></span><br><span class="line">  <span class="hljs-comment">// 提取出Java module 配置信息中的属性</span></span><br><span class="line">  <span class="hljs-keyword">const</span> [moduleName, constants, methods, promiseMethods, syncMethods] = config;</span><br><span class="line">  <span class="hljs-comment">// 创建Moduel对象</span></span><br><span class="line">  <span class="hljs-keyword">const</span> <span class="hljs-built_in">module</span> = &#123;&#125;;</span><br><span class="line">  methods &amp;&amp; <span class="hljs-comment">// 为module创建所有的方法</span></span><br><span class="line">    methods.forEach(<span class="hljs-function">(<span class="hljs-params">methodName, methodID</span>) =&gt;</span> &#123;</span><br><span class="line">      <span class="hljs-keyword">const</span> methodType = isPromise ? <span class="hljs-string">'promise'</span> : isSync ? <span class="hljs-string">'sync'</span> : <span class="hljs-string">'async'</span>;</span><br><span class="line">      <span class="hljs-comment">// 创建方法</span></span><br><span class="line">      <span class="hljs-built_in">module</span>[methodName] = genMethod(moduleID, methodID, methodType);</span><br><span class="line">    &#125;);</span><br><span class="line">  <span class="hljs-built_in">Object</span>.assign(<span class="hljs-built_in">module</span>, constants);</span><br><span class="line">  <span class="hljs-keyword">return</span> &#123;<span class="hljs-attr">name</span>: moduleName, <span class="hljs-built_in">module</span>&#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="NativeModules-genMethod-JS层"><a href="#NativeModules-genMethod-JS层" class="headerlink" title="NativeModules.genMethod (JS层)"></a>NativeModules.genMethod (JS层)</h6><p>为所有的Java module对象创建需要的方法，并提供实现(此处类似于Java层创建接口和代理对象一样)。在JS层创建Java module在JS层中虚假对象和方法，便于外部直接调用Java module的方法，该对象的方法实现和代理对象一样，都会传递到C++层中，然后通过C++层传递到Java层。</p>
+<figure class="highlight js hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">genMethod</span>(<span class="hljs-params">moduleID: number, methodID: number, type: MethodType</span>) </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">let</span> fn = <span class="hljs-literal">null</span>;</span><br><span class="line">  <span class="hljs-keyword">if</span> (type === <span class="hljs-string">'promise'</span>) &#123;</span><br><span class="line">    ...</span><br><span class="line">  &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (type === <span class="hljs-string">'sync'</span>) &#123;</span><br><span class="line">    ...</span><br><span class="line">  &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">    <span class="hljs-comment">// 所有Java module方法的真实实现</span></span><br><span class="line">    fn = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">...args: Array&lt;any&gt;</span>) </span>&#123;</span><br><span class="line">      <span class="hljs-comment">// 通过MessageQueue调用c++层，然后c++层调用Java层对象，执行Java module的方法</span></span><br><span class="line">      BatchedBridge.enqueueNativeCall(</span><br><span class="line">        moduleID,</span><br><span class="line">        methodID,</span><br><span class="line">        args,</span><br><span class="line">        onFail,</span><br><span class="line">        onSuccess,</span><br><span class="line">      );</span><br><span class="line">    &#125;;</span><br><span class="line">  &#125;</span><br><span class="line">  fn.type = type;</span><br><span class="line">  <span class="hljs-keyword">return</span> fn;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>至此，所有的Java module都在JS层创建了一个虚假对象，该对象持有module中注册的方法，在JS中可以直接通过普通对象的方式来调用，而module方法的真正实现就是上面的 fn ，会调向c++层。</strong></p>
+<h5 id="Js层-1"><a href="#Js层-1" class="headerlink" title="Js层"></a>Js层</h5><h6 id="NativeModules-xxxNativeModule-xxxMethod"><a href="#NativeModules-xxxNativeModule-xxxMethod" class="headerlink" title="NativeModules.xxxNativeModule.xxxMethod"></a>NativeModules.xxxNativeModule.xxxMethod</h6><p>由于上面讲过，在JS层为每个Java module 都创建了一个虚拟对象和方法实现，所以可以通过普通对象一样调用Java module。而这些许虚拟对象的方法实现都是上面的 fn 函数。所以会调用BatchedBridge.enqueueNativeCall方法。</p>
+<figure class="highlight js hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">const</span> NativeModules = <span class="hljs-built_in">require</span>(<span class="hljs-string">'NativeModules'</span>);</span><br><span class="line"><span class="hljs-comment">// 想要调用UIManagerModule.createView方法</span></span><br><span class="line">UIManager.createView(</span><br><span class="line">    tag, <span class="hljs-comment">// reactTag</span></span><br><span class="line">    viewConfig.uiViewClassName, <span class="hljs-comment">// viewName</span></span><br><span class="line">    rootContainerInstance, <span class="hljs-comment">// rootTag</span></span><br><span class="line">    updatePayload <span class="hljs-comment">// props</span></span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<h6 id="MessageQueue-enqueueNativeCall"><a href="#MessageQueue-enqueueNativeCall" class="headerlink" title="MessageQueue.enqueueNativeCall"></a>MessageQueue.enqueueNativeCall</h6><p>在MessageQueue中维护了一个队列_queue，这个队列中保存了每次JS层对Java module的调用请求。</p>
+<figure class="highlight js hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">enqueueNativeCall(</span><br><span class="line">  moduleID: number,</span><br><span class="line">  methodID: number,</span><br><span class="line">  params: any[],</span><br><span class="line">  onFail: ?<span class="hljs-built_in">Function</span>,</span><br><span class="line">  onSucc: ?<span class="hljs-built_in">Function</span>,</span><br><span class="line">) &#123;</span><br><span class="line"></span><br><span class="line">  <span class="hljs-keyword">this</span>._callID++;</span><br><span class="line">  <span class="hljs-comment">// 将本次Java module方法调用请求加入队列中</span></span><br><span class="line">  <span class="hljs-keyword">this</span>._queue[MODULE_IDS].push(moduleID);</span><br><span class="line">  <span class="hljs-keyword">this</span>._queue[METHOD_IDS].push(methodID);</span><br><span class="line">  <span class="hljs-keyword">this</span>._queue[PARAMS].push(params);</span><br><span class="line"></span><br><span class="line">  <span class="hljs-keyword">const</span> now = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>().getTime();</span><br><span class="line">  <span class="hljs-keyword">if</span> (</span><br><span class="line">    global.nativeFlushQueueImmediate &amp;&amp;</span><br><span class="line">    now - <span class="hljs-keyword">this</span>._lastFlush &gt;= MIN_TIME_BETWEEN_FLUSHES_MS</span><br><span class="line">  ) &#123;</span><br><span class="line">    <span class="hljs-comment">// 如果上一次刷新_queue队列距离现在已经过去5秒，则立刻刷新</span></span><br><span class="line">    <span class="hljs-keyword">const</span> queue = <span class="hljs-keyword">this</span>._queue;</span><br><span class="line">    <span class="hljs-keyword">this</span>._queue = [[], [], [], <span class="hljs-keyword">this</span>._callID];</span><br><span class="line">    <span class="hljs-keyword">this</span>._lastFlush = now;</span><br><span class="line">    <span class="hljs-comment">// nativeFlushQueueImmediate是在c++层添加的c++方法引用</span></span><br><span class="line">    global.nativeFlushQueueImmediate(queue);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// 否则，等待c++层主动来获取队列</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="C-层-1"><a href="#C-层-1" class="headerlink" title="C++层"></a>C++层</h5><h6 id="JSCExecutor-nativeFlushQueueImmediate"><a href="#JSCExecutor-nativeFlushQueueImmediate" class="headerlink" title="JSCExecutor.nativeFlushQueueImmediate"></a>JSCExecutor.nativeFlushQueueImmediate</h6><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">JSValueRef JSCExecutor::nativeFlushQueueImmediate(</span><br><span class="line">    <span class="hljs-keyword">size_t</span> argumentCount,</span><br><span class="line">    <span class="hljs-keyword">const</span> JSValueRef arguments[]) &#123;</span><br><span class="line">  <span class="hljs-keyword">if</span> (argumentCount != <span class="hljs-number">1</span>) &#123;</span><br><span class="line">    <span class="hljs-keyword">throw</span> <span class="hljs-built_in">std</span>::invalid_argument(<span class="hljs-string">"Got wrong number of args"</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  flushQueueImmediate(Value(m_context, arguments[<span class="hljs-number">0</span>]));</span><br><span class="line">  <span class="hljs-keyword">return</span> Value::makeUndefined(m_context);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="JsToNativeBridge-callNativeModules"><a href="#JsToNativeBridge-callNativeModules" class="headerlink" title="JsToNativeBridge.callNativeModules"></a>JsToNativeBridge.callNativeModules</h6><p>JsToNativeBridge专门处理所有的Js层对Java层的调用。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">callNativeModules</span><span class="hljs-params">(</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    JSExecutor&amp; executor, folly::dynamic&amp;&amp; calls, <span class="hljs-keyword">bool</span> isEndOfBatch)</span> override </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">auto</span>&amp; call : parseMethodCalls(<span class="hljs-built_in">std</span>::move(calls))) &#123;</span><br><span class="line">    <span class="hljs-comment">// 以此执行每次调用请求</span></span><br><span class="line">    m_registry-&gt;callNativeMethod(call.moduleId, call.methodId, <span class="hljs-built_in">std</span>::move(call.arguments), call.callId);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-keyword">if</span> (isEndOfBatch) &#123;</span><br><span class="line">    <span class="hljs-keyword">if</span> (m_batchHadNativeModuleCalls) &#123;</span><br><span class="line">      <span class="hljs-comment">// 如果请求队列不为空，则执行完毕后通知Java层，JS层对Java层module调用处理完毕</span></span><br><span class="line">      m_callback-&gt;onBatchComplete();</span><br><span class="line">      m_batchHadNativeModuleCalls = <span class="hljs-literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    m_callback-&gt;decrementPendingJSCalls();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="ModuleRegistry-callNativeMethod"><a href="#ModuleRegistry-callNativeMethod" class="headerlink" title="ModuleRegistry.callNativeMethod"></a>ModuleRegistry.callNativeMethod</h6><p>该modules_列表是在CatalystInstanceImpl.initializeBridge时，创建ModuleRegistry对象时赋值的。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">void</span> ModuleRegistry::callNativeMethod(<span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span> moduleId, <span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span> methodId, folly::dynamic&amp;&amp; params, <span class="hljs-keyword">int</span> callId) &#123;</span><br><span class="line">  <span class="hljs-keyword">if</span> (moduleId &gt;= modules_.size()) &#123;</span><br><span class="line">    <span class="hljs-keyword">throw</span> <span class="hljs-built_in">std</span>::runtime_error(</span><br><span class="line">      folly::to&lt;<span class="hljs-built_in">std</span>::<span class="hljs-built_in">string</span>&gt;(<span class="hljs-string">"moduleId "</span>, moduleId, <span class="hljs-string">" out of range [0.."</span>, modules_.size(), <span class="hljs-string">")"</span>));</span><br><span class="line">  &#125;</span><br><span class="line">  modules_[moduleId]-&gt;invoke(methodId, <span class="hljs-built_in">std</span>::move(params), callId);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="JavaNativeModule-invoke"><a href="#JavaNativeModule-invoke" class="headerlink" title="JavaNativeModule.invoke"></a>JavaNativeModule.invoke</h6><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">void</span> JavaNativeModule::invoke(<span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">int</span> reactMethodId, folly::dynamic&amp;&amp; params, <span class="hljs-keyword">int</span> callId) &#123;</span><br><span class="line">  <span class="hljs-comment">// 在native消息线程中执行</span></span><br><span class="line">  messageQueueThread_-&gt;runOnQueue([<span class="hljs-keyword">this</span>, reactMethodId, params=<span class="hljs-built_in">std</span>::move(params), callId] &#123;</span><br><span class="line">    <span class="hljs-keyword">static</span> <span class="hljs-keyword">auto</span> invokeMethod = wrapper_-&gt;getClass()-&gt;getMethod&lt;<span class="hljs-keyword">void</span>(jint, ReadableNativeArray::javaobject)&gt;(<span class="hljs-string">"invoke"</span>);</span><br><span class="line">    <span class="hljs-comment">// 执行Java层JavaModuleWrapper.invoke方法</span></span><br><span class="line">    invokeMethod(</span><br><span class="line">      wrapper_,</span><br><span class="line">      <span class="hljs-keyword">static_cast</span>&lt;jint&gt;(reactMethodId),</span><br><span class="line">      ReadableNativeArray::newObjectCxxArgs(<span class="hljs-built_in">std</span>::move(params)).get());</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="JInstanceCallback-onBatchComplete"><a href="#JInstanceCallback-onBatchComplete" class="headerlink" title="JInstanceCallback.onBatchComplete"></a>JInstanceCallback.onBatchComplete</h6><p>该ReactCallback对象是在CatalystInstanceImpl.initializeBridge注册的时候创建的一个BridgeCallback对象。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">onBatchComplete</span><span class="hljs-params">()</span> override </span>&#123;</span><br><span class="line">  <span class="hljs-comment">// 在native消息线程中</span></span><br><span class="line">  messageQueueThread_-&gt;runOnQueue([<span class="hljs-keyword">this</span>] &#123;</span><br><span class="line">    <span class="hljs-comment">// 执行ReactCallback.onBatchComplete方法</span></span><br><span class="line">    <span class="hljs-keyword">static</span> <span class="hljs-keyword">auto</span> method =</span><br><span class="line">      ReactCallback::javaClassStatic()-&gt;getMethod&lt;<span class="hljs-keyword">void</span>()&gt;(<span class="hljs-string">"onBatchComplete"</span>);</span><br><span class="line">    method(jobj_);</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="Java层-1"><a href="#Java层-1" class="headerlink" title="Java层"></a>Java层</h5><h6 id="JavaModuleWrapper-invoke"><a href="#JavaModuleWrapper-invoke" class="headerlink" title="JavaModuleWrapper.invoke"></a>JavaModuleWrapper.invoke</h6><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">invoke</span><span class="hljs-params">(<span class="hljs-keyword">int</span> methodId, ReadableNativeArray parameters)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">if</span> (mMethods == <span class="hljs-keyword">null</span> || methodId &gt;= mMethods.size()) &#123;</span><br><span class="line">    <span class="hljs-keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  mMethods.get(methodId).invoke(mJSInstance, parameters);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="JavaMethodWrapper-invoke"><a href="#JavaMethodWrapper-invoke" class="headerlink" title="JavaMethodWrapper.invoke"></a>JavaMethodWrapper.invoke</h6><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">invoke</span><span class="hljs-params">(JSInstance jsInstance, ReadableNativeArray parameters)</span> </span>&#123;</span><br><span class="line">  String traceName = mModuleWrapper.getName() + <span class="hljs-string">"."</span> + mMethod.getName();</span><br><span class="line"></span><br><span class="line">  <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">    <span class="hljs-keyword">if</span> (!mArgumentsProcessed) &#123;</span><br><span class="line">      processArguments();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>, jsArgumentsConsumed = <span class="hljs-number">0</span>;</span><br><span class="line">    <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">      <span class="hljs-keyword">for</span> (; i &lt; mArgumentExtractors.length; i++) &#123;</span><br><span class="line">        mArguments[i] = mArgumentExtractors[i].extractArgument(</span><br><span class="line">          jsInstance, parameters, jsArgumentsConsumed);</span><br><span class="line">        jsArgumentsConsumed += mArgumentExtractors[i].getJSArgumentsNeeded();</span><br><span class="line">      &#125;</span><br><span class="line">    &#125; <span class="hljs-keyword">catch</span> (UnexpectedNativeTypeException e) &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">      <span class="hljs-comment">// 反射执行真正的Java module的方法</span></span><br><span class="line">      mMethod.invoke(mModuleWrapper.getModule(), mArguments);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125; <span class="hljs-keyword">finally</span> &#123;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+        </div>
+        
+        <ul class="post-copyright">
+            <li><strong>本文标题：</strong><a href="https://witgao.com/Android-ReactNative通信流程/">Android-ReactNative通信流程</a></li>
+            <li><strong>本文作者：</strong><a href="https://witgao.com">zhenyu</a></li>
+            <li><strong>本文链接：</strong><a href="https://witgao.com/Android-ReactNative通信流程/">https://witgao.com/Android-ReactNative通信流程/</a></li>
+            <li><strong>发布时间：</strong>2018-06-28</li>
+            <li><strong>版权声明：</strong>本博客所有文章除特别声明外，均采用 <a
+                    href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="external nofollow"
+                    target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明出处！
+            </li>
+        </ul>
+        
+        
+        
+        
+    </div>
+</div>
+
+
+
+
+
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        <div class="level-start">
+            <a class="level level-item has-link-grey  article-nav-prev"
+                href="/Android-ReactNative启动流程/">
+                <i class="level-item fas fa-chevron-left"></i>
+                <span class="level-item">Android-ReactNative通信流程</span>
+            </a>
+        </div>
+        
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next"
+                href="/RePlugin之插件Activity启动/">
+                <span class="level-item">RePlugin之插件Activity启动</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+    </div>
+</div>
+
+
+</div>
+                
+
+
+
+
+<div
+    class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left ">
+    
+    
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered" style="flex-shrink: 1">
+                <div>
+                    
+                    <figure class="image is-128x128 has-mb-6">
+                        <img class="" src="/images/avatar1.png" alt="zhenyu">
+                    </figure>
+                    
+                    <p class="is-size-4 is-block">
+                        zhenyu
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        富贵山庄无富贵，只留欢乐在此间
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>杭州</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        文章
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        38
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        分类
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        9
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        标签
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        0
+                    </p>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="level">
+            <a class="level-item button is-link is-rounded" href="https://github.com/witgao" target="_blank">
+                关注我</a>
+        </div>
+        
+        
+        
+    </div>
+</div>
+    
+    
+<div class="card widget column-left is-sticky" id="toc">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                目录
+            </h3>
+            <ul class="menu-list"><li>
+        <a class="is-flex" href="#JNI注册">
+        <span class="has-mr-6">1</span>
+        <span>JNI注册</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#动态注册">
+        <span class="has-mr-6">1.1</span>
+        <span>动态注册</span>
+        </a></li><li>
+        <a class="is-flex" href="#静态注册">
+        <span class="has-mr-6">1.2</span>
+        <span>静态注册</span>
+        </a></li><li>
+        <a class="is-flex" href="#RN中的JNI注册">
+        <span class="has-mr-6">1.3</span>
+        <span>RN中的JNI注册</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#JNI-OnLoad">
+        <span class="has-mr-6">1.3.1</span>
+        <span>JNI_OnLoad</span>
+        </a></li><li>
+        <a class="is-flex" href="#CatalystInstanceImpl-registerNatives">
+        <span class="has-mr-6">1.3.2</span>
+        <span>CatalystInstanceImpl.registerNatives</span>
+        </a></li><li>
+        <a class="is-flex" href="#registerHybrid">
+        <span class="has-mr-6">1.3.3</span>
+        <span>registerHybrid</span>
+        </a></li><li>
+        <a class="is-flex" href="#JClass-registerNatives">
+        <span class="has-mr-6">1.3.4</span>
+        <span>JClass.registerNatives</span>
+        </a></li></ul></li></ul></li><li>
+        <a class="is-flex" href="#Java调用Js">
+        <span class="has-mr-6">2</span>
+        <span>Java调用Js</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#在Java层注册Js层module">
+        <span class="has-mr-6">2.1</span>
+        <span>在Java层注册Js层module</span>
+        </a></li><li>
+        <a class="is-flex" href="#Java层">
+        <span class="has-mr-6">2.2</span>
+        <span>Java层</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#CatalystInstanceImpl-getJSModule">
+        <span class="has-mr-6">2.2.1</span>
+        <span>CatalystInstanceImpl.getJSModule</span>
+        </a></li><li>
+        <a class="is-flex" href="#CatalystInstanceImpl-callFunction">
+        <span class="has-mr-6">2.2.2</span>
+        <span>CatalystInstanceImpl.callFunction</span>
+        </a></li><li>
+        <a class="is-flex" href="#CatalystInstanceImpl-jniCallJSFunction">
+        <span class="has-mr-6">2.2.3</span>
+        <span>CatalystInstanceImpl.jniCallJSFunction</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#C-层">
+        <span class="has-mr-6">2.3</span>
+        <span>C++层</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#CatalystInstanceImpl-jniCallJSFunction-1">
+        <span class="has-mr-6">2.3.1</span>
+        <span>CatalystInstanceImpl.jniCallJSFunction</span>
+        </a></li><li>
+        <a class="is-flex" href="#NativeToJsBridge-callFunction">
+        <span class="has-mr-6">2.3.2</span>
+        <span>NativeToJsBridge.callFunction</span>
+        </a></li><li>
+        <a class="is-flex" href="#JSCExecutor-callFunction">
+        <span class="has-mr-6">2.3.3</span>
+        <span>JSCExecutor.callFunction</span>
+        </a></li><li>
+        <a class="is-flex" href="#JSCExecutor-bindBridge">
+        <span class="has-mr-6">2.3.4</span>
+        <span>JSCExecutor.bindBridge</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#Js层">
+        <span class="has-mr-6">2.4</span>
+        <span>Js层</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#MessageQueue-callFunctionReturnResultAndFlushedQueue">
+        <span class="has-mr-6">2.4.1</span>
+        <span>MessageQueue.callFunctionReturnResultAndFlushedQueue</span>
+        </a></li><li>
+        <a class="is-flex" href="#MessageQueue-callFunction">
+        <span class="has-mr-6">2.4.2</span>
+        <span>MessageQueue.__callFunction</span>
+        </a></li><li>
+        <a class="is-flex" href="#MessageQueue全局属性">
+        <span class="has-mr-6">2.4.3</span>
+        <span>MessageQueue全局属性</span>
+        </a></li></ul></li></ul></li><li>
+        <a class="is-flex" href="#Js调用Java">
+        <span class="has-mr-6">3</span>
+        <span>Js调用Java</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#在Js层注册Java层module">
+        <span class="has-mr-6">3.1</span>
+        <span>在Js层注册Java层module</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#NativeModules-JS层">
+        <span class="has-mr-6">3.1.1</span>
+        <span>NativeModules (JS层)</span>
+        </a></li><li>
+        <a class="is-flex" href="#设置nativeModuleProxy-C-层">
+        <span class="has-mr-6">3.1.2</span>
+        <span>设置nativeModuleProxy (C++层)</span>
+        </a></li><li>
+        <a class="is-flex" href="#JSCNativeModules-getModule-C-层">
+        <span class="has-mr-6">3.1.3</span>
+        <span>JSCNativeModules.getModule (C++层)</span>
+        </a></li><li>
+        <a class="is-flex" href="#JSCNativeModules-createModule-C-层">
+        <span class="has-mr-6">3.1.4</span>
+        <span>JSCNativeModules.createModule (C++层)</span>
+        </a></li><li>
+        <a class="is-flex" href="#ModuleRegistry-getConfig-C-层">
+        <span class="has-mr-6">3.1.5</span>
+        <span>ModuleRegistry.getConfig (C++层)</span>
+        </a></li><li>
+        <a class="is-flex" href="#JavaNativeModule-getConstants-C-层">
+        <span class="has-mr-6">3.1.6</span>
+        <span>JavaNativeModule.getConstants (C++层)</span>
+        </a></li><li>
+        <a class="is-flex" href="#JavaNativeModule-getMethods-C-层">
+        <span class="has-mr-6">3.1.7</span>
+        <span>JavaNativeModule.getMethods (C++层)</span>
+        </a></li><li>
+        <a class="is-flex" href="#JavaModuleWrapper-getMethodDescriptors-Java层">
+        <span class="has-mr-6">3.1.8</span>
+        <span>JavaModuleWrapper.getMethodDescriptors (Java层)</span>
+        </a></li><li>
+        <a class="is-flex" href="#NativeModules-genModule-JS层">
+        <span class="has-mr-6">3.1.9</span>
+        <span>NativeModules.genModule (JS层)</span>
+        </a></li><li>
+        <a class="is-flex" href="#NativeModules-genMethod-JS层">
+        <span class="has-mr-6">3.1.10</span>
+        <span>NativeModules.genMethod (JS层)</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#Js层-1">
+        <span class="has-mr-6">3.2</span>
+        <span>Js层</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#NativeModules-xxxNativeModule-xxxMethod">
+        <span class="has-mr-6">3.2.1</span>
+        <span>NativeModules.xxxNativeModule.xxxMethod</span>
+        </a></li><li>
+        <a class="is-flex" href="#MessageQueue-enqueueNativeCall">
+        <span class="has-mr-6">3.2.2</span>
+        <span>MessageQueue.enqueueNativeCall</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#C-层-1">
+        <span class="has-mr-6">3.3</span>
+        <span>C++层</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#JSCExecutor-nativeFlushQueueImmediate">
+        <span class="has-mr-6">3.3.1</span>
+        <span>JSCExecutor.nativeFlushQueueImmediate</span>
+        </a></li><li>
+        <a class="is-flex" href="#JsToNativeBridge-callNativeModules">
+        <span class="has-mr-6">3.3.2</span>
+        <span>JsToNativeBridge.callNativeModules</span>
+        </a></li><li>
+        <a class="is-flex" href="#ModuleRegistry-callNativeMethod">
+        <span class="has-mr-6">3.3.3</span>
+        <span>ModuleRegistry.callNativeMethod</span>
+        </a></li><li>
+        <a class="is-flex" href="#JavaNativeModule-invoke">
+        <span class="has-mr-6">3.3.4</span>
+        <span>JavaNativeModule.invoke</span>
+        </a></li><li>
+        <a class="is-flex" href="#JInstanceCallback-onBatchComplete">
+        <span class="has-mr-6">3.3.5</span>
+        <span>JInstanceCallback.onBatchComplete</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#Java层-1">
+        <span class="has-mr-6">3.4</span>
+        <span>Java层</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#JavaModuleWrapper-invoke">
+        <span class="has-mr-6">3.4.1</span>
+        <span>JavaModuleWrapper.invoke</span>
+        </a></li><li>
+        <a class="is-flex" href="#JavaMethodWrapper-invoke">
+        <span class="has-mr-6">3.4.2</span>
+        <span>JavaMethodWrapper.invoke</span>
+        </a></li></ul></li></ul></li></ul>
+        </div>
+    </div>
+</div>
+    
+    
+    <div class="column-right-shadow is-hidden-widescreen ">
+        
+    </div>
+    
+</div>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <!-- <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="/images/logo2.png" alt="Android-ReactNative通信流程" height="28">
+                
+                </a> -->
+                <p class="is-size-7">
+                    &copy; 2020 zhenyu&nbsp;
+                    Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a
+                        href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank">Icarus</a>
+                    
+                </p>
+            </div>
+            <div class="level-end">
+                
+            </div>
+        </div>
+    </div>
+</footer>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("zh-CN");</script>
+
+<script>
+var IcarusThemeSettings = {
+    article: {
+        highlight: {
+            clipboard: true,
+            fold: 'unfolded'
+        }
+    }
+};
+</script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+
+
+
+    
+    
+<script src="/js/animation.js"></script>
+
+    
+    
+<script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+<script src="/js/gallery.js" defer></script>
+
+    
+    
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    MathJax.Hub.Config({
+        'HTML-CSS': {
+            matchFontHeight: false
+        },
+        SVG: {
+            matchFontHeight: false
+        },
+        CommonHTML: {
+            matchFontHeight: false
+        },
+        tex2jax: {
+            inlineMath: [
+                ['$','$'],
+                ['\\(','\\)']
+            ]
+        }
+    });
+});
+</script>
+    
+    
+<a id="back-to-top" title="回到顶端" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="想要查找什么..." />
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: '文章',
+                PAGES: '页面',
+                CATEGORIES: '分类',
+                TAGS: '标签',
+                UNTITLED: '(无标题)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+</body>
+
+</html>

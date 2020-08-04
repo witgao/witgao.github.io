@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html  lang="zh">
+
+<head>
+    <meta charset="utf-8" />
+
+<meta name="generator" content="Hexo 3.9.0" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<title>Flutter深入之flutter run命令究竟做了什么? - 富贵山庄</title>
+
+
+    <meta name="description" content="开篇当我们创建一个Flutter App项目后，在当前项目路径下运行命令flutter run，就可以编译生成一个APK，并且将APK安装到模拟器中并启动。那么Flutter究竟是如何编译Dart资源的？又是如何将Dart资源放入到APK中？ 接下来让我们慢慢跟着代码来分析flutter run 命令的执行过程。 flutter命令在Mac上，flutter命令是指 ${flutterSdk}/b">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flutter深入之flutter run命令究竟做了什么?">
+<meta property="og:url" content="https://witgao.com/Flutter深入之flutter-run命令究竟做了什么/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:description" content="开篇当我们创建一个Flutter App项目后，在当前项目路径下运行命令flutter run，就可以编译生成一个APK，并且将APK安装到模拟器中并启动。那么Flutter究竟是如何编译Dart资源的？又是如何将Dart资源放入到APK中？ 接下来让我们慢慢跟着代码来分析flutter run 命令的执行过程。 flutter命令在Mac上，flutter命令是指 ${flutterSdk}/b">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://witgao.com/images/og_image.png">
+<meta property="og:updated_time" content="2020-07-13T13:45:28.894Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Flutter深入之flutter run命令究竟做了什么?">
+<meta name="twitter:description" content="开篇当我们创建一个Flutter App项目后，在当前项目路径下运行命令flutter run，就可以编译生成一个APK，并且将APK安装到模拟器中并启动。那么Flutter究竟是如何编译Dart资源的？又是如何将Dart资源放入到APK中？ 接下来让我们慢慢跟着代码来分析flutter run 命令的执行过程。 flutter命令在Mac上，flutter命令是指 ${flutterSdk}/b">
+<meta name="twitter:image" content="https://witgao.com/images/og_image.png">
+
+
+
+
+
+
+
+<link rel="icon" href="/images/favicon1.svg">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/default.css">
+
+
+    
+    
+<style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+    
+    
+    
+    
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+    
+    
+    
+    
+    
+    
+    
+    <link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+    
+    
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body class="is-3-column">
+    <nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="/images/logo2.png" alt="Flutter深入之flutter run命令究竟做了什么?" height="28">
+            
+            </a>
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item"
+                href="/">燕子坞</a>
+                
+                <a class="navbar-item"
+                href="/archives">听香水榭</a>
+                
+                <a class="navbar-item"
+                href="/categories">还施水阁</a>
+                
+                <a class="navbar-item"
+                href="/about">思过崖</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    <a class="navbar-item" target="_blank" title="Download on GitHub" href="https://github.com/witgao/blog">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                <a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;">
+                    <i class="fas fa-list-ul"></i>
+                </a>
+                
+                
+                <a class="navbar-item search" title="搜索" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-9-widescreen has-order-2 column-main">
+<div class="card">
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2018-11-03T16:00:00.000Z">2018-11-04</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/">刀枪棍棒（Android）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/伏魔杖法（Flutter）/">伏魔杖法（Flutter）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    24 分钟 读完 (大约 3641 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            Flutter深入之flutter run命令究竟做了什么?
+            
+        </h1>
+        <div class="content">
+            <h4 id="开篇"><a href="#开篇" class="headerlink" title="开篇"></a>开篇</h4><p>当我们创建一个Flutter App项目后，在当前项目路径下运行命令flutter run，就可以编译生成一个APK，并且将APK安装到模拟器中并启动。那么Flutter究竟是如何编译Dart资源的？又是如何将Dart资源放入到APK中？</p>
+<p>接下来让我们慢慢跟着代码来分析flutter run 命令的执行过程。</p>
+<h4 id="flutter命令"><a href="#flutter命令" class="headerlink" title="flutter命令"></a>flutter命令</h4><p>在Mac上，flutter命令是指 ${flutterSdk}/bin/flutter 这个shell程序。</p>
+<figure class="highlight shell hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">... </span><br><span class="line">update逻辑</span><br><span class="line">...</span><br><span class="line">PROG_NAME="$(path_uri "$(follow_links "$BASH_SOURCE")")"</span><br><span class="line">BIN_DIR="$(cd "$&#123;PROG_NAME%/*&#125;" ; pwd -P)"</span><br><span class="line">export FLUTTER_ROOT="$(cd "$&#123;BIN_DIR&#125;/.." ; pwd -P)"</span><br><span class="line"></span><br><span class="line">FLUTTER_TOOLS_DIR="$FLUTTER_ROOT/packages/flutter_tools"</span><br><span class="line">SNAPSHOT_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.snapshot"</span><br><span class="line">STAMP_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.stamp"</span><br><span class="line">SCRIPT_PATH="$FLUTTER_TOOLS_DIR/bin/flutter_tools.dart"</span><br><span class="line">DART_SDK_PATH="$FLUTTER_ROOT/bin/cache/dart-sdk"</span><br><span class="line">DART="$DART_SDK_PATH/bin/dart"</span><br><span class="line">PUB="$DART_SDK_PATH/bin/pub"</span><br><span class="line"></span><br><span class="line">// 实际上抛除更新逻辑，flutter的这个shell就是直接执行了dart命令</span><br><span class="line">// $FLUTTER_TOOL_ARGS 这个参数可以无视</span><br><span class="line">// $SNAPSHOT_PATH 这个指的就是$FLUTTER_ROOT/bin/cache/flutter_tools.snapshot这个snapshot</span><br><span class="line">// $@ 这个就是flutter 后面跟的参数</span><br><span class="line">"$DART" $FLUTTER_TOOL_ARGS "$SNAPSHOT_PATH" "$@"</span><br></pre></td></tr></table></figure>
+<p>我们可以看到，实际上flutter run 命令，执行的就是 dart flutter_tools.snapshot  run</p>
+ <a id="more"></a>
+<h4 id="flutter-tools项目"><a href="#flutter-tools项目" class="headerlink" title="flutter_tools项目"></a>flutter_tools项目</h4><p>flutter_toools.snapshot实际上就是${flutterSdk}/packages/flutter_tools这个项目编译生成的snapshot文件。所以flutter run 实际上就是使用dart来执行了这个dart项目的main方法，run就是参数。</p>
+<p>我们可以将上面shell中的snapshot地址修改成本地flutter_tools项目地址，这样运行flutter命令走的就是本地项目代码，可以用于调试修改源码。</p>
+<figure class="highlight shell hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">将这一行 "$DART" $FLUTTER_TOOL_ARGS "$SNAPSHOT_PATH" "$@"</span><br><span class="line"></span><br><span class="line">修改成 "$DART" $FLUTTER_TOOL_ARGS "$FLUTTER_ROOT/packages/flutter_tools/bin/flutter_tools.dart" "$@"</span><br></pre></td></tr></table></figure>
+<h5 id="执行main方法"><a href="#执行main方法" class="headerlink" title="执行main方法"></a>执行main方法</h5><p>flutter_tools项目的main方法定义在 bin/flutter_tools.dart中。</p>
+<figure class="highlight dart hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">void</span> main(<span class="hljs-built_in">List</span>&lt;<span class="hljs-built_in">String</span>&gt; args) &#123;</span><br><span class="line">  <span class="hljs-keyword">if</span> (args != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">    <span class="hljs-keyword">for</span> (<span class="hljs-built_in">String</span> arg <span class="hljs-keyword">in</span> args) &#123;</span><br><span class="line">      <span class="hljs-built_in">print</span>(<span class="hljs-string">'参数 == $arg'</span>);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  executable.main(args);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="创建所有命令的对应对象"><a href="#创建所有命令的对应对象" class="headerlink" title="创建所有命令的对应对象"></a>创建所有命令的对应对象</h5><p>再看看 lib/executable.dart，在这里会预先创建好每一种命令对应的对象，然后后面会根据解析的参数来选择指定的命令对象来执行。</p>
+<figure class="highlight dart hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">Future&lt;<span class="hljs-built_in">Null</span>&gt; main(<span class="hljs-built_in">List</span>&lt;<span class="hljs-built_in">String</span>&gt; args) <span class="hljs-keyword">async</span> &#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="hljs-keyword">await</span> runner.run(args, &lt;FlutterCommand&gt;[</span><br><span class="line">    AnalyzeCommand(verboseHelp: verboseHelp),</span><br><span class="line">    AttachCommand(verboseHelp: verboseHelp),</span><br><span class="line">    BuildCommand(verboseHelp: verboseHelp),</span><br><span class="line">    ChannelCommand(verboseHelp: verboseHelp),</span><br><span class="line">    CleanCommand(),</span><br><span class="line">    ConfigCommand(verboseHelp: verboseHelp),</span><br><span class="line">    CreateCommand(),</span><br><span class="line">    DaemonCommand(hidden: !verboseHelp),</span><br><span class="line">    DevicesCommand(),</span><br><span class="line">    DoctorCommand(verbose: verbose),</span><br><span class="line">    DriveCommand(),</span><br><span class="line">    EmulatorsCommand(),</span><br><span class="line">    FormatCommand(),</span><br><span class="line">    FuchsiaReloadCommand(),</span><br><span class="line">    IdeConfigCommand(hidden: !verboseHelp),</span><br><span class="line">    InjectPluginsCommand(hidden: !verboseHelp),</span><br><span class="line">    InstallCommand(),</span><br><span class="line">    LogsCommand(),</span><br><span class="line">    MakeHostAppEditableCommand(),</span><br><span class="line">    PackagesCommand(),</span><br><span class="line">    PrecacheCommand(),</span><br><span class="line">    RunCommand(verboseHelp: verboseHelp),</span><br><span class="line">    ScreenshotCommand(),</span><br><span class="line">    ShellCompletionCommand(),</span><br><span class="line">    StopCommand(),</span><br><span class="line">    TestCommand(verboseHelp: verboseHelp),</span><br><span class="line">    TraceCommand(),</span><br><span class="line">    UpdatePackagesCommand(hidden: !verboseHelp),</span><br><span class="line">    UpgradeCommand(),</span><br><span class="line">  ], verbose: verbose,</span><br><span class="line">     muteCommandLogging: muteCommandLogging,</span><br><span class="line">     verboseHelp: verboseHelp);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="执行参数中指定的命令对象"><a href="#执行参数中指定的命令对象" class="headerlink" title="执行参数中指定的命令对象"></a>执行参数中指定的命令对象</h5><p>在runner.run中会通过runZoned创建一个新的分区，在新分区中运行，最终会在command_runner.dart的runCommand方法中解析参数，选定指定的命令对象来执行。</p>
+<figure class="highlight dart hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">Future&lt;T&gt; runCommand(ArgResults topLevelResults) <span class="hljs-keyword">async</span> &#123;</span><br><span class="line">  <span class="hljs-comment">// 解析后的参数对象 也就是run参数</span></span><br><span class="line">  <span class="hljs-keyword">var</span> argResults = topLevelResults;</span><br><span class="line">  <span class="hljs-keyword">var</span> commands = _commands; <span class="hljs-comment">// 上一步创建的所有命令对应的对象</span></span><br><span class="line">  Command command;</span><br><span class="line">  <span class="hljs-keyword">var</span> commandString = executableName;</span><br><span class="line"></span><br><span class="line">  <span class="hljs-keyword">while</span> (commands.isNotEmpty) &#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="hljs-comment">// Step into the command.</span></span><br><span class="line">    argResults = argResults.command;</span><br><span class="line">    <span class="hljs-comment">// argResults.name 就是 run,所以此处取出的就是RunCommand对象</span></span><br><span class="line">    command = commands[argResults.name]; </span><br><span class="line">    command._globalResults = topLevelResults;</span><br><span class="line">    command._argResults = argResults;</span><br><span class="line">    commands = command._subcommands;</span><br><span class="line">    commandString += <span class="hljs-string">" <span class="hljs-subst">$&#123;argResults.name&#125;</span>"</span>;</span><br><span class="line"> ...</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">  <span class="hljs-comment">// 执行 RunCommand.run()</span></span><br><span class="line">  <span class="hljs-keyword">return</span> (<span class="hljs-keyword">await</span> command.run()) <span class="hljs-keyword">as</span> T;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="执行Run命令"><a href="#执行Run命令" class="headerlink" title="执行Run命令"></a>执行Run命令</h5><p>上面的command.run方法实际上执行的是其父类的run方法，最终会执行到runCommand方法，该方法由子类实现。所以我们主要关注RunCommand.runCommand方法。</p>
+<figure class="highlight dart hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"> <span class="hljs-meta">@override</span></span><br><span class="line"> Future&lt;FlutterCommandResult&gt; runCommand() <span class="hljs-keyword">async</span> &#123;</span><br><span class="line">   Cache.releaseLockEarly();</span><br><span class="line">   </span><br><span class="line">   <span class="hljs-comment">// debug模式会默认开启热加载模式，如果不想要可以使用参数 --no-hot来关闭</span></span><br><span class="line">   <span class="hljs-keyword">final</span> <span class="hljs-built_in">bool</span> hotMode = shouldUseHotMode();</span><br><span class="line">   </span><br><span class="line">   ...</span><br><span class="line">       </span><br><span class="line"><span class="hljs-comment">// 所有支持的flutter设备</span></span><br><span class="line">   <span class="hljs-keyword">final</span> <span class="hljs-built_in">List</span>&lt;FlutterDevice&gt; flutterDevices = devices.map((Device device) &#123;</span><br><span class="line">     <span class="hljs-keyword">return</span> FlutterDevice(</span><br><span class="line">       device,</span><br><span class="line">       trackWidgetCreation: argResults[<span class="hljs-string">'track-widget-creation'</span>],</span><br><span class="line">       dillOutputPath: argResults[<span class="hljs-string">'output-dill'</span>],</span><br><span class="line">       fileSystemRoots: argResults[<span class="hljs-string">'filesystem-root'</span>],</span><br><span class="line">       fileSystemScheme: argResults[<span class="hljs-string">'filesystem-scheme'</span>],</span><br><span class="line">     );</span><br><span class="line">   &#125;).toList();</span><br><span class="line"></span><br><span class="line">   ResidentRunner runner;</span><br><span class="line">   <span class="hljs-keyword">final</span> <span class="hljs-built_in">String</span> applicationBinaryPath = argResults[<span class="hljs-string">'use-application-binary'</span>];</span><br><span class="line">   <span class="hljs-keyword">if</span> (hotMode) &#123;</span><br><span class="line">     <span class="hljs-comment">// 创建热加载模式的HotRunner</span></span><br><span class="line">     runner = HotRunner(</span><br><span class="line">       flutterDevices,</span><br><span class="line">       target: targetFile,</span><br><span class="line">       debuggingOptions: _createDebuggingOptions(),</span><br><span class="line">       benchmarkMode: argResults[<span class="hljs-string">'benchmark'</span>],</span><br><span class="line">       applicationBinary: applicationBinaryPath == <span class="hljs-keyword">null</span></span><br><span class="line">           ? <span class="hljs-keyword">null</span></span><br><span class="line">           : fs.file(applicationBinaryPath),</span><br><span class="line">       projectRootPath: argResults[<span class="hljs-string">'project-root'</span>],</span><br><span class="line">       packagesFilePath: globalResults[<span class="hljs-string">'packages'</span>],</span><br><span class="line">       dillOutputPath: argResults[<span class="hljs-string">'output-dill'</span>],</span><br><span class="line">       stayResident: stayResident,</span><br><span class="line">       ipv6: ipv6,</span><br><span class="line">     );</span><br><span class="line">   &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">     runner = ColdRunner(</span><br><span class="line">       flutterDevices,</span><br><span class="line">       target: targetFile,</span><br><span class="line">       debuggingOptions: _createDebuggingOptions(),</span><br><span class="line">       traceStartup: traceStartup,</span><br><span class="line">       applicationBinary: applicationBinaryPath == <span class="hljs-keyword">null</span></span><br><span class="line">           ? <span class="hljs-keyword">null</span></span><br><span class="line">           : fs.file(applicationBinaryPath),</span><br><span class="line">       stayResident: stayResident,</span><br><span class="line">       ipv6: ipv6,</span><br><span class="line">     );</span><br><span class="line">   &#125;</span><br><span class="line">   ...</span><br><span class="line">   <span class="hljs-comment">// HotRunner.run 以热加载模式运行</span></span><br><span class="line">   <span class="hljs-keyword">final</span> <span class="hljs-built_in">int</span> result = <span class="hljs-keyword">await</span> runner.run(</span><br><span class="line">     appStartedCompleter: appStartedTimeRecorder,</span><br><span class="line">     route: route,</span><br><span class="line">     shouldBuild: !runningWithPrebuiltApplication &amp;&amp; argResults[<span class="hljs-string">'build'</span>],</span><br><span class="line">   );</span><br><span class="line">   <span class="hljs-keyword">if</span> (result != <span class="hljs-number">0</span>)</span><br><span class="line">     throwToolExit(<span class="hljs-keyword">null</span>, exitCode: result);</span><br><span class="line">   <span class="hljs-keyword">return</span> FlutterCommandResult(</span><br><span class="line">     ExitStatus.success,</span><br><span class="line">     timingLabelParts: &lt;<span class="hljs-built_in">String</span>&gt;[</span><br><span class="line">       hotMode ? <span class="hljs-string">'hot'</span> : <span class="hljs-string">'cold'</span>,</span><br><span class="line">       getModeName(getBuildMode()),</span><br><span class="line">       devices.length == <span class="hljs-number">1</span></span><br><span class="line">           ? getNameForTargetPlatform(<span class="hljs-keyword">await</span> devices[<span class="hljs-number">0</span>].targetPlatform)</span><br><span class="line">           : <span class="hljs-string">'multiple'</span>,</span><br><span class="line">       devices.length == <span class="hljs-number">1</span> &amp;&amp; <span class="hljs-keyword">await</span> devices[<span class="hljs-number">0</span>].isLocalEmulator ? <span class="hljs-string">'emulator'</span> : <span class="hljs-keyword">null</span></span><br><span class="line">     ],</span><br><span class="line">     endTimeOverride: appStartedTime,</span><br><span class="line">   );</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<h5 id="热加载模式运行"><a href="#热加载模式运行" class="headerlink" title="热加载模式运行"></a>热加载模式运行</h5><figure class="highlight dart hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"> <span class="hljs-meta">@override</span></span><br><span class="line"> Future&lt;<span class="hljs-built_in">int</span>&gt; run(&#123;</span><br><span class="line">   Completer&lt;DebugConnectionInfo&gt; connectionInfoCompleter,</span><br><span class="line">   Completer&lt;<span class="hljs-keyword">void</span>&gt; appStartedCompleter,</span><br><span class="line">   <span class="hljs-built_in">String</span> route,</span><br><span class="line">   <span class="hljs-built_in">bool</span> shouldBuild = <span class="hljs-keyword">true</span></span><br><span class="line"> &#125;) <span class="hljs-keyword">async</span> &#123;</span><br><span class="line">   ...</span><br><span class="line">   <span class="hljs-comment">// 执行 pub get 去更新flutter项目依赖</span></span><br><span class="line">   <span class="hljs-keyword">if</span> (!<span class="hljs-keyword">await</span> _refreshDartDependencies()) &#123;</span><br><span class="line">     <span class="hljs-comment">// Some kind of source level error or missing file in the Dart code.</span></span><br><span class="line">     <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   firstBuildTime = <span class="hljs-built_in">DateTime</span>.now();</span><br><span class="line"></span><br><span class="line">   <span class="hljs-keyword">for</span> (FlutterDevice device <span class="hljs-keyword">in</span> flutterDevices) &#123;</span><br><span class="line">     <span class="hljs-comment">// 通过设备对象去运行</span></span><br><span class="line">     <span class="hljs-keyword">final</span> <span class="hljs-built_in">int</span> result = <span class="hljs-keyword">await</span> device.runHot(</span><br><span class="line">       hotRunner: <span class="hljs-keyword">this</span>,</span><br><span class="line">       route: route,</span><br><span class="line">       shouldBuild: shouldBuild,</span><br><span class="line">     );</span><br><span class="line">     <span class="hljs-keyword">if</span> (result != <span class="hljs-number">0</span>) &#123;</span><br><span class="line">       <span class="hljs-keyword">return</span> result;</span><br><span class="line">     &#125;</span><br><span class="line">   &#125;</span><br><span class="line"><span class="hljs-comment">// 与设备进行socket连接，用于热加载</span></span><br><span class="line">   <span class="hljs-keyword">return</span> attach(</span><br><span class="line">     connectionInfoCompleter: connectionInfoCompleter,</span><br><span class="line">     appStartedCompleter: appStartedCompleter</span><br><span class="line">   );</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight dart hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">Future&lt;<span class="hljs-built_in">int</span>&gt; runHot(&#123;</span><br><span class="line">   HotRunner hotRunner,</span><br><span class="line">   <span class="hljs-built_in">String</span> route,</span><br><span class="line">   <span class="hljs-built_in">bool</span> shouldBuild,</span><br><span class="line"> &#125;) <span class="hljs-keyword">async</span> &#123;</span><br><span class="line">   <span class="hljs-keyword">final</span> <span class="hljs-built_in">bool</span> prebuiltMode = hotRunner.applicationBinary != <span class="hljs-keyword">null</span>;</span><br><span class="line">   <span class="hljs-comment">// 构建模式 debug</span></span><br><span class="line">   <span class="hljs-keyword">final</span> <span class="hljs-built_in">String</span> modeName = hotRunner.debuggingOptions.buildInfo.modeName;</span><br><span class="line"><span class="hljs-comment">// 设备架构</span></span><br><span class="line">   <span class="hljs-keyword">final</span> TargetPlatform targetPlatform = <span class="hljs-keyword">await</span> device.targetPlatform;</span><br><span class="line">    </span><br><span class="line">   <span class="hljs-comment">// 获取应用对象</span></span><br><span class="line">   package = <span class="hljs-keyword">await</span> getApplicationPackageForPlatform(</span><br><span class="line">     targetPlatform,</span><br><span class="line">     applicationBinary: hotRunner.applicationBinary</span><br><span class="line">   );</span><br><span class="line">...</span><br><span class="line">   <span class="hljs-comment">// Start the application.</span></span><br><span class="line">   <span class="hljs-keyword">final</span> <span class="hljs-built_in">bool</span> hasDirtyDependencies = hotRunner.hasDirtyDependencies(<span class="hljs-keyword">this</span>);</span><br><span class="line">   <span class="hljs-comment">// 启动App，不同的平台有不同的实现，在Android平台，是由AndroidDevice来实现</span></span><br><span class="line">   <span class="hljs-keyword">final</span> Future&lt;LaunchResult&gt; futureResult = device.startApp(</span><br><span class="line">     package,</span><br><span class="line">     mainPath: hotRunner.mainPath,</span><br><span class="line">     debuggingOptions: hotRunner.debuggingOptions,</span><br><span class="line">     platformArgs: platformArgs,</span><br><span class="line">     route: route,</span><br><span class="line">     prebuiltApplication: prebuiltMode,</span><br><span class="line">     applicationNeedsRebuild: shouldBuild || hasDirtyDependencies,</span><br><span class="line">     usesTerminalUi: hotRunner.usesTerminalUI,</span><br><span class="line">     ipv6: hotRunner.ipv6,</span><br><span class="line">   );</span><br><span class="line"></span><br><span class="line">   <span class="hljs-keyword">final</span> LaunchResult result = <span class="hljs-keyword">await</span> futureResult;</span><br><span class="line"></span><br><span class="line">   <span class="hljs-keyword">if</span> (!result.started) &#123;</span><br><span class="line">     printError(<span class="hljs-string">'Error launching application on <span class="hljs-subst">$&#123;device.name&#125;</span>.'</span>);</span><br><span class="line">     <span class="hljs-keyword">await</span> stopEchoingDeviceLog();</span><br><span class="line">     <span class="hljs-keyword">return</span> <span class="hljs-number">2</span>;</span><br><span class="line">   &#125;</span><br><span class="line">   observatoryUris = &lt;<span class="hljs-built_in">Uri</span>&gt;[result.observatoryUri];</span><br><span class="line">   <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<h6 id="创建应用对象"><a href="#创建应用对象" class="headerlink" title="创建应用对象"></a>创建应用对象</h6><p>具体的编译运行逻辑根据不同平台设备的特性不同，由不同的对象去执行</p>
+<figure class="highlight dart hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">Future&lt;ApplicationPackage&gt; getApplicationPackageForPlatform(</span><br><span class="line">    TargetPlatform platform,</span><br><span class="line">    &#123;File applicationBinary&#125;) <span class="hljs-keyword">async</span> &#123;</span><br><span class="line">  <span class="hljs-keyword">switch</span> (platform) &#123;</span><br><span class="line">    <span class="hljs-keyword">case</span> TargetPlatform.android_arm:</span><br><span class="line">    <span class="hljs-keyword">case</span> TargetPlatform.android_arm64:</span><br><span class="line">    <span class="hljs-keyword">case</span> TargetPlatform.android_x64:</span><br><span class="line">    <span class="hljs-keyword">case</span> TargetPlatform.android_x86:</span><br><span class="line">      <span class="hljs-keyword">return</span> applicationBinary == <span class="hljs-keyword">null</span></span><br><span class="line">          <span class="hljs-comment">// FlutterProject.current()的到的是当前目录，</span></span><br><span class="line">          <span class="hljs-comment">// FlutterProject.current()).android 得到的就是当前flutter项目中的android子项目</span></span><br><span class="line">          ? <span class="hljs-keyword">await</span> AndroidApk.fromAndroidProject((<span class="hljs-keyword">await</span> FlutterProject.current()).android)</span><br><span class="line">          : AndroidApk.fromApk(applicationBinary);</span><br><span class="line">    <span class="hljs-keyword">case</span> TargetPlatform.ios:</span><br><span class="line">      <span class="hljs-keyword">return</span> applicationBinary == <span class="hljs-keyword">null</span></span><br><span class="line">          ? IOSApp.fromIosProject((<span class="hljs-keyword">await</span> FlutterProject.current()).ios)</span><br><span class="line">          : IOSApp.fromPrebuiltApp(applicationBinary);</span><br><span class="line">    <span class="hljs-keyword">case</span> TargetPlatform.tester:</span><br><span class="line">      <span class="hljs-keyword">return</span> FlutterTesterApp.fromCurrentDirectory();</span><br><span class="line">    <span class="hljs-keyword">case</span> TargetPlatform.darwin_x64:</span><br><span class="line">    <span class="hljs-keyword">case</span> TargetPlatform.linux_x64:</span><br><span class="line">    <span class="hljs-keyword">case</span> TargetPlatform.windows_x64:</span><br><span class="line">    <span class="hljs-keyword">case</span> TargetPlatform.fuchsia:</span><br><span class="line">      <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-keyword">assert</span>(platform != <span class="hljs-keyword">null</span>);</span><br><span class="line">  <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="创建Android应用对象"><a href="#创建Android应用对象" class="headerlink" title="创建Android应用对象"></a>创建Android应用对象</h6><p>获取到Apk文件以及包名和启动的Activity名字来构建一个AndroidApk对象返回。</p>
+<figure class="highlight dart hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"> <span class="hljs-comment">/// Creates a new AndroidApk based on the information in the Android manifest.</span></span><br><span class="line"> <span class="hljs-keyword">static</span> Future&lt;AndroidApk&gt; fromAndroidProject(AndroidProject androidProject) <span class="hljs-keyword">async</span> &#123;</span><br><span class="line">   File apkFile;</span><br><span class="line"></span><br><span class="line">   <span class="hljs-keyword">if</span> (androidProject.isUsingGradle) &#123;</span><br><span class="line">      <span class="hljs-comment">// 如果是gradle项目，获取apk文件</span></span><br><span class="line">      <span class="hljs-comment">// 就是在此处执行 Initializing gradle 和 Resolving dependencies</span></span><br><span class="line">      <span class="hljs-comment">// 该方法返回build目录中的apk文件路径</span></span><br><span class="line">     apkFile = <span class="hljs-keyword">await</span> getGradleAppOut(androidProject);</span><br><span class="line">     <span class="hljs-keyword">if</span> (apkFile.existsSync()) &#123;</span><br><span class="line">       <span class="hljs-comment">// 如果Apk文件已经存在过了，则直接读取Apk文件，从中获取packageName和launchableActivityName</span></span><br><span class="line">       <span class="hljs-comment">// 通过 packageName和launchableActivityName和Apk文件 创建一个AndroidApk对象返回</span></span><br><span class="line">       <span class="hljs-keyword">return</span> AndroidApk.fromApk(apkFile);</span><br><span class="line">     &#125;</span><br><span class="line">   &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">     apkFile = fs.file(fs.path.join(getAndroidBuildDirectory(), <span class="hljs-string">'app.apk'</span>));</span><br><span class="line">   &#125;</span><br><span class="line"><span class="hljs-comment">// 如果build目录中没有Apk文件，则读取manifest，获取packageName和launchableActivityName</span></span><br><span class="line">   <span class="hljs-keyword">final</span> File manifest = androidProject.appManifestFile;</span><br><span class="line"></span><br><span class="line">   <span class="hljs-keyword">if</span> (!manifest.existsSync())</span><br><span class="line">     <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;</span><br><span class="line"></span><br><span class="line">   <span class="hljs-keyword">final</span> <span class="hljs-built_in">String</span> manifestString = manifest.readAsStringSync();</span><br><span class="line">   <span class="hljs-keyword">final</span> xml.XmlDocument <span class="hljs-built_in">document</span> = xml.parse(manifestString);</span><br><span class="line"></span><br><span class="line">   <span class="hljs-keyword">final</span> <span class="hljs-built_in">Iterable</span>&lt;xml.XmlElement&gt; manifests = <span class="hljs-built_in">document</span>.findElements(<span class="hljs-string">'manifest'</span>);</span><br><span class="line">   <span class="hljs-keyword">if</span> (manifests.isEmpty)</span><br><span class="line">     <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;</span><br><span class="line">   <span class="hljs-comment">// 获取packageName</span></span><br><span class="line">   <span class="hljs-keyword">final</span> <span class="hljs-built_in">String</span> packageId = manifests.first.getAttribute(<span class="hljs-string">'package'</span>);</span><br><span class="line"></span><br><span class="line">   <span class="hljs-built_in">String</span> launchActivity;</span><br><span class="line">   <span class="hljs-comment">// 获取launchableActivityName</span></span><br><span class="line">   <span class="hljs-keyword">for</span> (xml.XmlElement category <span class="hljs-keyword">in</span> <span class="hljs-built_in">document</span>.findAllElements(<span class="hljs-string">'category'</span>)) &#123;</span><br><span class="line">     <span class="hljs-keyword">if</span> (category.getAttribute(<span class="hljs-string">'android:name'</span>) == <span class="hljs-string">'android.intent.category.LAUNCHER'</span>) &#123;</span><br><span class="line">       <span class="hljs-keyword">final</span> xml.XmlElement activity = category.parent.parent;</span><br><span class="line">       <span class="hljs-keyword">final</span> <span class="hljs-built_in">String</span> enabled = activity.getAttribute(<span class="hljs-string">'android:enabled'</span>);</span><br><span class="line">       <span class="hljs-keyword">if</span> (enabled == <span class="hljs-keyword">null</span> || enabled == <span class="hljs-string">'true'</span>) &#123;</span><br><span class="line">         <span class="hljs-keyword">final</span> <span class="hljs-built_in">String</span> activityName = activity.getAttribute(<span class="hljs-string">'android:name'</span>);</span><br><span class="line">         launchActivity = <span class="hljs-string">'$packageId/$activityName'</span>;</span><br><span class="line">         <span class="hljs-keyword">break</span>;</span><br><span class="line">       &#125;</span><br><span class="line">     &#125;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="hljs-keyword">if</span> (packageId == <span class="hljs-keyword">null</span> || launchActivity == <span class="hljs-keyword">null</span>)</span><br><span class="line">     <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;</span><br><span class="line"></span><br><span class="line">   <span class="hljs-keyword">return</span> AndroidApk(</span><br><span class="line">     id: packageId,</span><br><span class="line">     file: apkFile,</span><br><span class="line">     launchActivity: launchActivity</span><br><span class="line">   );</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<h6 id="Initializing-gradle"><a href="#Initializing-gradle" class="headerlink" title="Initializing gradle"></a>Initializing gradle</h6><p>在第一次执行gradlew命令时，会初始化gradlew命令，也就是获取gradlew命令全路径，并且通过 gradlew -v 来验证gradlew可以正常运行。</p>
+<figure class="highlight dart hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Future&lt;<span class="hljs-built_in">String</span>&gt; _initializeGradle(FlutterProject project) <span class="hljs-keyword">async</span> &#123;</span><br><span class="line">  <span class="hljs-keyword">final</span> Directory android = project.android.hostAppGradleRoot;</span><br><span class="line">  <span class="hljs-keyword">final</span> Status status = logger.startProgress(<span class="hljs-string">'Initializing gradle...'</span>, expectSlowOperation: <span class="hljs-keyword">true</span>);</span><br><span class="line">  <span class="hljs-comment">// 获取gradlew命令文件</span></span><br><span class="line">  <span class="hljs-built_in">String</span> gradle = _locateGradlewExecutable(android);</span><br><span class="line">  ...</span><br><span class="line">  <span class="hljs-comment">// 执行 gradlew -v 来验证</span></span><br><span class="line">  <span class="hljs-keyword">await</span> runCheckedAsync(&lt;<span class="hljs-built_in">String</span>&gt;[gradle, <span class="hljs-string">'-v'</span>], environment: _gradleEnv);</span><br><span class="line">  status.stop();</span><br><span class="line">  <span class="hljs-keyword">return</span> gradle;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="Resolving-dependencies"><a href="#Resolving-dependencies" class="headerlink" title="Resolving dependencies"></a>Resolving dependencies</h6><figure class="highlight dart hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">Future&lt;GradleProject&gt; _readGradleProject() <span class="hljs-keyword">async</span> &#123;</span><br><span class="line">  <span class="hljs-comment">// 当前flutter项目</span></span><br><span class="line">  <span class="hljs-keyword">final</span> FlutterProject flutterProject = <span class="hljs-keyword">await</span> FlutterProject.current();</span><br><span class="line">  <span class="hljs-comment">// 获取gradlew命令</span></span><br><span class="line">  <span class="hljs-keyword">final</span> <span class="hljs-built_in">String</span> gradle = <span class="hljs-keyword">await</span> _ensureGradle(flutterProject);</span><br><span class="line">  <span class="hljs-comment">// 解析local.properties中的配置</span></span><br><span class="line">  updateLocalProperties(project: flutterProject);</span><br><span class="line">  <span class="hljs-keyword">final</span> Status status = logger.startProgress(<span class="hljs-string">'Resolving dependencies...'</span>, expectSlowOperation: <span class="hljs-keyword">true</span>);</span><br><span class="line">  GradleProject project;</span><br><span class="line">  <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">     <span class="hljs-comment">// 运行 gradlew app:properties 命令，获取所有的项目中所有的properties</span></span><br><span class="line">    <span class="hljs-keyword">final</span> RunResult runResult = <span class="hljs-keyword">await</span> runCheckedAsync(</span><br><span class="line">      &lt;<span class="hljs-built_in">String</span>&gt;[gradle, <span class="hljs-string">'app:properties'</span>],</span><br><span class="line">      workingDirectory: flutterProject.android.hostAppGradleRoot.path,</span><br><span class="line">      environment: _gradleEnv,</span><br><span class="line">    );</span><br><span class="line">    <span class="hljs-keyword">final</span> <span class="hljs-built_in">String</span> properties = runResult.stdout.trim();</span><br><span class="line">    <span class="hljs-comment">// 提取出 build目录和 build type 和 flavors</span></span><br><span class="line">    <span class="hljs-comment">// 根据这三个属性创建GradleProject对象</span></span><br><span class="line">    project = GradleProject.fromAppProperties(properties);</span><br><span class="line">  &#125; <span class="hljs-keyword">catch</span> (exception) &#123;</span><br><span class="line">    ...</span><br><span class="line">  &#125;</span><br><span class="line">  status.stop();</span><br><span class="line">  <span class="hljs-keyword">return</span> project;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="启动应用"><a href="#启动应用" class="headerlink" title="启动应用"></a>启动应用</h5><figure class="highlight dart hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"> <span class="hljs-meta">@override</span></span><br><span class="line"> Future&lt;LaunchResult&gt; startApp(</span><br><span class="line">   ApplicationPackage package, &#123;</span><br><span class="line">   <span class="hljs-built_in">String</span> mainPath,</span><br><span class="line">   <span class="hljs-built_in">String</span> route,</span><br><span class="line">   DebuggingOptions debuggingOptions,</span><br><span class="line">   <span class="hljs-built_in">Map</span>&lt;<span class="hljs-built_in">String</span>, <span class="hljs-keyword">dynamic</span>&gt; platformArgs,</span><br><span class="line">   <span class="hljs-built_in">bool</span> prebuiltApplication = <span class="hljs-keyword">false</span>,</span><br><span class="line">   <span class="hljs-built_in">bool</span> applicationNeedsRebuild = <span class="hljs-keyword">false</span>,</span><br><span class="line">   <span class="hljs-built_in">bool</span> usesTerminalUi = <span class="hljs-keyword">true</span>,</span><br><span class="line">   <span class="hljs-built_in">bool</span> ipv6 = <span class="hljs-keyword">false</span>,</span><br><span class="line"> &#125;) <span class="hljs-keyword">async</span> &#123;</span><br><span class="line">   <span class="hljs-comment">// 检查版本和架构是否支持</span></span><br><span class="line">...</span><br><span class="line">   <span class="hljs-keyword">if</span> (!prebuiltApplication) &#123;</span><br><span class="line">     printTrace(<span class="hljs-string">'Building APK'</span>);</span><br><span class="line">     <span class="hljs-keyword">final</span> FlutterProject project = <span class="hljs-keyword">await</span> FlutterProject.current();</span><br><span class="line">     <span class="hljs-comment">// assembleDebug 构建APK</span></span><br><span class="line">     <span class="hljs-keyword">await</span> buildApk(</span><br><span class="line">         project: project,</span><br><span class="line">         target: mainPath,</span><br><span class="line">         buildInfo: buildInfo,</span><br><span class="line">     );</span><br><span class="line">     <span class="hljs-comment">// Package has been built, so we can get the updated application ID and</span></span><br><span class="line">     <span class="hljs-comment">// activity name from the .apk.</span></span><br><span class="line">     package = <span class="hljs-keyword">await</span> AndroidApk.fromAndroidProject(project.android);</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   printTrace(<span class="hljs-string">"Stopping app '<span class="hljs-subst">$&#123;package.name&#125;</span>' on $name."</span>);</span><br><span class="line">   <span class="hljs-keyword">await</span> stopApp(package);</span><br><span class="line"><span class="hljs-comment">// 运行adb install 命令来安装上面生成的Apk文件</span></span><br><span class="line">   <span class="hljs-keyword">if</span> (!<span class="hljs-keyword">await</span> _installLatestApp(package))</span><br><span class="line">     <span class="hljs-keyword">return</span> LaunchResult.failed();</span><br><span class="line"></span><br><span class="line">   ...</span><br><span class="line">   <span class="hljs-built_in">List</span>&lt;<span class="hljs-built_in">String</span>&gt; cmd;</span><br><span class="line"><span class="hljs-comment">// 启动Activity</span></span><br><span class="line">   cmd = adbCommandForDevice(&lt;<span class="hljs-built_in">String</span>&gt;[</span><br><span class="line">     <span class="hljs-string">'shell'</span>, <span class="hljs-string">'am'</span>, <span class="hljs-string">'start'</span>,</span><br><span class="line">     <span class="hljs-string">'-a'</span>, <span class="hljs-string">'android.intent.action.RUN'</span>,</span><br><span class="line">     <span class="hljs-string">'-f'</span>, <span class="hljs-string">'0x20000000'</span>, <span class="hljs-comment">// FLAG_ACTIVITY_SINGLE_TOP</span></span><br><span class="line">     <span class="hljs-string">'--ez'</span>, <span class="hljs-string">'enable-background-compilation'</span>, <span class="hljs-string">'true'</span>,</span><br><span class="line">     <span class="hljs-string">'--ez'</span>, <span class="hljs-string">'enable-dart-profiling'</span>, <span class="hljs-string">'true'</span>,</span><br><span class="line">   ]);</span><br><span class="line">...</span><br><span class="line">   cmd.add(apk.launchActivity);</span><br><span class="line">   <span class="hljs-keyword">final</span> <span class="hljs-built_in">String</span> result = (<span class="hljs-keyword">await</span> runCheckedAsync(cmd)).stdout;</span><br><span class="line">   <span class="hljs-comment">// This invocation returns 0 even when it fails.</span></span><br><span class="line">   <span class="hljs-keyword">if</span> (result.contains(<span class="hljs-string">'Error: '</span>)) &#123;</span><br><span class="line">     printError(result.trim());</span><br><span class="line">     <span class="hljs-keyword">return</span> LaunchResult.failed();</span><br><span class="line">   &#125;</span><br><span class="line">...</span><br><span class="line">   <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">     <span class="hljs-built_in">Uri</span> observatoryUri;</span><br><span class="line"></span><br><span class="line">     <span class="hljs-keyword">if</span> (debuggingOptions.buildInfo.isDebug || debuggingOptions.buildInfo.isProfile) &#123;</span><br><span class="line">       observatoryUri = <span class="hljs-keyword">await</span> observatoryDiscovery.uri;</span><br><span class="line">     &#125;</span><br><span class="line"></span><br><span class="line">     <span class="hljs-keyword">return</span> LaunchResult.succeeded(observatoryUri: observatoryUri);</span><br><span class="line">   &#125; <span class="hljs-keyword">catch</span> (error) &#123;</span><br><span class="line">     printError(<span class="hljs-string">'Error waiting for a debug connection: $error'</span>);</span><br><span class="line">     <span class="hljs-keyword">return</span> LaunchResult.failed();</span><br><span class="line">   &#125; <span class="hljs-keyword">finally</span> &#123;</span><br><span class="line">     <span class="hljs-keyword">await</span> observatoryDiscovery.cancel();</span><br><span class="line">   &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<h5 id="构建Android-Apk"><a href="#构建Android-Apk" class="headerlink" title="构建Android Apk"></a>构建Android Apk</h5><h6 id="assembleTask"><a href="#assembleTask" class="headerlink" title="assembleTask"></a>assembleTask</h6><figure class="highlight dart hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">Future&lt;<span class="hljs-built_in">Null</span>&gt; _buildGradleProjectV2(</span><br><span class="line">    FlutterProject flutterProject,</span><br><span class="line">    <span class="hljs-built_in">String</span> gradle,</span><br><span class="line">    BuildInfo buildInfo,</span><br><span class="line">    <span class="hljs-built_in">String</span> target) <span class="hljs-keyword">async</span> &#123;</span><br><span class="line">  <span class="hljs-keyword">final</span> GradleProject project = <span class="hljs-keyword">await</span> _gradleProject();</span><br><span class="line">  <span class="hljs-comment">// 根据build信息，获取assembleDebug任务名称</span></span><br><span class="line">  <span class="hljs-keyword">final</span> <span class="hljs-built_in">String</span> assembleTask = project.assembleTaskFor(buildInfo);</span><br><span class="line">  ...</span><br><span class="line">  <span class="hljs-keyword">final</span> Status status = logger.startProgress(</span><br><span class="line">    <span class="hljs-string">"Gradle task '$assembleTask'..."</span>,</span><br><span class="line">    expectSlowOperation: <span class="hljs-keyword">true</span>,</span><br><span class="line">    multilineOutput: <span class="hljs-keyword">true</span>,</span><br><span class="line">  );</span><br><span class="line">  <span class="hljs-comment">// gradlew 路径</span></span><br><span class="line">  <span class="hljs-keyword">final</span> <span class="hljs-built_in">String</span> gradlePath = fs.file(gradle).absolute.path;</span><br><span class="line">  <span class="hljs-comment">// 组装参数</span></span><br><span class="line">  <span class="hljs-keyword">final</span> <span class="hljs-built_in">List</span>&lt;<span class="hljs-built_in">String</span>&gt; command = &lt;<span class="hljs-built_in">String</span>&gt;[gradlePath];</span><br><span class="line">  ...</span><br><span class="line">  command.add(assembleTask);</span><br><span class="line">  <span class="hljs-comment">// 运行 gradlew -args assembleDebug </span></span><br><span class="line">  <span class="hljs-keyword">final</span> <span class="hljs-built_in">int</span> exitCode = <span class="hljs-keyword">await</span> runCommandAndStreamOutput(</span><br><span class="line">    command,</span><br><span class="line">    workingDirectory: flutterProject.android.hostAppGradleRoot.path,</span><br><span class="line">    allowReentrantFlutter: <span class="hljs-keyword">true</span>,</span><br><span class="line">    environment: _gradleEnv,</span><br><span class="line">    filter: logger.isVerbose ? <span class="hljs-keyword">null</span> : ndkMessageFilter,</span><br><span class="line">  );</span><br><span class="line">  status.stop();</span><br><span class="line"></span><br><span class="line">  <span class="hljs-keyword">if</span> (exitCode != <span class="hljs-number">0</span>)</span><br><span class="line">    throwToolExit(<span class="hljs-string">'Gradle task $assembleTask failed with exit code $exitCode'</span>, exitCode: exitCode);</span><br><span class="line">  <span class="hljs-comment">// 找到生成的Apk文件</span></span><br><span class="line">  <span class="hljs-keyword">final</span> File apkFile = _findApkFile(project, buildInfo);</span><br><span class="line">  ...</span><br><span class="line">  apkFile.copySync(project.apkDirectory.childFile(<span class="hljs-string">'app.apk'</span>).path);</span><br><span class="line"></span><br><span class="line">  printTrace(<span class="hljs-string">'calculateSha: <span class="hljs-subst">$&#123;project.apkDirectory&#125;</span>/app.apk'</span>);</span><br><span class="line">  <span class="hljs-keyword">final</span> File apkShaFile = project.apkDirectory.childFile(<span class="hljs-string">'app.apk.sha1'</span>);</span><br><span class="line">  apkShaFile.writeAsStringSync(calculateSha(apkFile));</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="flutter-gradle"><a href="#flutter-gradle" class="headerlink" title="flutter.gradle"></a>flutter.gradle</h6><p>我们可以看到在flutter_tools中，只是简单的执行了一下assemble任务，并没有对Dart资源进行编译和处理，那么具体的逻辑，对于Android项目来说，是在gradle/flutter.gradle中。</p>
+<ol>
+<li><p>在flutter.gradle中，创建了flutterPlugin。</p>
+<figure class="highlight plain hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apply plugin: FlutterPlugin</span><br></pre></td></tr></table></figure>
+<figure class="highlight groovy hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line">   </span><br><span class="line"><span class="hljs-meta">@Override</span></span><br><span class="line"><span class="hljs-keyword">void</span> apply(Project project) &#123;</span><br><span class="line">    <span class="hljs-comment">// Add custom build types</span></span><br><span class="line">  	...</span><br><span class="line">  	<span class="hljs-comment">// 找到flutter命令</span></span><br><span class="line">    flutterExecutable = Paths.get(flutterRoot.absolutePath, <span class="hljs-string">"bin"</span>, flutterExecutableName).toFile();</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (project.hasProperty(<span class="hljs-string">'localEngineOut'</span>)) &#123;</span><br><span class="line">        <span class="hljs-comment">// 配置了本地自己编译的引擎目录 </span></span><br><span class="line">        ...</span><br><span class="line">    &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">    	<span class="hljs-comment">// 找到flutter engine目录，这里面有已经编译好的所有平台架构所有build type的flutter engine。</span></span><br><span class="line">        <span class="hljs-comment">// Android平台提供的是一个jar包，flutter.jar，在这个jar包中包含了engine so库，和Java Api库。</span></span><br><span class="line">        Path baseEnginePath = Paths.get(flutterRoot.absolutePath, <span class="hljs-string">"bin"</span>, <span class="hljs-string">"cache"</span>, <span class="hljs-string">"artifacts"</span>, <span class="hljs-string">"engine"</span>)</span><br><span class="line">        <span class="hljs-comment">// 根据配置的平台架构来选择对应的flutter.jar,默认是arm架构</span></span><br><span class="line">        String targetArch = <span class="hljs-string">'arm'</span></span><br><span class="line">        <span class="hljs-keyword">if</span> (project.hasProperty(<span class="hljs-string">'target-platform'</span>) &amp;&amp;</span><br><span class="line">            project.property(<span class="hljs-string">'target-platform'</span>) == <span class="hljs-string">'android-arm64'</span>) &#123;</span><br><span class="line">          targetArch = <span class="hljs-string">'arm64'</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="hljs-comment">// 获取对应架构下所有build type的flutter.jar</span></span><br><span class="line">        debugFlutterJar = baseEnginePath.resolve(<span class="hljs-string">"android-$&#123;targetArch&#125;"</span>).resolve(<span class="hljs-string">"flutter.jar"</span>).toFile()</span><br><span class="line">        profileFlutterJar = baseEnginePath.resolve(<span class="hljs-string">"android-$&#123;targetArch&#125;-profile"</span>).resolve(<span class="hljs-string">"flutter.jar"</span>).toFile()</span><br><span class="line">        releaseFlutterJar = baseEnginePath.resolve(<span class="hljs-string">"android-$&#123;targetArch&#125;-release"</span>).resolve(<span class="hljs-string">"flutter.jar"</span>).toFile()</span><br><span class="line">        dynamicProfileFlutterJar = baseEnginePath.resolve(<span class="hljs-string">"android-$&#123;targetArch&#125;-dynamic-profile"</span>).resolve(<span class="hljs-string">"flutter.jar"</span>).toFile()</span><br><span class="line">        dynamicReleaseFlutterJar = baseEnginePath.resolve(<span class="hljs-string">"android-$&#123;targetArch&#125;-dynamic-release"</span>).resolve(<span class="hljs-string">"flutter.jar"</span>).toFile()</span><br><span class="line">        <span class="hljs-keyword">if</span> (!debugFlutterJar.isFile()) &#123;</span><br><span class="line">            project.exec &#123;</span><br><span class="line">                executable flutterExecutable.absolutePath</span><br><span class="line">                args <span class="hljs-string">"--suppress-analytics"</span></span><br><span class="line">                args <span class="hljs-string">"precache"</span></span><br><span class="line">            &#125;</span><br><span class="line">            <span class="hljs-keyword">if</span> (!debugFlutterJar.isFile()) &#123;</span><br><span class="line">                <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> GradleException(<span class="hljs-string">"Unable to find flutter.jar in SDK: $&#123;debugFlutterJar&#125;"</span>)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">   </span><br><span class="line">        <span class="hljs-comment">// 对于 x86架构，只在debug类型下才会添加，所以单独创建了一个task，专门用来将x86、x86_64两种架构的so库加入到apk中。</span></span><br><span class="line">        flutterX86Jar = project.file(<span class="hljs-string">"$&#123;project.buildDir&#125;/$&#123;AndroidProject.FD_INTERMEDIATES&#125;/flutter/flutter-x86.jar"</span>)</span><br><span class="line">        Task flutterX86JarTask = project.tasks.create(<span class="hljs-string">"$&#123;flutterBuildPrefix&#125;X86Jar"</span>, Jar) &#123;</span><br><span class="line">            destinationDir flutterX86Jar.parentFile</span><br><span class="line">            archiveName flutterX86Jar.name</span><br><span class="line">            from(<span class="hljs-string">"$&#123;flutterRoot&#125;/bin/cache/artifacts/engine/android-x86/libflutter.so"</span>) &#123;</span><br><span class="line">                into <span class="hljs-string">"lib/x86"</span></span><br><span class="line">            &#125;</span><br><span class="line">            from(<span class="hljs-string">"$&#123;flutterRoot&#125;/bin/cache/artifacts/engine/android-x64/libflutter.so"</span>) &#123;</span><br><span class="line">                into <span class="hljs-string">"lib/x86_64"</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="hljs-comment">// 将flutter.jar添加到项目的依赖列表中，打包就会自动打入到apk中。</span></span><br><span class="line">        project.android.buildTypes.each &#123; addFlutterJarApiDependency(project, it, flutterX86JarTask) &#125;</span><br><span class="line">        project.android.buildTypes.whenObjectAdded &#123; addFlutterJarApiDependency(project, it, flutterX86JarTask) &#125;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="hljs-comment">// flutter配置</span></span><br><span class="line">    project.extensions.create(<span class="hljs-string">"flutter"</span>, FlutterExtension)</span><br><span class="line">    <span class="hljs-comment">// 添加 flutterTask，具体编译操作就在这个task里面</span></span><br><span class="line">    project.afterEvaluate <span class="hljs-keyword">this</span>.&amp;addFlutterTask</span><br><span class="line">   </span><br><span class="line">    <span class="hljs-comment">// 对于 flutter plugin的处理</span></span><br><span class="line">    File pluginsFile = <span class="hljs-keyword">new</span> File(project.projectDir.parentFile.parentFile, <span class="hljs-string">'.flutter-plugins'</span>)</span><br><span class="line">    Properties plugins = readPropertiesIfExist(pluginsFile)</span><br><span class="line">   </span><br><span class="line">    plugins.each &#123; name, _ -&gt;</span><br><span class="line">        <span class="hljs-keyword">def</span> pluginProject = project.rootProject.findProject(<span class="hljs-string">":$name"</span>)</span><br><span class="line">        <span class="hljs-keyword">if</span> (pluginProject != <span class="hljs-literal">null</span>) &#123;</span><br><span class="line">            project.dependencies &#123;</span><br><span class="line">                <span class="hljs-keyword">if</span> (project.getConfigurations().findByName(<span class="hljs-string">"implementation"</span>)) &#123;</span><br><span class="line">                    implementation pluginProject</span><br><span class="line">                &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">                    compile pluginProject</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            pluginProject.afterEvaluate <span class="hljs-keyword">this</span>.&amp;addFlutterJarCompileOnlyDependency</span><br><span class="line">        &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">            project.logger.error(<span class="hljs-string">"Plugin project :$name not found. Please update settings.gradle."</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li>在flutterPlugin中创建了flutterTask</li>
+</ol>
+<figure class="highlight groovy hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line">  <span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> addFlutterTask(Project project) &#123;</span><br><span class="line"><span class="hljs-comment">// 设置 target</span></span><br><span class="line">      String target = project.flutter.target</span><br><span class="line">      <span class="hljs-keyword">if</span> (target == <span class="hljs-literal">null</span>) &#123;</span><br><span class="line">          target = <span class="hljs-string">'lib/main.dart'</span></span><br><span class="line">      &#125;</span><br><span class="line">      <span class="hljs-keyword">if</span> (project.hasProperty(<span class="hljs-string">'target'</span>)) &#123;</span><br><span class="line">          target = project.property(<span class="hljs-string">'target'</span>)</span><br><span class="line">      &#125;</span><br><span class="line"><span class="hljs-comment">// 配置flutter命令运行参数</span></span><br><span class="line">      ...</span><br><span class="line">      <span class="hljs-keyword">def</span> addFlutterDeps = &#123; variant -&gt;</span><br><span class="line">          String flutterBuildMode = buildModeFor(variant.buildType)</span><br><span class="line">          <span class="hljs-keyword">if</span> (flutterBuildMode == <span class="hljs-string">'debug'</span> &amp;&amp; project.tasks.findByName(<span class="hljs-string">'$&#123;flutterBuildPrefix&#125;X86Jar'</span>)) &#123;</span><br><span class="line">              Task task = project.tasks.findByName(<span class="hljs-string">"compile$&#123;variant.name.capitalize()&#125;JavaWithJavac"</span>)</span><br><span class="line">              <span class="hljs-keyword">if</span> (task) &#123;</span><br><span class="line">                  <span class="hljs-comment">// 如果是debug模式，则找到 javac任务，将上面创建的添加x86架构的任务添加到javac任务上。</span></span><br><span class="line">                  task.dependsOn project.flutterBuildX86Jar</span><br><span class="line">              &#125;</span><br><span class="line">              task = project.tasks.findByName(<span class="hljs-string">"compile$&#123;variant.name.capitalize()&#125;Kotlin"</span>)</span><br><span class="line">              <span class="hljs-keyword">if</span> (task) &#123;</span><br><span class="line">                  <span class="hljs-comment">// 如果找到kotlin任务，对于纯kotlin项目</span></span><br><span class="line">                  task.dependsOn project.flutterBuildX86Jar</span><br><span class="line">              &#125;</span><br><span class="line">          &#125;</span><br><span class="line">	<span class="hljs-comment">// 创建FlutterTask</span></span><br><span class="line">          FlutterTask flutterTask = project.tasks.create(<span class="hljs-string">name:</span> <span class="hljs-string">"$&#123;flutterBuildPrefix&#125;$&#123;variant.name.capitalize()&#125;"</span>, <span class="hljs-string">type:</span> FlutterTask) &#123;</span><br><span class="line">              flutterRoot <span class="hljs-keyword">this</span>.flutterRoot</span><br><span class="line">              flutterExecutable <span class="hljs-keyword">this</span>.flutterExecutable</span><br><span class="line">              buildMode flutterBuildMode</span><br><span class="line">              localEngine <span class="hljs-keyword">this</span>.localEngine</span><br><span class="line">              localEngineSrcPath <span class="hljs-keyword">this</span>.localEngineSrcPath</span><br><span class="line">              targetPath target</span><br><span class="line">              verbose verboseValue</span><br><span class="line">              fileSystemRoots fileSystemRootsValue</span><br><span class="line">              fileSystemScheme fileSystemSchemeValue</span><br><span class="line">              trackWidgetCreation trackWidgetCreationValue</span><br><span class="line">              compilationTraceFilePath compilationTraceFilePathValue</span><br><span class="line">              buildHotUpdate buildHotUpdateValue</span><br><span class="line">              buildSharedLibrary buildSharedLibraryValue</span><br><span class="line">              targetPlatform targetPlatformValue</span><br><span class="line">              sourceDir project.file(project.flutter.source)</span><br><span class="line">              intermediateDir project.file(<span class="hljs-string">"$&#123;project.buildDir&#125;/$&#123;AndroidProject.FD_INTERMEDIATES&#125;/flutter/$&#123;variant.name&#125;"</span>)</span><br><span class="line">              extraFrontEndOptions extraFrontEndOptionsValue</span><br><span class="line">              extraGenSnapshotOptions extraGenSnapshotOptionsValue</span><br><span class="line">          &#125;</span><br><span class="line">	<span class="hljs-comment">// 创建复制flutter资源任务，在assets中包含了dart资源和dart编译后的代码资源，在该任务中会将这些dart编译后生成的产物都复制到Android apk构建时资源的最终输出目录中去，这样在构建apk时，会将这个dart资源也一起打包进去。</span></span><br><span class="line">          Task copyFlutterAssetsTask = project.tasks.create(<span class="hljs-string">name:</span> <span class="hljs-string">"copyFlutterAssets$&#123;variant.name.capitalize()&#125;"</span>, <span class="hljs-string">type:</span> Copy) &#123;</span><br><span class="line">              <span class="hljs-comment">// 该任务依赖于 flutterTask，必须要等dart编译完代码后才开始复制</span></span><br><span class="line">              dependsOn flutterTask</span><br><span class="line">   </span><br><span class="line">              dependsOn variant.mergeAssets</span><br><span class="line">              dependsOn <span class="hljs-string">"clean$&#123;variant.mergeAssets.name.capitalize()&#125;"</span></span><br><span class="line">              into variant.mergeAssets.outputDir</span><br><span class="line">              with flutterTask.assets <span class="hljs-comment">// 将flutterTask.getAssets输出的资源复制</span></span><br><span class="line">          &#125;</span><br><span class="line">          <span class="hljs-comment">// 在processResouces任务执行前，会执行复制dart资源的任务，然后复制dart资源的任务执行前，会执行flutterTask任务去编译dart代码。</span></span><br><span class="line">          variant.outputs[<span class="hljs-number">0</span>].processResources.dependsOn(copyFlutterAssetsTask)</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="hljs-keyword">if</span> (project.android.hasProperty(<span class="hljs-string">"applicationVariants"</span>)) &#123;</span><br><span class="line">          project.android.applicationVariants.all addFlutterDeps</span><br><span class="line">      &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">          project.android.libraryVariants.all addFlutterDeps</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight groovy hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">CopySpec getAssets() &#123;</span><br><span class="line">     <span class="hljs-keyword">return</span> project.copySpec &#123;</span><br><span class="line">         from <span class="hljs-string">"$&#123;intermediateDir&#125;"</span></span><br><span class="line">   </span><br><span class="line">         include <span class="hljs-string">"flutter_assets/**"</span> <span class="hljs-comment">// the working dir and its files</span></span><br><span class="line">   </span><br><span class="line">         <span class="hljs-keyword">if</span> (buildMode != <span class="hljs-string">'debug'</span> || compilationTraceFilePath) &#123;</span><br><span class="line">             <span class="hljs-keyword">if</span> (buildSharedLibrary) &#123;</span><br><span class="line">                 include <span class="hljs-string">"app.so"</span></span><br><span class="line">             &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">                 <span class="hljs-comment">// 如果是非debug模式，会只输入以下四个文件资源</span></span><br><span class="line">                 include <span class="hljs-string">"vm_snapshot_data"</span></span><br><span class="line">                 include <span class="hljs-string">"vm_snapshot_instr"</span></span><br><span class="line">                 include <span class="hljs-string">"isolate_snapshot_data"</span></span><br><span class="line">                 include <span class="hljs-string">"isolate_snapshot_instr"</span></span><br><span class="line">             &#125;</span><br><span class="line">         &#125;</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li>执行flutterTask，编译dart资源</li>
+</ol>
+<figure class="highlight groovy hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">void</span> buildBundle() &#123;</span><br><span class="line">    <span class="hljs-keyword">if</span> (!sourceDir.isDirectory()) &#123;</span><br><span class="line">        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> GradleException(<span class="hljs-string">"Invalid Flutter source directory: $&#123;sourceDir&#125;"</span>)</span><br><span class="line">    &#125;</span><br><span class="line">   </span><br><span class="line">    intermediateDir.mkdirs()</span><br><span class="line">   </span><br><span class="line">    <span class="hljs-keyword">if</span> (buildMode == <span class="hljs-string">"profile"</span> || buildMode == <span class="hljs-string">"release"</span>) &#123;</span><br><span class="line">        <span class="hljs-comment">// 配置release模式下的flutter命令参数</span></span><br><span class="line">        ... </span><br><span class="line">    &#125;</span><br><span class="line">   </span><br><span class="line">    project.exec &#123;</span><br><span class="line">        <span class="hljs-comment">// executable 就是flutter命令</span></span><br><span class="line">        executable flutterExecutable.absolutePath</span><br><span class="line">        <span class="hljs-comment">// dart代码目录</span></span><br><span class="line">        workingDir sourceDir</span><br><span class="line">        <span class="hljs-comment">// 可以配置本地引擎</span></span><br><span class="line">        <span class="hljs-keyword">if</span> (localEngine != <span class="hljs-literal">null</span>) &#123;</span><br><span class="line">            args <span class="hljs-string">"--local-engine"</span>, localEngine</span><br><span class="line">            args <span class="hljs-string">"--local-engine-src-path"</span>, localEngineSrcPath</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="hljs-comment">// 配置flutter 命令参数，执行的是flutter build bundle 来编译dart代码。</span></span><br><span class="line">        args <span class="hljs-string">"build"</span>, <span class="hljs-string">"bundle"</span></span><br><span class="line">        args <span class="hljs-string">"--suppress-analytics"</span></span><br><span class="line">        args <span class="hljs-string">"--target"</span>, targetPath</span><br><span class="line">        <span class="hljs-comment">// 配置参数</span></span><br><span class="line">        ...</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h6 id="编译dart代码"><a href="#编译dart代码" class="headerlink" title="编译dart代码"></a>编译dart代码</h6><p>在flutterTask中会执行flutter build bundle 来编译dart代码，具体build bundle是怎样编译的我们放在下一篇中详细讲解。</p>
+<p>总之flutterTask通过执行flutter build bundle编译dart，将生成的dart资源放在build目录中。然后copyFlutterAssetsTask执行，将build目录中的dart资源复制到android的build/intermediates中，最后在processResources任务中和Android的assets资源一起被处理。</p>
+
+        </div>
+        
+        <ul class="post-copyright">
+            <li><strong>本文标题：</strong><a href="https://witgao.com/Flutter深入之flutter-run命令究竟做了什么/">Flutter深入之flutter run命令究竟做了什么?</a></li>
+            <li><strong>本文作者：</strong><a href="https://witgao.com">zhenyu</a></li>
+            <li><strong>本文链接：</strong><a href="https://witgao.com/Flutter深入之flutter-run命令究竟做了什么/">https://witgao.com/Flutter深入之flutter-run命令究竟做了什么/</a></li>
+            <li><strong>发布时间：</strong>2018-11-04</li>
+            <li><strong>版权声明：</strong>本博客所有文章除特别声明外，均采用 <a
+                    href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="external nofollow"
+                    target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明出处！
+            </li>
+        </ul>
+        
+        
+        
+        
+    </div>
+</div>
+
+
+
+
+
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        <div class="level-start">
+            <a class="level level-item has-link-grey  article-nav-prev"
+                href="/Flutter深入之flutter-build-bundle命令如何编译Dart/">
+                <i class="level-item fas fa-chevron-left"></i>
+                <span class="level-item">Flutter深入之flutter-build-bundle命令如何编译Dart?</span>
+            </a>
+        </div>
+        
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next"
+                href="/Flutter深入之flutter初始化/">
+                <span class="level-item">Flutter深入之flutter初始化</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+    </div>
+</div>
+
+
+</div>
+                
+
+
+
+
+<div
+    class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left ">
+    
+    
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered" style="flex-shrink: 1">
+                <div>
+                    
+                    <figure class="image is-128x128 has-mb-6">
+                        <img class="" src="/images/avatar1.png" alt="zhenyu">
+                    </figure>
+                    
+                    <p class="is-size-4 is-block">
+                        zhenyu
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        富贵山庄无富贵，只留欢乐在此间
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>杭州</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        文章
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        38
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        分类
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        9
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        标签
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        0
+                    </p>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="level">
+            <a class="level-item button is-link is-rounded" href="https://github.com/witgao" target="_blank">
+                关注我</a>
+        </div>
+        
+        
+        
+    </div>
+</div>
+    
+    
+<div class="card widget column-left is-sticky" id="toc">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                目录
+            </h3>
+            <ul class="menu-list"><li>
+        <a class="is-flex" href="#开篇">
+        <span class="has-mr-6">1</span>
+        <span>开篇</span>
+        </a></li><li>
+        <a class="is-flex" href="#flutter命令">
+        <span class="has-mr-6">2</span>
+        <span>flutter命令</span>
+        </a></li><li>
+        <a class="is-flex" href="#flutter-tools项目">
+        <span class="has-mr-6">3</span>
+        <span>flutter_tools项目</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#执行main方法">
+        <span class="has-mr-6">3.1</span>
+        <span>执行main方法</span>
+        </a></li><li>
+        <a class="is-flex" href="#创建所有命令的对应对象">
+        <span class="has-mr-6">3.2</span>
+        <span>创建所有命令的对应对象</span>
+        </a></li><li>
+        <a class="is-flex" href="#执行参数中指定的命令对象">
+        <span class="has-mr-6">3.3</span>
+        <span>执行参数中指定的命令对象</span>
+        </a></li><li>
+        <a class="is-flex" href="#执行Run命令">
+        <span class="has-mr-6">3.4</span>
+        <span>执行Run命令</span>
+        </a></li><li>
+        <a class="is-flex" href="#热加载模式运行">
+        <span class="has-mr-6">3.5</span>
+        <span>热加载模式运行</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#创建应用对象">
+        <span class="has-mr-6">3.5.1</span>
+        <span>创建应用对象</span>
+        </a></li><li>
+        <a class="is-flex" href="#创建Android应用对象">
+        <span class="has-mr-6">3.5.2</span>
+        <span>创建Android应用对象</span>
+        </a></li><li>
+        <a class="is-flex" href="#Initializing-gradle">
+        <span class="has-mr-6">3.5.3</span>
+        <span>Initializing gradle</span>
+        </a></li><li>
+        <a class="is-flex" href="#Resolving-dependencies">
+        <span class="has-mr-6">3.5.4</span>
+        <span>Resolving dependencies</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#启动应用">
+        <span class="has-mr-6">3.6</span>
+        <span>启动应用</span>
+        </a></li><li>
+        <a class="is-flex" href="#构建Android-Apk">
+        <span class="has-mr-6">3.7</span>
+        <span>构建Android Apk</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#assembleTask">
+        <span class="has-mr-6">3.7.1</span>
+        <span>assembleTask</span>
+        </a></li><li>
+        <a class="is-flex" href="#flutter-gradle">
+        <span class="has-mr-6">3.7.2</span>
+        <span>flutter.gradle</span>
+        </a></li><li>
+        <a class="is-flex" href="#编译dart代码">
+        <span class="has-mr-6">3.7.3</span>
+        <span>编译dart代码</span>
+        </a></li></ul></li></ul></li></ul>
+        </div>
+    </div>
+</div>
+    
+    
+    <div class="column-right-shadow is-hidden-widescreen ">
+        
+    </div>
+    
+</div>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <!-- <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="/images/logo2.png" alt="Flutter深入之flutter run命令究竟做了什么?" height="28">
+                
+                </a> -->
+                <p class="is-size-7">
+                    &copy; 2020 zhenyu&nbsp;
+                    Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a
+                        href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank">Icarus</a>
+                    
+                </p>
+            </div>
+            <div class="level-end">
+                
+            </div>
+        </div>
+    </div>
+</footer>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("zh-CN");</script>
+
+<script>
+var IcarusThemeSettings = {
+    article: {
+        highlight: {
+            clipboard: true,
+            fold: 'unfolded'
+        }
+    }
+};
+</script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+
+
+
+    
+    
+<script src="/js/animation.js"></script>
+
+    
+    
+<script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+<script src="/js/gallery.js" defer></script>
+
+    
+    
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    MathJax.Hub.Config({
+        'HTML-CSS': {
+            matchFontHeight: false
+        },
+        SVG: {
+            matchFontHeight: false
+        },
+        CommonHTML: {
+            matchFontHeight: false
+        },
+        tex2jax: {
+            inlineMath: [
+                ['$','$'],
+                ['\\(','\\)']
+            ]
+        }
+    });
+});
+</script>
+    
+    
+<a id="back-to-top" title="回到顶端" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="想要查找什么..." />
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: '文章',
+                PAGES: '页面',
+                CATEGORIES: '分类',
+                TAGS: '标签',
+                UNTITLED: '(无标题)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+</body>
+
+</html>
