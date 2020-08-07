@@ -160,7 +160,7 @@
                 <span class="level-item has-text-grey">
                     
                     
-                    22 分钟 读完 (大约 3274 个字)
+                    22 分钟 读完 (大约 3275 个字)
                 </span>
                 
                 
@@ -186,93 +186,19 @@
 <ul>
 <li>forbidden_zero_bit : 1个比特，在H.264规范中规定了这一位必须为0。</li>
 <li>nal_ref_idc : 2个比特，取00~11，指示这个NALU的重要性，取值越大，表示当前NAL越重要，需要优先受到保护。</li>
-<li>nal_unit_type : 5个比特，表示NALU单元的类型。</li>
-</ul>
-<p>常见的NAL单元类型有:</p>
-<ul>
-<li>NALU_TYPE_SLICE : 1, 非IDR图像的Slice</li>
-<li>NALU_TYPE_IDR : 5, IDR图像的Slice</li>
-<li>NALU_TYPE_SPS : 7, SPS 序列参数集</li>
-<li>NALU_TYPE_PPS : 8, PPS 图像参数集</li>
-</ul>
-<h5 id="IDR和GOP"><a href="#IDR和GOP" class="headerlink" title="IDR和GOP"></a>IDR和GOP</h5><p>GOP就是一组图像序列，序列中的图像强相关，差别小。每个GOP序列中，第一个图像就是IDR图像，IDR图像一定是切分成I类型的Slice，但是I类型的Slice并不一定是属于IDR图像。</p>
-<h5 id="SPS"><a href="#SPS" class="headerlink" title="SPS"></a>SPS</h5><p>序列参数集，作用于一个序列中的所有图像，对于H.264原始流来说，每个IDR图像之前都需要加入一个SPS，但是对于本地存储比如MP4文件来说，只需要一个SPS就可以了。</p>
-<p>SPS中主要包含以下参数:</p>
-<ul>
-<li>Profile</li>
-<li>Level</li>
-<li>pic_width_in_mbs_minus1 图像宽度包含的宏块个数-1，计算时需+1</li>
-<li>pic_height_in_mbs_minus1 图像高度包含的宏块个数-1,计算时需+1</li>
-<li>frame_mbs_only_flag 帧编码还是场编码（场隔行扫描，产生两张图）,1表示帧编码</li>
-<li>frame_cropping_flag 图像是否需要裁剪 （值需要x2）<ul>
-<li>frame_crop_left_offset 减去左侧的偏移量</li>
-<li>frame_crop_right_offset 减去右侧的偏移量</li>
-<li>frame_crop_top_offset 减去顶部的偏移量</li>
-<li>frame_crop_bottom_offset 减去底部的偏移量</li>
-</ul>
-</li>
-<li>log2_max_frame_num_minus4 一个GOP中最大的帧数</li>
-<li>max_num_ref_frames 参考帧的缓冲区大小，最大参考帧数</li>
-<li>pic_order_cnt_type 显示的顺序</li>
-<li>帧率framerate = (float)(sps-&gt;vui.vui_time_scale) / (float)(sps-&gt;vui.vui_num_units_in_tick) / 2;</li>
-</ul>
-<h6 id="Profile"><a href="#Profile" class="headerlink" title="Profile"></a>Profile</h6><p>H.264针对不同的程序类型，定义了几套功能组合，称为profile。</p>
-<p>最基础的profile是Constrained Baseline，基于这种组合有两条扩展线</p>
-<ul>
-<li>Constrained Baseline -&gt; Baseline -&gt; Extend</li>
-<li>Constrained Baseline -&gt; Main -&gt; High -&gt; High10 -&gt; High422 -&gt; High444</li>
-</ul>
-<p>下图是每种profile支持的功能列表。</p>
-<p><img src="/images/音视频开发之H.264码流结构与编码原理.resources/h264_profile.png" alt="h264_profile"></p>
-<h6 id="Level"><a href="#Level" class="headerlink" title="Level"></a>Level</h6><p>Level是一组解码性能约束，每一个Level都限定了当前能够解码的最大分辨率、帧率、码率、最大宏块大小、最高解码速度。Level越高，能处理的视频相关质量也就越高。比如说想要解码1920x1080分辨率的视频，那么Level就必须大于等于4。</p>
-<p><img src="/images/音视频开发之H.264码流结构与编码原理.resources/h264_level.png" alt="h264_level"></p>
-<h5 id="PPS"><a href="#PPS" class="headerlink" title="PPS"></a>PPS</h5><p>图像参数集，作用于一个序列中的所有图像，和SPS一样，对于H.264原始流来说，每个IDR图像之前都需要加入一个PPS，但是对于本地存储比如MP4文件来说，PPS可以只有一个也可以多个。<br>PPS中主要包含以下参数:</p>
-<ul>
-<li>entropy_coding_mode_flag 熵编码，1表示使用CABAC</li>
-<li>num_slice_groups_minus1 分片数量-1</li>
-<li>weighted_pred_flag 在p/sp slice中是否开启权重预测</li>
-<li>weighted_bipred_idc 在b slice中加权预测的方法</li>
-<li>pic_init_qp_minus26/pic_init_qs_minus26 初始化量化参数，实际参数在slice header</li>
-<li>chroma_qp_index_offset 用于计算色度分量的量化参数</li>
-<li>deblocking_filter_control_present_flag 表示slice header中是否存在用于去块滤波器控制的信息</li>
-<li>constrained_intra_pred_flag 若该标识为1，表示I宏块在进行帧内预测时只能使用来自I和SI类型宏块的信息</li>
-<li>redundant_pic_cnt_present_flag 用于表示slice header中是否存在redundant_pic语法元素</li>
-</ul>
-<h5 id="Slice"><a href="#Slice" class="headerlink" title="Slice"></a>Slice</h5><p>对于NAL单元常用的类型中，SPS和PPS我们已经讲过了，剩下的就是IDR图像的Slice和非IDR图像的Slice。前面也讲过，H.264会将一张图像分割成一个或多个Slice（其实常用的一般都是一个Slice）。</p>
-<p>Slice = Slice Header + Slice Data</p>
-<h6 id="Slice-Header"><a href="#Slice-Header" class="headerlink" title="Slice Header"></a>Slice Header</h6><p>在Header中描述了当前Slice的类型以及当前Slice的解码显示顺序等信息。</p>
-<ul>
-<li>slice_type : 类型, 常见的类型有I Slice、P Slice、B Slice。</li>
-<li>frame_num : GOP中解码帧序号，frame_num表示解码的顺序。该图像是参考帧的时候，frame_num才有意义。也就是说B帧的frame_num是没有意义的。H264中frame_num定义如下：当参数集中的句法元素gaps_in_frame_num_value_allowed_flag不为1时，每个图像的frame_num值是它前一个参考帧的frame_num值增加1。如果两个相邻的帧具有相同的frame_num，那么其中一个是参考帧，一个是非参考帧。参考帧在非参考帧之前进行编解码。</li>
-<li>POC : 图像显示序号，用于标识图像播放顺序。计算POC有三种方法，根据pic_order_cnt_type指定。</li>
-</ul>
-<p>在MP4存储时，是按照frame_num的顺序进行存储的，但是在播放的时候需要解析器POC，按照POC的顺序进行播放。只有当存在B帧是，显示顺序和编码顺序才不一样。<br><figure class="highlight plain hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">录制顺序</span><br><span class="line">    1 2 3 4 5</span><br><span class="line">编码后顺序</span><br><span class="line">    1 3 2 5 4</span><br><span class="line">    I P B P B</span><br><span class="line">播放顺序</span><br><span class="line">    1 2 3 4 5</span><br></pre></td></tr></table></figure></p>
-<h6 id="I-B-P-Slice"><a href="#I-B-P-Slice" class="headerlink" title="I/B/P Slice"></a>I/B/P Slice</h6><ul>
-<li>I Slice所属的图像就是我们平常所说的关键帧，采用的是帧内压缩技术，压缩比最小。</li>
-<li>P Slice采用的是向前预测，编码时，只参考前面已经处理的图像，P Slice约占I Slice一半大小。</li>
-<li>B Slice采用的是双向预测，编码时，即参考前面已经处理的图像，也参考后面的图像，所以对于B Slice来说，它所参考的Slice必须先处理，B Slice约占I Slice的1/4大小。</li>
-</ul>
-<h3 id="编码原理"><a href="#编码原理" class="headerlink" title="编码原理"></a>编码原理</h3><p>编码技术分为两种，一种是有损编码，另一种是无损编码。有损编码中有帧内压缩技术和帧间压缩技术；无损编码中有DCT变换和VLC压缩和CABAC压缩技术。</p>
-<p><img src="/images/音视频开发之H.264码流结构与编码原理.resources/H264编码流程.png" alt="H264编码流程"></p>
-<h4 id="帧内压缩"><a href="#帧内压缩" class="headerlink" title="帧内压缩"></a>帧内压缩</h4><p>对于I Slice，采用的是帧内压缩技术，所以I Slice的压缩比最低。</p>
-<p>帧内压缩技术基于人眼对亮度的敏感度超过色度，且YUV很容易将亮度和色度分开来实现。一张图像中相邻像素之间差别都不大，所以当已知当前宏块的颜色值时，可以通过一种预测模式来进行推导，预测出相邻宏块的颜色值。在H.264中提供了九种预测模式，每个宏块在进行处理后只需要记录下其采用的预测模式的编号即可，在预测的过程中，亮度和色度是分开预测的。</p>
-<p>只有预测模式肯定是不够的，在确定了每个宏块的预测模式后，通过将预测推导出来的图像和原始图像进行比较，得到残差值，这些残差值才是细节的数据，也需要保存下来，所以帧内压缩数据 = 宏块预测模式 + 预测残差值</p>
-<h4 id="帧间压缩"><a href="#帧间压缩" class="headerlink" title="帧间压缩"></a>帧间压缩</h4><p>对于P Slice和B Slice，采用的都是帧间压缩就，所以其压缩比高。其中P Slice是单向向前参考，而B Slice是双向参考。<br>帧间参考是指在一个GOP序列中的帧进行参考，不同的GOP序列不能参考。所以一个GOP序列中的所有帧，只需要当前GOP序列中的数据就可以全部显示。</p>
-<p>帧间压缩是基于运动估计来实现的，通过对当前Slice中每一个宏块在参考Slice中进行宏块运动轨迹的查找匹配，计算出运动矢量，通每个宏块的运动矢量结合参考Slice进行预测，将当前Slice和预测的结果进行比较，得到残差值作为运动补偿。所以帧间压缩数据 = 宏块运动矢量 + 预测残差值</p>
-<h4 id="变换与量化"><a href="#变换与量化" class="headerlink" title="变换与量化"></a>变换与量化</h4><h5 id="变换编码"><a href="#变换编码" class="headerlink" title="变换编码"></a>变换编码</h5><p>大多数视频图像都和上面展示的一样，变动的区域只是一小部分，大部分区域是不变的，可就是说低频区占大部分，高频区占小部分。然后将空间域的图像变换到频率域，会产生相关性很小的变换系数，然后再对变换系数进行量化，利用上面人类视觉体统特点所说到的，人对高频信息不敏感的特征，对低频区的系数进行细量化，对高频区的系数进行粗量化，从而降低信息传递量，达到压缩的目的。</p>
-<p>简单的解释变换，就是如下图所示，坐标系中有ABC三点，我们将坐标轴调整一下，ABC三点的坐标值就会变小。</p>
-<p><img src="/images/transform_coding.png" alt></p>
-<p>一个8x8的像素区域，假设其像素颜色值如下图所示</p>
-<p><img src="/images/transform_coding_1.png" alt></p>
-<p>像素区域经过DCT（离散余弦变换）变换后，生产的变换系数，如下图所示</p>
-<p><img src="/images/transform_coding_2.png" alt></p>
-<p>对变换系数进行量化，量化后大部分都会变成0，此时只需要将这些非0的值进行编码即可，入下图所示</p>
-<p><img src="/images/transform_coding_3.png" alt></p>
-<h5 id="量化"><a href="#量化" class="headerlink" title="量化"></a>量化</h5><p>利用信息的统计特性，使用新的编码来表示输入的数据。H.264中支持两种量化技术，一种是VLC，另一种是CABAC。通过PPS中的entropy_coding_mode_flag参数可以知道当前视频采用了哪种编码技术。</p>
-
+<li><p>nal_unit_type : 5个比特，表示NALU单元的类型。</p></li></ul>
         </div>
         
         
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/音视频开发之H.264码流结构与编码原理/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
         
         
     </div>

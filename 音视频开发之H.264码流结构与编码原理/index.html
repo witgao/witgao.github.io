@@ -19,7 +19,7 @@
 <meta property="og:description" content="目前主流的H.264和H.265编码格式是由ITU和MPEG两个组织合力制定的。 在早期，ITU和MPEG两家组织都是各搞各的，ITU组织推行了H.261、H.262、H.263编码格式，而MPEG组织则推行了MPEG-1、MPEG-2、MPEG-3标准族群。后来两家组织准备合力制作新一代的视频编码标准，对于ITU组织来说，将这个新一代的编码标准命名为H.264，而对于MPEG来说，这个新一代的压">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://witgao.com/images/19.jpg">
-<meta property="og:updated_time" content="2020-08-07T05:46:30.698Z">
+<meta property="og:updated_time" content="2020-08-07T05:47:36.050Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="音视频开发之H.264码流结构与编码原理">
 <meta name="twitter:description" content="目前主流的H.264和H.265编码格式是由ITU和MPEG两个组织合力制定的。 在早期，ITU和MPEG两家组织都是各搞各的，ITU组织推行了H.261、H.262、H.263编码格式，而MPEG组织则推行了MPEG-1、MPEG-2、MPEG-3标准族群。后来两家组织准备合力制作新一代的视频编码标准，对于ITU组织来说，将这个新一代的编码标准命名为H.264，而对于MPEG来说，这个新一代的压">
@@ -156,7 +156,7 @@
                 <span class="level-item has-text-grey">
                     
                     
-                    22 分钟 读完 (大约 3274 个字)
+                    22 分钟 读完 (大约 3275 个字)
                 </span>
                 
                 
@@ -182,7 +182,9 @@
 <ul>
 <li>forbidden_zero_bit : 1个比特，在H.264规范中规定了这一位必须为0。</li>
 <li>nal_ref_idc : 2个比特，取00~11，指示这个NALU的重要性，取值越大，表示当前NAL越重要，需要优先受到保护。</li>
-<li>nal_unit_type : 5个比特，表示NALU单元的类型。</li>
+<li><p>nal_unit_type : 5个比特，表示NALU单元的类型。</p>
+<a id="more"></a>
+</li>
 </ul>
 <p>常见的NAL单元类型有:</p>
 <ul>
