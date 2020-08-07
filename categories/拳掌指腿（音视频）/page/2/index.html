@@ -140,6 +140,72 @@
 <div class="card">
     
     <div class="card-image">
+        <a href="/音视频开发之Android录制音频/" class="image is-7by1">
+        <img class="thumbnail" src="/images/9.jpeg" alt="音视频开发之Android录制音频">
+        </a>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-07-19T16:00:00.000Z">2020-07-20</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    13 分钟 读完 (大约 2001 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/音视频开发之Android录制音频/">音视频开发之Android录制音频</a>
+            
+        </h1>
+        <div class="content">
+            <p>由于FFmpeg一直都没有支持Android平台的音频输入设备API，所以无法使用FFmpeg在Android上录制音频。</p>
+<h3 id="Android平台音频录制API"><a href="#Android平台音频录制API" class="headerlink" title="Android平台音频录制API"></a>Android平台音频录制API</h3><p>Android上音频输入的API比较繁琐，有多套实现。有Java层的实现AudioRecord，也有native层实现OpenSLES，在 Android O之后又推出了新的native层实现AAudio，并且提供了Oboe库，对OpenSLES和AAudio进行了封装。</p>
+<p>下面来详细的介绍下每套API的使用</p>
+<h4 id="AudioRecord"><a href="#AudioRecord" class="headerlink" title="AudioRecord"></a>AudioRecord</h4><p>AudioRecord是Android平台提供的录制音频的Java层API，使用起来非常简单。通过设置采集参数就可以创建一个AudioRecord对象，调用了start方法后，就可以开始读取数据了，通过read方法将数据读取到指定的缓冲区中，调用stop后就停止采集。</p>
+<h5 id="创建AudioRecord"><a href="#创建AudioRecord" class="headerlink" title="创建AudioRecord"></a>创建AudioRecord</h5><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 一个音频帧的字节大小 = 声道数 *（位数 /8）</span></span><br><span class="line"><span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> bytesPerFrame = channels * (BITS_PER_SAMPLE / <span class="hljs-number">8</span>);</span><br><span class="line"><span class="hljs-comment">// BUFFERS_PER_SECOND = 100，预测一秒钟回调100次</span></span><br><span class="line"><span class="hljs-comment">// 那么44100的采样率，每次回调应该给的数据帧个数为4410个</span></span><br><span class="line"><span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> framesPerBuffer = sampleRate / BUFFERS_PER_SECOND;</span><br><span class="line"><span class="hljs-comment">// 一次回调给的总数据字节大小 = 一次给的数据帧个数 * 一个数据帧的字节大小</span></span><br><span class="line"><span class="hljs-comment">// 创建一个buffer用来接收回调数据，使用堆外内存，在通过JNI传递的时候避免内存拷贝</span></span><br><span class="line">byteBuffer = ByteBuffer.allocateDirect(bytesPerFrame * framesPerBuffer);</span><br><span class="line">   </span><br><span class="line">emptyBytes = <span class="hljs-keyword">new</span> <span class="hljs-keyword">byte</span>[byteBuffer.capacity()];</span><br><span class="line"><span class="hljs-comment">// 避免每次读取数据都需要传递buffer到JNI层，这里提前将buffer的地址保存在JNI层</span></span><br><span class="line">nativeCacheDirectBufferAddress(byteBuffer, nativeAudioRecord);</span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> channelConfig = channelCountToConfiguration(channels);</span><br><span class="line"><span class="hljs-comment">// 根据音频参数(采样率，声道数，位数)得到系统最小需要的缓冲区大小，创建AudioRecord时设置的缓冲区大小必须大于这个值</span></span><br><span class="line"><span class="hljs-keyword">int</span> minBufferSize =</span><br><span class="line">    AudioRecord.getMinBufferSize(sampleRate, channelConfig, AudioFormat.ENCODING_PCM_16BIT); </span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">// BUFFER_SIZE_FACTOR = 2</span></span><br><span class="line"><span class="hljs-comment">// 缓冲区一般要大一点，所以下面比较了两倍的最小缓冲区和我们自己计算的缓冲区大小</span></span><br><span class="line"><span class="hljs-comment">// 也就是说设置的缓冲区大小最小也要是最小缓冲区的两倍。</span></span><br><span class="line"><span class="hljs-keyword">int</span> bufferSizeInBytes = Math.max(BUFFER_SIZE_FACTOR * minBufferSize, byteBuffer.capacity());</span><br><span class="line"><span class="hljs-keyword">try</span> &#123;</span><br><span class="line">  <span class="hljs-comment">// 根据音频参数创建AudioRecord，audioSource是指音频采集的来源</span></span><br><span class="line">  audioRecord = <span class="hljs-keyword">new</span> AudioRecord(audioSource, sampleRate, channelConfig,</span><br><span class="line">      AudioFormat.ENCODING_PCM_16BIT, bufferSizeInBytes);</span><br><span class="line">&#125; <span class="hljs-keyword">catch</span> (IllegalArgumentException e) &#123;</span><br><span class="line">  <span class="hljs-keyword">return</span> -<span class="hljs-number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="hljs-keyword">if</span> (audioRecord == <span class="hljs-keyword">null</span> || audioRecord.getState() != AudioRecord.STATE_INITIALIZED) &#123;</span><br><span class="line">  <span class="hljs-keyword">return</span> -<span class="hljs-number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/音视频开发之Android录制音频/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-image">
         <a href="/音视频开发之FFmpeg录制视频/" class="image is-7by1">
         <img class="thumbnail" src="/images/8.jpeg" alt="音视频开发之FFmpeg录制视频">
         </a>
@@ -767,7 +833,7 @@
                         文章
                     </p>
                     <p class="title has-text-weight-normal">
-                        38
+                        39
                     </p>
                 </div>
             </div>
@@ -867,7 +933,7 @@
                 <span class="level-item">拳掌指腿（音视频）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">18</span>
+                <span class="level-item tag">19</span>
             </span>
         </a><ul><li>
         <a class="level is-marginless" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">
@@ -875,7 +941,7 @@
                 <span class="level-item">七伤拳（音视频基础）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">10</span>
+                <span class="level-item tag">11</span>
             </span>
         </a></li><li>
         <a class="level is-marginless" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">
@@ -899,6 +965,25 @@
         <h3 class="menu-label">
             最新文章
         </h3>
+        
+        <article class="media">
+            
+            <a href="/音视频开发之H.264码流结构与编码原理/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/19.jpg" alt="音视频开发之H.264码流结构与编码原理">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-06T16:00:00.000Z">2020-08-07</time></div>
+                    <a href="/音视频开发之H.264码流结构与编码原理/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之H.264码流结构与编码原理</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
         
         <article class="media">
             
@@ -976,25 +1061,6 @@
             </div>
         </article>
         
-        <article class="media">
-            
-            <a href="/音视频开发之SDL2播放视频/" class="media-left">
-                <p class="image is-64x64">
-                    <img class="thumbnail" src="/images/14.jpg" alt="音视频开发之SDL2播放视频">
-                </p>
-            </a>
-            
-            <div class="media-content">
-                <div class="content">
-                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-07-31T16:00:00.000Z">2020-08-01</time></div>
-                    <a href="/音视频开发之SDL2播放视频/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之SDL2播放视频</a>
-                    <p class="is-size-7 is-uppercase">
-                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
-                    </p>
-                </div>
-            </div>
-        </article>
-        
     </div>
 </div>
         
@@ -1012,7 +1078,7 @@
                             <span class="level-item">八月 2020</span>
                         </span>
                         <span class="level-end">
-                            <span class="level-item tag">6</span>
+                            <span class="level-item tag">7</span>
                         </span>
                     </a>
                 </li>
@@ -1198,6 +1264,25 @@
         
         <article class="media">
             
+            <a href="/音视频开发之H.264码流结构与编码原理/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/19.jpg" alt="音视频开发之H.264码流结构与编码原理">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-06T16:00:00.000Z">2020-08-07</time></div>
+                    <a href="/音视频开发之H.264码流结构与编码原理/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之H.264码流结构与编码原理</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
             <a href="/音视频开发之ffplay渲染线程分析/" class="media-left">
                 <p class="image is-64x64">
                     <img class="thumbnail" src="/images/18.jpg" alt="音视频开发之ffplay渲染线程分析">
@@ -1272,25 +1357,6 @@
             </div>
         </article>
         
-        <article class="media">
-            
-            <a href="/音视频开发之SDL2播放视频/" class="media-left">
-                <p class="image is-64x64">
-                    <img class="thumbnail" src="/images/14.jpg" alt="音视频开发之SDL2播放视频">
-                </p>
-            </a>
-            
-            <div class="media-content">
-                <div class="content">
-                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-07-31T16:00:00.000Z">2020-08-01</time></div>
-                    <a href="/音视频开发之SDL2播放视频/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之SDL2播放视频</a>
-                    <p class="is-size-7 is-uppercase">
-                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
-                    </p>
-                </div>
-            </div>
-        </article>
-        
     </div>
 </div>
     
@@ -1308,7 +1374,7 @@
                             <span class="level-item">八月 2020</span>
                         </span>
                         <span class="level-end">
-                            <span class="level-item tag">6</span>
+                            <span class="level-item tag">7</span>
                         </span>
                     </a>
                 </li>

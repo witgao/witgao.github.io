@@ -129,6 +129,84 @@
 <div class="card">
     
     <div class="card-image">
+        <a href="/音视频开发之Android硬件编解码/" class="image is-7by1">
+        <img class="thumbnail" src="/images/6.jpeg" alt="音视频开发之Android硬件编解码">
+        </a>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-04-21T16:00:00.000Z">2020-04-22</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    22 分钟 读完 (大约 3288 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/音视频开发之Android硬件编解码/">音视频开发之Android硬件编解码</a>
+            
+        </h1>
+        <div class="content">
+            <h2 id="MediaCodec介绍"><a href="#MediaCodec介绍" class="headerlink" title="MediaCodec介绍"></a>MediaCodec介绍</h2><p>MediaCodec是Android平台上用来访问编码器和解码器的组件。</p>
+<h3 id="工作流程"><a href="#工作流程" class="headerlink" title="工作流程"></a>工作流程</h3><p><img src="/images/mediacodec-processes.png" alt="mediacodec-processes"></p>
+<p>MediaCodec中维护了两个BufferQueue，一个用来存放输入数据，一个用来存放输出数据。对于编码来说，InputBufferQueue用来接收视频原始YUV数据，经过Codec编码处理后，将编码后的数据放入到OutputBufferQueue中输出。而对于解码来说，InputBufferQueue用来接收视频编码数据，经过Codec解码处理后，将解码后的视频原始YUV数据放入到OutputBufferQueue中输出。</p>
+<p>BufferQueue的数量是有限的，每次通过dequeueInputBuffer从InputBufferQueue中获取一个空的buffer索引，将输入数据填充到该buffer，通过queueInputBuffer通知Codec该索引位置的buffer已经填充了数据，可以开始处理了。然后通过dequeueOutputBuffer从OutputBufferQueue中获取处理完毕的buffer索引，获取到该buffer中的数据进行渲染或封装，使用完后，通过releaseOutputBuffer通知Codec释放该buffer中的数据（也可以让Codec进行数据的渲染）。</p>
+<p>MediaCodec的数据分为两种，一种是原始音视频数据，一种是压缩数据。上面讲到这两种数据都是使用bytebuffer来处理的，输入层获取到空的buffer后需要将数据copy到该buffer中，而输出层获取到buffer后也需要将数据copy出来进行消费，大量的数据copy是很影响性能的。</p>
+<p>针对原始音视频数据，MediaCodec提供了更加高效的方式来避免了数据的copy，那就是Surface。对于解码器来说，可以通过在configure的时候，设置OutputSurface来接收输出的Buffer，这样就不需要从OutputBufferQueue中copy数据了。而对于编码器来说，可以通过createInputSurface方法创建一个用来输入的Surface，这样就不需要往InputBufferQueue里copy数据了。</p>
+<p><img src="/images/mediacodec-surface-processes.png" alt="mediacodec-surface-processes"></p>
+<h3 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h3><h4 id="原始数据"><a href="#原始数据" class="headerlink" title="原始数据"></a>原始数据</h4><p>音频原始数据类型是一个PCM音频数据帧，视频原始数据类型由color_format决定，常用的有以下两种：</p>
+<ul>
+<li><strong>Surface Format</strong> ：这种类型的format数据，表明使用的GraphicBuffer，这是一个内存共享的缓冲区。（CodecCapabilities#COLOR_FormatSurface ）。</li>
+<li><strong>YUV Format</strong> ：YUV颜色格式，支持多种YUV格式（CodecCapabilities#COLOR_FormatYUV420Flexible ）。</li>
+</ul>
+<blockquote>
+<p>在configure的时候，对于编码器来说可以指定编码器输出的数据的format，对于解码器来说可以指定解码器输入的format。</p>
+<p>对于编码器，如果输入的时候使用的是Surface，则format需要设置为COLOR_FormatSurface。而对于解码器来说输入的format一般从媒体文件中读取。</p>
+</blockquote>
+<h4 id="压缩数据"><a href="#压缩数据" class="headerlink" title="压缩数据"></a>压缩数据</h4><p>对于视频来说，buffer中是一帧的压缩数据，对于音频来说，buffer中是一个单元的压缩数据，buffer中包含的都是完整的一帧或一个单元的数据。</p>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/音视频开发之Android硬件编解码/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-image">
         <a href="/音视频开发之Android硬件解封装/" class="image is-7by1">
         <img class="thumbnail" src="/images/5.jpeg" alt="音视频开发之Android硬件解封装">
         </a>
@@ -520,69 +598,6 @@
 
 
 
-    
-<div class="card">
-    
-    <div class="card-image">
-        <a href="/FFmpeg深入之avformat-open-input/" class="image is-7by1">
-        <img class="thumbnail" src="/images/2.jpeg" alt="FFmpeg深入之avformat_open_input">
-        </a>
-    </div>
-    
-    <div class="card-content article ">
-        
-        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
-            <div class="level-left">
-                <time class="level-item has-text-grey"
-                    datetime="2019-09-30T01:48:04.000Z">2019-09-30</time>
-                
-                <div class="level-item">
-                    <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
-                </div>
-                
-                
-                <span class="level-item has-text-grey">
-                    
-                    
-                    37 分钟 读完 (大约 5523 个字)
-                </span>
-                
-                
-            </div>
-        </div>
-        
-        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
-            
-            <a class="has-link-black-ter" href="/FFmpeg深入之avformat-open-input/">FFmpeg深入之avformat_open_input</a>
-            
-        </h1>
-        <div class="content">
-            <figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta"># libavformat/avformat.h</span></span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">/**</span></span><br><span class="line"><span class="hljs-comment"> * 读取多媒体文件头信息</span></span><br><span class="line"><span class="hljs-comment"> * 此时并未开始解码，开启的流通过avformat_close_input()关闭。</span></span><br><span class="line"><span class="hljs-comment"> *</span></span><br><span class="line"><span class="hljs-comment"> * @param ps AVFormatContext (通过avformat_alloc_context创建)，可以传NULL。    </span></span><br><span class="line"><span class="hljs-comment"> * @param url 多媒体URL</span></span><br><span class="line"><span class="hljs-comment"> * @param fmt 指定解封装的格式，传NULL时将自动检测.</span></span><br><span class="line"><span class="hljs-comment"> * @param options  解封装参数自定义，可以传NULL</span></span><br><span class="line"><span class="hljs-comment"> *</span></span><br><span class="line"><span class="hljs-comment"> * @return 0 成功</span></span><br><span class="line"><span class="hljs-comment"> */</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">avformat_open_input</span><span class="hljs-params">(AVFormatContext **ps, <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *url, AVInputFormat *fmt, AVDictionary **options)</span></span>;</span><br></pre></td></tr></table></figure>
-<p>方法调用流程图</p>
-        </div>
-        
-        
-        
-        <div class="level is-mobile">
-            <div class="level-start">
-                <div class="level-item">
-                    <a class="button is-size-7 is-light"
-                        href="/FFmpeg深入之avformat-open-input/#more">阅读更多</a>
-                </div>
-            </div>
-        </div>
-        
-        
-    </div>
-</div>
-
-
-
-
-
-
-
-
 
     
 <div class="card card-transparent">
@@ -655,7 +670,7 @@
                         文章
                     </p>
                     <p class="title has-text-weight-normal">
-                        38
+                        39
                     </p>
                 </div>
             </div>
@@ -755,7 +770,7 @@
                 <span class="level-item">拳掌指腿（音视频）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">18</span>
+                <span class="level-item tag">19</span>
             </span>
         </a><ul><li>
         <a class="level is-marginless" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">
@@ -763,7 +778,7 @@
                 <span class="level-item">七伤拳（音视频基础）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">10</span>
+                <span class="level-item tag">11</span>
             </span>
         </a></li><li>
         <a class="level is-marginless" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">
@@ -787,6 +802,25 @@
         <h3 class="menu-label">
             最新文章
         </h3>
+        
+        <article class="media">
+            
+            <a href="/音视频开发之H.264码流结构与编码原理/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/19.jpg" alt="音视频开发之H.264码流结构与编码原理">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-06T16:00:00.000Z">2020-08-07</time></div>
+                    <a href="/音视频开发之H.264码流结构与编码原理/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之H.264码流结构与编码原理</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
         
         <article class="media">
             
@@ -864,25 +898,6 @@
             </div>
         </article>
         
-        <article class="media">
-            
-            <a href="/音视频开发之SDL2播放视频/" class="media-left">
-                <p class="image is-64x64">
-                    <img class="thumbnail" src="/images/14.jpg" alt="音视频开发之SDL2播放视频">
-                </p>
-            </a>
-            
-            <div class="media-content">
-                <div class="content">
-                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-07-31T16:00:00.000Z">2020-08-01</time></div>
-                    <a href="/音视频开发之SDL2播放视频/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之SDL2播放视频</a>
-                    <p class="is-size-7 is-uppercase">
-                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
-                    </p>
-                </div>
-            </div>
-        </article>
-        
     </div>
 </div>
         
@@ -900,7 +915,7 @@
                             <span class="level-item">八月 2020</span>
                         </span>
                         <span class="level-end">
-                            <span class="level-item tag">6</span>
+                            <span class="level-item tag">7</span>
                         </span>
                     </a>
                 </li>
@@ -1086,6 +1101,25 @@
         
         <article class="media">
             
+            <a href="/音视频开发之H.264码流结构与编码原理/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/19.jpg" alt="音视频开发之H.264码流结构与编码原理">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-06T16:00:00.000Z">2020-08-07</time></div>
+                    <a href="/音视频开发之H.264码流结构与编码原理/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之H.264码流结构与编码原理</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
             <a href="/音视频开发之ffplay渲染线程分析/" class="media-left">
                 <p class="image is-64x64">
                     <img class="thumbnail" src="/images/18.jpg" alt="音视频开发之ffplay渲染线程分析">
@@ -1160,25 +1194,6 @@
             </div>
         </article>
         
-        <article class="media">
-            
-            <a href="/音视频开发之SDL2播放视频/" class="media-left">
-                <p class="image is-64x64">
-                    <img class="thumbnail" src="/images/14.jpg" alt="音视频开发之SDL2播放视频">
-                </p>
-            </a>
-            
-            <div class="media-content">
-                <div class="content">
-                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-07-31T16:00:00.000Z">2020-08-01</time></div>
-                    <a href="/音视频开发之SDL2播放视频/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之SDL2播放视频</a>
-                    <p class="is-size-7 is-uppercase">
-                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
-                    </p>
-                </div>
-            </div>
-        </article>
-        
     </div>
 </div>
     
@@ -1196,7 +1211,7 @@
                             <span class="level-item">八月 2020</span>
                         </span>
                         <span class="level-end">
-                            <span class="level-item tag">6</span>
+                            <span class="level-item tag">7</span>
                         </span>
                     </a>
                 </li>

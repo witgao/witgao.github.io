@@ -133,6 +133,80 @@
         <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
             <div class="level-left">
                 <time class="level-item has-text-grey"
+                    datetime="2017-12-18T16:00:00.000Z">2017-12-19</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/内功心法（CS基础）/">内功心法（CS基础）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/内功心法（CS基础）/神照功（网络协议）/">神照功（网络协议）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    11 分钟 读完 (大约 1602 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/ByteBuf/">ByteBuf</a>
+            
+        </h1>
+        <div class="content">
+            <h3 id="ByteBuf"><a href="#ByteBuf" class="headerlink" title="ByteBuf"></a>ByteBuf</h3><p>为了简化ByteBuffer的操作，Netty自定义了ByteBuf,相对于ByteBuffer的读写索引共用，Netty将其分开，定义了读索引和写索引，避免了每次读写都需要flip方法来转换。并且定义了扩容方法，解决了ByteBuffer容量无法修改的问题。</p>
+<p>基本属性</p>
+<ul>
+<li>readerIndex : 读索引</li>
+<li>writerIndex : 写索引</li>
+<li>markReaderIndex : 标记读索引位置</li>
+<li>markWriterIndex : 标记写索引位置</li>
+<li>readableBytes : 可读字节大小(writerIndex - readerIndex)</li>
+<li>writableBytes : 可写字节大小(capacity - writerIndex)</li>
+<li>resetReaderIndex : 还原到标记读索引位置</li>
+<li>resetWriterIndex : 还原到标记写索引位置</li>
+</ul>
+<blockquote>
+<p>池化：将用过的对象保存，重复使用。</p>
+</blockquote>
+<blockquote>
+<p>堆外内存：使用JVM堆栈外的内存，该内存JVM无法干预，JVM的GC只能回收ByteBuf对象本身，而不能回收其指向的堆外内存，所以需要手动释放。</p>
+</blockquote>
+<p>Netty的ByteBuf实现分为池化和非池化，其中又分为堆内存和堆外内存实现。由于堆外内存需要手动释放，所以需要自己维护引用数来标记是否释放。<br></p>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/ByteBuf/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
                     datetime="2017-12-14T16:00:00.000Z">2017-12-15</time>
                 
                 <div class="level-item">
@@ -414,7 +488,7 @@
                         文章
                     </p>
                     <p class="title has-text-weight-normal">
-                        38
+                        39
                     </p>
                 </div>
             </div>
@@ -514,7 +588,7 @@
                 <span class="level-item">拳掌指腿（音视频）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">18</span>
+                <span class="level-item tag">19</span>
             </span>
         </a><ul><li>
         <a class="level is-marginless" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">
@@ -522,7 +596,7 @@
                 <span class="level-item">七伤拳（音视频基础）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">10</span>
+                <span class="level-item tag">11</span>
             </span>
         </a></li><li>
         <a class="level is-marginless" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">
@@ -546,6 +620,25 @@
         <h3 class="menu-label">
             最新文章
         </h3>
+        
+        <article class="media">
+            
+            <a href="/音视频开发之H.264码流结构与编码原理/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/19.jpg" alt="音视频开发之H.264码流结构与编码原理">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-06T16:00:00.000Z">2020-08-07</time></div>
+                    <a href="/音视频开发之H.264码流结构与编码原理/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之H.264码流结构与编码原理</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
         
         <article class="media">
             
@@ -623,25 +716,6 @@
             </div>
         </article>
         
-        <article class="media">
-            
-            <a href="/音视频开发之SDL2播放视频/" class="media-left">
-                <p class="image is-64x64">
-                    <img class="thumbnail" src="/images/14.jpg" alt="音视频开发之SDL2播放视频">
-                </p>
-            </a>
-            
-            <div class="media-content">
-                <div class="content">
-                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-07-31T16:00:00.000Z">2020-08-01</time></div>
-                    <a href="/音视频开发之SDL2播放视频/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之SDL2播放视频</a>
-                    <p class="is-size-7 is-uppercase">
-                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
-                    </p>
-                </div>
-            </div>
-        </article>
-        
     </div>
 </div>
         
@@ -659,7 +733,7 @@
                             <span class="level-item">八月 2020</span>
                         </span>
                         <span class="level-end">
-                            <span class="level-item tag">6</span>
+                            <span class="level-item tag">7</span>
                         </span>
                     </a>
                 </li>
@@ -845,6 +919,25 @@
         
         <article class="media">
             
+            <a href="/音视频开发之H.264码流结构与编码原理/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/19.jpg" alt="音视频开发之H.264码流结构与编码原理">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-06T16:00:00.000Z">2020-08-07</time></div>
+                    <a href="/音视频开发之H.264码流结构与编码原理/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之H.264码流结构与编码原理</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
             <a href="/音视频开发之ffplay渲染线程分析/" class="media-left">
                 <p class="image is-64x64">
                     <img class="thumbnail" src="/images/18.jpg" alt="音视频开发之ffplay渲染线程分析">
@@ -919,25 +1012,6 @@
             </div>
         </article>
         
-        <article class="media">
-            
-            <a href="/音视频开发之SDL2播放视频/" class="media-left">
-                <p class="image is-64x64">
-                    <img class="thumbnail" src="/images/14.jpg" alt="音视频开发之SDL2播放视频">
-                </p>
-            </a>
-            
-            <div class="media-content">
-                <div class="content">
-                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-07-31T16:00:00.000Z">2020-08-01</time></div>
-                    <a href="/音视频开发之SDL2播放视频/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之SDL2播放视频</a>
-                    <p class="is-size-7 is-uppercase">
-                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
-                    </p>
-                </div>
-            </div>
-        </article>
-        
     </div>
 </div>
     
@@ -955,7 +1029,7 @@
                             <span class="level-item">八月 2020</span>
                         </span>
                         <span class="level-end">
-                            <span class="level-item tag">6</span>
+                            <span class="level-item tag">7</span>
                         </span>
                     </a>
                 </li>

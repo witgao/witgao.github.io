@@ -142,6 +142,155 @@
 <div class="card">
     
     <div class="card-image">
+        <a href="/音视频开发之H.264码流结构与编码原理/" class="image is-7by1">
+        <img class="thumbnail" src="/images/19.jpg" alt="音视频开发之H.264码流结构与编码原理">
+        </a>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-08-06T16:00:00.000Z">2020-08-07</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    22 分钟 读完 (大约 3274 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/音视频开发之H.264码流结构与编码原理/">音视频开发之H.264码流结构与编码原理</a>
+            
+        </h1>
+        <div class="content">
+            <p>目前主流的H.264和H.265编码格式是由ITU和MPEG两个组织合力制定的。</p>
+<p>在早期，ITU和MPEG两家组织都是各搞各的，ITU组织推行了H.261、H.262、H.263编码格式，而MPEG组织则推行了MPEG-1、MPEG-2、MPEG-3标准族群。后来两家组织准备合力制作新一代的视频编码标准，对于ITU组织来说，将这个新一代的编码标准命名为H.264，而对于MPEG来说，这个新一代的压缩标准只是其MPEG-4标准的第10部分，其第10部分叫做高级视频编码AVC（Advanced Video Coding）。</p>
+<p>所以可以简单的认为H.264就是MPEG-4 AVC。</p>
+<h3 id="码流结构"><a href="#码流结构" class="headerlink" title="码流结构"></a>码流结构</h3><h4 id="NAL单元组成"><a href="#NAL单元组成" class="headerlink" title="NAL单元组成"></a>NAL单元组成</h4><p>H.264原始码流是由一个一个的NALU组成的，而NALU是由一个字节的Header和RBSP组成，而RBSP是由SODB和对齐字节数据组成（因为SODB是原始数据比特流, 长度不一定是8的倍数，需补足对齐），SODB就是真实的编码数据。</p>
+<p>对于SODB中的数据，根据NAL单元的类型不同，存储了不同的数据，比如说对于Slice类型，其内部存储的就是Slice数据<br>，分为Slice Header和Slice Data。Slice Data中是由一个一个的MB（宏块）数据组成，MB又可以分为一个个的子MB，在子MB中存储了mb_type(宏块类型)、mb_pred(宏块预测类型)、coded residual(残差值)。</p>
+<p>所以简单来看一个NAL单元是由一个字节的Header加上Slice数据组成，而Slice数据是由一个一个的宏块数据组成。</p>
+<p>对于H.264来说，编码器会将每一帧图像都拆分成一个或多个Slice，每个Slice又分割成多个宏块，每个宏块是一个nxm大小的像素区域，每个宏块又可以切分成更小的子宏块。每个Slice编码完成后，会将当前Slice的编码数据打包成NAL单元下发出去。</p>
+<p><img src="/images/音视频开发之H.264码流结构与编码原理.resources/H264码流结构.png" alt="H264码流结构"></p>
+<h5 id="Annex-B格式"><a href="#Annex-B格式" class="headerlink" title="Annex B格式"></a>Annex B格式</h5><p>这种格式的H.264码流用于实时流的传播中，其特点是码流中每个NALU（单元块）之间通过起始码来分割，起始码分为两种，一帧开始则用四个字节的1来表示，不是一帧开始就用三个字节的1来表示。</p>
+<h4 id="NAL单元类型"><a href="#NAL单元类型" class="headerlink" title="NAL单元类型"></a>NAL单元类型</h4><p>NAL单元的Header由一个字节的数据组成，由三个数据组成</p>
+<ul>
+<li>forbidden_zero_bit : 1个比特，在H.264规范中规定了这一位必须为0。</li>
+<li>nal_ref_idc : 2个比特，取00~11，指示这个NALU的重要性，取值越大，表示当前NAL越重要，需要优先受到保护。</li>
+<li>nal_unit_type : 5个比特，表示NALU单元的类型。</li>
+</ul>
+<p>常见的NAL单元类型有:</p>
+<ul>
+<li>NALU_TYPE_SLICE : 1, 非IDR图像的Slice</li>
+<li>NALU_TYPE_IDR : 5, IDR图像的Slice</li>
+<li>NALU_TYPE_SPS : 7, SPS 序列参数集</li>
+<li>NALU_TYPE_PPS : 8, PPS 图像参数集</li>
+</ul>
+<h5 id="IDR和GOP"><a href="#IDR和GOP" class="headerlink" title="IDR和GOP"></a>IDR和GOP</h5><p>GOP就是一组图像序列，序列中的图像强相关，差别小。每个GOP序列中，第一个图像就是IDR图像，IDR图像一定是切分成I类型的Slice，但是I类型的Slice并不一定是属于IDR图像。</p>
+<h5 id="SPS"><a href="#SPS" class="headerlink" title="SPS"></a>SPS</h5><p>序列参数集，作用于一个序列中的所有图像，对于H.264原始流来说，每个IDR图像之前都需要加入一个SPS，但是对于本地存储比如MP4文件来说，只需要一个SPS就可以了。</p>
+<p>SPS中主要包含以下参数:</p>
+<ul>
+<li>Profile</li>
+<li>Level</li>
+<li>pic_width_in_mbs_minus1 图像宽度包含的宏块个数-1，计算时需+1</li>
+<li>pic_height_in_mbs_minus1 图像高度包含的宏块个数-1,计算时需+1</li>
+<li>frame_mbs_only_flag 帧编码还是场编码（场隔行扫描，产生两张图）,1表示帧编码</li>
+<li>frame_cropping_flag 图像是否需要裁剪 （值需要x2）<ul>
+<li>frame_crop_left_offset 减去左侧的偏移量</li>
+<li>frame_crop_right_offset 减去右侧的偏移量</li>
+<li>frame_crop_top_offset 减去顶部的偏移量</li>
+<li>frame_crop_bottom_offset 减去底部的偏移量</li>
+</ul>
+</li>
+<li>log2_max_frame_num_minus4 一个GOP中最大的帧数</li>
+<li>max_num_ref_frames 参考帧的缓冲区大小，最大参考帧数</li>
+<li>pic_order_cnt_type 显示的顺序</li>
+<li>帧率framerate = (float)(sps-&gt;vui.vui_time_scale) / (float)(sps-&gt;vui.vui_num_units_in_tick) / 2;</li>
+</ul>
+<h6 id="Profile"><a href="#Profile" class="headerlink" title="Profile"></a>Profile</h6><p>H.264针对不同的程序类型，定义了几套功能组合，称为profile。</p>
+<p>最基础的profile是Constrained Baseline，基于这种组合有两条扩展线</p>
+<ul>
+<li>Constrained Baseline -&gt; Baseline -&gt; Extend</li>
+<li>Constrained Baseline -&gt; Main -&gt; High -&gt; High10 -&gt; High422 -&gt; High444</li>
+</ul>
+<p>下图是每种profile支持的功能列表。</p>
+<p><img src="/images/音视频开发之H.264码流结构与编码原理.resources/h264_profile.png" alt="h264_profile"></p>
+<h6 id="Level"><a href="#Level" class="headerlink" title="Level"></a>Level</h6><p>Level是一组解码性能约束，每一个Level都限定了当前能够解码的最大分辨率、帧率、码率、最大宏块大小、最高解码速度。Level越高，能处理的视频相关质量也就越高。比如说想要解码1920x1080分辨率的视频，那么Level就必须大于等于4。</p>
+<p><img src="/images/音视频开发之H.264码流结构与编码原理.resources/h264_level.png" alt="h264_level"></p>
+<h5 id="PPS"><a href="#PPS" class="headerlink" title="PPS"></a>PPS</h5><p>图像参数集，作用于一个序列中的所有图像，和SPS一样，对于H.264原始流来说，每个IDR图像之前都需要加入一个PPS，但是对于本地存储比如MP4文件来说，PPS可以只有一个也可以多个。<br>PPS中主要包含以下参数:</p>
+<ul>
+<li>entropy_coding_mode_flag 熵编码，1表示使用CABAC</li>
+<li>num_slice_groups_minus1 分片数量-1</li>
+<li>weighted_pred_flag 在p/sp slice中是否开启权重预测</li>
+<li>weighted_bipred_idc 在b slice中加权预测的方法</li>
+<li>pic_init_qp_minus26/pic_init_qs_minus26 初始化量化参数，实际参数在slice header</li>
+<li>chroma_qp_index_offset 用于计算色度分量的量化参数</li>
+<li>deblocking_filter_control_present_flag 表示slice header中是否存在用于去块滤波器控制的信息</li>
+<li>constrained_intra_pred_flag 若该标识为1，表示I宏块在进行帧内预测时只能使用来自I和SI类型宏块的信息</li>
+<li>redundant_pic_cnt_present_flag 用于表示slice header中是否存在redundant_pic语法元素</li>
+</ul>
+<h5 id="Slice"><a href="#Slice" class="headerlink" title="Slice"></a>Slice</h5><p>对于NAL单元常用的类型中，SPS和PPS我们已经讲过了，剩下的就是IDR图像的Slice和非IDR图像的Slice。前面也讲过，H.264会将一张图像分割成一个或多个Slice（其实常用的一般都是一个Slice）。</p>
+<p>Slice = Slice Header + Slice Data</p>
+<h6 id="Slice-Header"><a href="#Slice-Header" class="headerlink" title="Slice Header"></a>Slice Header</h6><p>在Header中描述了当前Slice的类型以及当前Slice的解码显示顺序等信息。</p>
+<ul>
+<li>slice_type : 类型, 常见的类型有I Slice、P Slice、B Slice。</li>
+<li>frame_num : GOP中解码帧序号，frame_num表示解码的顺序。该图像是参考帧的时候，frame_num才有意义。也就是说B帧的frame_num是没有意义的。H264中frame_num定义如下：当参数集中的句法元素gaps_in_frame_num_value_allowed_flag不为1时，每个图像的frame_num值是它前一个参考帧的frame_num值增加1。如果两个相邻的帧具有相同的frame_num，那么其中一个是参考帧，一个是非参考帧。参考帧在非参考帧之前进行编解码。</li>
+<li>POC : 图像显示序号，用于标识图像播放顺序。计算POC有三种方法，根据pic_order_cnt_type指定。</li>
+</ul>
+<p>在MP4存储时，是按照frame_num的顺序进行存储的，但是在播放的时候需要解析器POC，按照POC的顺序进行播放。只有当存在B帧是，显示顺序和编码顺序才不一样。<br><figure class="highlight plain hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">录制顺序</span><br><span class="line">    1 2 3 4 5</span><br><span class="line">编码后顺序</span><br><span class="line">    1 3 2 5 4</span><br><span class="line">    I P B P B</span><br><span class="line">播放顺序</span><br><span class="line">    1 2 3 4 5</span><br></pre></td></tr></table></figure></p>
+<h6 id="I-B-P-Slice"><a href="#I-B-P-Slice" class="headerlink" title="I/B/P Slice"></a>I/B/P Slice</h6><ul>
+<li>I Slice所属的图像就是我们平常所说的关键帧，采用的是帧内压缩技术，压缩比最小。</li>
+<li>P Slice采用的是向前预测，编码时，只参考前面已经处理的图像，P Slice约占I Slice一半大小。</li>
+<li>B Slice采用的是双向预测，编码时，即参考前面已经处理的图像，也参考后面的图像，所以对于B Slice来说，它所参考的Slice必须先处理，B Slice约占I Slice的1/4大小。</li>
+</ul>
+<h3 id="编码原理"><a href="#编码原理" class="headerlink" title="编码原理"></a>编码原理</h3><p>编码技术分为两种，一种是有损编码，另一种是无损编码。有损编码中有帧内压缩技术和帧间压缩技术；无损编码中有DCT变换和VLC压缩和CABAC压缩技术。</p>
+<p><img src="/images/音视频开发之H.264码流结构与编码原理.resources/H264编码流程.png" alt="H264编码流程"></p>
+<h4 id="帧内压缩"><a href="#帧内压缩" class="headerlink" title="帧内压缩"></a>帧内压缩</h4><p>对于I Slice，采用的是帧内压缩技术，所以I Slice的压缩比最低。</p>
+<p>帧内压缩技术基于人眼对亮度的敏感度超过色度，且YUV很容易将亮度和色度分开来实现。一张图像中相邻像素之间差别都不大，所以当已知当前宏块的颜色值时，可以通过一种预测模式来进行推导，预测出相邻宏块的颜色值。在H.264中提供了九种预测模式，每个宏块在进行处理后只需要记录下其采用的预测模式的编号即可，在预测的过程中，亮度和色度是分开预测的。</p>
+<p>只有预测模式肯定是不够的，在确定了每个宏块的预测模式后，通过将预测推导出来的图像和原始图像进行比较，得到残差值，这些残差值才是细节的数据，也需要保存下来，所以帧内压缩数据 = 宏块预测模式 + 预测残差值</p>
+<h4 id="帧间压缩"><a href="#帧间压缩" class="headerlink" title="帧间压缩"></a>帧间压缩</h4><p>对于P Slice和B Slice，采用的都是帧间压缩就，所以其压缩比高。其中P Slice是单向向前参考，而B Slice是双向参考。<br>帧间参考是指在一个GOP序列中的帧进行参考，不同的GOP序列不能参考。所以一个GOP序列中的所有帧，只需要当前GOP序列中的数据就可以全部显示。</p>
+<p>帧间压缩是基于运动估计来实现的，通过对当前Slice中每一个宏块在参考Slice中进行宏块运动轨迹的查找匹配，计算出运动矢量，通每个宏块的运动矢量结合参考Slice进行预测，将当前Slice和预测的结果进行比较，得到残差值作为运动补偿。所以帧间压缩数据 = 宏块运动矢量 + 预测残差值</p>
+<h4 id="变换与量化"><a href="#变换与量化" class="headerlink" title="变换与量化"></a>变换与量化</h4><h5 id="变换编码"><a href="#变换编码" class="headerlink" title="变换编码"></a>变换编码</h5><p>大多数视频图像都和上面展示的一样，变动的区域只是一小部分，大部分区域是不变的，可就是说低频区占大部分，高频区占小部分。然后将空间域的图像变换到频率域，会产生相关性很小的变换系数，然后再对变换系数进行量化，利用上面人类视觉体统特点所说到的，人对高频信息不敏感的特征，对低频区的系数进行细量化，对高频区的系数进行粗量化，从而降低信息传递量，达到压缩的目的。</p>
+<p>简单的解释变换，就是如下图所示，坐标系中有ABC三点，我们将坐标轴调整一下，ABC三点的坐标值就会变小。</p>
+<p><img src="/images/transform_coding.png" alt></p>
+<p>一个8x8的像素区域，假设其像素颜色值如下图所示</p>
+<p><img src="/images/transform_coding_1.png" alt></p>
+<p>像素区域经过DCT（离散余弦变换）变换后，生产的变换系数，如下图所示</p>
+<p><img src="/images/transform_coding_2.png" alt></p>
+<p>对变换系数进行量化，量化后大部分都会变成0，此时只需要将这些非0的值进行编码即可，入下图所示</p>
+<p><img src="/images/transform_coding_3.png" alt></p>
+<h5 id="量化"><a href="#量化" class="headerlink" title="量化"></a>量化</h5><p>利用信息的统计特性，使用新的编码来表示输入的数据。H.264中支持两种量化技术，一种是VLC，另一种是CABAC。通过PPS中的entropy_coding_mode_flag参数可以知道当前视频采用了哪种编码技术。</p>
+
+        </div>
+        
+        
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-image">
         <a href="/音视频开发之SDL2播放视频/" class="image is-7by1">
         <img class="thumbnail" src="/images/14.jpg" alt="音视频开发之SDL2播放视频">
         </a>
@@ -767,82 +916,25 @@
 
 
 
+
     
-<div class="card">
-    
-    <div class="card-image">
-        <a href="/音视频开发之基础篇/" class="image is-7by1">
-        <img class="thumbnail" src="/images/7.jpeg" alt="音视频开发之基础篇">
-        </a>
-    </div>
-    
-    <div class="card-content article ">
-        
-        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
-            <div class="level-left">
-                <time class="level-item has-text-grey"
-                    datetime="2020-02-29T16:00:00.000Z">2020-03-01</time>
-                
-                <div class="level-item">
-                    <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
-                </div>
-                
-                
-                <span class="level-item has-text-grey">
-                    
-                    
-                    36 分钟 读完 (大约 5326 个字)
-                </span>
-                
-                
-            </div>
+<div class="card card-transparent">
+    <nav class="pagination is-centered" role="navigation" aria-label="pagination">
+        <div class="pagination-previous is-invisible is-hidden-mobile">
+            <a class="is-flex-grow has-text-black-ter" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/page/0/">上一页</a>
         </div>
-        
-        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+        <div class="pagination-next">
+            <a class="is-flex-grow has-text-black-ter" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/page/2/">下一页</a>
+        </div>
+        <ul class="pagination-list is-hidden-mobile">
             
-            <a class="has-link-black-ter" href="/音视频开发之基础篇/">音视频开发之基础篇</a>
+            <li><a class="pagination-link is-current" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">1</a></li>
             
-        </h1>
-        <div class="content">
-            <h3 id="本篇重点"><a href="#本篇重点" class="headerlink" title="本篇重点"></a>本篇重点</h3><blockquote>
-<p>音视频基础概念与相关术语的讲解</p>
-</blockquote>
-<h3 id="什么是视频"><a href="#什么是视频" class="headerlink" title="什么是视频"></a>什么是视频</h3><h4 id="图像的组成"><a href="#图像的组成" class="headerlink" title="图像的组成"></a>图像的组成</h4><p>在说视频之前，我们来聊一下图像，<strong>图像是人对视觉感知的物质再现</strong>。图像是使用像素点阵来表示的，每个像素点都分配有特定的颜色和位置值。像素也是图像显示的基本单位，通常一幅1080x1920的图片，就是长度1920个像素点，宽度1080个像素点组成的矩阵。</p>
-<h4 id="颜色空间"><a href="#颜色空间" class="headerlink" title="颜色空间"></a>颜色空间</h4><p>像素点除了有位置外还需要有颜色信息，那么颜色在计算机中是如何表示呢？</p>
-<p>在计算机中颜色空间有很多，这里我们介绍下常用的两种颜色空间，RGB颜色空间和YUV颜色空间。</p>
-<h5 id="RGB颜色空间"><a href="#RGB颜色空间" class="headerlink" title="RGB颜色空间"></a>RGB颜色空间</h5><p>RGB颜色空间是由红绿蓝三原色来定义，通过三原色混合成所有的颜色，这应该是我们最熟悉的一种颜色空间。</p>
-<h5 id="YUV颜色空间"><a href="#YUV颜色空间" class="headerlink" title="YUV颜色空间"></a>YUV颜色空间</h5><p>Y表示亮度，U和V表示色度和浓度。早期的YUV实际上是用在彩色电视和黑白电视的交替上，感兴趣历史的同学可以点击<a href="https://zh.wikipedia.org/wiki/YUV" target="_blank" rel="noopener">YUV</a>查看相关资料。YUV颜色空间在数字媒体中广泛使用是由于人类对亮度的的敏感度高于对色度的敏感度，但是在数字媒体中使用的是个变体，叫YCbCr，其中Cb是指蓝色色度，Cr就是红色色度。像JPEG、MPEG都是采用此格式，后续一般讲的YUV都是指YCbCr。(Y的值是根据RGB值计算出来的，所以Cg的值可以通过CbCr计算出来，所以在传输的时候只需要传输YCbCr)</p>
-<figure class="highlight plain hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">计算公式: </span><br><span class="line">    Y = KrR+KgG+Kb*B（k为权重值,ITU-R推荐的BT.601中定义Kb=0.114,Kr=0.299,Kb+Kr+Kg=1）</span><br><span class="line">    Cb=B-Y</span><br><span class="line">    Cr=R-Y</span><br><span class="line">    Cg=G-Y</span><br></pre></td></tr></table></figure>
-<p>YCbCr会按照一定的采样比对色度数据进行采样，采样比通常表示为 <strong>J​ : a : ​b</strong>，表示在一个宽为J像素、高为2像素的采样区域中进行采样，J表示采样的宽度，通常是4，a表示第一行色度采样数，b表示第二行色度采样数与第一行色度采样的不同样点数。</p>
-<p><img src="/images/ycbcr.png" alt="YCbCr采样比"></p>
-<p>最常见的采样比是 4:2:0 ，表示宽为4，第一行有两个色度采样点，第二行与第一行完全相同。所以总共有八个亮度采样点和两个色度采样点，每个亮度采样点需要记录一个值Y，而每个色度采样点都需要记录两个值Cb和Cr。最终需要记录的值为 8Y+2Cr+2Cb = 12，而如果使用RGB来记录则会需要3x8=24。</p>
-<blockquote>
-<p>YCbCr的优势就在于，在达到最大压缩率的情况下，能够保证对人眼感知的失真度最小。拿4:2:0来说足足压缩了一半。</p>
-</blockquote>
-        </div>
-        
-        
-        
-        <div class="level is-mobile">
-            <div class="level-start">
-                <div class="level-item">
-                    <a class="button is-size-7 is-light"
-                        href="/音视频开发之基础篇/#more">阅读更多</a>
-                </div>
-            </div>
-        </div>
-        
-        
-    </div>
+            <li><a class="pagination-link has-text-black-ter" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/page/2/">2</a></li>
+            
+        </ul>
+    </nav>
 </div>
-
-
-
-
-
-
-
-
 </div>
                 
 
@@ -888,7 +980,7 @@
                         文章
                     </p>
                     <p class="title has-text-weight-normal">
-                        38
+                        39
                     </p>
                 </div>
             </div>
@@ -988,7 +1080,7 @@
                 <span class="level-item">拳掌指腿（音视频）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">18</span>
+                <span class="level-item tag">19</span>
             </span>
         </a><ul><li>
         <a class="level is-marginless" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">
@@ -996,7 +1088,7 @@
                 <span class="level-item">七伤拳（音视频基础）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">10</span>
+                <span class="level-item tag">11</span>
             </span>
         </a></li><li>
         <a class="level is-marginless" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">
@@ -1020,6 +1112,25 @@
         <h3 class="menu-label">
             最新文章
         </h3>
+        
+        <article class="media">
+            
+            <a href="/音视频开发之H.264码流结构与编码原理/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/19.jpg" alt="音视频开发之H.264码流结构与编码原理">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-06T16:00:00.000Z">2020-08-07</time></div>
+                    <a href="/音视频开发之H.264码流结构与编码原理/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之H.264码流结构与编码原理</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
         
         <article class="media">
             
@@ -1097,25 +1208,6 @@
             </div>
         </article>
         
-        <article class="media">
-            
-            <a href="/音视频开发之SDL2播放视频/" class="media-left">
-                <p class="image is-64x64">
-                    <img class="thumbnail" src="/images/14.jpg" alt="音视频开发之SDL2播放视频">
-                </p>
-            </a>
-            
-            <div class="media-content">
-                <div class="content">
-                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-07-31T16:00:00.000Z">2020-08-01</time></div>
-                    <a href="/音视频开发之SDL2播放视频/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之SDL2播放视频</a>
-                    <p class="is-size-7 is-uppercase">
-                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
-                    </p>
-                </div>
-            </div>
-        </article>
-        
     </div>
 </div>
         
@@ -1133,7 +1225,7 @@
                             <span class="level-item">八月 2020</span>
                         </span>
                         <span class="level-end">
-                            <span class="level-item tag">6</span>
+                            <span class="level-item tag">7</span>
                         </span>
                     </a>
                 </li>
@@ -1319,6 +1411,25 @@
         
         <article class="media">
             
+            <a href="/音视频开发之H.264码流结构与编码原理/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/19.jpg" alt="音视频开发之H.264码流结构与编码原理">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-06T16:00:00.000Z">2020-08-07</time></div>
+                    <a href="/音视频开发之H.264码流结构与编码原理/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之H.264码流结构与编码原理</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
             <a href="/音视频开发之ffplay渲染线程分析/" class="media-left">
                 <p class="image is-64x64">
                     <img class="thumbnail" src="/images/18.jpg" alt="音视频开发之ffplay渲染线程分析">
@@ -1393,25 +1504,6 @@
             </div>
         </article>
         
-        <article class="media">
-            
-            <a href="/音视频开发之SDL2播放视频/" class="media-left">
-                <p class="image is-64x64">
-                    <img class="thumbnail" src="/images/14.jpg" alt="音视频开发之SDL2播放视频">
-                </p>
-            </a>
-            
-            <div class="media-content">
-                <div class="content">
-                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-07-31T16:00:00.000Z">2020-08-01</time></div>
-                    <a href="/音视频开发之SDL2播放视频/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之SDL2播放视频</a>
-                    <p class="is-size-7 is-uppercase">
-                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
-                    </p>
-                </div>
-            </div>
-        </article>
-        
     </div>
 </div>
     
@@ -1429,7 +1521,7 @@
                             <span class="level-item">八月 2020</span>
                         </span>
                         <span class="level-end">
-                            <span class="level-item tag">6</span>
+                            <span class="level-item tag">7</span>
                         </span>
                     </a>
                 </li>

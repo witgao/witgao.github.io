@@ -133,6 +133,68 @@
         <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
             <div class="level-left">
                 <time class="level-item has-text-grey"
+                    datetime="2018-06-27T16:00:00.000Z">2018-06-28</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/">刀枪棍棒（Android）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/五虎断门刀（Android原生）/">五虎断门刀（Android原生）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    24 分钟 读完 (大约 3656 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/Android-ReactNative通信流程/">Android-ReactNative通信流程</a>
+            
+        </h1>
+        <div class="content">
+            <h4 id="JNI注册"><a href="#JNI注册" class="headerlink" title="JNI注册"></a>JNI注册</h4><p>Android中注册JNI方法有两种方式，一种是静态注册，一种是动态注册。</p>
+<h5 id="动态注册"><a href="#动态注册" class="headerlink" title="动态注册"></a>动态注册</h5><p>因为JNI允许我们提供一个函数映射表(native函数和jni函数对应表)。而在执行System.loadLibrary加载so库时，会执行该so的JNI_OnLoad函数，利用这个时机可以动态注册JIN方法。具体实现的话是通过JNINativeMethod结构保存映射关系，然后通过RegisterNatives函数来将该映射关系注册。</p>
+<h5 id="静态注册"><a href="#静态注册" class="headerlink" title="静态注册"></a>静态注册</h5><p>如果没有在JNI_OnLoad中将JNI方法注册(将方法在进程中的地址增加到ClassObject-&gt;directMethods中)，则在调用的时候解析javah风格的函数(比如Java_com_example_hellojni_HelloJni_stringFromJNI)，进行静态注册。静态注册根据函数名来建立java方法和jni函数的对应关系。静态注册需要根据方法名本地搜索，比较耗时。</p>
+<h5 id="RN中的JNI注册"><a href="#RN中的JNI注册" class="headerlink" title="RN中的JNI注册"></a>RN中的JNI注册</h5><h6 id="JNI-OnLoad"><a href="#JNI-OnLoad" class="headerlink" title="JNI_OnLoad"></a>JNI_OnLoad</h6><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta"># src/main/jni/react/jni/OnLoad.cpp</span></span><br><span class="line"><span class="hljs-keyword">extern</span> <span class="hljs-string">"C"</span> <span class="hljs-function">JNIEXPORT jint <span class="hljs-title">JNI_OnLoad</span><span class="hljs-params">(JavaVM* vm, <span class="hljs-keyword">void</span>* reserved)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-comment">// 调用各个类的注册方法</span></span><br><span class="line">  <span class="hljs-keyword">return</span> initialize(vm, [] &#123;</span><br><span class="line">    gloginit::initialize();</span><br><span class="line">    JSCJavaScriptExecutorHolder::registerNatives();</span><br><span class="line">    ProxyJavaScriptExecutorHolder::registerNatives();</span><br><span class="line">    CatalystInstanceImpl::registerNatives();</span><br><span class="line">    CxxModuleWrapperBase::registerNatives();</span><br><span class="line">    CxxModuleWrapper::registerNatives();</span><br><span class="line">    JCxxCallbackImpl::registerNatives();</span><br><span class="line">    NativeArray::registerNatives();</span><br><span class="line">    NativeDeltaClient::registerNatives();</span><br><span class="line">    ReadableNativeArray::registerNatives();</span><br><span class="line">    WritableNativeArray::registerNatives();</span><br><span class="line">    NativeMap::registerNatives();</span><br><span class="line">    ReadableNativeMap::registerNatives();</span><br><span class="line">    WritableNativeMap::registerNatives();</span><br><span class="line">    ReadableNativeMapKeySetIterator::registerNatives();</span><br><span class="line"></span><br><span class="line">    #ifdef WITH_INSPECTOR</span><br><span class="line">    JInspector::registerNatives();</span><br><span class="line">    #endif</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="CatalystInstanceImpl-registerNatives"><a href="#CatalystInstanceImpl-registerNatives" class="headerlink" title="CatalystInstanceImpl.registerNatives"></a>CatalystInstanceImpl.registerNatives</h6><p>先拿CatalystInstanceImpl来举例子，先准备好映射数据，然后构建映射表，再通过FindClass获取对应java类的引用，通过这些参数使用RegisterNatives函数来注册。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta"># src/main/jni/react/jni/CatalystInstanceImpl.h </span></span><br><span class="line"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CatalystInstanceImpl</span> :</span> <span class="hljs-keyword">public</span> jni::HybridClass&lt;CatalystInstanceImpl&gt; &#123;</span><br><span class="line"> <span class="hljs-comment">// 该类对应的Java类，通过该路径来加载java类的class引用</span></span><br><span class="line"> <span class="hljs-keyword">public</span>:</span><br><span class="line">  <span class="hljs-keyword">static</span> <span class="hljs-keyword">constexpr</span> <span class="hljs-keyword">auto</span> kJavaDescriptor = <span class="hljs-string">"Lcom/facebook/react/bridge/CatalystInstanceImpl;"</span>;</span><br><span class="line"></span><br><span class="line">  <span class="hljs-keyword">static</span> jni::local_ref&lt;jhybriddata&gt; initHybrid(jni::alias_ref&lt;jclass&gt;);</span><br><span class="line">  ~CatalystInstanceImpl() override;</span><br><span class="line"></span><br><span class="line">  <span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">registerNatives</span><span class="hljs-params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta"># src/main/jni/react/jni/CatalysInstanceImpl.cpp </span></span><br><span class="line"><span class="hljs-keyword">void</span> CatalystInstanceImpl::registerNatives() &#123;</span><br><span class="line">  registerHybrid(&#123;</span><br><span class="line">    <span class="hljs-comment">// 返回&#123;java方法名，java类命名空间(CatalysInstanceImpl.kJavaDescriptor),JNIMethod指针&#125;</span></span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"initHybrid"</span>, CatalystInstanceImpl::initHybrid),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"initializeBridge"</span>, CatalystInstanceImpl::initializeBridge),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"jniExtendNativeModules"</span>, CatalystInstanceImpl::extendNativeModules),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"jniSetSourceURL"</span>, CatalystInstanceImpl::jniSetSourceURL),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"jniRegisterSegment"</span>, CatalystInstanceImpl::jniRegisterSegment),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"jniLoadScriptFromAssets"</span>, CatalystInstanceImpl::jniLoadScriptFromAssets),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"jniLoadScriptFromFile"</span>, CatalystInstanceImpl::jniLoadScriptFromFile),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"jniLoadScriptFromDeltaBundle"</span>, CatalystInstanceImpl::jniLoadScriptFromDeltaBundle),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"jniCallJSFunction"</span>, CatalystInstanceImpl::jniCallJSFunction),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"jniCallJSCallback"</span>, CatalystInstanceImpl::jniCallJSCallback),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"setGlobalVariable"</span>, CatalystInstanceImpl::setGlobalVariable),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"getJavaScriptContext"</span>, CatalystInstanceImpl::getJavaScriptContext),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"jniHandleMemoryPressure"</span>, CatalystInstanceImpl::handleMemoryPressure),</span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  JNativeRunnable::registerNatives();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/Android-ReactNative通信流程/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
                     datetime="2018-05-29T16:00:00.000Z">2018-05-30</time>
                 
                 <div class="level-item">
@@ -497,80 +559,6 @@ N-->O[attach时替换Activity的上下文]</pre>
 
 
 
-    
-<div class="card">
-    
-    <div class="card-content article ">
-        
-        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
-            <div class="level-left">
-                <time class="level-item has-text-grey"
-                    datetime="2017-12-18T16:00:00.000Z">2017-12-19</time>
-                
-                <div class="level-item">
-                    <a class="has-link-grey -link" href="/categories/内功心法（CS基础）/">内功心法（CS基础）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/内功心法（CS基础）/神照功（网络协议）/">神照功（网络协议）</a>
-                </div>
-                
-                
-                <span class="level-item has-text-grey">
-                    
-                    
-                    11 分钟 读完 (大约 1602 个字)
-                </span>
-                
-                
-            </div>
-        </div>
-        
-        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
-            
-            <a class="has-link-black-ter" href="/ByteBuf/">ByteBuf</a>
-            
-        </h1>
-        <div class="content">
-            <h3 id="ByteBuf"><a href="#ByteBuf" class="headerlink" title="ByteBuf"></a>ByteBuf</h3><p>为了简化ByteBuffer的操作，Netty自定义了ByteBuf,相对于ByteBuffer的读写索引共用，Netty将其分开，定义了读索引和写索引，避免了每次读写都需要flip方法来转换。并且定义了扩容方法，解决了ByteBuffer容量无法修改的问题。</p>
-<p>基本属性</p>
-<ul>
-<li>readerIndex : 读索引</li>
-<li>writerIndex : 写索引</li>
-<li>markReaderIndex : 标记读索引位置</li>
-<li>markWriterIndex : 标记写索引位置</li>
-<li>readableBytes : 可读字节大小(writerIndex - readerIndex)</li>
-<li>writableBytes : 可写字节大小(capacity - writerIndex)</li>
-<li>resetReaderIndex : 还原到标记读索引位置</li>
-<li>resetWriterIndex : 还原到标记写索引位置</li>
-</ul>
-<blockquote>
-<p>池化：将用过的对象保存，重复使用。</p>
-</blockquote>
-<blockquote>
-<p>堆外内存：使用JVM堆栈外的内存，该内存JVM无法干预，JVM的GC只能回收ByteBuf对象本身，而不能回收其指向的堆外内存，所以需要手动释放。</p>
-</blockquote>
-<p>Netty的ByteBuf实现分为池化和非池化，其中又分为堆内存和堆外内存实现。由于堆外内存需要手动释放，所以需要自己维护引用数来标记是否释放。<br></p>
-        </div>
-        
-        
-        
-        <div class="level is-mobile">
-            <div class="level-start">
-                <div class="level-item">
-                    <a class="button is-size-7 is-light"
-                        href="/ByteBuf/#more">阅读更多</a>
-                </div>
-            </div>
-        </div>
-        
-        
-    </div>
-</div>
-
-
-
-
-
-
-
-
 
     
 <div class="card card-transparent">
@@ -641,7 +629,7 @@ N-->O[attach时替换Activity的上下文]</pre>
                         文章
                     </p>
                     <p class="title has-text-weight-normal">
-                        38
+                        39
                     </p>
                 </div>
             </div>
@@ -741,7 +729,7 @@ N-->O[attach时替换Activity的上下文]</pre>
                 <span class="level-item">拳掌指腿（音视频）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">18</span>
+                <span class="level-item tag">19</span>
             </span>
         </a><ul><li>
         <a class="level is-marginless" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">
@@ -749,7 +737,7 @@ N-->O[attach时替换Activity的上下文]</pre>
                 <span class="level-item">七伤拳（音视频基础）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">10</span>
+                <span class="level-item tag">11</span>
             </span>
         </a></li><li>
         <a class="level is-marginless" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">
@@ -773,6 +761,25 @@ N-->O[attach时替换Activity的上下文]</pre>
         <h3 class="menu-label">
             最新文章
         </h3>
+        
+        <article class="media">
+            
+            <a href="/音视频开发之H.264码流结构与编码原理/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/19.jpg" alt="音视频开发之H.264码流结构与编码原理">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-06T16:00:00.000Z">2020-08-07</time></div>
+                    <a href="/音视频开发之H.264码流结构与编码原理/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之H.264码流结构与编码原理</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
         
         <article class="media">
             
@@ -850,25 +857,6 @@ N-->O[attach时替换Activity的上下文]</pre>
             </div>
         </article>
         
-        <article class="media">
-            
-            <a href="/音视频开发之SDL2播放视频/" class="media-left">
-                <p class="image is-64x64">
-                    <img class="thumbnail" src="/images/14.jpg" alt="音视频开发之SDL2播放视频">
-                </p>
-            </a>
-            
-            <div class="media-content">
-                <div class="content">
-                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-07-31T16:00:00.000Z">2020-08-01</time></div>
-                    <a href="/音视频开发之SDL2播放视频/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之SDL2播放视频</a>
-                    <p class="is-size-7 is-uppercase">
-                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
-                    </p>
-                </div>
-            </div>
-        </article>
-        
     </div>
 </div>
         
@@ -886,7 +874,7 @@ N-->O[attach时替换Activity的上下文]</pre>
                             <span class="level-item">八月 2020</span>
                         </span>
                         <span class="level-end">
-                            <span class="level-item tag">6</span>
+                            <span class="level-item tag">7</span>
                         </span>
                     </a>
                 </li>
@@ -1072,6 +1060,25 @@ N-->O[attach时替换Activity的上下文]</pre>
         
         <article class="media">
             
+            <a href="/音视频开发之H.264码流结构与编码原理/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/19.jpg" alt="音视频开发之H.264码流结构与编码原理">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-06T16:00:00.000Z">2020-08-07</time></div>
+                    <a href="/音视频开发之H.264码流结构与编码原理/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之H.264码流结构与编码原理</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
             <a href="/音视频开发之ffplay渲染线程分析/" class="media-left">
                 <p class="image is-64x64">
                     <img class="thumbnail" src="/images/18.jpg" alt="音视频开发之ffplay渲染线程分析">
@@ -1146,25 +1153,6 @@ N-->O[attach时替换Activity的上下文]</pre>
             </div>
         </article>
         
-        <article class="media">
-            
-            <a href="/音视频开发之SDL2播放视频/" class="media-left">
-                <p class="image is-64x64">
-                    <img class="thumbnail" src="/images/14.jpg" alt="音视频开发之SDL2播放视频">
-                </p>
-            </a>
-            
-            <div class="media-content">
-                <div class="content">
-                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-07-31T16:00:00.000Z">2020-08-01</time></div>
-                    <a href="/音视频开发之SDL2播放视频/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之SDL2播放视频</a>
-                    <p class="is-size-7 is-uppercase">
-                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
-                    </p>
-                </div>
-            </div>
-        </article>
-        
     </div>
 </div>
     
@@ -1182,7 +1170,7 @@ N-->O[attach时替换Activity的上下文]</pre>
                             <span class="level-item">八月 2020</span>
                         </span>
                         <span class="level-end">
-                            <span class="level-item tag">6</span>
+                            <span class="level-item tag">7</span>
                         </span>
                     </a>
                 </li>
