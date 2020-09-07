@@ -141,6 +141,134 @@
     
 <div class="card">
     
+    <div class="card-image">
+        <a href="/Android多媒体深入之MediaPlayer分析/" class="image is-7by1">
+        <img class="thumbnail" src="/images/24.jpg" alt="Android多媒体深入之MediaPlayer分析">
+        </a>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-02-14T16:00:00.000Z">2020-02-15</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/">刀枪棍棒（Android）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/五虎断门刀（Android原生）/">五虎断门刀（Android原生）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    20 分钟 读完 (大约 2934 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/Android多媒体深入之MediaPlayer分析/">Android多媒体深入之MediaPlayer分析</a>
+            
+        </h1>
+        <div class="content">
+            <h3 id="引入MediaPlayer"><a href="#引入MediaPlayer" class="headerlink" title="引入MediaPlayer"></a>引入MediaPlayer</h3><h4 id="加载SO"><a href="#加载SO" class="headerlink" title="加载SO"></a>加载SO</h4><p>当MediaPlayer类被加载时，触发静态代码块，开始加载SO。</p>
+<p>media_jni动态库的代码在frameworks/base/media/jni/目录下，里面包含了整个Media模块的jni代码。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">static</span> &#123;</span><br><span class="line">    <span class="hljs-comment">// 加载动态库</span></span><br><span class="line">    System.loadLibrary(<span class="hljs-string">"media_jni"</span>);</span><br><span class="line">    <span class="hljs-comment">// 注册MediaPlayer的JNI函数</span></span><br><span class="line">    native_init();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="native-init"><a href="#native-init" class="headerlink" title="native_init"></a>native_init</h4><p>通过JNI获取Java层相关类的字段和方法句柄。</p>
+<p>mNativeContext用来存储Native层Player地址，postEventFromNative用来给Native层进行事件回调，mNativeSurfaceTexture就是Surface中的BufferQueue的生产者句柄，是Surfaceflinger是该Surface的BufferQueue的消费者，使用该句柄可以给Surface的BufferQueue中传递数据。<br><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span></span><br><span class="line">android_media_MediaPlayer_native_init(JNIEnv *env)</span><br><span class="line">&#123;</span><br><span class="line">    jclass clazz;</span><br><span class="line"></span><br><span class="line">    clazz = env-&gt;FindClass(<span class="hljs-string">"android/media/MediaPlayer"</span>);</span><br><span class="line">    <span class="hljs-keyword">if</span> (clazz == <span class="hljs-literal">NULL</span>) &#123;</span><br><span class="line">        <span class="hljs-keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    fields.context = env-&gt;GetFieldID(clazz, <span class="hljs-string">"mNativeContext"</span>, <span class="hljs-string">"J"</span>);</span><br><span class="line">    <span class="hljs-keyword">if</span> (fields.context == <span class="hljs-literal">NULL</span>) &#123;</span><br><span class="line">        <span class="hljs-keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    fields.post_event = env-&gt;GetStaticMethodID(clazz, <span class="hljs-string">"postEventFromNative"</span>,</span><br><span class="line">                                               <span class="hljs-string">"(Ljava/lang/Object;IIILjava/lang/Object;)V"</span>);</span><br><span class="line">    <span class="hljs-keyword">if</span> (fields.post_event == <span class="hljs-literal">NULL</span>) &#123;</span><br><span class="line">        <span class="hljs-keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    fields.surface_texture = env-&gt;GetFieldID(clazz, <span class="hljs-string">"mNativeSurfaceTexture"</span>, <span class="hljs-string">"J"</span>);</span><br><span class="line">    <span class="hljs-keyword">if</span> (fields.surface_texture == <span class="hljs-literal">NULL</span>) &#123;</span><br><span class="line">        <span class="hljs-keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    env-&gt;DeleteLocalRef(clazz);</span><br><span class="line">    ...</span><br><span class="line">    <span class="hljs-comment">// 获取网络和DRM相关字段方法</span></span><br><span class="line">    ...</span><br><span class="line">    </span><br><span class="line">    <span class="hljs-comment">// 获取android/media/PlaybackParams相关字段方法</span></span><br><span class="line">    gPlaybackParamsFields.init(env);</span><br><span class="line">    <span class="hljs-comment">// 获取android/media/SyncParams相关字段方法</span></span><br><span class="line">    gSyncParamsFields.init(env);</span><br><span class="line">    <span class="hljs-comment">// 获取android/media/VolumeShaper$Configuration相关字段方法</span></span><br><span class="line">    gVolumeShaperFields.init(env);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/Android多媒体深入之MediaPlayer分析/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-image">
+        <a href="/Android多媒体深入之ALooper分析/" class="image is-7by1">
+        <img class="thumbnail" src="/images/19.jpg" alt="Android多媒体深入之ALooper分析">
+        </a>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-02-04T16:00:00.000Z">2020-02-05</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/">刀枪棍棒（Android）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/五虎断门刀（Android原生）/">五虎断门刀（Android原生）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    19 分钟 读完 (大约 2907 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/Android多媒体深入之ALooper分析/">Android多媒体深入之ALooper分析</a>
+            
+        </h1>
+        <div class="content">
+            <p>在media模块中，会涉及到很多多线程的场景，所以在media模块中，实现了一套与Java层的Looper/Handler一样的机制，相关类有ALooper/AHandler/AMessage。（源码在av/media/libstagefright/foundation中）</p>
+<h4 id="ALooper"><a href="#ALooper" class="headerlink" title="ALooper"></a>ALooper</h4><h5 id="ALooper声明"><a href="#ALooper声明" class="headerlink" title="ALooper声明"></a>ALooper声明</h5><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">ALooper</span> :</span> <span class="hljs-keyword">public</span> RefBase &#123;</span><br><span class="line">    <span class="hljs-keyword">typedef</span> <span class="hljs-keyword">int32_t</span> event_id;</span><br><span class="line">    <span class="hljs-keyword">typedef</span> <span class="hljs-keyword">int32_t</span> handler_id;</span><br><span class="line"></span><br><span class="line">    ALooper();</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// Takes effect in a subsequent call to start().</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">setName</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *name)</span></span>;</span><br><span class="line">    <span class="hljs-comment">// 注册AHandler和当前ALooper的映射关系</span></span><br><span class="line">    <span class="hljs-function">handler_id <span class="hljs-title">registerHandler</span><span class="hljs-params">(<span class="hljs-keyword">const</span> sp&lt;AHandler&gt; &amp;handler)</span></span>;</span><br><span class="line">    <span class="hljs-comment">// 解注册该HandlerID的映射关系</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">unregisterHandler</span><span class="hljs-params">(handler_id handlerID)</span></span>;</span><br><span class="line">    <span class="hljs-comment">// 启动线程，并开始loop轮询</span></span><br><span class="line">    <span class="hljs-keyword">status_t</span> start(</span><br><span class="line">            <span class="hljs-keyword">bool</span> runOnCallingThread = <span class="hljs-literal">false</span>,</span><br><span class="line">            <span class="hljs-keyword">bool</span> canCallJava = <span class="hljs-literal">false</span>,</span><br><span class="line">            <span class="hljs-keyword">int32_t</span> priority = PRIORITY_DEFAULT</span><br><span class="line">            );</span><br><span class="line">    <span class="hljs-comment">// 退出线程</span></span><br><span class="line">    <span class="hljs-keyword">status_t</span> stop();</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">static</span> int64_t <span class="hljs-title">GetNowUs</span><span class="hljs-params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *<span class="hljs-title">getName</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span> </span>&#123;</span><br><span class="line">        <span class="hljs-keyword">return</span> mName.c_str();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">protected</span>:</span><br><span class="line">    <span class="hljs-keyword">virtual</span> ~ALooper();</span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">private</span>:</span><br><span class="line">    <span class="hljs-keyword">friend</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">AMessage</span>;</span>       <span class="hljs-comment">// post()</span></span><br><span class="line"></span><br><span class="line">    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Event</span> &#123;</span></span><br><span class="line">        <span class="hljs-keyword">int64_t</span> mWhenUs;</span><br><span class="line">        sp&lt;AMessage&gt; mMessage;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="hljs-comment">// 锁</span></span><br><span class="line">    Mutex mLock;</span><br><span class="line">    <span class="hljs-comment">// 互斥量</span></span><br><span class="line">    Condition mQueueChangedCondition;</span><br><span class="line">    <span class="hljs-comment">// 线程name</span></span><br><span class="line">    AString mName;</span><br><span class="line">    <span class="hljs-comment">// 事件队列</span></span><br><span class="line">    List&lt;Event&gt; mEventQueue;</span><br><span class="line">    <span class="hljs-comment">// 定义内部类</span></span><br><span class="line">    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">LooperThread</span>;</span></span><br><span class="line">    <span class="hljs-comment">// 作为Loop的线程</span></span><br><span class="line">    sp&lt;LooperThread&gt; mThread;</span><br><span class="line">    <span class="hljs-comment">// 是否在调用线程中直接loop</span></span><br><span class="line">    <span class="hljs-keyword">bool</span> mRunningLocally;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// use a separate lock for reply handling, as it is always on another thread</span></span><br><span class="line">    <span class="hljs-comment">// use a central lock, however, to avoid creating a mutex for each reply</span></span><br><span class="line">    Mutex mRepliesLock;</span><br><span class="line">    Condition mRepliesCondition;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// START --- methods used only by AMessage</span></span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// posts a message on this looper with the given timeout</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">post</span><span class="hljs-params">(<span class="hljs-keyword">const</span> sp&lt;AMessage&gt; &amp;msg, <span class="hljs-keyword">int64_t</span> delayUs)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// creates a reply token to be used with this looper</span></span><br><span class="line">    sp&lt;AReplyToken&gt; createReplyToken();</span><br><span class="line">    <span class="hljs-comment">// waits for a response for the reply token.  If status is OK, the response</span></span><br><span class="line">    <span class="hljs-comment">// is stored into the supplied variable.  Otherwise, it is unchanged.</span></span><br><span class="line">    <span class="hljs-keyword">status_t</span> awaitResponse(<span class="hljs-keyword">const</span> sp&lt;AReplyToken&gt; &amp;replyToken, sp&lt;AMessage&gt; *response);</span><br><span class="line">    <span class="hljs-comment">// posts a reply for a reply token.  If the reply could be successfully posted,</span></span><br><span class="line">    <span class="hljs-comment">// it returns OK. Otherwise, it returns an error value.</span></span><br><span class="line">    <span class="hljs-keyword">status_t</span> postReply(<span class="hljs-keyword">const</span> sp&lt;AReplyToken&gt; &amp;replyToken, <span class="hljs-keyword">const</span> sp&lt;AMessage&gt; &amp;msg);</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// END --- methods used only by AMessage</span></span><br><span class="line">    </span><br><span class="line">    <span class="hljs-comment">// 轮询处理事件</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">bool</span> <span class="hljs-title">loop</span><span class="hljs-params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    DISALLOW_EVIL_CONSTRUCTORS(ALooper);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/Android多媒体深入之ALooper分析/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
     <div class="card-content article ">
         
         <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
@@ -653,7 +781,7 @@ N-->O[attach时替换Activity的上下文]</pre>
                         文章
                     </p>
                     <p class="title has-text-weight-normal">
-                        39
+                        45
                     </p>
                 </div>
             </div>
@@ -705,7 +833,7 @@ N-->O[attach时替换Activity的上下文]</pre>
                 <span class="level-item">内功心法（CS基础）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">9</span>
+                <span class="level-item tag">13</span>
             </span>
         </a><ul><li>
         <a class="level is-marginless" href="/categories/内功心法（CS基础）/北冥神功（编程语言）/">
@@ -713,7 +841,7 @@ N-->O[attach时替换Activity的上下文]</pre>
                 <span class="level-item">北冥神功（编程语言）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">2</span>
+                <span class="level-item tag">4</span>
             </span>
         </a></li><li>
         <a class="level is-marginless" href="/categories/内功心法（CS基础）/神照功（网络协议）/">
@@ -721,7 +849,7 @@ N-->O[attach时替换Activity的上下文]</pre>
                 <span class="level-item">神照功（网络协议）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">7</span>
+                <span class="level-item tag">9</span>
             </span>
         </a></li></ul></li><li>
         <a class="level is-marginless" href="/categories/刀枪棍棒（Android）/">
@@ -729,7 +857,7 @@ N-->O[attach时替换Activity的上下文]</pre>
                 <span class="level-item">刀枪棍棒（Android）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">11</span>
+                <span class="level-item tag">13</span>
             </span>
         </a><ul><li>
         <a class="level is-marginless" href="/categories/刀枪棍棒（Android）/五虎断门刀（Android原生）/">
@@ -737,7 +865,7 @@ N-->O[attach时替换Activity的上下文]</pre>
                 <span class="level-item">五虎断门刀（Android原生）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">7</span>
+                <span class="level-item tag">9</span>
             </span>
         </a></li><li>
         <a class="level is-marginless" href="/categories/刀枪棍棒（Android）/伏魔杖法（Flutter）/">
@@ -790,7 +918,7 @@ N-->O[attach时替换Activity的上下文]</pre>
             
             <a href="/音视频开发之H.264码流结构与编码原理/" class="media-left">
                 <p class="image is-64x64">
-                    <img class="thumbnail" src="/images/19.jpg" alt="音视频开发之H.264码流结构与编码原理">
+                    <img class="thumbnail" src="/images/23.jpg" alt="音视频开发之H.264码流结构与编码原理">
                 </p>
             </a>
             
@@ -915,6 +1043,28 @@ N-->O[attach时替换Activity的上下文]</pre>
                 </li>
                 
                 <li>
+                    <a class="level is-marginless" href="/archives/2020/06/">
+                        <span class="level-start">
+                            <span class="level-item">六月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">2</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/05/">
+                        <span class="level-start">
+                            <span class="level-item">五月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">2</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
                     <a class="level is-marginless" href="/archives/2020/04/">
                         <span class="level-start">
                             <span class="level-item">四月 2020</span>
@@ -942,7 +1092,7 @@ N-->O[attach时替换Activity的上下文]</pre>
                             <span class="level-item">二月 2020</span>
                         </span>
                         <span class="level-end">
-                            <span class="level-item tag">1</span>
+                            <span class="level-item tag">3</span>
                         </span>
                     </a>
                 </li>
@@ -1086,7 +1236,7 @@ N-->O[attach时替换Activity的上下文]</pre>
             
             <a href="/音视频开发之H.264码流结构与编码原理/" class="media-left">
                 <p class="image is-64x64">
-                    <img class="thumbnail" src="/images/19.jpg" alt="音视频开发之H.264码流结构与编码原理">
+                    <img class="thumbnail" src="/images/23.jpg" alt="音视频开发之H.264码流结构与编码原理">
                 </p>
             </a>
             
@@ -1211,6 +1361,28 @@ N-->O[attach时替换Activity的上下文]</pre>
                 </li>
                 
                 <li>
+                    <a class="level is-marginless" href="/archives/2020/06/">
+                        <span class="level-start">
+                            <span class="level-item">六月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">2</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/05/">
+                        <span class="level-start">
+                            <span class="level-item">五月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">2</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
                     <a class="level is-marginless" href="/archives/2020/04/">
                         <span class="level-start">
                             <span class="level-item">四月 2020</span>
@@ -1238,7 +1410,7 @@ N-->O[attach时替换Activity的上下文]</pre>
                             <span class="level-item">二月 2020</span>
                         </span>
                         <span class="level-end">
-                            <span class="level-item tag">1</span>
+                            <span class="level-item tag">3</span>
                         </span>
                     </a>
                 </li>

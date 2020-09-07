@@ -141,6 +141,164 @@
     
 <div class="card">
     
+    <div class="card-image">
+        <a href="/如何使用JNI/" class="image is-7by1">
+        <img class="thumbnail" src="/images/21.jpg" alt="如何使用JNI">
+        </a>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-05-27T16:00:00.000Z">2020-05-28</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/内功心法（CS基础）/">内功心法（CS基础）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/内功心法（CS基础）/北冥神功（编程语言）/">北冥神功（编程语言）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    8 分钟 读完 (大约 1248 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/如何使用JNI/">如何使用JNI</a>
+            
+        </h1>
+        <div class="content">
+            <h3 id="JNI"><a href="#JNI" class="headerlink" title="JNI"></a>JNI</h3><p>JNI是Java与C/C++连接的桥梁，是通过动态库的动态装载机制来实现的。（在前面将静态库和动态库的时候，讲过动态库的动态装载）<br>对于动态装载涉及到两个核心的函数：</p>
+<ul>
+<li>dlopen(): 打开一个动态库，并创建一个引用该动态库的句柄</li>
+<li>dlsym(): 根据动态库的句柄以及函数符号，返回该符号对应函数的地址，从而可以执行该函数</li>
+</ul>
+<p>在Java中一般通过System类的loadLibrary函数来加载一个动态库，该函数底层就是通过调用dlopen函数来实现的。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">System.loadLibrary(libraryName);</span><br></pre></td></tr></table></figure></p>
+<h4 id="JNI函数注册"><a href="#JNI函数注册" class="headerlink" title="JNI函数注册"></a>JNI函数注册</h4><p>注册JNI方法有两种方式，一种是静态注册，一种是动态注册。</p>
+<h5 id="动态注册"><a href="#动态注册" class="headerlink" title="动态注册"></a>动态注册</h5><p>因为JNI允许我们提供一个函数映射表(native函数和jni函数对应表)。而在执行System.loadLibrary加载so库时，会执行该so的JNI_OnLoad函数，利用这个时机可以动态注册JIN方法。具体实现的话是通过JNINativeMethod结构保存映射关系，然后通过RegisterNatives函数来将该映射关系注册。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 定义映射关系</span></span><br><span class="line"><span class="hljs-keyword">static</span> <span class="hljs-keyword">const</span> JNINativeMethod gMethods[] = &#123;</span><br><span class="line">    &#123;<span class="hljs-string">"native_init"</span>, <span class="hljs-string">"()V"</span>,</span><br><span class="line">     (<span class="hljs-keyword">void</span> *)com_zhenyu_martlet_MartletFormatEngine_native_init&#125;,</span><br><span class="line">    &#123;<span class="hljs-string">"native_setup"</span>, <span class="hljs-string">"(Ljava/lang/Object;)V"</span>,</span><br><span class="line">     (<span class="hljs-keyword">void</span> *)com_zhenyu_martlet_MartletFormatEngine_native_setup&#125;,</span><br><span class="line">    &#123;<span class="hljs-string">"native_demuxer"</span>,</span><br><span class="line">     <span class="hljs-string">"(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)J"</span>,</span><br><span class="line">     (<span class="hljs-keyword">void</span> *)com_zhenyu_martlet_MartletFormatEngine_native_demuxer&#125;,</span><br><span class="line">    &#123;<span class="hljs-string">"native_muxer"</span>,</span><br><span class="line">     <span class="hljs-string">"(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)J"</span>,</span><br><span class="line">     (<span class="hljs-keyword">void</span> *)com_zhenyu_martlet_MartletFormatEngine_native_muxer&#125;,</span><br><span class="line">    &#123;<span class="hljs-string">"native_release"</span>, <span class="hljs-string">"()V"</span>,</span><br><span class="line">     (<span class="hljs-keyword">void</span> *)com_zhenyu_martlet_MartletFormatEngine_native_release&#125;,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="hljs-function">jint <span class="hljs-title">register_com_zhenyu_martlet_MartletFormatEngine</span><span class="hljs-params">(JNIEnv *env)</span> </span>&#123;</span><br><span class="line">  jclass clazz;</span><br><span class="line">  <span class="hljs-comment">// 找到native函数所在的类</span></span><br><span class="line">  clazz = env-&gt;FindClass(<span class="hljs-string">"com/zhenyu/martlet/format/MartletFormatEngine"</span>);</span><br><span class="line">  <span class="hljs-keyword">if</span> (clazz == <span class="hljs-literal">NULL</span>) &#123;</span><br><span class="line">    <span class="hljs-keyword">return</span> JNI_FALSE;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-keyword">int</span> numMethods = (<span class="hljs-keyword">sizeof</span>(gMethods) / <span class="hljs-keyword">sizeof</span>((gMethods)[<span class="hljs-number">0</span>]));</span><br><span class="line">  <span class="hljs-comment">// 注册映射关系</span></span><br><span class="line">  <span class="hljs-keyword">if</span> (env-&gt;RegisterNatives(clazz, gMethods, numMethods) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">    env-&gt;DeleteLocalRef(clazz);</span><br><span class="line">    <span class="hljs-keyword">return</span> JNI_FALSE;</span><br><span class="line">  &#125;</span><br><span class="line">  env-&gt;DeleteLocalRef(clazz);</span><br><span class="line">  <span class="hljs-keyword">return</span> JNI_TRUE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="静态注册"><a href="#静态注册" class="headerlink" title="静态注册"></a>静态注册</h5><p>如果没有在JNI_OnLoad中将JNI方法注册(将方法在进程中的地址增加到ClassObject-&gt;directMethods中)，则在调用的时候解析javah风格的函数(比如Java_com_example_hellojni_HelloJni_stringFromJNI)，进行静态注册。静态注册根据函数名来建立java方法和jni函数的对应关系。静态注册需要根据方法名本地搜索，比较耗时。</p>
+<h4 id="JNI线程"><a href="#JNI线程" class="headerlink" title="JNI线程"></a>JNI线程</h4><p>对于JNI来说，有两个比较重要的对象，一个是JavaVM，另一个是JNIEnv。其中JavaVM代表着JVM虚拟机，一个进程只有一个，可以通过JNI_OnLoad函数获取。而JNIEnv封装了JNI提供的所有API，是JNI执行的环境，一个线程只能有一个。</p>
+<p>对于Java层的每一次JNI调用，都会通过JavaVM在当前线程中创建一个JNIEnv，当JNI调用执行完成时，会通过JavaVM销毁当前线程中的JNIEnv。</p>
+<p>所以对于C++中手动创建的线程，默认是无法调用JNI方法的，需要通过JavaVM的AttachCurrentThread函数为当前线程创建一个JNIEnv后，才可以调用。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">jint JNIHelper::attachThreadJNIEnv(JNIEnv **p_env) &#123;</span><br><span class="line">  JavaVM *jvm = g_jvm;</span><br><span class="line">  JNIEnv *env = <span class="hljs-literal">NULL</span>;</span><br><span class="line">  <span class="hljs-comment">// 如果当前线程已经有JNIEnv，则会返回JNI_OK</span></span><br><span class="line">  jint status = jvm-&gt;GetEnv((<span class="hljs-keyword">void</span> **)&amp;env, JNI_VERSION_1_6);</span><br><span class="line">  <span class="hljs-keyword">if</span> (status == JNI_OK) &#123;</span><br><span class="line">    *p_env = env;</span><br><span class="line">    MLOG(<span class="hljs-string">"Already AttachCurrentThread"</span>);</span><br><span class="line">    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line"> </span><br><span class="line">  <span class="hljs-comment">// 为当前线程创建JNIEnv</span></span><br><span class="line">  <span class="hljs-keyword">if</span> (jvm-&gt;AttachCurrentThread(&amp;env, <span class="hljs-literal">NULL</span>) == JNI_OK) &#123;</span><br><span class="line">    MLOG(<span class="hljs-string">"AttachCurrentThread"</span>);</span><br><span class="line">    *p_env = env;</span><br><span class="line">    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当C++线程执行完成的时候，一定要手动的销毁JNIEnv,否则会造成内存泄露。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">void</span> JNIHelper::detachThreadJNIEnv() &#123;</span><br><span class="line">  JavaVM *jvm = g_jvm;</span><br><span class="line">  </span><br><span class="line">  <span class="hljs-keyword">if</span> (jvm-&gt;DetachCurrentThread() == JNI_OK) &#123;</span><br><span class="line">    MLOG(<span class="hljs-string">"DetachCurrentThread"</span>);</span><br><span class="line">    <span class="hljs-keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="JNI引用"><a href="#JNI引用" class="headerlink" title="JNI引用"></a>JNI引用</h4><p>对于JNI来说，引用类型分为Local引用、Global引用、Weak Global引用。（这里的引用都是指JNI类型的变量）</p>
+<h5 id="Local引用"><a href="#Local引用" class="headerlink" title="Local引用"></a>Local引用</h5><p>对于Local引用是无法夸线程使用的，其生命周期在Native方法执行完成后，就会被结束。每次JNI调用的时候，JVM都会分配一块内存给当前线程，用于创建一个Local引用表，在native方法中创建的所有JNI类型变量都会保存在该表中。对于这些变量，当Native方法结束时，JNI会自动释放，也可以手动调用DeleteLocalRef函数来删除。</p>
+<h5 id="Global引用"><a href="#Global引用" class="headerlink" title="Global引用"></a>Global引用</h5><p>当一个JNI类型的对象需要跨线程使用时，就需要将其转换为Global引用，通过NewGlobalRef函数。对于Global引用，GC是不会回收其内存，只能手动调用DeleteGlobalRef函数来释放。</p>
+<h5 id="Weak-Global引用"><a href="#Weak-Global引用" class="headerlink" title="Weak Global引用"></a>Weak Global引用</h5><p>如果一个对象想要进行跨线程使用，但是又想让GC可以回收，那么可以使用Weak Global引用。可以通过NewWeakGlobakRef和DeleteWeakGlobalRef函数来创建和删除。</p>
+<blockquote>
+<p>在使用的时候需要注意一点，由于其GC的时机是不确定的，所以最好先通过NewLocalRef将Weak Global引用转换成Local引用再使用。</p>
+</blockquote>
+
+        </div>
+        
+        
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-image">
+        <a href="/静态库与动态库之间的那些事/" class="image is-7by1">
+        <img class="thumbnail" src="/images/20.jpg" alt="静态库与动态库之间的那些事">
+        </a>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-05-23T16:00:00.000Z">2020-05-24</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/内功心法（CS基础）/">内功心法（CS基础）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/内功心法（CS基础）/北冥神功（编程语言）/">北冥神功（编程语言）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    12 分钟 读完 (大约 1729 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/静态库与动态库之间的那些事/">静态库与动态库之间的那些事</a>
+            
+        </h1>
+        <div class="content">
+            <h3 id="什么是库"><a href="#什么是库" class="headerlink" title="什么是库"></a>什么是库</h3><p>库是一种可执行代码的二进制形式，可以被操作系统载入到内存中执行，库根据链接不同分为静态库和动态库。</p>
+<p>可执行文件生成的过程为:</p>
+<blockquote>
+<p>c -&gt; 预编译 -&gt; 编译器 -&gt; 汇编代码 -&gt; 汇编器 -&gt; 目标代码 -&gt; 链接器 -&gt; 可执行代码</p>
+</blockquote>
+<ul>
+<li>预编译：处理宏定义、删除注释、添加行号</li>
+<li>编译器：词法分析、语法分析、语义分析、代码优化</li>
+<li>汇编器：翻译成二进制</li>
+<li>链接器：合并符号表、符号解析、分配地址、重定位符号表</li>
+</ul>
+<h4 id="链接"><a href="#链接" class="headerlink" title="链接"></a>链接</h4><p>将多个独立的模块（目标文件、静态库、动态库）链接在一起，建立全局符号表，然后再根据全局符号表修正所有的重定向表。重定向表中保留了当前目标文件中那些未知跳转地址的符号。</p>
+<p>在编译a.o目标文件时，如果a库里面引用了其它库的符号，则在a.o的重定位表中该符号是没有对应的地址的，如果强行将a.o链接成可执行文件会出错。 此时就需要链接，假设b.o里面正好有该符号的实现，则将a.o和b.o链接，建立全局符号表，然后修正a.o中的符号对应的地址。</p>
+<h4 id="静态库"><a href="#静态库" class="headerlink" title="静态库"></a>静态库</h4><p>静态库被链接到可执行程序中采用的是静态链接。</p>
+<h5 id="静态链接"><a href="#静态链接" class="headerlink" title="静态链接"></a>静态链接</h5><p>可执行程序在编译的时候，会将所有被链接的静态库中所有使用到的目标文件都拷贝到可执行文件中，并进行链接，重新修正所有的重定向表。</p>
+<h4 id="动态库"><a href="#动态库" class="headerlink" title="动态库"></a>动态库</h4><p>动态库被链接到可执行程序中采用的是动态链接。</p>
+<h5 id="动态链接"><a href="#动态链接" class="headerlink" title="动态链接"></a>动态链接</h5><p>动态链接在编译的时候并不会将链接对象的内容拷贝到当前库中，仅仅在其中加入了所调用函数的描述信息用来重定位。直到链接对象被装载到内存中时，才会发生真正的链接，此时才会修正所有的重定向表，将目标文件中的未知符号地址修正。</p>
+<h5 id="静态装载"><a href="#静态装载" class="headerlink" title="静态装载"></a>静态装载</h5><p>静态加载的方式通过在编译的时候加上 -l 来指定当前库所依赖的动态库，当可执行程序启动的时候，会自动将-l 依赖的动态库全部加载到内存中，此时加载进来的动态库会进行链接操作。</p>
+<h5 id="动态装载"><a href="#动态装载" class="headerlink" title="动态装载"></a>动态装载</h5><p>想要动态加载的动态库，在编译时需要加上 -shared -fPIC来生成与位置无关的代码，生成的代码中使用的都是相对地址。加载使用dlopen函数以指定模式打开指定的动态库，通过dlopen来调用能够确保多个进程调用时内存中只存在一份。</p>
+<p>动态加载就是在程序执行的时候，需要用到动态库的函数时，再加载该动态库。</p>
+<p><strong>JNI就是通过动态加载来实现的</strong></p>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/静态库与动态库之间的那些事/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
     <div class="card-content article ">
         
         <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
@@ -294,7 +452,7 @@
                         文章
                     </p>
                     <p class="title has-text-weight-normal">
-                        39
+                        45
                     </p>
                 </div>
             </div>
@@ -346,7 +504,7 @@
                 <span class="level-item">内功心法（CS基础）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">9</span>
+                <span class="level-item tag">13</span>
             </span>
         </a><ul><li>
         <a class="level is-marginless" href="/categories/内功心法（CS基础）/北冥神功（编程语言）/">
@@ -354,7 +512,7 @@
                 <span class="level-item">北冥神功（编程语言）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">2</span>
+                <span class="level-item tag">4</span>
             </span>
         </a></li><li>
         <a class="level is-marginless" href="/categories/内功心法（CS基础）/神照功（网络协议）/">
@@ -362,7 +520,7 @@
                 <span class="level-item">神照功（网络协议）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">7</span>
+                <span class="level-item tag">9</span>
             </span>
         </a></li></ul></li><li>
         <a class="level is-marginless" href="/categories/刀枪棍棒（Android）/">
@@ -370,7 +528,7 @@
                 <span class="level-item">刀枪棍棒（Android）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">11</span>
+                <span class="level-item tag">13</span>
             </span>
         </a><ul><li>
         <a class="level is-marginless" href="/categories/刀枪棍棒（Android）/五虎断门刀（Android原生）/">
@@ -378,7 +536,7 @@
                 <span class="level-item">五虎断门刀（Android原生）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">7</span>
+                <span class="level-item tag">9</span>
             </span>
         </a></li><li>
         <a class="level is-marginless" href="/categories/刀枪棍棒（Android）/伏魔杖法（Flutter）/">
@@ -431,7 +589,7 @@
             
             <a href="/音视频开发之H.264码流结构与编码原理/" class="media-left">
                 <p class="image is-64x64">
-                    <img class="thumbnail" src="/images/19.jpg" alt="音视频开发之H.264码流结构与编码原理">
+                    <img class="thumbnail" src="/images/23.jpg" alt="音视频开发之H.264码流结构与编码原理">
                 </p>
             </a>
             
@@ -556,6 +714,28 @@
                 </li>
                 
                 <li>
+                    <a class="level is-marginless" href="/archives/2020/06/">
+                        <span class="level-start">
+                            <span class="level-item">六月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">2</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/05/">
+                        <span class="level-start">
+                            <span class="level-item">五月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">2</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
                     <a class="level is-marginless" href="/archives/2020/04/">
                         <span class="level-start">
                             <span class="level-item">四月 2020</span>
@@ -583,7 +763,7 @@
                             <span class="level-item">二月 2020</span>
                         </span>
                         <span class="level-end">
-                            <span class="level-item tag">1</span>
+                            <span class="level-item tag">3</span>
                         </span>
                     </a>
                 </li>
@@ -727,7 +907,7 @@
             
             <a href="/音视频开发之H.264码流结构与编码原理/" class="media-left">
                 <p class="image is-64x64">
-                    <img class="thumbnail" src="/images/19.jpg" alt="音视频开发之H.264码流结构与编码原理">
+                    <img class="thumbnail" src="/images/23.jpg" alt="音视频开发之H.264码流结构与编码原理">
                 </p>
             </a>
             
@@ -852,6 +1032,28 @@
                 </li>
                 
                 <li>
+                    <a class="level is-marginless" href="/archives/2020/06/">
+                        <span class="level-start">
+                            <span class="level-item">六月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">2</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/05/">
+                        <span class="level-start">
+                            <span class="level-item">五月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">2</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
                     <a class="level is-marginless" href="/archives/2020/04/">
                         <span class="level-start">
                             <span class="level-item">四月 2020</span>
@@ -879,7 +1081,7 @@
                             <span class="level-item">二月 2020</span>
                         </span>
                         <span class="level-end">
-                            <span class="level-item tag">1</span>
+                            <span class="level-item tag">3</span>
                         </span>
                     </a>
                 </li>

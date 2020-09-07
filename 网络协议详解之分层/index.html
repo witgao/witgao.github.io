@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html  lang="zh">
+
+<head>
+    <meta charset="utf-8" />
+
+<meta name="generator" content="Hexo 3.9.0" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<title>网络协议详解之分层 - 富贵山庄</title>
+
+
+    <meta name="description" content="一条HTTP请求的旅途当我们在浏览器中输入一个网址访问它，请求是如何从我们主机的浏览器发送到对应服务器上的应用程序上呢？ 主要分为下面三个步骤：  客户端主机中，将一个HTTP网络请求从本机的应用上经过一层层的包装，通过网卡将数据发送出去。 路由器中，将数据报经过一个个路由跳转，到达目标服务器主机的网卡。 服务端主机中，将数据报进行一层层的解析，到达了目标服务器的HTTP服务上处理。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="网络协议详解之分层">
+<meta property="og:url" content="https://witgao.com/网络协议详解之分层/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:description" content="一条HTTP请求的旅途当我们在浏览器中输入一个网址访问它，请求是如何从我们主机的浏览器发送到对应服务器上的应用程序上呢？ 主要分为下面三个步骤：  客户端主机中，将一个HTTP网络请求从本机的应用上经过一层层的包装，通过网卡将数据发送出去。 路由器中，将数据报经过一个个路由跳转，到达目标服务器主机的网卡。 服务端主机中，将数据报进行一层层的解析，到达了目标服务器的HTTP服务上处理。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://witgao.com/images/25.jpg">
+<meta property="og:updated_time" content="2020-09-07T14:33:58.108Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="网络协议详解之分层">
+<meta name="twitter:description" content="一条HTTP请求的旅途当我们在浏览器中输入一个网址访问它，请求是如何从我们主机的浏览器发送到对应服务器上的应用程序上呢？ 主要分为下面三个步骤：  客户端主机中，将一个HTTP网络请求从本机的应用上经过一层层的包装，通过网卡将数据发送出去。 路由器中，将数据报经过一个个路由跳转，到达目标服务器主机的网卡。 服务端主机中，将数据报进行一层层的解析，到达了目标服务器的HTTP服务上处理。">
+<meta name="twitter:image" content="https://witgao.com/images/25.jpg">
+
+
+
+
+
+
+
+<link rel="icon" href="/images/favicon1.svg">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/default.css">
+
+
+    
+    
+<style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+    
+    
+    
+    
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+    
+    
+    
+    
+    
+    
+    
+    <link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+    
+    
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body class="is-3-column">
+    <nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="/images/logo2.png" alt="网络协议详解之分层" height="28">
+            
+            </a>
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item"
+                href="/">燕子坞</a>
+                
+                <a class="navbar-item"
+                href="/archives">听香水榭</a>
+                
+                <a class="navbar-item"
+                href="/categories">还施水阁</a>
+                
+                <a class="navbar-item"
+                href="/about">思过崖</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    <a class="navbar-item" target="_blank" title="Download on GitHub" href="https://github.com/witgao/blog">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                <a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;">
+                    <i class="fas fa-list-ul"></i>
+                </a>
+                
+                
+                <a class="navbar-item search" title="搜索" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-9-widescreen has-order-2 column-main">
+<div class="card">
+    
+    <div class="card-image">
+        <span  class="image is-7by1">
+        <img class="thumbnail" src="/images/25.jpg" alt="网络协议详解之分层">
+        </span>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-06-11T16:00:00.000Z">2020-06-12</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/内功心法（CS基础）/">内功心法（CS基础）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/内功心法（CS基础）/神照功（网络协议）/">神照功（网络协议）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    13 分钟 读完 (大约 1970 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            网络协议详解之分层
+            
+        </h1>
+        <div class="content">
+            <h3 id="一条HTTP请求的旅途"><a href="#一条HTTP请求的旅途" class="headerlink" title="一条HTTP请求的旅途"></a>一条HTTP请求的旅途</h3><p>当我们在浏览器中输入一个网址访问它，请求是如何从我们主机的浏览器发送到对应服务器上的应用程序上呢？</p>
+<p>主要分为下面三个步骤：</p>
+<ol>
+<li>客户端主机中，将一个HTTP网络请求从本机的应用上经过一层层的包装，通过网卡将数据发送出去。</li>
+<li>路由器中，将数据报经过一个个路由跳转，到达目标服务器主机的网卡。</li>
+<li>服务端主机中，将数据报进行一层层的解析，到达了目标服务器的HTTP服务上处理。</li>
+</ol>
+<p><img src="/images/网络协议详解之分层.resources/网络请求流程.png" alt="4109cccf9f5eb9a279c2caa5ef7cb015"></p>
+<a id="more"></a>
+<h4 id="客户端主机"><a href="#客户端主机" class="headerlink" title="客户端主机"></a>客户端主机</h4><p>在客户端主机中，一个HTTP请求将从应用层发送到传输层，再由传输层发送到网络层，最终由链路层发送出去。</p>
+<h5 id="应用层"><a href="#应用层" class="headerlink" title="应用层"></a>应用层</h5><p>客户端主机的应用层主要是将上层用户的需求，根据特定的协议进行数据格式的封装，再通过Socket编程将协议数据发送到传输层进行传输。应用层一般使用的协议有DNS、HTTP、HTTPS等。</p>
+<p><strong>数据格式 = HTTP请求头 + HTTP请求体</strong></p>
+<h6 id="DNS协议"><a href="#DNS协议" class="headerlink" title="DNS协议"></a>DNS协议</h6><p>比如说，我们在浏览器上输入<a href="http://www.witgao.com这个网址，首先游览器需要对witgao.com这个域名进行DNS解析，获取到解析后的IP地址。" target="_blank" rel="noopener">www.witgao.com这个网址，首先游览器需要对witgao.com这个域名进行DNS解析，获取到解析后的IP地址。</a></p>
+<h6 id="HTTP协议"><a href="#HTTP协议" class="headerlink" title="HTTP协议"></a>HTTP协议</h6><p>将请求打包成HTTP格式，封装HTTP请求头和HTTP请求体。</p>
+<p>HTTP请求头中参数如下：<br><figure class="highlight hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">GET / HTTP/1.1\r\n</span><br><span class="line">Host: witgao.com\r\n</span><br><span class="line">Connection: keep-alive\r\n</span><br><span class="line">Upgrade-Insecure-Requests: 1\r\n</span><br><span class="line">User-Agent: </span><br><span class="line">Accept:</span><br><span class="line">Accept-Encoding: gzip, deflate\r\n</span><br><span class="line">Accept-Language: zh-CN,zh;q=0.9\r\n</span><br></pre></td></tr></table></figure></p>
+<h5 id="传输层"><a href="#传输层" class="headerlink" title="传输层"></a>传输层</h5><p>传输层在整个过程中提供了端到端的服务，将某台主机某个端口的数据传输到另一台主机的某个端口上。</p>
+<p>HTTP是基于TCP/IP的协议，所以在传输层中使用的是TCP协议。</p>
+<p><strong>数据格式 = TCP请求头 + HTTP请求头 + HTTP请求体</strong></p>
+<h6 id="TCP协议"><a href="#TCP协议" class="headerlink" title="TCP协议"></a>TCP协议</h6><p>TCP模块在应用层的数据报的前面加上TCP头，TCP头上包含了发送端应用的端口号和目标服务器的应用端口号。</p>
+<p>TCP请求头参数如下：<br><figure class="highlight hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">Source Port: 54503</span><br><span class="line">Destination Port: 80</span><br><span class="line">[Stream index: <span class="hljs-number">22</span>]</span><br><span class="line">[TCP Segment Len: <span class="hljs-number">0</span>]</span><br><span class="line">Sequence number: 0    (relative sequence number)</span><br><span class="line">Sequence number (raw): 3600493510</span><br><span class="line">[Next sequence number: <span class="hljs-number">1</span>    (relative sequence number)]</span><br><span class="line">Window size value: 65535</span><br><span class="line">[Calculated window size: <span class="hljs-number">65535</span>]</span><br><span class="line">Checksum: 0xe062 [unverified]</span><br><span class="line">[Checksum Status: Unverified]</span><br><span class="line">Urgent pointer: 0</span><br></pre></td></tr></table></figure></p>
+<h5 id="网络层"><a href="#网络层" class="headerlink" title="网络层"></a>网络层</h5><p>传输层在整个过程中提供了点到点的服务，将当前以太网的主机数据发送到当前以太网或者其它以太网的主机上。</p>
+<p><strong>数据格式 = IP请求头 + TCP请求头 + HTTP请求头 + HTTP请求体</strong></p>
+<h6 id="IP协议"><a href="#IP协议" class="headerlink" title="IP协议"></a>IP协议</h6><p>IP模块在传输层的数据报的前面加上IP头，IP头上包含了发送主机的IP和目标服务器的IP，以及传输层使用的协议。</p>
+<p>IP请求头参数如下：<br><figure class="highlight hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Total Length: 64</span><br><span class="line">Identification: 0x0000 (0)</span><br><span class="line">Flags: 0x4000, Don't fragment</span><br><span class="line">Fragment offset: 0</span><br><span class="line">Time to live: 64</span><br><span class="line">Protocol: TCP (6)</span><br><span class="line">Header checksum: 0x44fb [validation disabled]</span><br><span class="line">[Header checksum status: Unverified]</span><br><span class="line">Source: 172.18.34.74</span><br><span class="line">Destination: 185.199.109.153</span><br></pre></td></tr></table></figure></p>
+<h5 id="链路层"><a href="#链路层" class="headerlink" title="链路层"></a>链路层</h5><p>链路层在整个过程中负责真正的物理传输，将以太网内的某个网卡数据发送给另一个网卡。</p>
+<p><strong>数据格式 = MAC请求头 + IP请求头 + TCP请求头 + HTTP请求头 + HTTP请求体</strong></p>
+<p>物理层的数据传输是基于MAC地址来传输的，所以在链路层优先需要通过ARP获取到目标的MAC地址（目标主机网卡的MAC或者下一跳路由的MAC）。</p>
+<p>如果服务器主机和客户端主机在同一个网段，则通过ARP获取服务器主机的MAC地址，如果不在同一个网段，则会将数据发送给当前以太网的网关，发送主机通过ARP协议获取当前网关的MAC地址。</p>
+<p>MAC请求头参数如下：<br><figure class="highlight hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Destination: HuaweiTe_08:2d:be (cc:bb:fe:08:2d:be)</span><br><span class="line">Source: Apple_97:62:a3 (3c:22:fb:97:62:a3)</span><br><span class="line">Type: IPv4 (0x0800)</span><br></pre></td></tr></table></figure></p>
+<h5 id="ARP协议"><a href="#ARP协议" class="headerlink" title="ARP协议"></a>ARP协议</h5><p>ARP协议为IP地址到MAC地址提供映射。ARP协议通过发送一个广播到局域网中，通过目标主机的IP地址，去换取目标主机的MAC地址。因为同一个局域网内交换机需要通过MAC地址来进行数据的转发。（二层交换机只支持MAC地址转发，三层交换机才支持IP地址转发）。</p>
+<h4 id="网关"><a href="#网关" class="headerlink" title="网关"></a>网关</h4><p>网关一般就是路由器，负责将发送给自己的数据报进行转发。在转发网关中主要是解析MAC请求头和重新封装下一跳的MAC请求头，不改变数据报中发送端的IP地址。但是如果是NAT网关，则会改变IP地址（改变的IP地址是源IP而不是目标IP），因为内网的IP想要到公网上需要使用公网的IP。</p>
+<h5 id="链路层-1"><a href="#链路层-1" class="headerlink" title="链路层"></a>链路层</h5><p>当网关的链路层收到数据报后，首先会解析数据报的MAC请求头，如果发现数据报的MAC地址就是自己，则表明数据是发送给自己的，会去掉MAC请求头，将剩余的数据报发送到网络层进行处理。</p>
+<p><strong>数据格式 = MAC请求头 + IP请求头 + TCP请求头 + HTTP请求头 + HTTP请求体</strong></p>
+<h5 id="网路层"><a href="#网路层" class="headerlink" title="网路层"></a>网路层</h5><p>IP模块解析数据报的IP请求头，发现目标IP并不是自己，则会将数据进行转发。</p>
+<p>在路由器的IP模块中会维护一个路由表，首先会在路由表中查找目标IP的下一跳，如果找不到，则会将数据转发给默认的路由。</p>
+<p>转发时会对数据报重新封装MAC请求头，目标MAC地址为下一跳的路由MAC地址。</p>
+<p><strong>数据格式 = IP请求头 + TCP请求头 + HTTP请求头 + HTTP请求体</strong></p>
+<h5 id="链路层-2"><a href="#链路层-2" class="headerlink" title="链路层"></a>链路层</h5><p>将重新封装的数据报进行转发</p>
+<p><strong>数据格式 = MAC请求头 + IP请求头 + TCP请求头 + HTTP请求头 + HTTP请求体</strong></p>
+<h4 id="服务端主机"><a href="#服务端主机" class="headerlink" title="服务端主机"></a>服务端主机</h4><p>服务端主机中对网卡收到的数据进行一层层的剥离，将数据从链路层传送到网络层，再一层层传递到传输层，最后到应用层。</p>
+<h5 id="链路层-3"><a href="#链路层-3" class="headerlink" title="链路层"></a>链路层</h5><p>首先解析数据报的MAC请求头，发现数据是发送给自己的，去掉MAC请求头，将剩余的数据报发送到对应网络层中对应的协议模块处理，比如这里就是IP模块处理。</p>
+<p><strong>数据格式 = MAC请求头 + IP请求头 + TCP请求头 + HTTP请求头 + HTTP请求体</strong></p>
+<h5 id="网络层-1"><a href="#网络层-1" class="headerlink" title="网络层"></a>网络层</h5><p>解析IP请求头，发现数据是发送给自己的，去掉IP请求头，将剩余的数据报发送给传输层中对应的协议模块处理，比如这里就是TCP模块处理。</p>
+<p><strong>数据格式 = IP请求头 + TCP请求头 + HTTP请求头 + HTTP请求体</strong></p>
+<h5 id="传输层-1"><a href="#传输层-1" class="headerlink" title="传输层"></a>传输层</h5><p>解析TCP请求头，发现数据是发送给自己的，去掉TCP请求头，将剩余的数据报发送给应用层中对应的端口程序来处理，如果这里就是HTTP服务器。</p>
+<p><strong>数据格式 = TCP请求头 + HTTP请求头 + HTTP请求体</strong></p>
+<h5 id="应用层-1"><a href="#应用层-1" class="headerlink" title="应用层"></a>应用层</h5><p>正在监听指定端口的服务器，比如Nginx服务器。</p>
+<p><strong>数据格式 = HTTP请求头 + HTTP请求体</strong></p>
+
+        </div>
+        
+        <ul class="post-copyright">
+            <li><strong>本文标题：</strong><a href="https://witgao.com/网络协议详解之分层/">网络协议详解之分层</a></li>
+            <li><strong>本文作者：</strong><a href="https://witgao.com">zhenyu</a></li>
+            <li><strong>本文链接：</strong><a href="https://witgao.com/网络协议详解之分层/">https://witgao.com/网络协议详解之分层/</a></li>
+            <li><strong>发布时间：</strong>2020-06-12</li>
+            <li><strong>版权声明：</strong>本博客所有文章除特别声明外，均采用 <a
+                    href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="external nofollow"
+                    target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明出处！
+            </li>
+        </ul>
+        
+        
+        
+        
+    </div>
+</div>
+
+
+
+
+
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        <div class="level-start">
+            <a class="level level-item has-link-grey  article-nav-prev"
+                href="/网络协议详解之TCP/">
+                <i class="level-item fas fa-chevron-left"></i>
+                <span class="level-item">网络协议详解之TCP</span>
+            </a>
+        </div>
+        
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next"
+                href="/如何使用JNI/">
+                <span class="level-item">如何使用JNI</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+    </div>
+</div>
+
+
+</div>
+                
+
+
+
+
+<div
+    class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left ">
+    
+    
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered" style="flex-shrink: 1">
+                <div>
+                    
+                    <figure class="image is-128x128 has-mb-6">
+                        <img class="" src="/images/avatar1.png" alt="zhenyu">
+                    </figure>
+                    
+                    <p class="is-size-4 is-block">
+                        zhenyu
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        富贵山庄无富贵，只留欢乐在此间
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>杭州</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        文章
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        45
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        分类
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        9
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        标签
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        0
+                    </p>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="level">
+            <a class="level-item button is-link is-rounded" href="https://github.com/witgao" target="_blank">
+                关注我</a>
+        </div>
+        
+        
+        
+    </div>
+</div>
+    
+    
+<div class="card widget column-left is-sticky" id="toc">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                目录
+            </h3>
+            <ul class="menu-list"><li>
+        <a class="is-flex" href="#一条HTTP请求的旅途">
+        <span class="has-mr-6">1</span>
+        <span>一条HTTP请求的旅途</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#客户端主机">
+        <span class="has-mr-6">1.1</span>
+        <span>客户端主机</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#应用层">
+        <span class="has-mr-6">1.1.1</span>
+        <span>应用层</span>
+        </a></li><li>
+        <a class="is-flex" href="#传输层">
+        <span class="has-mr-6">1.1.2</span>
+        <span>传输层</span>
+        </a></li><li>
+        <a class="is-flex" href="#网络层">
+        <span class="has-mr-6">1.1.3</span>
+        <span>网络层</span>
+        </a></li><li>
+        <a class="is-flex" href="#链路层">
+        <span class="has-mr-6">1.1.4</span>
+        <span>链路层</span>
+        </a></li><li>
+        <a class="is-flex" href="#ARP协议">
+        <span class="has-mr-6">1.1.5</span>
+        <span>ARP协议</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#网关">
+        <span class="has-mr-6">1.2</span>
+        <span>网关</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#链路层-1">
+        <span class="has-mr-6">1.2.1</span>
+        <span>链路层</span>
+        </a></li><li>
+        <a class="is-flex" href="#网路层">
+        <span class="has-mr-6">1.2.2</span>
+        <span>网路层</span>
+        </a></li><li>
+        <a class="is-flex" href="#链路层-2">
+        <span class="has-mr-6">1.2.3</span>
+        <span>链路层</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#服务端主机">
+        <span class="has-mr-6">1.3</span>
+        <span>服务端主机</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#链路层-3">
+        <span class="has-mr-6">1.3.1</span>
+        <span>链路层</span>
+        </a></li><li>
+        <a class="is-flex" href="#网络层-1">
+        <span class="has-mr-6">1.3.2</span>
+        <span>网络层</span>
+        </a></li><li>
+        <a class="is-flex" href="#传输层-1">
+        <span class="has-mr-6">1.3.3</span>
+        <span>传输层</span>
+        </a></li><li>
+        <a class="is-flex" href="#应用层-1">
+        <span class="has-mr-6">1.3.4</span>
+        <span>应用层</span>
+        </a></li></ul></li></ul></li></ul>
+        </div>
+    </div>
+</div>
+    
+    
+    <div class="column-right-shadow is-hidden-widescreen ">
+        
+    </div>
+    
+</div>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <!-- <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="/images/logo2.png" alt="网络协议详解之分层" height="28">
+                
+                </a> -->
+                <p class="is-size-7">
+                    &copy; 2020 zhenyu&nbsp;
+                    Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a
+                        href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank">Icarus</a>
+                    
+                </p>
+            </div>
+            <div class="level-end">
+                
+            </div>
+        </div>
+    </div>
+</footer>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("zh-CN");</script>
+
+<script>
+var IcarusThemeSettings = {
+    article: {
+        highlight: {
+            clipboard: true,
+            fold: 'unfolded'
+        }
+    }
+};
+</script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+
+
+
+    
+    
+<script src="/js/animation.js"></script>
+
+    
+    
+<script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+<script src="/js/gallery.js" defer></script>
+
+    
+    
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    MathJax.Hub.Config({
+        'HTML-CSS': {
+            matchFontHeight: false
+        },
+        SVG: {
+            matchFontHeight: false
+        },
+        CommonHTML: {
+            matchFontHeight: false
+        },
+        tex2jax: {
+            inlineMath: [
+                ['$','$'],
+                ['\\(','\\)']
+            ]
+        }
+    });
+});
+</script>
+    
+    
+<a id="back-to-top" title="回到顶端" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="想要查找什么..." />
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: '文章',
+                PAGES: '页面',
+                CATEGORIES: '分类',
+                TAGS: '标签',
+                UNTITLED: '(无标题)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+</body>
+
+</html>

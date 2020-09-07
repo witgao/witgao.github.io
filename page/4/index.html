@@ -129,6 +129,384 @@
 <div class="card">
     
     <div class="card-image">
+        <a href="/Android多媒体深入之MediaPlayer分析/" class="image is-7by1">
+        <img class="thumbnail" src="/images/24.jpg" alt="Android多媒体深入之MediaPlayer分析">
+        </a>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-02-14T16:00:00.000Z">2020-02-15</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/">刀枪棍棒（Android）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/五虎断门刀（Android原生）/">五虎断门刀（Android原生）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    20 分钟 读完 (大约 2934 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/Android多媒体深入之MediaPlayer分析/">Android多媒体深入之MediaPlayer分析</a>
+            
+        </h1>
+        <div class="content">
+            <h3 id="引入MediaPlayer"><a href="#引入MediaPlayer" class="headerlink" title="引入MediaPlayer"></a>引入MediaPlayer</h3><h4 id="加载SO"><a href="#加载SO" class="headerlink" title="加载SO"></a>加载SO</h4><p>当MediaPlayer类被加载时，触发静态代码块，开始加载SO。</p>
+<p>media_jni动态库的代码在frameworks/base/media/jni/目录下，里面包含了整个Media模块的jni代码。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">static</span> &#123;</span><br><span class="line">    <span class="hljs-comment">// 加载动态库</span></span><br><span class="line">    System.loadLibrary(<span class="hljs-string">"media_jni"</span>);</span><br><span class="line">    <span class="hljs-comment">// 注册MediaPlayer的JNI函数</span></span><br><span class="line">    native_init();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="native-init"><a href="#native-init" class="headerlink" title="native_init"></a>native_init</h4><p>通过JNI获取Java层相关类的字段和方法句柄。</p>
+<p>mNativeContext用来存储Native层Player地址，postEventFromNative用来给Native层进行事件回调，mNativeSurfaceTexture就是Surface中的BufferQueue的生产者句柄，是Surfaceflinger是该Surface的BufferQueue的消费者，使用该句柄可以给Surface的BufferQueue中传递数据。<br><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span></span><br><span class="line">android_media_MediaPlayer_native_init(JNIEnv *env)</span><br><span class="line">&#123;</span><br><span class="line">    jclass clazz;</span><br><span class="line"></span><br><span class="line">    clazz = env-&gt;FindClass(<span class="hljs-string">"android/media/MediaPlayer"</span>);</span><br><span class="line">    <span class="hljs-keyword">if</span> (clazz == <span class="hljs-literal">NULL</span>) &#123;</span><br><span class="line">        <span class="hljs-keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    fields.context = env-&gt;GetFieldID(clazz, <span class="hljs-string">"mNativeContext"</span>, <span class="hljs-string">"J"</span>);</span><br><span class="line">    <span class="hljs-keyword">if</span> (fields.context == <span class="hljs-literal">NULL</span>) &#123;</span><br><span class="line">        <span class="hljs-keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    fields.post_event = env-&gt;GetStaticMethodID(clazz, <span class="hljs-string">"postEventFromNative"</span>,</span><br><span class="line">                                               <span class="hljs-string">"(Ljava/lang/Object;IIILjava/lang/Object;)V"</span>);</span><br><span class="line">    <span class="hljs-keyword">if</span> (fields.post_event == <span class="hljs-literal">NULL</span>) &#123;</span><br><span class="line">        <span class="hljs-keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    fields.surface_texture = env-&gt;GetFieldID(clazz, <span class="hljs-string">"mNativeSurfaceTexture"</span>, <span class="hljs-string">"J"</span>);</span><br><span class="line">    <span class="hljs-keyword">if</span> (fields.surface_texture == <span class="hljs-literal">NULL</span>) &#123;</span><br><span class="line">        <span class="hljs-keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    env-&gt;DeleteLocalRef(clazz);</span><br><span class="line">    ...</span><br><span class="line">    <span class="hljs-comment">// 获取网络和DRM相关字段方法</span></span><br><span class="line">    ...</span><br><span class="line">    </span><br><span class="line">    <span class="hljs-comment">// 获取android/media/PlaybackParams相关字段方法</span></span><br><span class="line">    gPlaybackParamsFields.init(env);</span><br><span class="line">    <span class="hljs-comment">// 获取android/media/SyncParams相关字段方法</span></span><br><span class="line">    gSyncParamsFields.init(env);</span><br><span class="line">    <span class="hljs-comment">// 获取android/media/VolumeShaper$Configuration相关字段方法</span></span><br><span class="line">    gVolumeShaperFields.init(env);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/Android多媒体深入之MediaPlayer分析/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-image">
+        <a href="/FFmpeg深入之ffmpeg-parse-options/" class="image is-7by1">
+        <img class="thumbnail" src="/images/3.jpeg" alt="FFmpeg深入之ffmpeg_parse_options">
+        </a>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-02-11T06:38:17.000Z">2020-02-11</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    26 分钟 读完 (大约 3840 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/FFmpeg深入之ffmpeg-parse-options/">FFmpeg深入之ffmpeg_parse_options</a>
+            
+        </h1>
+        <div class="content">
+            <h3 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h3><figure class="highlight shell hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ffmpeg [global_options] &#123;[input_file_options] -i input_url&#125; ... &#123;[output_file_options] output_url&#125; ...</span><br></pre></td></tr></table></figure>
+<p>根据FFmpeg官方文档定义，FFmpeg命令由 全局参数+{输入参数+输入源}+{输出参数+输出流} 组成。其中全局参数可放在任何地方，输入参数必须放在输入源之前。</p>
+<p>例：</p>
+<figure class="highlight shell hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ffmpeg -i video.mp4 -i 1.png -i 1.mp3 -filter_complex "[0:v]scale=750:1334,pad=750:1334:0:0:black[source];[source][1:v]overlay=x=0:y=0[result]" -map "[result]" -map 2:a -s 540x960 -t 7 -shortest -movflags faststart -y output.mp4</span><br></pre></td></tr></table></figure>
+<p>那么当FFmpeg接收到上面这样一串字符命令时，是如何解析和处理的？</p>
+<figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-keyword">int</span> argc, <span class="hljs-keyword">char</span> **argv)</span></span></span><br><span class="line"><span class="hljs-function"></span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="hljs-comment">/* parse options and open all input/output files */</span></span><br><span class="line">    ret = ffmpeg_parse_options(argc, argv);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在FFmpeg的main方法中可以看到，所有的解析逻辑都在ffmpeg_parse_options函数中，下面我们来一起分析下该函数</p>
+<figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">ffmpeg_parse_options</span><span class="hljs-params">(<span class="hljs-keyword">int</span> argc, <span class="hljs-keyword">char</span> **argv)</span></span></span><br><span class="line"><span class="hljs-function"></span>&#123;</span><br><span class="line">    OptionParseContext octx;</span><br><span class="line">    <span class="hljs-keyword">uint8_t</span> error[<span class="hljs-number">128</span>];</span><br><span class="line">    <span class="hljs-keyword">int</span> ret;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-built_in">memset</span>(&amp;octx, <span class="hljs-number">0</span>, <span class="hljs-keyword">sizeof</span>(octx));</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">/* 解析输入的字符命令 */</span></span><br><span class="line">    ret = split_commandline(&amp;octx, argc, argv, options, groups,</span><br><span class="line">                            FF_ARRAY_ELEMS(groups));</span><br><span class="line">    <span class="hljs-keyword">if</span> (ret &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        av_log(<span class="hljs-literal">NULL</span>, AV_LOG_FATAL, <span class="hljs-string">"Error splitting the argument list: "</span>);</span><br><span class="line">        <span class="hljs-keyword">goto</span> fail;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">/* 应用全局参数 */</span></span><br><span class="line">    ret = parse_optgroup(<span class="hljs-literal">NULL</span>, &amp;octx.global_opts);</span><br><span class="line">    <span class="hljs-keyword">if</span> (ret &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        av_log(<span class="hljs-literal">NULL</span>, AV_LOG_FATAL, <span class="hljs-string">"Error parsing global options: "</span>);</span><br><span class="line">        <span class="hljs-keyword">goto</span> fail;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">/* configure terminal and setup signal handlers */</span></span><br><span class="line">    term_init();</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">/* 打开输入文件流 */</span></span><br><span class="line">    ret = open_files(&amp;octx.groups[GROUP_INFILE], <span class="hljs-string">"input"</span>, open_input_file);</span><br><span class="line">    <span class="hljs-keyword">if</span> (ret &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        av_log(<span class="hljs-literal">NULL</span>, AV_LOG_FATAL, <span class="hljs-string">"Error opening input files: "</span>);</span><br><span class="line">        <span class="hljs-keyword">goto</span> fail;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">/* 初始化滤镜图 */</span></span><br><span class="line">    ret = init_complex_filters();</span><br><span class="line">    <span class="hljs-keyword">if</span> (ret &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        av_log(<span class="hljs-literal">NULL</span>, AV_LOG_FATAL, <span class="hljs-string">"Error initializing complex filters.\n"</span>);</span><br><span class="line">        <span class="hljs-keyword">goto</span> fail;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">/* 打开输出文件流 */</span></span><br><span class="line">    ret = open_files(&amp;octx.groups[GROUP_OUTFILE], <span class="hljs-string">"output"</span>, open_output_file);</span><br><span class="line">    <span class="hljs-keyword">if</span> (ret &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        av_log(<span class="hljs-literal">NULL</span>, AV_LOG_FATAL, <span class="hljs-string">"Error opening output files: "</span>);</span><br><span class="line">        <span class="hljs-keyword">goto</span> fail;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    check_filter_outputs();</span><br><span class="line"></span><br><span class="line">fail:</span><br><span class="line">    uninit_parse_context(&amp;octx);</span><br><span class="line">    <span class="hljs-keyword">if</span> (ret &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        av_strerror(ret, error, <span class="hljs-keyword">sizeof</span>(error));</span><br><span class="line">        av_log(<span class="hljs-literal">NULL</span>, AV_LOG_FATAL, <span class="hljs-string">"%s\n"</span>, error);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">return</span> ret;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/FFmpeg深入之ffmpeg-parse-options/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-image">
+        <a href="/Android多媒体深入之ALooper分析/" class="image is-7by1">
+        <img class="thumbnail" src="/images/19.jpg" alt="Android多媒体深入之ALooper分析">
+        </a>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-02-04T16:00:00.000Z">2020-02-05</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/">刀枪棍棒（Android）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/五虎断门刀（Android原生）/">五虎断门刀（Android原生）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    19 分钟 读完 (大约 2907 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/Android多媒体深入之ALooper分析/">Android多媒体深入之ALooper分析</a>
+            
+        </h1>
+        <div class="content">
+            <p>在media模块中，会涉及到很多多线程的场景，所以在media模块中，实现了一套与Java层的Looper/Handler一样的机制，相关类有ALooper/AHandler/AMessage。（源码在av/media/libstagefright/foundation中）</p>
+<h4 id="ALooper"><a href="#ALooper" class="headerlink" title="ALooper"></a>ALooper</h4><h5 id="ALooper声明"><a href="#ALooper声明" class="headerlink" title="ALooper声明"></a>ALooper声明</h5><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">ALooper</span> :</span> <span class="hljs-keyword">public</span> RefBase &#123;</span><br><span class="line">    <span class="hljs-keyword">typedef</span> <span class="hljs-keyword">int32_t</span> event_id;</span><br><span class="line">    <span class="hljs-keyword">typedef</span> <span class="hljs-keyword">int32_t</span> handler_id;</span><br><span class="line"></span><br><span class="line">    ALooper();</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// Takes effect in a subsequent call to start().</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">setName</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *name)</span></span>;</span><br><span class="line">    <span class="hljs-comment">// 注册AHandler和当前ALooper的映射关系</span></span><br><span class="line">    <span class="hljs-function">handler_id <span class="hljs-title">registerHandler</span><span class="hljs-params">(<span class="hljs-keyword">const</span> sp&lt;AHandler&gt; &amp;handler)</span></span>;</span><br><span class="line">    <span class="hljs-comment">// 解注册该HandlerID的映射关系</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">unregisterHandler</span><span class="hljs-params">(handler_id handlerID)</span></span>;</span><br><span class="line">    <span class="hljs-comment">// 启动线程，并开始loop轮询</span></span><br><span class="line">    <span class="hljs-keyword">status_t</span> start(</span><br><span class="line">            <span class="hljs-keyword">bool</span> runOnCallingThread = <span class="hljs-literal">false</span>,</span><br><span class="line">            <span class="hljs-keyword">bool</span> canCallJava = <span class="hljs-literal">false</span>,</span><br><span class="line">            <span class="hljs-keyword">int32_t</span> priority = PRIORITY_DEFAULT</span><br><span class="line">            );</span><br><span class="line">    <span class="hljs-comment">// 退出线程</span></span><br><span class="line">    <span class="hljs-keyword">status_t</span> stop();</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">static</span> int64_t <span class="hljs-title">GetNowUs</span><span class="hljs-params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *<span class="hljs-title">getName</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span> </span>&#123;</span><br><span class="line">        <span class="hljs-keyword">return</span> mName.c_str();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">protected</span>:</span><br><span class="line">    <span class="hljs-keyword">virtual</span> ~ALooper();</span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">private</span>:</span><br><span class="line">    <span class="hljs-keyword">friend</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">AMessage</span>;</span>       <span class="hljs-comment">// post()</span></span><br><span class="line"></span><br><span class="line">    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Event</span> &#123;</span></span><br><span class="line">        <span class="hljs-keyword">int64_t</span> mWhenUs;</span><br><span class="line">        sp&lt;AMessage&gt; mMessage;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="hljs-comment">// 锁</span></span><br><span class="line">    Mutex mLock;</span><br><span class="line">    <span class="hljs-comment">// 互斥量</span></span><br><span class="line">    Condition mQueueChangedCondition;</span><br><span class="line">    <span class="hljs-comment">// 线程name</span></span><br><span class="line">    AString mName;</span><br><span class="line">    <span class="hljs-comment">// 事件队列</span></span><br><span class="line">    List&lt;Event&gt; mEventQueue;</span><br><span class="line">    <span class="hljs-comment">// 定义内部类</span></span><br><span class="line">    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">LooperThread</span>;</span></span><br><span class="line">    <span class="hljs-comment">// 作为Loop的线程</span></span><br><span class="line">    sp&lt;LooperThread&gt; mThread;</span><br><span class="line">    <span class="hljs-comment">// 是否在调用线程中直接loop</span></span><br><span class="line">    <span class="hljs-keyword">bool</span> mRunningLocally;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// use a separate lock for reply handling, as it is always on another thread</span></span><br><span class="line">    <span class="hljs-comment">// use a central lock, however, to avoid creating a mutex for each reply</span></span><br><span class="line">    Mutex mRepliesLock;</span><br><span class="line">    Condition mRepliesCondition;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// START --- methods used only by AMessage</span></span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// posts a message on this looper with the given timeout</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">post</span><span class="hljs-params">(<span class="hljs-keyword">const</span> sp&lt;AMessage&gt; &amp;msg, <span class="hljs-keyword">int64_t</span> delayUs)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// creates a reply token to be used with this looper</span></span><br><span class="line">    sp&lt;AReplyToken&gt; createReplyToken();</span><br><span class="line">    <span class="hljs-comment">// waits for a response for the reply token.  If status is OK, the response</span></span><br><span class="line">    <span class="hljs-comment">// is stored into the supplied variable.  Otherwise, it is unchanged.</span></span><br><span class="line">    <span class="hljs-keyword">status_t</span> awaitResponse(<span class="hljs-keyword">const</span> sp&lt;AReplyToken&gt; &amp;replyToken, sp&lt;AMessage&gt; *response);</span><br><span class="line">    <span class="hljs-comment">// posts a reply for a reply token.  If the reply could be successfully posted,</span></span><br><span class="line">    <span class="hljs-comment">// it returns OK. Otherwise, it returns an error value.</span></span><br><span class="line">    <span class="hljs-keyword">status_t</span> postReply(<span class="hljs-keyword">const</span> sp&lt;AReplyToken&gt; &amp;replyToken, <span class="hljs-keyword">const</span> sp&lt;AMessage&gt; &amp;msg);</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// END --- methods used only by AMessage</span></span><br><span class="line">    </span><br><span class="line">    <span class="hljs-comment">// 轮询处理事件</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">bool</span> <span class="hljs-title">loop</span><span class="hljs-params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    DISALLOW_EVIL_CONSTRUCTORS(ALooper);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/Android多媒体深入之ALooper分析/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2019-12-30T13:42:46.000Z">2019-12-30</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/">刀枪棍棒（Android）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/伏魔杖法（Flutter）/">伏魔杖法（Flutter）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    10 分钟 读完 (大约 1568 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/Flutter深入之插件新API-Embedding-V2/">Flutter深入之插件新API——Embedding-V2</a>
+            
+        </h1>
+        <div class="content">
+            <p>在Flutter1.12版本中正式将Embedding-V2API在Android平台默认开启，所有官方插件都迁移到了新的API。Embedding-V2APi的优势在于针对混合开发提供了更好的支持。</p>
+<h2 id="版本配置"><a href="#版本配置" class="headerlink" title="版本配置"></a>版本配置</h2><p>GeneratedPluginRegistrant生成内容配置，通过在AndroidManifest.xml中配置Embedding的版本来确定工具生成的GeneratedPluginRegistrant类的内容。<br><figure class="highlight xml hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">&lt;!-- Don't delete the meta-data below.</span></span><br><span class="line"><span class="hljs-comment">     It is used by the Flutter tool to generate GeneratedPluginRegistrant.java --&gt;</span></span><br><span class="line"><span class="hljs-tag">&lt;<span class="hljs-name">meta-data</span></span></span><br><span class="line"><span class="hljs-tag">    <span class="hljs-attr">android:name</span>=<span class="hljs-string">"flutterEmbedding"</span></span></span><br><span class="line"><span class="hljs-tag">    <span class="hljs-attr">android:value</span>=<span class="hljs-string">"2"</span> /&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>具体判定逻辑在flutter_tools项目中<br><figure class="highlight dart hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">  AndroidEmbeddingVersion getEmbeddingVersion() &#123;</span><br><span class="line">    <span class="hljs-keyword">if</span> (isModule) &#123;</span><br><span class="line">      <span class="hljs-comment">// A module type's Android project is used in add-to-app scenarios and</span></span><br><span class="line">      <span class="hljs-comment">// only supports the V2 embedding.</span></span><br><span class="line">      <span class="hljs-keyword">return</span> AndroidEmbeddingVersion.v2;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">if</span> (appManifestFile == <span class="hljs-keyword">null</span> || !appManifestFile.existsSync()) &#123;</span><br><span class="line">      <span class="hljs-keyword">return</span> AndroidEmbeddingVersion.v1;</span><br><span class="line">    &#125;</span><br><span class="line">    xml.XmlDocument <span class="hljs-built_in">document</span>;</span><br><span class="line">    <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">      <span class="hljs-built_in">document</span> = xml.parse(appManifestFile.readAsStringSync());</span><br><span class="line">    &#125; on xml.XmlParserException &#123;</span><br><span class="line">      throwToolExit(<span class="hljs-string">'Error parsing $appManifestFile '</span></span><br><span class="line">                    <span class="hljs-string">'Please ensure that the android manifest is a valid XML document and try again.'</span>);</span><br><span class="line">    &#125; on FileSystemException &#123;</span><br><span class="line">      throwToolExit(<span class="hljs-string">'Error reading $appManifestFile even though it exists. '</span></span><br><span class="line">                    <span class="hljs-string">'Please ensure that you have read permission to this file and try again.'</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">for</span> (xml.XmlElement metaData <span class="hljs-keyword">in</span> <span class="hljs-built_in">document</span>.findAllElements(<span class="hljs-string">'meta-data'</span>)) &#123;</span><br><span class="line">      <span class="hljs-keyword">final</span> <span class="hljs-built_in">String</span> name = metaData.getAttribute(<span class="hljs-string">'android:name'</span>);</span><br><span class="line">      <span class="hljs-keyword">if</span> (name == <span class="hljs-string">'flutterEmbedding'</span>) &#123;</span><br><span class="line">        <span class="hljs-keyword">final</span> <span class="hljs-built_in">String</span> embeddingVersionString = metaData.getAttribute(<span class="hljs-string">'android:value'</span>);</span><br><span class="line">        <span class="hljs-keyword">if</span> (embeddingVersionString == <span class="hljs-string">'1'</span>) &#123;</span><br><span class="line">          <span class="hljs-keyword">return</span> AndroidEmbeddingVersion.v1;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="hljs-keyword">if</span> (embeddingVersionString == <span class="hljs-string">'2'</span>) &#123;</span><br><span class="line">          <span class="hljs-keyword">return</span> AndroidEmbeddingVersion.v2;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">return</span> AndroidEmbeddingVersion.v1;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="创建时机变更"><a href="#创建时机变更" class="headerlink" title="创建时机变更"></a>创建时机变更</h2><h3 id="旧API"><a href="#旧API" class="headerlink" title="旧API"></a>旧API</h3><p>旧的创建插件的时机一般是在FlutterActivity的子类onCreate()回调时，手动调用下面的方法来创建所有的插件。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GeneratedPluginRegistrant.registerWith(PluginRegistry registry);</span><br></pre></td></tr></table></figure>
+<h3 id="新API"><a href="#新API" class="headerlink" title="新API"></a>新API</h3><p>新的API将插件与视图进行解绑，将插件与引擎进行绑定，并且在引擎创建的时候提供了自动创建插件的功能。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">FlutterEngine</span><span class="hljs-params">(</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    @NonNull Context context,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    @NonNull FlutterLoader flutterLoader,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    @NonNull FlutterJNI flutterJNI,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    @Nullable String[] dartVmArgs,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">    <span class="hljs-keyword">boolean</span> automaticallyRegisterPlugins</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">)</span> </span>&#123;</span><br><span class="line"> </span><br><span class="line">  <span class="hljs-keyword">this</span>.pluginRegistry = <span class="hljs-keyword">new</span> FlutterEnginePluginRegistry(</span><br><span class="line">    context.getApplicationContext(),</span><br><span class="line">    <span class="hljs-keyword">this</span>,</span><br><span class="line">    flutterLoader</span><br><span class="line">  );</span><br><span class="line">  <span class="hljs-comment">// 默认为true，自动创建插件</span></span><br><span class="line">  <span class="hljs-keyword">if</span> (automaticallyRegisterPlugins) &#123;</span><br><span class="line">    registerPlugins();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">// 通过反射调用GeneratedPluginRegistrant.registerWith(FlutterEngine engine)方法</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">registerPlugins</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">    Class&lt;?&gt; generatedPluginRegistrant = Class.forName(<span class="hljs-string">"io.flutter.plugins.GeneratedPluginRegistrant"</span>);</span><br><span class="line">    Method registrationMethod = generatedPluginRegistrant.getDeclaredMethod(<span class="hljs-string">"registerWith"</span>, FlutterEngine.class);</span><br><span class="line">    registrationMethod.invoke(<span class="hljs-keyword">null</span>, <span class="hljs-keyword">this</span>);</span><br><span class="line">  &#125; <span class="hljs-keyword">catch</span> (Exception e) &#123;</span><br><span class="line">    Log.w(TAG, <span class="hljs-string">"Tried to automatically register plugins with FlutterEngine ("</span></span><br><span class="line">        + <span class="hljs-keyword">this</span> + <span class="hljs-string">") but could not find and invoke the GeneratedPluginRegistrant."</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/Flutter深入之插件新API-Embedding-V2/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2019-12-14T16:00:00.000Z">2019-12-15</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/">刀枪棍棒（Android）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/五虎断门刀（Android原生）/">五虎断门刀（Android原生）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    21 分钟 读完 (大约 3161 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/SurfaceFlinger深入之Layer创建与渲染/">SurfaceFlinger深入之Layer创建与渲染</a>
+            
+        </h1>
+        <div class="content">
+            <h3 id="一切的开始resumeActivity"><a href="#一切的开始resumeActivity" class="headerlink" title="一切的开始resumeActivity"></a>一切的开始resumeActivity</h3><p>在Activity第一次执行resume的时候，会将DecorView添加到WindowManager中，由此开始了Activity视图显示的第一步。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">final</span> <span class="hljs-keyword">void</span> <span class="hljs-title">handleResumeActivity</span><span class="hljs-params">(IBinder token,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">        <span class="hljs-keyword">boolean</span> clearHide, <span class="hljs-keyword">boolean</span> isForward, <span class="hljs-keyword">boolean</span> reallyResume, <span class="hljs-keyword">int</span> seq, String reason)</span> </span>&#123;</span><br><span class="line">        ...</span><br><span class="line">        <span class="hljs-keyword">final</span> Activity a = r.activity;</span><br><span class="line">		...</span><br><span class="line">        <span class="hljs-keyword">if</span> (r.window == <span class="hljs-keyword">null</span> &amp;&amp; !a.mFinished &amp;&amp; willBeVisible) &#123;</span><br><span class="line">            r.window = r.activity.getWindow();</span><br><span class="line">            View decor = r.window.getDecorView();</span><br><span class="line">            decor.setVisibility(View.INVISIBLE);</span><br><span class="line">            ViewManager wm = a.getWindowManager();</span><br><span class="line">            ...</span><br><span class="line">            <span class="hljs-keyword">if</span> (a.mVisibleFromClient) &#123;</span><br><span class="line">                <span class="hljs-keyword">if</span> (!a.mWindowAdded) &#123;</span><br><span class="line">                    a.mWindowAdded = <span class="hljs-keyword">true</span>;</span><br><span class="line">                    wm.addView(decor, l);</span><br><span class="line">                &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">                  ...</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">          ...</span><br><span class="line">        &#125;</span><br><span class="line">        ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="WindowManager-addView"><a href="#WindowManager-addView" class="headerlink" title="WindowManager.addView"></a>WindowManager.addView</h4><p>WindowManagerImpl最终会调用到WindowManagerGlobal中，在WindowManagerGlobal中会创建一个ViewRootImpl对象，每个DecorView都会有对应的ViewRootImpl对象，而一个Window中可以有多个DecorView。</p>
+<p>ViewRootImpl负责与WMS通信，通过其维护的IWindowSession对象来与WMS进行通信。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">addView</span><span class="hljs-params">(View view, ViewGroup.LayoutParams params,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">        Display display, Window parentWindow)</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    ViewRootImpl root;</span><br><span class="line">    View panelParentView = <span class="hljs-keyword">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">synchronized</span> (mLock) &#123;</span><br><span class="line">        ...</span><br><span class="line">        root = <span class="hljs-keyword">new</span> ViewRootImpl(view.getContext(), display);</span><br><span class="line"></span><br><span class="line">        view.setLayoutParams(wparams);</span><br><span class="line"></span><br><span class="line">        mViews.add(view);</span><br><span class="line">        mRoots.add(root);</span><br><span class="line">        mParams.add(wparams);</span><br><span class="line"></span><br><span class="line">        <span class="hljs-comment">// do this last because it fires off messages to start doing things</span></span><br><span class="line">        <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">            root.setView(view, wparams, panelParentView);</span><br><span class="line">        &#125; <span class="hljs-keyword">catch</span> (RuntimeException e) &#123;</span><br><span class="line">            ...</span><br><span class="line">            <span class="hljs-keyword">throw</span> e;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/SurfaceFlinger深入之Layer创建与渲染/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2019-10-14T16:00:00.000Z">2019-10-15</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/">刀枪棍棒（Android）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/五虎断门刀（Android原生）/">五虎断门刀（Android原生）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    16 分钟 读完 (大约 2391 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/Android图形架构总览/">Android图形架构总览</a>
+            
+        </h1>
+        <div class="content">
+            <h3 id="图形渲染流程"><a href="#图形渲染流程" class="headerlink" title="图形渲染流程"></a>图形渲染流程</h3><p>​    在Android中，所有的渲染都是将内容绘制到对应的Surface上，Surface作为BufferQueue的生产方，每当发生入队操作时，都会通知BufferQueue创建者进行消费，也就是SurfaceFlinger，由SurfaceFlinger进行合并，然后发送到显示器进行显示。</p>
+<p>下面这张图描述了关键组件的工作流程:</p>
+<p><img src="/images/ape_fwk_graphics.png" alt="工作流程"></p>
+<ol>
+<li><p>当前一个可见的界面被创建时，会通过WindowManager去创建一个Window对象，而每一个Window对象中都会包含一个Surface对象，该对象由WindowManager向SurfaceFlinger请求创建。Surface中包含一个BufferQueue，它由SurfaceFlinger向HAL层调用Gralloc对其进行内存分配。</p></li></ol>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/Android图形架构总览/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-image">
         <a href="/FFmpeg深入之avformat-open-input/" class="image is-7by1">
         <img class="thumbnail" src="/images/2.jpeg" alt="FFmpeg深入之avformat_open_input">
         </a>
@@ -188,379 +566,6 @@
 
 
 
-    
-<div class="card">
-    
-    <div class="card-content article ">
-        
-        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
-            <div class="level-left">
-                <time class="level-item has-text-grey"
-                    datetime="2019-02-23T16:00:00.000Z">2019-02-24</time>
-                
-                <div class="level-item">
-                    <a class="has-link-grey -link" href="/categories/内功心法（CS基础）/">内功心法（CS基础）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/内功心法（CS基础）/北冥神功（编程语言）/">北冥神功（编程语言）</a>
-                </div>
-                
-                
-                <span class="level-item has-text-grey">
-                    
-                    
-                    4 分钟 读完 (大约 580 个字)
-                </span>
-                
-                
-            </div>
-        </div>
-        
-        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
-            
-            <a class="has-link-black-ter" href="/了解cmake/">了解cmake</a>
-            
-        </h1>
-        <div class="content">
-            <h4 id="什么是cmake"><a href="#什么是cmake" class="headerlink" title="什么是cmake"></a>什么是cmake</h4><p>cmake是一个跨平台的构建工具，主要是用来解决不同平台上Makefile不同的问题，通过编写CMakeLists.txt文件，然后通过cmake命令自动生成对应平台的Makefile。</p>
-<h4 id="编写CMakeLists"><a href="#编写CMakeLists" class="headerlink" title="编写CMakeLists"></a>编写CMakeLists</h4><figure class="highlight cmake hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">// 指定运行此配置文件所需的 CMake 的最低版本</span><br><span class="line"><span class="hljs-keyword">cmake_minimum_required</span>(VERSION <span class="hljs-number">3.4</span>.<span class="hljs-number">1</span>)</span><br><span class="line"></span><br><span class="line">// 该指令的主要作用就是将指定的源文件生成链接文件，然后添加到工程中去。</span><br><span class="line">// native-lib表示生成的链接文件的名字。</span><br><span class="line">// SHARED表示生成的文件类型：STATIC类型在链接其它目标的时候使用。SHARED库会被动态链接，在运行时会被加载。MODULE库是一种不会被链接到其它目标中的插件，但是可能会在运行时使用dlopen-系列的函数。</span><br><span class="line">// native-lib.cpp 表示源文件，可以有多个。</span><br><span class="line"><span class="hljs-keyword">add_library</span>(native-lib SHARED native-lib.cpp)</span><br><span class="line"></span><br><span class="line">// 查找一个库，log库已经包含在NDK中。</span><br><span class="line">// log-lib用来存储查找结果</span><br><span class="line">// log 表示查找库的名字</span><br><span class="line"><span class="hljs-keyword">find_library</span>(log-lib log)</span><br><span class="line"></span><br><span class="line">// 为了确保CMake可以在编译时定位您的标头文件，使用该命令来指定包含标头文件的路径</span><br><span class="line"><span class="hljs-keyword">include_directories</span>(<span class="hljs-variable">$&#123;openCVPath&#125;</span>/native/jni/<span class="hljs-keyword">include</span>)</span><br><span class="line"></span><br><span class="line">// <span class="hljs-keyword">set</span>用来设置一些变量 </span><br><span class="line">// CMAKE_CURRENT_SOURCE_DIR 表示当前CMakeLists所在的目录</span><br><span class="line"><span class="hljs-keyword">set</span>(openCVPath <span class="hljs-variable">$&#123;CMAKE_SOURCE_DIR&#125;</span>/../../../../opencv-sdk )</span><br><span class="line"></span><br><span class="line">// 使用static来添加依赖库，IMPORTED表示您只希望将库导入到项目中,</span><br><span class="line">// 然后需要通过<span class="hljs-keyword">set_target_properties</span>来指定库的路径</span><br><span class="line"><span class="hljs-keyword">add_library</span>(lib_opencv STATIC IMPORTED)</span><br><span class="line"></span><br><span class="line">// lib_opencv就是上面导入的库的变量</span><br><span class="line">// PROPERTIES 表示设置属性</span><br><span class="line">// IMPORTED_LOCATION 设置导入库的位置</span><br><span class="line"><span class="hljs-keyword">set_target_properties</span>(lib_opencv PROPERTIES IMPORTED_LOCATION</span><br><span class="line">        <span class="hljs-variable">$&#123;openCVPath&#125;</span>/native/libs/<span class="hljs-variable">$&#123;ANDROID_ABI&#125;</span>/libopencv_java4.so)</span><br><span class="line"></span><br><span class="line">// 将预构建库关联到您自己的原生库</span><br><span class="line">// native-lib库就是原生库，将上面查找的系统库和添加的依赖库都链接到目标库上。</span><br><span class="line"><span class="hljs-keyword">target_link_libraries</span>(native-lib <span class="hljs-variable">$&#123;log-lib&#125;</span> lib_opencv)</span><br></pre></td></tr></table></figure>
-<h4 id="运行cmake"><a href="#运行cmake" class="headerlink" title="运行cmake"></a>运行cmake</h4><p>运行cmake只需要执行cmake命令，后面跟上CMakeLists所在的目录位置，运行后在当前目录中生成Makefile。<br><figure class="highlight cmake hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cmake .</span><br></pre></td></tr></table></figure></p>
-<p>然后再在当前目录执行make命令，就可以生成对应的项目编译文件。</p>
-
-        </div>
-        
-        
-        
-        
-    </div>
-</div>
-
-
-
-
-
-
-
-
-    
-<div class="card">
-    
-    <div class="card-content article ">
-        
-        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
-            <div class="level-left">
-                <time class="level-item has-text-grey"
-                    datetime="2018-11-03T16:00:00.000Z">2018-11-04</time>
-                
-                <div class="level-item">
-                    <a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/">刀枪棍棒（Android）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/伏魔杖法（Flutter）/">伏魔杖法（Flutter）</a>
-                </div>
-                
-                
-                <span class="level-item has-text-grey">
-                    
-                    
-                    15 分钟 读完 (大约 2176 个字)
-                </span>
-                
-                
-            </div>
-        </div>
-        
-        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
-            
-            <a class="has-link-black-ter" href="/Flutter深入之flutter-build-bundle命令如何编译Dart/">Flutter深入之flutter-build-bundle命令如何编译Dart?</a>
-            
-        </h1>
-        <div class="content">
-            <h4 id="开篇"><a href="#开篇" class="headerlink" title="开篇"></a>开篇</h4><p>上一篇我们讲到，在flutterTask中会调用flutter build bundle命令来编译dart代码，生成dart资源。那么build bundle命令是如何编译dart代码的？编译后生成了哪些资源？这些资源都是些什么？</p>
-<p><img src="/images/flutter-build-bundle-产物.png" alt="flutter-build-bundle-产物"></p>
-<ul>
-<li><p>app.dill : 这就是dart代码编译后的二级制文件</p>
-</li>
-<li><p>Frontend_server.d : 这里面放的是frontend_server.dart.snapshot的绝对路径，使用该snapshot来编译dart代码生成上面的app.dill</p>
-<p>​    flutter/bin/cache/artifacts/engine/darwin-x64/frontend_server.dart.snapshot</p>
-</li>
-<li><p>snapshot_blob.bin.d : 这里面放的是所有参与编译的dart文件的绝对路径的集合，包括项目的代码和flutterSdk的代码以及pub库中的三方代码。</p>
-</li>
-<li><p>snapshot_blob.bin.d.fingerprint : 这里面放的是snapshot_blob.bin.d中的所有文件的绝对路径以及每个文件所对应的md5值。使用这个md5来判断该文件是否有修改。在每次编译的时候会判断，如果没有文件修改，则直接跳过编译。</p></li></ul>
-        </div>
-        
-        
-        
-        <div class="level is-mobile">
-            <div class="level-start">
-                <div class="level-item">
-                    <a class="button is-size-7 is-light"
-                        href="/Flutter深入之flutter-build-bundle命令如何编译Dart/#more">阅读更多</a>
-                </div>
-            </div>
-        </div>
-        
-        
-    </div>
-</div>
-
-
-
-
-
-
-
-
-    
-<div class="card">
-    
-    <div class="card-content article ">
-        
-        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
-            <div class="level-left">
-                <time class="level-item has-text-grey"
-                    datetime="2018-11-03T16:00:00.000Z">2018-11-04</time>
-                
-                <div class="level-item">
-                    <a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/">刀枪棍棒（Android）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/伏魔杖法（Flutter）/">伏魔杖法（Flutter）</a>
-                </div>
-                
-                
-                <span class="level-item has-text-grey">
-                    
-                    
-                    27 分钟 读完 (大约 4031 个字)
-                </span>
-                
-                
-            </div>
-        </div>
-        
-        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
-            
-            <a class="has-link-black-ter" href="/Flutter深入之flutter初始化/">Flutter深入之flutter初始化</a>
-            
-        </h1>
-        <div class="content">
-            <h4 id="开篇"><a href="#开篇" class="headerlink" title="开篇"></a>开篇</h4><p>前面两篇我们讲到了Flutter应用如何编译，并将编译结果如何放入APK中。那么当应用启动时，又是如何执行到main.dart中的main方法呢？Flutter的绘制内容又是如何被显示的呢？</p>
-<p><img src="/images/Flutter启动流程.png" alt="flutter-启动流程"></p>
-<h4 id="FlutterApplication"><a href="#FlutterApplication" class="headerlink" title="FlutterApplication"></a>FlutterApplication</h4><p>在应用启动的Application中会执行一些初始化操作，比如初始化一些路径文件夹等配置，搬移flutter资源，最为重要的是安装flutter.so。在前面的编译讲解中，我们知道该so就是flutter-engine。</p>
-<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"># FlutterMain.java</span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">startInitialization</span><span class="hljs-params">(Context applicationContext, Settings settings)</span> </span>&#123;</span><br><span class="line">        ...</span><br><span class="line">        sSettings = settings;</span><br><span class="line">        <span class="hljs-keyword">long</span> initStartTimestampMillis = SystemClock.uptimeMillis();</span><br><span class="line">        <span class="hljs-comment">// 初始化路径等配置</span></span><br><span class="line">        initConfig(applicationContext);</span><br><span class="line">    	<span class="hljs-comment">// 检测aot</span></span><br><span class="line">        initAot(applicationContext);</span><br><span class="line">    	<span class="hljs-comment">// 搬移flutter资源</span></span><br><span class="line">        initResources(applicationContext);</span><br><span class="line">        <span class="hljs-comment">// 加载so</span></span><br><span class="line">        System.loadLibrary(<span class="hljs-string">"flutter"</span>);</span><br><span class="line"></span><br><span class="line">        <span class="hljs-comment">// initTimeMicros是java层初始化loadLibrary所花费的时间。</span></span><br><span class="line">    	<span class="hljs-comment">// 因为so库中需要记录flutter开始的时间，但是在加载so库之前，</span></span><br><span class="line">    	<span class="hljs-comment">// 是无法调用so中的api，所以将加载so库所花费的时间传下去，然后so库中使用当前时间回退该花费时间，就是应用启动的真正时间。</span></span><br><span class="line">        <span class="hljs-keyword">long</span> initTimeMillis = SystemClock.uptimeMillis() - initStartTimestampMillis;</span><br><span class="line">        nativeRecordStartTimestamp(initTimeMillis);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"># flutter_main.cc</span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">RecordStartTimestamp</span><span class="hljs-params">(JNIEnv* env,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">                                 jclass jcaller,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">                                 jlong initTimeMillis)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">int64_t</span> initTimeMicros =</span><br><span class="line">      <span class="hljs-keyword">static_cast</span>&lt;<span class="hljs-keyword">int64_t</span>&gt;(initTimeMillis) * <span class="hljs-keyword">static_cast</span>&lt;<span class="hljs-keyword">int64_t</span>&gt;(<span class="hljs-number">1000</span>);</span><br><span class="line">  <span class="hljs-comment">// initTimeMicros是java层初始化所花费的时间，使用当前时间回退该花费时间，就是应用启动的真正时间。</span></span><br><span class="line">  blink::engine_main_enter_ts = Dart_TimelineGetMicros() - initTimeMicros;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>在加载so库完成后，会触发JNI回调JNI_OnLoad，开始动态注册JNI方法。</p>
-<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"># library_loader.cc</span><br><span class="line"><span class="hljs-function">JNIEXPORT jint <span class="hljs-title">JNI_OnLoad</span><span class="hljs-params">(JavaVM* vm, <span class="hljs-keyword">void</span>* reserved)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-comment">// 将javaVM保存成全局变量</span></span><br><span class="line">  fml::jni::InitJavaVM(vm);</span><br><span class="line">  <span class="hljs-comment">// 获取JNIEnv,通过JNIEnv.RegisterNatives来动态注册</span></span><br><span class="line">  JNIEnv* env = fml::jni::AttachCurrentThread();</span><br><span class="line">  <span class="hljs-keyword">bool</span> result = <span class="hljs-literal">false</span>;</span><br><span class="line"></span><br><span class="line">  <span class="hljs-comment">// 注册FlutterMain.java中的native方法</span></span><br><span class="line">  result = shell::FlutterMain::Register(env);</span><br><span class="line">  FML_CHECK(result);</span><br><span class="line"></span><br><span class="line">  <span class="hljs-comment">// 注册FlutterCallbackInformation.java、FlutterView.java、FlutterNativeView.java中的native方法</span></span><br><span class="line">  result = shell::PlatformViewAndroid::Register(env);</span><br><span class="line">  FML_CHECK(result);</span><br><span class="line"></span><br><span class="line">  <span class="hljs-comment">// 注册VsyncWaiter.java中的native方法</span></span><br><span class="line">  result = shell::VsyncWaiterAndroid::Register(env);</span><br><span class="line">  FML_CHECK(result);</span><br><span class="line"></span><br><span class="line">  <span class="hljs-keyword">return</span> JNI_VERSION_1_4;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-        </div>
-        
-        
-        
-        <div class="level is-mobile">
-            <div class="level-start">
-                <div class="level-item">
-                    <a class="button is-size-7 is-light"
-                        href="/Flutter深入之flutter初始化/#more">阅读更多</a>
-                </div>
-            </div>
-        </div>
-        
-        
-    </div>
-</div>
-
-
-
-
-
-
-
-
-    
-<div class="card">
-    
-    <div class="card-content article ">
-        
-        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
-            <div class="level-left">
-                <time class="level-item has-text-grey"
-                    datetime="2018-11-03T16:00:00.000Z">2018-11-04</time>
-                
-                <div class="level-item">
-                    <a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/">刀枪棍棒（Android）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/伏魔杖法（Flutter）/">伏魔杖法（Flutter）</a>
-                </div>
-                
-                
-                <span class="level-item has-text-grey">
-                    
-                    
-                    24 分钟 读完 (大约 3641 个字)
-                </span>
-                
-                
-            </div>
-        </div>
-        
-        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
-            
-            <a class="has-link-black-ter" href="/Flutter深入之flutter-run命令究竟做了什么/">Flutter深入之flutter run命令究竟做了什么?</a>
-            
-        </h1>
-        <div class="content">
-            <h4 id="开篇"><a href="#开篇" class="headerlink" title="开篇"></a>开篇</h4><p>当我们创建一个Flutter App项目后，在当前项目路径下运行命令flutter run，就可以编译生成一个APK，并且将APK安装到模拟器中并启动。那么Flutter究竟是如何编译Dart资源的？又是如何将Dart资源放入到APK中？</p>
-<p>接下来让我们慢慢跟着代码来分析flutter run 命令的执行过程。</p>
-<h4 id="flutter命令"><a href="#flutter命令" class="headerlink" title="flutter命令"></a>flutter命令</h4><p>在Mac上，flutter命令是指 ${flutterSdk}/bin/flutter 这个shell程序。</p>
-<figure class="highlight shell hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">... </span><br><span class="line">update逻辑</span><br><span class="line">...</span><br><span class="line">PROG_NAME="$(path_uri "$(follow_links "$BASH_SOURCE")")"</span><br><span class="line">BIN_DIR="$(cd "$&#123;PROG_NAME%/*&#125;" ; pwd -P)"</span><br><span class="line">export FLUTTER_ROOT="$(cd "$&#123;BIN_DIR&#125;/.." ; pwd -P)"</span><br><span class="line"></span><br><span class="line">FLUTTER_TOOLS_DIR="$FLUTTER_ROOT/packages/flutter_tools"</span><br><span class="line">SNAPSHOT_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.snapshot"</span><br><span class="line">STAMP_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.stamp"</span><br><span class="line">SCRIPT_PATH="$FLUTTER_TOOLS_DIR/bin/flutter_tools.dart"</span><br><span class="line">DART_SDK_PATH="$FLUTTER_ROOT/bin/cache/dart-sdk"</span><br><span class="line">DART="$DART_SDK_PATH/bin/dart"</span><br><span class="line">PUB="$DART_SDK_PATH/bin/pub"</span><br><span class="line"></span><br><span class="line">// 实际上抛除更新逻辑，flutter的这个shell就是直接执行了dart命令</span><br><span class="line">// $FLUTTER_TOOL_ARGS 这个参数可以无视</span><br><span class="line">// $SNAPSHOT_PATH 这个指的就是$FLUTTER_ROOT/bin/cache/flutter_tools.snapshot这个snapshot</span><br><span class="line">// $@ 这个就是flutter 后面跟的参数</span><br><span class="line">"$DART" $FLUTTER_TOOL_ARGS "$SNAPSHOT_PATH" "$@"</span><br></pre></td></tr></table></figure>
-<p>我们可以看到，实际上flutter run 命令，执行的就是 dart flutter_tools.snapshot  run</p>
-        </div>
-        
-        
-        
-        <div class="level is-mobile">
-            <div class="level-start">
-                <div class="level-item">
-                    <a class="button is-size-7 is-light"
-                        href="/Flutter深入之flutter-run命令究竟做了什么/#more">阅读更多</a>
-                </div>
-            </div>
-        </div>
-        
-        
-    </div>
-</div>
-
-
-
-
-
-
-
-
-    
-<div class="card">
-    
-    <div class="card-content article ">
-        
-        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
-            <div class="level-left">
-                <time class="level-item has-text-grey"
-                    datetime="2018-07-01T16:00:00.000Z">2018-07-02</time>
-                
-                <div class="level-item">
-                    <a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/">刀枪棍棒（Android）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/五虎断门刀（Android原生）/">五虎断门刀（Android原生）</a>
-                </div>
-                
-                
-                <span class="level-item has-text-grey">
-                    
-                    
-                    14 分钟 读完 (大约 2152 个字)
-                </span>
-                
-                
-            </div>
-        </div>
-        
-        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
-            
-            <a class="has-link-black-ter" href="/Android-ReactNative渲染流程/">Android-ReactNative渲染流程</a>
-            
-        </h1>
-        <div class="content">
-            <h4 id="注册组件"><a href="#注册组件" class="headerlink" title="注册组件"></a>注册组件</h4><p>在RN项目中必须使用AppRegistry.registerComponent(appkey,component)来注册组件。在上一篇中的runJSBundle里面，加载js文件后，交给JSC运行(evaluateSourceCode函数)，就会开始执行index.js，执行里面的代码，在index.js里面就会调用AppRegistry来注册组件。</p>
-<figure class="highlight js hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">registerComponent(</span><br><span class="line">  appKey: string,</span><br><span class="line">  componentProvider: ComponentProvider,</span><br><span class="line">  section?: boolean,</span><br><span class="line">): string &#123;</span><br><span class="line">  <span class="hljs-comment">// 为该appkey准备了一个runnable</span></span><br><span class="line">  runnables[appKey] = &#123;</span><br><span class="line">    componentProvider,</span><br><span class="line">    run: <span class="hljs-function"><span class="hljs-params">appParameters</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="hljs-comment">// appParameters启动参数，来自原生调用传入的</span></span><br><span class="line">      <span class="hljs-comment">// 开始渲染</span></span><br><span class="line">      renderApplication(</span><br><span class="line">        componentProviderInstrumentationHook(componentProvider),</span><br><span class="line">        appParameters.initialProps,</span><br><span class="line">        appParameters.rootTag,</span><br><span class="line">        wrapperComponentProvider &amp;&amp; wrapperComponentProvider(appParameters),</span><br><span class="line">        appParameters.fabric,</span><br><span class="line">      );</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;;</span><br><span class="line">  <span class="hljs-keyword">if</span> (section) &#123;</span><br><span class="line">    sections[appKey] = runnables[appKey];</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-keyword">return</span> appKey;</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
-<h4 id="启动组件"><a href="#启动组件" class="headerlink" title="启动组件"></a>启动组件</h4><p>在上一篇说到，当Context创建完毕后，会启动js组件(defaultJSEntryPoint函数)，通过调用js函数AppRegister.runApplication来启动。</p>
-<figure class="highlight js hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">runApplication(appKey: string, <span class="hljs-attr">appParameters</span>: any): <span class="hljs-keyword">void</span> &#123;</span><br><span class="line">  invariant(</span><br><span class="line">    runnables[appKey] &amp;&amp; runnables[appKey].run,</span><br><span class="line">    <span class="hljs-string">'Application '</span> +</span><br><span class="line">      appKey +</span><br><span class="line">      <span class="hljs-string">' has not been registered.\n\n'</span> +</span><br><span class="line">      <span class="hljs-string">"Hint: This error often happens when you're running the packager "</span> +</span><br><span class="line">      <span class="hljs-string">'(local dev server) from a wrong folder. For example you have '</span> +</span><br><span class="line">      <span class="hljs-string">'multiple apps and the packager is still running for the app you '</span> +</span><br><span class="line">      <span class="hljs-string">'were working on before.\nIf this is the case, simply kill the old '</span> +</span><br><span class="line">      <span class="hljs-string">'packager instance (e.g. close the packager terminal window) '</span> +</span><br><span class="line">      <span class="hljs-string">'and start the packager in the correct app folder (e.g. cd into app '</span> +</span><br><span class="line">      <span class="hljs-string">"folder and run 'npm start').\n\n"</span> +</span><br><span class="line">      <span class="hljs-string">'This error can also happen due to a require() error during '</span> +</span><br><span class="line">      <span class="hljs-string">'initialization or failure to call AppRegistry.registerComponent.\n\n'</span>,</span><br><span class="line">  );</span><br><span class="line"></span><br><span class="line">  <span class="hljs-comment">// 运行该appkey注册的runnable</span></span><br><span class="line">  runnables[appKey].run(appParameters);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="解析组件"><a href="#解析组件" class="headerlink" title="解析组件"></a>解析组件</h4><p>通过ReactNativeRenderer来解析组件视图，然后会调用组件的render方法获取渲染内容。</p>
-<figure class="highlight js hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">renderApplication</span>&lt;<span class="hljs-title">Props</span>: <span class="hljs-title">Object</span>&gt;(<span class="hljs-params"></span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">  RootComponent: React.ComponentType&lt;Props&gt;,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">  initialProps: Props,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">  rootTag: any,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">  WrapperComponent?: ?React.ComponentType&lt;*&gt;,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params">  fabric?: boolean,</span></span></span><br><span class="line"><span class="hljs-function"><span class="hljs-params"></span>) </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">let</span> renderable = (</span><br><span class="line">    &lt;AppContainer rootTag=&#123;rootTag&#125; WrapperComponent=&#123;WrapperComponent&#125;&gt;</span><br><span class="line">      &lt;RootComponent &#123;...initialProps&#125; rootTag=&#123;rootTag&#125; /&gt;</span><br><span class="line">    &lt;<span class="hljs-regexp">/AppContainer&gt;</span></span><br><span class="line"><span class="hljs-regexp">  );</span></span><br><span class="line"><span class="hljs-regexp">  if (</span></span><br><span class="line"><span class="hljs-regexp">    RootComponent.prototype != null &amp;&amp;</span></span><br><span class="line"><span class="hljs-regexp">    RootComponent.prototype.unstable_isAsyncReactComponent === true</span></span><br><span class="line"><span class="hljs-regexp">  ) &#123;</span></span><br><span class="line"><span class="hljs-regexp">    const AsyncMode = React.unstable_AsyncMode;</span></span><br><span class="line"><span class="hljs-regexp">    renderable = &lt;AsyncMode&gt;&#123;renderable&#125;&lt;/</span>AsyncMode&gt;;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-keyword">if</span> (fabric) &#123;</span><br><span class="line">    <span class="hljs-built_in">require</span>(<span class="hljs-string">'ReactFabric'</span>).render(renderable, rootTag);</span><br><span class="line">  &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">    <span class="hljs-comment">// </span></span><br><span class="line">    <span class="hljs-built_in">require</span>(<span class="hljs-string">'ReactNative'</span>).render(renderable, rootTag);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-        </div>
-        
-        
-        
-        <div class="level is-mobile">
-            <div class="level-start">
-                <div class="level-item">
-                    <a class="button is-size-7 is-light"
-                        href="/Android-ReactNative渲染流程/#more">阅读更多</a>
-                </div>
-            </div>
-        </div>
-        
-        
-    </div>
-</div>
-
-
-
-
-
-
-
-
-    
-<div class="card">
-    
-    <div class="card-content article ">
-        
-        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
-            <div class="level-left">
-                <time class="level-item has-text-grey"
-                    datetime="2018-07-01T16:00:00.000Z">2018-07-02</time>
-                
-                <div class="level-item">
-                    <a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/">刀枪棍棒（Android）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/五虎断门刀（Android原生）/">五虎断门刀（Android原生）</a>
-                </div>
-                
-                
-                <span class="level-item has-text-grey">
-                    
-                    
-                    26 分钟 读完 (大约 3908 个字)
-                </span>
-                
-                
-            </div>
-        </div>
-        
-        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
-            
-            <a class="has-link-black-ter" href="/Android-ReactNative启动流程/">Android-ReactNative通信流程</a>
-            
-        </h1>
-        <div class="content">
-            <h4 id="ReactAndroid"><a href="#ReactAndroid" class="headerlink" title="ReactAndroid"></a>ReactAndroid</h4><h5 id="ReactActivity"><a href="#ReactActivity" class="headerlink" title="ReactActivity"></a>ReactActivity</h5><p>一个ReactActivity对应着一个RN组件(通过AppRegistry.registerComponent注册)，而ReactActivity的功能都包装在ReactActivityDelegate中。</p>
-<p>ReactActivity实际上类似于一个浏览器窗口，在一个窗口内对一个网页访问，并进行页面的跳转和回退。</p>
-<h5 id="ReactRootView"><a href="#ReactRootView" class="headerlink" title="ReactRootView"></a>ReactRootView</h5><p>ReactRootView是ReactNative组件的根布局，是一个ViewGroup(继承自FrameLayout)，所有的RN视图都会被添加到该布局下，然后该布局会被添加到Activity上，因此每个ReactActivity都有着一个ReactRootView。RN组件内的页面跳转实际上就是在该ReactRootView上重绘。</p>
-<h5 id="ReactNativeHost"><a href="#ReactNativeHost" class="headerlink" title="ReactNativeHost"></a>ReactNativeHost</h5><p>每个RN组件的配置，设置jsbundle文件的文件名和js模块名称以及开发模式等。</p>
-<ul>
-<li>getJSMainModuleName : 远程服务获取bundle时，获取的模块名称</li>
-<li>getBundleAssetName : 本地加载bundle时，获取asset文件的文件名</li>
-<li>getUseDeveloperSupport : 是否开启debug模式</li>
-<li>getPackages :  配置js和native通信module，必须包含MainReactPackage</li>
-<li>ReactInstanceManager :  与js通信的管理类，CatalystInstance是一个异步JSC桥梁，提供了调用js方法的JavaAPI</li>
-</ul>
-<p>每个ReactActivity都需要一个Host配置，对应不同的jsbundle配置。在ReactActivity中默认会去获取Application中的ReactNativeHost，默认Application需要继承ReactApplication接口，并实现其getReactNativeHost方法。如果我们不想在Application中实现该接口(必须我们有多个RN组件需要多个ReactNativeHost对象)，就必须重写ReactActivity中getReactNativeHost方法。</p>
-<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">protected</span> ReactNativeHost <span class="hljs-title">getReactNativeHost</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">return</span> ((ReactApplication) getPlainActivity().getApplication()).getReactNativeHost();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="加载RN组件"><a href="#加载RN组件" class="headerlink" title="加载RN组件"></a>加载RN组件</h4><h5 id="启动ReactActivity"><a href="#启动ReactActivity" class="headerlink" title="启动ReactActivity"></a>启动ReactActivity</h5><p>首先启动ReactActivity，创建ReactActivity时会同时创建ReactActivityDelegate，ReactActivity的getMainComponentName方法对应的是js组件的注册名称(js中AppRegistry.registerComponent注册时的appKey)，在ReactActivity的onCreate回调中，开始加载该js组件。</p>
-<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onCreate</span><span class="hljs-params">(Bundle savedInstanceState)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">if</span> (mMainComponentName != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">    loadApp(mMainComponentName);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title">loadApp</span><span class="hljs-params">(String appKey)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">if</span> (mReactRootView != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalStateException(<span class="hljs-string">"Cannot loadApp while app is already running."</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// 创建根布局</span></span><br><span class="line">  mReactRootView = createRootView();</span><br><span class="line">  <span class="hljs-comment">// 启动该js组件，加载jsbundle文件，并通过jsc来构建virtualDom来解析js组件</span></span><br><span class="line">  <span class="hljs-comment">// 将js控件解析成对应的View，并添加到根布局上，组成视图树。</span></span><br><span class="line">  mReactRootView.startReactApplication(</span><br><span class="line">    <span class="hljs-comment">// 创建js通信管理器</span></span><br><span class="line">    getReactNativeHost().getReactInstanceManager(),</span><br><span class="line">    appKey,</span><br><span class="line">    getLaunchOptions());</span><br><span class="line">  <span class="hljs-comment">// 将解析完成的布局放到Activity中渲染</span></span><br><span class="line">  getPlainActivity().setContentView(mReactRootView);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h5 id="创建ReactRootView"><a href="#创建ReactRootView" class="headerlink" title="创建ReactRootView"></a>创建ReactRootView</h5><p>ReactRootView继承FrameLayout，是整个RN组件的根布局，解析出来的View都会添加到该布局上。该View主要处理了测量和事件的分发拦截，包括触摸、手势、焦点等。还设置了OnGlobalLayout监听，该方法会在布局重新layout或者系统UI发生改变时触发(具体在ViewRootImpl.performTraversals中)，在该监听中将发生的改变通知给js模块。</p>
-<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta">@Override</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onGlobalLayout</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">if</span> (mReactInstanceManager == <span class="hljs-keyword">null</span> || !mIsAttachedToInstance ||</span><br><span class="line">    mReactInstanceManager.getCurrentReactContext() == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">    <span class="hljs-keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// 键盘状态改变</span></span><br><span class="line">  checkForKeyboardEvents();</span><br><span class="line">  <span class="hljs-comment">// 屏幕方向改变</span></span><br><span class="line">  checkForDeviceOrientationChanges();</span><br><span class="line">  <span class="hljs-comment">// 屏幕分辨率改变</span></span><br><span class="line">  checkForDeviceDimensionsChanges();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h5 id="创建ReactInstanceManager"><a href="#创建ReactInstanceManager" class="headerlink" title="创建ReactInstanceManager"></a>创建ReactInstanceManager</h5><p>ReactInstanceManager是一个CatalystInstance实例的管理者，而CatalysInstance是一个异步的JSC桥梁，负责与js进行通信，调用js方法。</p>
-        </div>
-        
-        
-        
-        <div class="level is-mobile">
-            <div class="level-start">
-                <div class="level-item">
-                    <a class="button is-size-7 is-light"
-                        href="/Android-ReactNative启动流程/#more">阅读更多</a>
-                </div>
-            </div>
-        </div>
-        
-        
-    </div>
-</div>
-
-
-
-
-
-
-
-
 
     
 <div class="card card-transparent">
@@ -584,6 +589,8 @@
             <li><a class="pagination-link has-text-black-ter" href="/page/5/">5</a></li>
             
             <li><a class="pagination-link has-text-black-ter" href="/page/6/">6</a></li>
+            
+            <li><a class="pagination-link has-text-black-ter" href="/page/7/">7</a></li>
             
         </ul>
     </nav>
@@ -633,7 +640,7 @@
                         文章
                     </p>
                     <p class="title has-text-weight-normal">
-                        39
+                        45
                     </p>
                 </div>
             </div>
@@ -685,7 +692,7 @@
                 <span class="level-item">内功心法（CS基础）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">9</span>
+                <span class="level-item tag">13</span>
             </span>
         </a><ul><li>
         <a class="level is-marginless" href="/categories/内功心法（CS基础）/北冥神功（编程语言）/">
@@ -693,7 +700,7 @@
                 <span class="level-item">北冥神功（编程语言）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">2</span>
+                <span class="level-item tag">4</span>
             </span>
         </a></li><li>
         <a class="level is-marginless" href="/categories/内功心法（CS基础）/神照功（网络协议）/">
@@ -701,7 +708,7 @@
                 <span class="level-item">神照功（网络协议）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">7</span>
+                <span class="level-item tag">9</span>
             </span>
         </a></li></ul></li><li>
         <a class="level is-marginless" href="/categories/刀枪棍棒（Android）/">
@@ -709,7 +716,7 @@
                 <span class="level-item">刀枪棍棒（Android）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">11</span>
+                <span class="level-item tag">13</span>
             </span>
         </a><ul><li>
         <a class="level is-marginless" href="/categories/刀枪棍棒（Android）/五虎断门刀（Android原生）/">
@@ -717,7 +724,7 @@
                 <span class="level-item">五虎断门刀（Android原生）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">7</span>
+                <span class="level-item tag">9</span>
             </span>
         </a></li><li>
         <a class="level is-marginless" href="/categories/刀枪棍棒（Android）/伏魔杖法（Flutter）/">
@@ -770,7 +777,7 @@
             
             <a href="/音视频开发之H.264码流结构与编码原理/" class="media-left">
                 <p class="image is-64x64">
-                    <img class="thumbnail" src="/images/19.jpg" alt="音视频开发之H.264码流结构与编码原理">
+                    <img class="thumbnail" src="/images/23.jpg" alt="音视频开发之H.264码流结构与编码原理">
                 </p>
             </a>
             
@@ -895,6 +902,28 @@
                 </li>
                 
                 <li>
+                    <a class="level is-marginless" href="/archives/2020/06/">
+                        <span class="level-start">
+                            <span class="level-item">六月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">2</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/05/">
+                        <span class="level-start">
+                            <span class="level-item">五月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">2</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
                     <a class="level is-marginless" href="/archives/2020/04/">
                         <span class="level-start">
                             <span class="level-item">四月 2020</span>
@@ -922,7 +951,7 @@
                             <span class="level-item">二月 2020</span>
                         </span>
                         <span class="level-end">
-                            <span class="level-item tag">1</span>
+                            <span class="level-item tag">3</span>
                         </span>
                     </a>
                 </li>
@@ -1066,7 +1095,7 @@
             
             <a href="/音视频开发之H.264码流结构与编码原理/" class="media-left">
                 <p class="image is-64x64">
-                    <img class="thumbnail" src="/images/19.jpg" alt="音视频开发之H.264码流结构与编码原理">
+                    <img class="thumbnail" src="/images/23.jpg" alt="音视频开发之H.264码流结构与编码原理">
                 </p>
             </a>
             
@@ -1191,6 +1220,28 @@
                 </li>
                 
                 <li>
+                    <a class="level is-marginless" href="/archives/2020/06/">
+                        <span class="level-start">
+                            <span class="level-item">六月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">2</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/05/">
+                        <span class="level-start">
+                            <span class="level-item">五月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">2</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
                     <a class="level is-marginless" href="/archives/2020/04/">
                         <span class="level-start">
                             <span class="level-item">四月 2020</span>
@@ -1218,7 +1269,7 @@
                             <span class="level-item">二月 2020</span>
                         </span>
                         <span class="level-end">
-                            <span class="level-item tag">1</span>
+                            <span class="level-item tag">3</span>
                         </span>
                     </a>
                 </li>

@@ -141,6 +141,156 @@
     
 <div class="card">
     
+    <div class="card-image">
+        <a href="/网络协议详解之TCP/" class="image is-7by1">
+        <img class="thumbnail" src="/images/22.jpg" alt="网络协议详解之TCP">
+        </a>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-06-21T16:00:00.000Z">2020-06-22</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/内功心法（CS基础）/">内功心法（CS基础）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/内功心法（CS基础）/神照功（网络协议）/">神照功（网络协议）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    17 分钟 读完 (大约 2553 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/网络协议详解之TCP/">网络协议详解之TCP</a>
+            
+        </h1>
+        <div class="content">
+            <p>TCP是一个面向连接的、可靠的、流协议。</p>
+<h4 id="IP协议"><a href="#IP协议" class="headerlink" title="IP协议"></a>IP协议</h4><p>TCP和UDP都是基于IP协议的传输层协议，而IP协议是一个不可靠、无连接的协议。</p>
+<ul>
+<li><strong>不可靠</strong>是指IP协议不保证数据能成功到达目的地。比如当某个路由器缓冲区暂时用完了，IP协议会丢弃该数据报。</li>
+<li><strong>无连接</strong>是指IP协议不维护任何关于后续数据报的状态信息，每个数据报的处理都是独立的，也就是说数据报可以不按照发送顺序来接收。比如A主机发送了1、2两个数据报，由于每个数据报都是独立的进行路由选择，可能2比1会先到达。</li>
+</ul>
+<p>UDP协议并没有在上层做出更多的改进，保留着IP协议的这些特性，但是TCP协议不同。</p>
+<h4 id="TCP协议"><a href="#TCP协议" class="headerlink" title="TCP协议"></a>TCP协议</h4><p>TCP协议在IP协议的基础上，提供了面向连接、可靠的服务。</p>
+<ul>
+<li><p><strong>面向连接</strong>意味着两个使用TCP的应用在交换数据之前，需要先建立一个TCP连接，因此广播与多播不能使用在TCP。</p>
+</li>
+<li><p><strong>可靠性</strong></p>
+<ol>
+<li>应用数据数据被分割成TCP适合发送的数据块，TCP将数据分割成多个段（UDP不会进行数据分割）。</li>
+<li>当TCP发送一段数据后，会启动一个定时器，等待目的主机确认收到这个数据段，如果不能及时收到确认，则重发该段。</li>
+<li>当目标主机的TCP收到数据后，会在稍后发送一个确认消息给发送端主机。</li>
+<li>验证数据段，如果验证有误则丢弃，不确认收到，等待发送端重发。</li>
+<li>因为IP层数据是无序的，所以TCP层会对收到的数据进行重新排序，将排序后的数据交给应用层。</li>
+<li>IP层数据报可能会重复，所以TCP层需要丢弃重复数据。</li>
+<li>提供流量控制，TCP连接的每一方都有固定大小的缓冲区，TCP接收端不允许TCP发送端发送超出接收端缓冲区大小的数据。</li></ol></li></ul>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/网络协议详解之TCP/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-image">
+        <a href="/网络协议详解之分层/" class="image is-7by1">
+        <img class="thumbnail" src="/images/25.jpg" alt="网络协议详解之分层">
+        </a>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-06-11T16:00:00.000Z">2020-06-12</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/内功心法（CS基础）/">内功心法（CS基础）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/内功心法（CS基础）/神照功（网络协议）/">神照功（网络协议）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    13 分钟 读完 (大约 1970 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/网络协议详解之分层/">网络协议详解之分层</a>
+            
+        </h1>
+        <div class="content">
+            <h3 id="一条HTTP请求的旅途"><a href="#一条HTTP请求的旅途" class="headerlink" title="一条HTTP请求的旅途"></a>一条HTTP请求的旅途</h3><p>当我们在浏览器中输入一个网址访问它，请求是如何从我们主机的浏览器发送到对应服务器上的应用程序上呢？</p>
+<p>主要分为下面三个步骤：</p>
+<ol>
+<li>客户端主机中，将一个HTTP网络请求从本机的应用上经过一层层的包装，通过网卡将数据发送出去。</li>
+<li>路由器中，将数据报经过一个个路由跳转，到达目标服务器主机的网卡。</li>
+<li>服务端主机中，将数据报进行一层层的解析，到达了目标服务器的HTTP服务上处理。</li>
+</ol>
+<p><img src="/images/网络协议详解之分层.resources/网络请求流程.png" alt="4109cccf9f5eb9a279c2caa5ef7cb015"></p>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/网络协议详解之分层/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
     <div class="card-content article ">
         
         <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
@@ -636,7 +786,7 @@
                         文章
                     </p>
                     <p class="title has-text-weight-normal">
-                        39
+                        45
                     </p>
                 </div>
             </div>
@@ -688,7 +838,7 @@
                 <span class="level-item">内功心法（CS基础）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">9</span>
+                <span class="level-item tag">13</span>
             </span>
         </a><ul><li>
         <a class="level is-marginless" href="/categories/内功心法（CS基础）/北冥神功（编程语言）/">
@@ -696,7 +846,7 @@
                 <span class="level-item">北冥神功（编程语言）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">2</span>
+                <span class="level-item tag">4</span>
             </span>
         </a></li><li>
         <a class="level is-marginless" href="/categories/内功心法（CS基础）/神照功（网络协议）/">
@@ -704,7 +854,7 @@
                 <span class="level-item">神照功（网络协议）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">7</span>
+                <span class="level-item tag">9</span>
             </span>
         </a></li></ul></li><li>
         <a class="level is-marginless" href="/categories/刀枪棍棒（Android）/">
@@ -712,7 +862,7 @@
                 <span class="level-item">刀枪棍棒（Android）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">11</span>
+                <span class="level-item tag">13</span>
             </span>
         </a><ul><li>
         <a class="level is-marginless" href="/categories/刀枪棍棒（Android）/五虎断门刀（Android原生）/">
@@ -720,7 +870,7 @@
                 <span class="level-item">五虎断门刀（Android原生）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">7</span>
+                <span class="level-item tag">9</span>
             </span>
         </a></li><li>
         <a class="level is-marginless" href="/categories/刀枪棍棒（Android）/伏魔杖法（Flutter）/">
@@ -773,7 +923,7 @@
             
             <a href="/音视频开发之H.264码流结构与编码原理/" class="media-left">
                 <p class="image is-64x64">
-                    <img class="thumbnail" src="/images/19.jpg" alt="音视频开发之H.264码流结构与编码原理">
+                    <img class="thumbnail" src="/images/23.jpg" alt="音视频开发之H.264码流结构与编码原理">
                 </p>
             </a>
             
@@ -898,6 +1048,28 @@
                 </li>
                 
                 <li>
+                    <a class="level is-marginless" href="/archives/2020/06/">
+                        <span class="level-start">
+                            <span class="level-item">六月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">2</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/05/">
+                        <span class="level-start">
+                            <span class="level-item">五月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">2</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
                     <a class="level is-marginless" href="/archives/2020/04/">
                         <span class="level-start">
                             <span class="level-item">四月 2020</span>
@@ -925,7 +1097,7 @@
                             <span class="level-item">二月 2020</span>
                         </span>
                         <span class="level-end">
-                            <span class="level-item tag">1</span>
+                            <span class="level-item tag">3</span>
                         </span>
                     </a>
                 </li>
@@ -1069,7 +1241,7 @@
             
             <a href="/音视频开发之H.264码流结构与编码原理/" class="media-left">
                 <p class="image is-64x64">
-                    <img class="thumbnail" src="/images/19.jpg" alt="音视频开发之H.264码流结构与编码原理">
+                    <img class="thumbnail" src="/images/23.jpg" alt="音视频开发之H.264码流结构与编码原理">
                 </p>
             </a>
             
@@ -1194,6 +1366,28 @@
                 </li>
                 
                 <li>
+                    <a class="level is-marginless" href="/archives/2020/06/">
+                        <span class="level-start">
+                            <span class="level-item">六月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">2</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/05/">
+                        <span class="level-start">
+                            <span class="level-item">五月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">2</span>
+                        </span>
+                    </a>
+                </li>
+                
+                <li>
                     <a class="level is-marginless" href="/archives/2020/04/">
                         <span class="level-start">
                             <span class="level-item">四月 2020</span>
@@ -1221,7 +1415,7 @@
                             <span class="level-item">二月 2020</span>
                         </span>
                         <span class="level-end">
-                            <span class="level-item tag">1</span>
+                            <span class="level-item tag">3</span>
                         </span>
                     </a>
                 </li>

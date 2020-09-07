@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html  lang="zh">
+
+<head>
+    <meta charset="utf-8" />
+
+<meta name="generator" content="Hexo 3.9.0" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<title>Android多媒体深入之ALooper分析 - 富贵山庄</title>
+
+
+    <meta name="description" content="在media模块中，会涉及到很多多线程的场景，所以在media模块中，实现了一套与Java层的Looper/Handler一样的机制，相关类有ALooper/AHandler/AMessage。（源码在av/media/libstagefright/foundation中） ALooperALooper声明1234567891011121314151617181920212223242526272">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android多媒体深入之ALooper分析">
+<meta property="og:url" content="https://witgao.com/Android多媒体深入之ALooper分析/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:description" content="在media模块中，会涉及到很多多线程的场景，所以在media模块中，实现了一套与Java层的Looper/Handler一样的机制，相关类有ALooper/AHandler/AMessage。（源码在av/media/libstagefright/foundation中） ALooperALooper声明1234567891011121314151617181920212223242526272">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://witgao.com/images/19.jpg">
+<meta property="og:updated_time" content="2020-09-07T14:38:14.288Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android多媒体深入之ALooper分析">
+<meta name="twitter:description" content="在media模块中，会涉及到很多多线程的场景，所以在media模块中，实现了一套与Java层的Looper/Handler一样的机制，相关类有ALooper/AHandler/AMessage。（源码在av/media/libstagefright/foundation中） ALooperALooper声明1234567891011121314151617181920212223242526272">
+<meta name="twitter:image" content="https://witgao.com/images/19.jpg">
+
+
+
+
+
+
+
+<link rel="icon" href="/images/favicon1.svg">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/default.css">
+
+
+    
+    
+<style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+    
+    
+    
+    
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+    
+    
+    
+    
+    
+    
+    
+    <link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+    
+    
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body class="is-3-column">
+    <nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="/images/logo2.png" alt="Android多媒体深入之ALooper分析" height="28">
+            
+            </a>
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item"
+                href="/">燕子坞</a>
+                
+                <a class="navbar-item"
+                href="/archives">听香水榭</a>
+                
+                <a class="navbar-item"
+                href="/categories">还施水阁</a>
+                
+                <a class="navbar-item"
+                href="/about">思过崖</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    <a class="navbar-item" target="_blank" title="Download on GitHub" href="https://github.com/witgao/blog">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                <a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;">
+                    <i class="fas fa-list-ul"></i>
+                </a>
+                
+                
+                <a class="navbar-item search" title="搜索" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-9-widescreen has-order-2 column-main">
+<div class="card">
+    
+    <div class="card-image">
+        <span  class="image is-7by1">
+        <img class="thumbnail" src="/images/19.jpg" alt="Android多媒体深入之ALooper分析">
+        </span>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-02-04T16:00:00.000Z">2020-02-05</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/">刀枪棍棒（Android）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/五虎断门刀（Android原生）/">五虎断门刀（Android原生）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    19 分钟 读完 (大约 2907 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            Android多媒体深入之ALooper分析
+            
+        </h1>
+        <div class="content">
+            <p>在media模块中，会涉及到很多多线程的场景，所以在media模块中，实现了一套与Java层的Looper/Handler一样的机制，相关类有ALooper/AHandler/AMessage。（源码在av/media/libstagefright/foundation中）</p>
+<h4 id="ALooper"><a href="#ALooper" class="headerlink" title="ALooper"></a>ALooper</h4><h5 id="ALooper声明"><a href="#ALooper声明" class="headerlink" title="ALooper声明"></a>ALooper声明</h5><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">ALooper</span> :</span> <span class="hljs-keyword">public</span> RefBase &#123;</span><br><span class="line">    <span class="hljs-keyword">typedef</span> <span class="hljs-keyword">int32_t</span> event_id;</span><br><span class="line">    <span class="hljs-keyword">typedef</span> <span class="hljs-keyword">int32_t</span> handler_id;</span><br><span class="line"></span><br><span class="line">    ALooper();</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// Takes effect in a subsequent call to start().</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">setName</span><span class="hljs-params">(<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *name)</span></span>;</span><br><span class="line">    <span class="hljs-comment">// 注册AHandler和当前ALooper的映射关系</span></span><br><span class="line">    <span class="hljs-function">handler_id <span class="hljs-title">registerHandler</span><span class="hljs-params">(<span class="hljs-keyword">const</span> sp&lt;AHandler&gt; &amp;handler)</span></span>;</span><br><span class="line">    <span class="hljs-comment">// 解注册该HandlerID的映射关系</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">unregisterHandler</span><span class="hljs-params">(handler_id handlerID)</span></span>;</span><br><span class="line">    <span class="hljs-comment">// 启动线程，并开始loop轮询</span></span><br><span class="line">    <span class="hljs-keyword">status_t</span> start(</span><br><span class="line">            <span class="hljs-keyword">bool</span> runOnCallingThread = <span class="hljs-literal">false</span>,</span><br><span class="line">            <span class="hljs-keyword">bool</span> canCallJava = <span class="hljs-literal">false</span>,</span><br><span class="line">            <span class="hljs-keyword">int32_t</span> priority = PRIORITY_DEFAULT</span><br><span class="line">            );</span><br><span class="line">    <span class="hljs-comment">// 退出线程</span></span><br><span class="line">    <span class="hljs-keyword">status_t</span> stop();</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">static</span> int64_t <span class="hljs-title">GetNowUs</span><span class="hljs-params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *<span class="hljs-title">getName</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span> </span>&#123;</span><br><span class="line">        <span class="hljs-keyword">return</span> mName.c_str();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">protected</span>:</span><br><span class="line">    <span class="hljs-keyword">virtual</span> ~ALooper();</span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">private</span>:</span><br><span class="line">    <span class="hljs-keyword">friend</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">AMessage</span>;</span>       <span class="hljs-comment">// post()</span></span><br><span class="line"></span><br><span class="line">    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Event</span> &#123;</span></span><br><span class="line">        <span class="hljs-keyword">int64_t</span> mWhenUs;</span><br><span class="line">        sp&lt;AMessage&gt; mMessage;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="hljs-comment">// 锁</span></span><br><span class="line">    Mutex mLock;</span><br><span class="line">    <span class="hljs-comment">// 互斥量</span></span><br><span class="line">    Condition mQueueChangedCondition;</span><br><span class="line">    <span class="hljs-comment">// 线程name</span></span><br><span class="line">    AString mName;</span><br><span class="line">    <span class="hljs-comment">// 事件队列</span></span><br><span class="line">    List&lt;Event&gt; mEventQueue;</span><br><span class="line">    <span class="hljs-comment">// 定义内部类</span></span><br><span class="line">    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">LooperThread</span>;</span></span><br><span class="line">    <span class="hljs-comment">// 作为Loop的线程</span></span><br><span class="line">    sp&lt;LooperThread&gt; mThread;</span><br><span class="line">    <span class="hljs-comment">// 是否在调用线程中直接loop</span></span><br><span class="line">    <span class="hljs-keyword">bool</span> mRunningLocally;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// use a separate lock for reply handling, as it is always on another thread</span></span><br><span class="line">    <span class="hljs-comment">// use a central lock, however, to avoid creating a mutex for each reply</span></span><br><span class="line">    Mutex mRepliesLock;</span><br><span class="line">    Condition mRepliesCondition;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// START --- methods used only by AMessage</span></span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// posts a message on this looper with the given timeout</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">post</span><span class="hljs-params">(<span class="hljs-keyword">const</span> sp&lt;AMessage&gt; &amp;msg, <span class="hljs-keyword">int64_t</span> delayUs)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// creates a reply token to be used with this looper</span></span><br><span class="line">    sp&lt;AReplyToken&gt; createReplyToken();</span><br><span class="line">    <span class="hljs-comment">// waits for a response for the reply token.  If status is OK, the response</span></span><br><span class="line">    <span class="hljs-comment">// is stored into the supplied variable.  Otherwise, it is unchanged.</span></span><br><span class="line">    <span class="hljs-keyword">status_t</span> awaitResponse(<span class="hljs-keyword">const</span> sp&lt;AReplyToken&gt; &amp;replyToken, sp&lt;AMessage&gt; *response);</span><br><span class="line">    <span class="hljs-comment">// posts a reply for a reply token.  If the reply could be successfully posted,</span></span><br><span class="line">    <span class="hljs-comment">// it returns OK. Otherwise, it returns an error value.</span></span><br><span class="line">    <span class="hljs-keyword">status_t</span> postReply(<span class="hljs-keyword">const</span> sp&lt;AReplyToken&gt; &amp;replyToken, <span class="hljs-keyword">const</span> sp&lt;AMessage&gt; &amp;msg);</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// END --- methods used only by AMessage</span></span><br><span class="line">    </span><br><span class="line">    <span class="hljs-comment">// 轮询处理事件</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">bool</span> <span class="hljs-title">loop</span><span class="hljs-params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    DISALLOW_EVIL_CONSTRUCTORS(ALooper);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<a id="more"></a>
+<h5 id="LooperThread"><a href="#LooperThread" class="headerlink" title="LooperThread"></a>LooperThread</h5><p>LooperThread是一个线程类的子类，是Looper轮询的线程实现。<br><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">ALooper</span>:</span>:LooperThread : <span class="hljs-keyword">public</span> Thread &#123;</span><br><span class="line">    LooperThread(ALooper *looper, <span class="hljs-keyword">bool</span> canCallJava)</span><br><span class="line">        : Thread(canCallJava),</span><br><span class="line">          <span class="hljs-comment">// 创建线程，保存ALooper对象</span></span><br><span class="line">          mLooper(looper),</span><br><span class="line">          mThreadId(<span class="hljs-literal">NULL</span>) &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">virtual</span> status_t <span class="hljs-title">readyToRun</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">        <span class="hljs-comment">// 保存当前线程ID</span></span><br><span class="line">        mThreadId = androidGetThreadId();</span><br><span class="line">        <span class="hljs-comment">// 运行当前线程</span></span><br><span class="line">        <span class="hljs-keyword">return</span> Thread::readyToRun();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">virtual</span> <span class="hljs-keyword">bool</span> <span class="hljs-title">threadLoop</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">        <span class="hljs-comment">// loop 轮询</span></span><br><span class="line">        <span class="hljs-keyword">return</span> mLooper-&gt;loop();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">bool</span> <span class="hljs-title">isCurrentThread</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span> </span>&#123;</span><br><span class="line">        <span class="hljs-comment">// 调用该方法的线程是否是LooperThread自己</span></span><br><span class="line">        <span class="hljs-keyword">return</span> mThreadId == androidGetThreadId();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">protected</span>:</span><br><span class="line">    <span class="hljs-keyword">virtual</span> ~LooperThread() &#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">private</span>:</span><br><span class="line">    ALooper *mLooper; <span class="hljs-comment">// ALooper对象</span></span><br><span class="line">    <span class="hljs-keyword">android_thread_id_t</span> mThreadId; <span class="hljs-comment">// 当前线程ID</span></span><br><span class="line"></span><br><span class="line">    DISALLOW_EVIL_CONSTRUCTORS(LooperThread);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<h5 id="ALooperRoster"><a href="#ALooperRoster" class="headerlink" title="ALooperRoster"></a>ALooperRoster</h5><p>ALooper的辅助类，用来管理Handler的注册和解注册。</p>
+<p>ALooper中定义了一个全局的ALooperRoster变量，所以ALooperRoster对象只会有一个，它来管理所有创建的AHandler和ALooper的关系。<br><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ALooperRoster gLooperRoster;</span><br></pre></td></tr></table></figure></p>
+<h6 id="registerHandler"><a href="#registerHandler" class="headerlink" title="registerHandler"></a>registerHandler</h6><p>由于ALooperRoster只有一个实例对象，所以HandlerId是不会重复的，每个AHandler都有自己唯一的ID。HandlerInfo用来存储ALooper和AHandler的映射关系，需要注意的是HandlerInfo中存储的对象是弱引用。mHandlers字典中存储了HandlerID和HandlerInfo的映射关系。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">ALooper::handler_id ALooperRoster::registerHandler(</span><br><span class="line">        <span class="hljs-keyword">const</span> sp&lt;ALooper&gt; &amp;looper, <span class="hljs-keyword">const</span> sp&lt;AHandler&gt; &amp;handler) &#123;</span><br><span class="line">    Mutex::<span class="hljs-function">Autolock <span class="hljs-title">autoLock</span><span class="hljs-params">(mLock)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (handler-&gt;id() != <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        CHECK(!<span class="hljs-string">"A handler must only be registered once."</span>);</span><br><span class="line">        <span class="hljs-keyword">return</span> INVALID_OPERATION;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-comment">// 创建HandlerInfo，保存ALooper和AHandler的映射关系</span></span><br><span class="line">    HandlerInfo info;</span><br><span class="line">    <span class="hljs-comment">// 保存的是弱引用</span></span><br><span class="line">    info.mLooper = looper;</span><br><span class="line">    info.mHandler = handler;</span><br><span class="line">    <span class="hljs-comment">// 将HandlerID自增，作为当前HandlerInfo的对应ID</span></span><br><span class="line">    ALooper::handler_id handlerID = mNextHandlerID++;</span><br><span class="line">    <span class="hljs-comment">// 将ID与HandlerInfo保存到字典中</span></span><br><span class="line">    mHandlers.add(handlerID, info);</span><br><span class="line">    <span class="hljs-comment">// 通知AHandler，其映射的ID和ALooper</span></span><br><span class="line">    handler-&gt;setID(handlerID, looper);</span><br><span class="line">    <span class="hljs-comment">// 返回当前AHandler的ID</span></span><br><span class="line">    <span class="hljs-keyword">return</span> handlerID;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h6 id="unregisterHandler"><a href="#unregisterHandler" class="headerlink" title="unregisterHandler"></a>unregisterHandler</h6><p>通过ID找到唯一的HandlerInfo，从mHandlers字典中删除该映射关系。<br><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">void</span> ALooperRoster::unregisterHandler(ALooper::handler_id handlerID) &#123;</span><br><span class="line">    Mutex::<span class="hljs-function">Autolock <span class="hljs-title">autoLock</span><span class="hljs-params">(mLock)</span></span>;</span><br><span class="line">    <span class="hljs-comment">// 从字典中查询该HandlerID对应的索引</span></span><br><span class="line">    <span class="hljs-keyword">ssize_t</span> index = mHandlers.indexOfKey(handlerID);</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (index &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        <span class="hljs-keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-comment">// 取出存储的HandlerInfo</span></span><br><span class="line">    <span class="hljs-keyword">const</span> HandlerInfo &amp;info = mHandlers.valueAt(index);</span><br><span class="line">    <span class="hljs-comment">// 将弱引用转换成强引用，如果强引用有值，则表明该对象并没有被销毁</span></span><br><span class="line">    sp&lt;AHandler&gt; handler = info.mHandler.promote();</span><br><span class="line">    <span class="hljs-comment">// 清除AHandler与ALooper的映射关系</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (handler != <span class="hljs-literal">NULL</span>) &#123;</span><br><span class="line">        handler-&gt;setID(<span class="hljs-number">0</span>, <span class="hljs-literal">NULL</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-comment">// 清除HandlerInfo</span></span><br><span class="line">    mHandlers.removeItemsAt(index);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h6 id="unregisterStaleHandlers"><a href="#unregisterStaleHandlers" class="headerlink" title="unregisterStaleHandlers"></a>unregisterStaleHandlers</h6><p>每当创建一个新的ALooper时，都会检查ALooperRoster中是否有过时的ALooper，如果有则清除。防止有些地方注册了AHandler，但是没有解除注册。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">void</span> ALooperRoster::unregisterStaleHandlers() &#123;</span><br><span class="line"></span><br><span class="line">    Vector&lt;sp&lt;ALooper&gt; &gt; activeLoopers;</span><br><span class="line">    &#123;</span><br><span class="line">        Mutex::<span class="hljs-function">Autolock <span class="hljs-title">autoLock</span><span class="hljs-params">(mLock)</span></span>;</span><br><span class="line">        <span class="hljs-comment">// 遍历所有注册活跃的ALooper</span></span><br><span class="line">        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">size_t</span> i = mHandlers.size(); i &gt; <span class="hljs-number">0</span>;) &#123;</span><br><span class="line">            i--;</span><br><span class="line">            <span class="hljs-keyword">const</span> HandlerInfo &amp;info = mHandlers.valueAt(i);</span><br><span class="line">            <span class="hljs-comment">// 将弱引用转换成强引用</span></span><br><span class="line">            sp&lt;ALooper&gt; looper = info.mLooper.promote();</span><br><span class="line">            <span class="hljs-comment">// 如果为空，则表明该ALooper已经被释放了，直接删除mHandlers中存储的映射关系。</span></span><br><span class="line">            <span class="hljs-keyword">if</span> (looper == <span class="hljs-literal">NULL</span>) &#123;</span><br><span class="line">                ALOGV(<span class="hljs-string">"Unregistering stale handler %d"</span>, mHandlers.keyAt(i));</span><br><span class="line">                mHandlers.removeItemsAt(i);</span><br><span class="line">            &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">                <span class="hljs-comment">// At this point 'looper' might be the only sp&lt;&gt; keeping</span></span><br><span class="line">                <span class="hljs-comment">// the object alive. To prevent it from going out of scope</span></span><br><span class="line">                <span class="hljs-comment">// and having ~ALooper call this method again recursively</span></span><br><span class="line">                <span class="hljs-comment">// and then deadlocking because of the Autolock above, add</span></span><br><span class="line">                <span class="hljs-comment">// it to a Vector which will go out of scope after the lock</span></span><br><span class="line">                <span class="hljs-comment">// has been released.</span></span><br><span class="line">                activeLoopers.add(looper);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="ALooper构造和析构"><a href="#ALooper构造和析构" class="headerlink" title="ALooper构造和析构"></a>ALooper构造和析构</h5><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">ALooper::ALooper()</span><br><span class="line">    : mRunningLocally(<span class="hljs-literal">false</span>) &#123;</span><br><span class="line">    <span class="hljs-comment">// clean up stale AHandlers. Doing it here instead of in the destructor avoids</span></span><br><span class="line">    <span class="hljs-comment">// the side effect of objects being deleted from the unregister function recursively.</span></span><br><span class="line">    <span class="hljs-comment">// 检查并清除在ALooperRoster中存储的过时的映射关系</span></span><br><span class="line">    gLooperRoster.unregisterStaleHandlers();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">ALooper::~ALooper() &#123;   </span><br><span class="line">    <span class="hljs-comment">// 退出线程</span></span><br><span class="line">    stop();</span><br><span class="line">    <span class="hljs-comment">// stale AHandlers are now cleaned up in the constructor of the next ALooper to come along</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="ALooper-start"><a href="#ALooper-start" class="headerlink" title="ALooper.start"></a>ALooper.start</h5><p>runOnCallingThread参数控制是在当前调用线程进行loop，还是新启线程进行loop，如果loop方法返回false，则会退出loop。<br><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">status_t</span> ALooper::start(</span><br><span class="line">        <span class="hljs-keyword">bool</span> runOnCallingThread, <span class="hljs-keyword">bool</span> canCallJava, <span class="hljs-keyword">int32_t</span> priority) &#123;</span><br><span class="line">    <span class="hljs-comment">// 是运行在当前调用的线程中，还是新启线程</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (runOnCallingThread) &#123;</span><br><span class="line">        &#123;</span><br><span class="line">            Mutex::<span class="hljs-function">Autolock <span class="hljs-title">autoLock</span><span class="hljs-params">(mLock)</span></span>;</span><br><span class="line"></span><br><span class="line">            <span class="hljs-keyword">if</span> (mThread != <span class="hljs-literal">NULL</span> || mRunningLocally) &#123;</span><br><span class="line">                <span class="hljs-keyword">return</span> INVALID_OPERATION;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            mRunningLocally = <span class="hljs-literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="hljs-comment">// 在当前调用线程中开始loop轮询，如果loop返回false，则停止轮询</span></span><br><span class="line">        <span class="hljs-keyword">do</span> &#123;</span><br><span class="line">        &#125; <span class="hljs-keyword">while</span> (loop());</span><br><span class="line"></span><br><span class="line">        <span class="hljs-keyword">return</span> OK;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    Mutex::<span class="hljs-function">Autolock <span class="hljs-title">autoLock</span><span class="hljs-params">(mLock)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (mThread != <span class="hljs-literal">NULL</span> || mRunningLocally) &#123;</span><br><span class="line">        <span class="hljs-keyword">return</span> INVALID_OPERATION;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-comment">// 创建loop轮询线程</span></span><br><span class="line">    mThread = <span class="hljs-keyword">new</span> LooperThread(<span class="hljs-keyword">this</span>, canCallJava);</span><br><span class="line">    <span class="hljs-comment">// 启动loop轮询线程，开始轮询</span></span><br><span class="line">    <span class="hljs-keyword">status_t</span> err = mThread-&gt;run(</span><br><span class="line">            mName.empty() ? <span class="hljs-string">"ALooper"</span> : mName.c_str(), priority);</span><br><span class="line">    <span class="hljs-keyword">if</span> (err != OK) &#123;</span><br><span class="line">        mThread.clear();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">return</span> err;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h5 id="Event"><a href="#Event" class="headerlink" title="Event"></a>Event</h5><p>Event是对AMessage的一个包装，每个发送到ALooper上的AMessage都被包装成Event，存储到一个List中。<br><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Event</span> &#123;</span></span><br><span class="line">    <span class="hljs-keyword">int64_t</span> mWhenUs; <span class="hljs-comment">// 事件处理的时间</span></span><br><span class="line">    sp&lt;AMessage&gt; mMessage; <span class="hljs-comment">// 接收到的事件</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<h5 id="ALooper-loop"><a href="#ALooper-loop" class="headerlink" title="ALooper.loop"></a>ALooper.loop</h5><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">bool</span> ALooper::loop() &#123;</span><br><span class="line">    Event event;</span><br><span class="line"></span><br><span class="line">    &#123;</span><br><span class="line">        Mutex::<span class="hljs-function">Autolock <span class="hljs-title">autoLock</span><span class="hljs-params">(mLock)</span></span>;</span><br><span class="line">        <span class="hljs-comment">// 如果线程对象已经为空，则说明线程已经被销毁了，退出轮询</span></span><br><span class="line">        <span class="hljs-keyword">if</span> (mThread == <span class="hljs-literal">NULL</span> &amp;&amp; !mRunningLocally) &#123;</span><br><span class="line">            <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="hljs-comment">// 如果当前Event队列为空，则进行wait等待</span></span><br><span class="line">        <span class="hljs-keyword">if</span> (mEventQueue.empty()) &#123;</span><br><span class="line">            mQueueChangedCondition.wait(mLock);</span><br><span class="line">            <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="hljs-comment">// 取出Event队列头节点</span></span><br><span class="line">        <span class="hljs-keyword">int64_t</span> whenUs = (*mEventQueue.begin()).mWhenUs;</span><br><span class="line">        <span class="hljs-keyword">int64_t</span> nowUs = GetNowUs();</span><br><span class="line">        <span class="hljs-comment">// 如果头结点的Event的处理事件还没到，则计算时差，wait等待</span></span><br><span class="line">        <span class="hljs-keyword">if</span> (whenUs &gt; nowUs) &#123;</span><br><span class="line">            <span class="hljs-keyword">int64_t</span> delayUs = whenUs - nowUs;</span><br><span class="line">            <span class="hljs-keyword">if</span> (delayUs &gt; INT64_MAX / <span class="hljs-number">1000</span>) &#123;</span><br><span class="line">                delayUs = INT64_MAX / <span class="hljs-number">1000</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            mQueueChangedCondition.waitRelative(mLock, delayUs * <span class="hljs-number">1000l</span>l);</span><br><span class="line"></span><br><span class="line">            <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="hljs-comment">// 取出头结点</span></span><br><span class="line">        event = *mEventQueue.begin();</span><br><span class="line">        <span class="hljs-comment">// 删除头结点</span></span><br><span class="line">        mEventQueue.erase(mEventQueue.begin());</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-comment">// 将AMessage交给对应的AHandler执行</span></span><br><span class="line">    event.mMessage-&gt;deliver();</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// <span class="hljs-doctag">NOTE:</span> It's important to note that at this point our "ALooper" object</span></span><br><span class="line">    <span class="hljs-comment">// may no longer exist (its final reference may have gone away while</span></span><br><span class="line">    <span class="hljs-comment">// delivering the message). We have made sure, however, that loop()</span></span><br><span class="line">    <span class="hljs-comment">// won't be called again.</span></span><br><span class="line">    </span><br><span class="line">    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="ALooper-stop"><a href="#ALooper-stop" class="headerlink" title="ALooper.stop"></a>ALooper.stop</h5><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">status_t</span> ALooper::stop() &#123;</span><br><span class="line">    sp&lt;LooperThread&gt; thread;</span><br><span class="line">    <span class="hljs-keyword">bool</span> runningLocally;</span><br><span class="line"></span><br><span class="line">    &#123;</span><br><span class="line">        Mutex::<span class="hljs-function">Autolock <span class="hljs-title">autoLock</span><span class="hljs-params">(mLock)</span></span>;</span><br><span class="line"></span><br><span class="line">        thread = mThread;</span><br><span class="line">        runningLocally = mRunningLocally;</span><br><span class="line">        mThread.clear();</span><br><span class="line">        mRunningLocally = <span class="hljs-literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (thread == <span class="hljs-literal">NULL</span> &amp;&amp; !runningLocally) &#123;</span><br><span class="line">        <span class="hljs-keyword">return</span> INVALID_OPERATION;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-comment">// 请求退出线程</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (thread != <span class="hljs-literal">NULL</span>) &#123;</span><br><span class="line">        thread-&gt;requestExit();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-comment">// 唤醒线程，如果线程被wait阻塞</span></span><br><span class="line">    mQueueChangedCondition.signal();</span><br><span class="line">    &#123;</span><br><span class="line">        Mutex::<span class="hljs-function">Autolock <span class="hljs-title">autoLock</span><span class="hljs-params">(mRepliesLock)</span></span>;</span><br><span class="line">        mRepliesCondition.broadcast();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (!runningLocally &amp;&amp; !thread-&gt;isCurrentThread()) &#123;</span><br><span class="line">        <span class="hljs-comment">// If not running locally and this thread _is_ the looper thread,</span></span><br><span class="line">        <span class="hljs-comment">// the loop() function will return and never be called again.</span></span><br><span class="line">        <span class="hljs-comment">// 如果调用stop的线程并不是ALooper的loop线程，则wait等待loop线程退出</span></span><br><span class="line">        thread-&gt;requestExitAndWait();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">return</span> OK;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="ALooper-post"><a href="#ALooper-post" class="headerlink" title="ALooper.post"></a>ALooper.post</h5><p>延迟发送一个事件<br><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">void</span> ALooper::post(<span class="hljs-keyword">const</span> sp&lt;AMessage&gt; &amp;msg, <span class="hljs-keyword">int64_t</span> delayUs) &#123;</span><br><span class="line">    Mutex::<span class="hljs-function">Autolock <span class="hljs-title">autoLock</span><span class="hljs-params">(mLock)</span></span>;</span><br><span class="line">    </span><br><span class="line">    <span class="hljs-keyword">int64_t</span> whenUs;</span><br><span class="line">    <span class="hljs-comment">// 如果延迟时间大于0，则根据当前时间计算出该事件真正的执行时间，否则忽略延时</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (delayUs &gt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        <span class="hljs-keyword">int64_t</span> nowUs = GetNowUs();</span><br><span class="line">        whenUs = (delayUs &gt; INT64_MAX - nowUs ? INT64_MAX : nowUs + delayUs);</span><br><span class="line"></span><br><span class="line">    &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">        whenUs = GetNowUs();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    List&lt;Event&gt;::iterator it = mEventQueue.begin();</span><br><span class="line">    <span class="hljs-comment">// 根据事件的执行时间，将其放到Event队列的合适位置</span></span><br><span class="line">    <span class="hljs-keyword">while</span> (it != mEventQueue.end() &amp;&amp; (*it).mWhenUs &lt;= whenUs) &#123;</span><br><span class="line">        ++it;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    Event event;</span><br><span class="line">    event.mWhenUs = whenUs;</span><br><span class="line">    event.mMessage = msg;</span><br><span class="line">    <span class="hljs-comment">// 如果当前事件正好是Event队列的头结点，则立马唤醒线程进行处理</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (it == mEventQueue.begin()) &#123;</span><br><span class="line">        mQueueChangedCondition.signal();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-comment">// 将事件插入到Event队列的指定位置</span></span><br><span class="line">    mEventQueue.insert(it, event);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h5 id="AReplyToken"><a href="#AReplyToken" class="headerlink" title="AReplyToken"></a>AReplyToken</h5><p>通过AReplyToken来实现事件的回复机制。发送者创建一个AReplyToken，将其与一个AMessage进行绑定，post执行该AMessage，调用awaitResponse进行阻塞等待，当AMessage被执行时，调用postReply回复一个消息后，awaitResponse解除阻塞，并获取到回复的消息。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">AReplyToken</span> :</span> <span class="hljs-keyword">public</span> RefBase &#123;</span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">explicit</span> <span class="hljs-title">AReplyToken</span><span class="hljs-params">(<span class="hljs-keyword">const</span> sp&lt;ALooper&gt; &amp;looper)</span></span></span><br><span class="line">        : mLooper(looper),</span><br><span class="line">          mReplied(<span class="hljs-literal">false</span>) &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">private</span>:</span><br><span class="line">    <span class="hljs-keyword">friend</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">AMessage</span>;</span></span><br><span class="line">    <span class="hljs-keyword">friend</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">ALooper</span>;</span></span><br><span class="line">    <span class="hljs-comment">// ALooper</span></span><br><span class="line">    wp&lt;ALooper&gt; mLooper;</span><br><span class="line">    <span class="hljs-comment">// 回复的消息</span></span><br><span class="line">    sp&lt;AMessage&gt; mReply;</span><br><span class="line">    <span class="hljs-comment">// 是否回复</span></span><br><span class="line">    <span class="hljs-keyword">bool</span> mReplied;</span><br><span class="line"></span><br><span class="line">    sp&lt;ALooper&gt; getLooper() <span class="hljs-keyword">const</span> &#123;</span><br><span class="line">        <span class="hljs-keyword">return</span> mLooper.promote();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-comment">// if reply is not set, returns false; otherwise, it retrieves the reply and returns true</span></span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">bool</span> <span class="hljs-title">retrieveReply</span><span class="hljs-params">(sp&lt;AMessage&gt; *reply)</span> </span>&#123;</span><br><span class="line">        <span class="hljs-comment">// 如果回复，则将回复的消息赋值给reply</span></span><br><span class="line">        <span class="hljs-keyword">if</span> (mReplied) &#123;</span><br><span class="line">            *reply = mReply;</span><br><span class="line">            mReply.clear();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="hljs-keyword">return</span> mReplied;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-comment">// sets the reply for this token. returns OK or error</span></span><br><span class="line">    <span class="hljs-comment">// 设置回复消息</span></span><br><span class="line">    <span class="hljs-keyword">status_t</span> setReply(<span class="hljs-keyword">const</span> sp&lt;AMessage&gt; &amp;reply);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h5 id="ALooper-createReplyToken"><a href="#ALooper-createReplyToken" class="headerlink" title="ALooper.createReplyToken"></a>ALooper.createReplyToken</h5><p>创建一个AReplyToken，将ALooper对象传入<br><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sp&lt;AReplyToken&gt; ALooper::createReplyToken() &#123;</span><br><span class="line">    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> AReplyToken(<span class="hljs-keyword">this</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h5 id="ALooper-awaitResponse"><a href="#ALooper-awaitResponse" class="headerlink" title="ALooper::awaitResponse"></a>ALooper::awaitResponse</h5><p>当通过ALooper发送了一个事件后，可以通过awaitResponse进行wait阻塞等待，将AReplyToken保存到发送的事件中，当该事件执行完成时，通过调用postReply回复一个事件，结束阻塞。<br><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// replyToken 通过该对象来进行回复，该对象需要绑定在执行的消息上</span></span><br><span class="line"><span class="hljs-comment">// response 用来接收回复的消息</span></span><br><span class="line"><span class="hljs-keyword">status_t</span> ALooper::awaitResponse(<span class="hljs-keyword">const</span> sp&lt;AReplyToken&gt; &amp;replyToken, sp&lt;AMessage&gt; *response) &#123;</span><br><span class="line">    <span class="hljs-comment">// return status in case we want to handle an interrupted wait</span></span><br><span class="line">    Mutex::<span class="hljs-function">Autolock <span class="hljs-title">autoLock</span><span class="hljs-params">(mRepliesLock)</span></span>;</span><br><span class="line">    CHECK(replyToken != <span class="hljs-literal">NULL</span>);</span><br><span class="line">    <span class="hljs-comment">// 阻塞等待，直到持有replyToken的消息调用了postReply方法进行回复</span></span><br><span class="line">    <span class="hljs-keyword">while</span> (!replyToken-&gt;retrieveReply(response)) &#123;</span><br><span class="line">        &#123;</span><br><span class="line">            Mutex::<span class="hljs-function">Autolock <span class="hljs-title">autoLock</span><span class="hljs-params">(mLock)</span></span>;</span><br><span class="line">            <span class="hljs-keyword">if</span> (mThread == <span class="hljs-literal">NULL</span>) &#123;</span><br><span class="line">                <span class="hljs-keyword">return</span> -ENOENT;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        mRepliesCondition.wait(mRepliesLock);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">return</span> OK;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h5 id="ALooper-postReply"><a href="#ALooper-postReply" class="headerlink" title="ALooper::postReply"></a>ALooper::postReply</h5><p>回复消息给replyToken对象中，并唤醒其阻塞的线程，将reply回复消息交给等待方。<br><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// replyToken 通过该对象来进行回复，该对象需要绑定在执行的消息上</span></span><br><span class="line"><span class="hljs-comment">// reply 回复的消息</span></span><br><span class="line"><span class="hljs-keyword">status_t</span> ALooper::postReply(<span class="hljs-keyword">const</span> sp&lt;AReplyToken&gt; &amp;replyToken, <span class="hljs-keyword">const</span> sp&lt;AMessage&gt; &amp;reply) &#123;</span><br><span class="line">    Mutex::<span class="hljs-function">Autolock <span class="hljs-title">autoLock</span><span class="hljs-params">(mRepliesLock)</span></span>;</span><br><span class="line">    <span class="hljs-keyword">status_t</span> err = replyToken-&gt;setReply(reply);</span><br><span class="line">    <span class="hljs-keyword">if</span> (err == OK) &#123;</span><br><span class="line">        mRepliesCondition.broadcast();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">return</span> err;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="AMessage"><a href="#AMessage" class="headerlink" title="AMessage"></a>AMessage</h4><p>类似于Java层的Message。</p>
+<h5 id="AMessage构造和析构"><a href="#AMessage构造和析构" class="headerlink" title="AMessage构造和析构"></a>AMessage构造和析构</h5><p>一个AMessage，必须要设置一个执行它的target，也就是AHandler，what是消息类型，而mNumItems是消息的参数。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">AMessage::AMessage(<span class="hljs-keyword">void</span>)</span><br><span class="line">    : mWhat(<span class="hljs-number">0</span>),</span><br><span class="line">      mTarget(<span class="hljs-number">0</span>),</span><br><span class="line">      mNumItems(<span class="hljs-number">0</span>) &#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">AMessage::AMessage(<span class="hljs-keyword">uint32_t</span> what, <span class="hljs-keyword">const</span> sp&lt;<span class="hljs-keyword">const</span> AHandler&gt; &amp;handler)</span><br><span class="line">    : mWhat(what),</span><br><span class="line">      mNumItems(<span class="hljs-number">0</span>) &#123;</span><br><span class="line">    setTarget(handler);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">AMessage::~AMessage() &#123;</span><br><span class="line">    clear();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="AMessage-deliver"><a href="#AMessage-deliver" class="headerlink" title="AMessage::deliver"></a>AMessage::deliver</h5><p>通知对应的AHandler处理该AMessage<br><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">void</span> AMessage::deliver() &#123;</span><br><span class="line">    sp&lt;AHandler&gt; handler = mHandler.promote();</span><br><span class="line">    <span class="hljs-keyword">if</span> (handler == <span class="hljs-literal">NULL</span>) &#123;</span><br><span class="line">        ALOGW(<span class="hljs-string">"failed to deliver message as target handler %d is gone."</span>, mTarget);</span><br><span class="line">        <span class="hljs-keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    handler-&gt;deliverMessage(<span class="hljs-keyword">this</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h5 id="AMessage-post"><a href="#AMessage-post" class="headerlink" title="AMessage::post"></a>AMessage::post</h5><p>调用ALooper发送该消息<br><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">status_t</span> AMessage::post(<span class="hljs-keyword">int64_t</span> delayUs) &#123;</span><br><span class="line">    <span class="hljs-comment">// ALooper从AHandler中获取</span></span><br><span class="line">    sp&lt;ALooper&gt; looper = mLooper.promote();</span><br><span class="line">    <span class="hljs-keyword">if</span> (looper == <span class="hljs-literal">NULL</span>) &#123;</span><br><span class="line">        ALOGW(<span class="hljs-string">"failed to post message as target looper for handler %d is gone."</span>, mTarget);</span><br><span class="line">        <span class="hljs-keyword">return</span> -ENOENT;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-comment">// 发送消息</span></span><br><span class="line">    looper-&gt;post(<span class="hljs-keyword">this</span>, delayUs);</span><br><span class="line">    <span class="hljs-keyword">return</span> OK;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h5 id="AMessage-postAndAwaitResponse"><a href="#AMessage-postAndAwaitResponse" class="headerlink" title="AMessage::postAndAwaitResponse"></a>AMessage::postAndAwaitResponse</h5><p>发送一个需要等待回复的消息（发送消息调用）<br><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">status_t</span> AMessage::postAndAwaitResponse(sp&lt;AMessage&gt; *response) &#123;</span><br><span class="line">    sp&lt;ALooper&gt; looper = mLooper.promote();</span><br><span class="line">    <span class="hljs-keyword">if</span> (looper == <span class="hljs-literal">NULL</span>) &#123;</span><br><span class="line">        ALOGW(<span class="hljs-string">"failed to post message as target looper for handler %d is gone."</span>, mTarget);</span><br><span class="line">        <span class="hljs-keyword">return</span> -ENOENT;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-comment">// 创建一个AReplyToken</span></span><br><span class="line">    sp&lt;AReplyToken&gt; token = looper-&gt;createReplyToken();</span><br><span class="line">    <span class="hljs-keyword">if</span> (token == <span class="hljs-literal">NULL</span>) &#123;</span><br><span class="line">        ALOGE(<span class="hljs-string">"failed to create reply token"</span>);</span><br><span class="line">        <span class="hljs-keyword">return</span> -ENOMEM;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-comment">// 将AReplyToken绑定到当前消息上</span></span><br><span class="line">    setObject(<span class="hljs-string">"replyID"</span>, token);</span><br><span class="line">    <span class="hljs-comment">// 发送当前消息</span></span><br><span class="line">    looper-&gt;post(<span class="hljs-keyword">this</span>, <span class="hljs-number">0</span> <span class="hljs-comment">/* delayUs */</span>);</span><br><span class="line">    <span class="hljs-comment">// 等待AReplyToken上的回复，将回复的消息赋值给response</span></span><br><span class="line">    <span class="hljs-keyword">return</span> looper-&gt;awaitResponse(token, response);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h5 id="AMessage-postReply"><a href="#AMessage-postReply" class="headerlink" title="AMessage::postReply"></a>AMessage::postReply</h5><p>回复消息（回复消息调用）<br><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">status_t</span> AMessage::postReply(<span class="hljs-keyword">const</span> sp&lt;AReplyToken&gt; &amp;replyToken) &#123;</span><br><span class="line">    <span class="hljs-keyword">if</span> (replyToken == <span class="hljs-literal">NULL</span>) &#123;</span><br><span class="line">        ALOGW(<span class="hljs-string">"failed to post reply to a NULL token"</span>);</span><br><span class="line">        <span class="hljs-keyword">return</span> -ENOENT;</span><br><span class="line">    &#125;</span><br><span class="line">    sp&lt;ALooper&gt; looper = replyToken-&gt;getLooper();</span><br><span class="line">    <span class="hljs-keyword">if</span> (looper == <span class="hljs-literal">NULL</span>) &#123;</span><br><span class="line">        ALOGW(<span class="hljs-string">"failed to post reply as target looper is gone."</span>);</span><br><span class="line">        <span class="hljs-keyword">return</span> -ENOENT;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-comment">// 在该AReplyToken上进行回复</span></span><br><span class="line">    <span class="hljs-keyword">return</span> looper-&gt;postReply(replyToken, <span class="hljs-keyword">this</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h5 id="AMessage-senderAwaitsResponse"><a href="#AMessage-senderAwaitsResponse" class="headerlink" title="AMessage::senderAwaitsResponse"></a>AMessage::senderAwaitsResponse</h5><p>从发送消息上获取到其创建的AReplyToken<br><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">bool</span> AMessage::senderAwaitsResponse(sp&lt;AReplyToken&gt; *replyToken) &#123;</span><br><span class="line">    sp&lt;RefBase&gt; tmp;</span><br><span class="line">    <span class="hljs-keyword">bool</span> found = findObject(<span class="hljs-string">"replyID"</span>, &amp;tmp);</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (!found) &#123;</span><br><span class="line">        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    *replyToken = <span class="hljs-keyword">static_cast</span>&lt;AReplyToken *&gt;(tmp.get());</span><br><span class="line">    tmp.clear();</span><br><span class="line">    setObject(<span class="hljs-string">"replyID"</span>, tmp);</span><br><span class="line">    <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> delete Object instead of setting it to NULL</span></span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">return</span> *replyToken != <span class="hljs-literal">NULL</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="AHandler"><a href="#AHandler" class="headerlink" title="AHandler"></a>AHandler</h4><p>AHandler只有一个主要的方法，用来处理事件，可以通过继承AHandler，实现onMessageReceived方法来实现自己的处理逻辑。</p>
+<p>在AMessage的deliver方法中，会调用AHandler的deliverMessage方法处理消息。<br><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">void</span> AHandler::deliverMessage(<span class="hljs-keyword">const</span> sp&lt;AMessage&gt; &amp;msg) &#123;</span><br><span class="line">    <span class="hljs-comment">// 子类处理</span></span><br><span class="line">    onMessageReceived(msg);</span><br><span class="line">    mMessageCounter++;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (mVerboseStats) &#123;</span><br><span class="line">        <span class="hljs-keyword">uint32_t</span> what = msg-&gt;what();</span><br><span class="line">        <span class="hljs-keyword">ssize_t</span> idx = mMessages.indexOfKey(what);</span><br><span class="line">        <span class="hljs-keyword">if</span> (idx &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">            mMessages.add(what, <span class="hljs-number">1</span>);</span><br><span class="line">        &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">            mMessages.editValueAt(idx)++;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+
+        </div>
+        
+        <ul class="post-copyright">
+            <li><strong>本文标题：</strong><a href="https://witgao.com/Android多媒体深入之ALooper分析/">Android多媒体深入之ALooper分析</a></li>
+            <li><strong>本文作者：</strong><a href="https://witgao.com">zhenyu</a></li>
+            <li><strong>本文链接：</strong><a href="https://witgao.com/Android多媒体深入之ALooper分析/">https://witgao.com/Android多媒体深入之ALooper分析/</a></li>
+            <li><strong>发布时间：</strong>2020-02-05</li>
+            <li><strong>版权声明：</strong>本博客所有文章除特别声明外，均采用 <a
+                    href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="external nofollow"
+                    target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明出处！
+            </li>
+        </ul>
+        
+        
+        
+        
+    </div>
+</div>
+
+
+
+
+
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        <div class="level-start">
+            <a class="level level-item has-link-grey  article-nav-prev"
+                href="/FFmpeg深入之ffmpeg-parse-options/">
+                <i class="level-item fas fa-chevron-left"></i>
+                <span class="level-item">FFmpeg深入之ffmpeg_parse_options</span>
+            </a>
+        </div>
+        
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next"
+                href="/Flutter深入之插件新API-Embedding-V2/">
+                <span class="level-item">Flutter深入之插件新API——Embedding-V2</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+    </div>
+</div>
+
+
+</div>
+                
+
+
+
+
+<div
+    class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left ">
+    
+    
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered" style="flex-shrink: 1">
+                <div>
+                    
+                    <figure class="image is-128x128 has-mb-6">
+                        <img class="" src="/images/avatar1.png" alt="zhenyu">
+                    </figure>
+                    
+                    <p class="is-size-4 is-block">
+                        zhenyu
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        富贵山庄无富贵，只留欢乐在此间
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>杭州</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        文章
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        45
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        分类
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        9
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        标签
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        0
+                    </p>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="level">
+            <a class="level-item button is-link is-rounded" href="https://github.com/witgao" target="_blank">
+                关注我</a>
+        </div>
+        
+        
+        
+    </div>
+</div>
+    
+    
+<div class="card widget column-left is-sticky" id="toc">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                目录
+            </h3>
+            <ul class="menu-list"><li>
+        <a class="is-flex" href="#ALooper">
+        <span class="has-mr-6">1</span>
+        <span>ALooper</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#ALooper声明">
+        <span class="has-mr-6">1.1</span>
+        <span>ALooper声明</span>
+        </a></li><li>
+        <a class="is-flex" href="#LooperThread">
+        <span class="has-mr-6">1.2</span>
+        <span>LooperThread</span>
+        </a></li><li>
+        <a class="is-flex" href="#ALooperRoster">
+        <span class="has-mr-6">1.3</span>
+        <span>ALooperRoster</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#registerHandler">
+        <span class="has-mr-6">1.3.1</span>
+        <span>registerHandler</span>
+        </a></li><li>
+        <a class="is-flex" href="#unregisterHandler">
+        <span class="has-mr-6">1.3.2</span>
+        <span>unregisterHandler</span>
+        </a></li><li>
+        <a class="is-flex" href="#unregisterStaleHandlers">
+        <span class="has-mr-6">1.3.3</span>
+        <span>unregisterStaleHandlers</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#ALooper构造和析构">
+        <span class="has-mr-6">1.4</span>
+        <span>ALooper构造和析构</span>
+        </a></li><li>
+        <a class="is-flex" href="#ALooper-start">
+        <span class="has-mr-6">1.5</span>
+        <span>ALooper.start</span>
+        </a></li><li>
+        <a class="is-flex" href="#Event">
+        <span class="has-mr-6">1.6</span>
+        <span>Event</span>
+        </a></li><li>
+        <a class="is-flex" href="#ALooper-loop">
+        <span class="has-mr-6">1.7</span>
+        <span>ALooper.loop</span>
+        </a></li><li>
+        <a class="is-flex" href="#ALooper-stop">
+        <span class="has-mr-6">1.8</span>
+        <span>ALooper.stop</span>
+        </a></li><li>
+        <a class="is-flex" href="#ALooper-post">
+        <span class="has-mr-6">1.9</span>
+        <span>ALooper.post</span>
+        </a></li><li>
+        <a class="is-flex" href="#AReplyToken">
+        <span class="has-mr-6">1.10</span>
+        <span>AReplyToken</span>
+        </a></li><li>
+        <a class="is-flex" href="#ALooper-createReplyToken">
+        <span class="has-mr-6">1.11</span>
+        <span>ALooper.createReplyToken</span>
+        </a></li><li>
+        <a class="is-flex" href="#ALooper-awaitResponse">
+        <span class="has-mr-6">1.12</span>
+        <span>ALooper::awaitResponse</span>
+        </a></li><li>
+        <a class="is-flex" href="#ALooper-postReply">
+        <span class="has-mr-6">1.13</span>
+        <span>ALooper::postReply</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#AMessage">
+        <span class="has-mr-6">2</span>
+        <span>AMessage</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#AMessage构造和析构">
+        <span class="has-mr-6">2.1</span>
+        <span>AMessage构造和析构</span>
+        </a></li><li>
+        <a class="is-flex" href="#AMessage-deliver">
+        <span class="has-mr-6">2.2</span>
+        <span>AMessage::deliver</span>
+        </a></li><li>
+        <a class="is-flex" href="#AMessage-post">
+        <span class="has-mr-6">2.3</span>
+        <span>AMessage::post</span>
+        </a></li><li>
+        <a class="is-flex" href="#AMessage-postAndAwaitResponse">
+        <span class="has-mr-6">2.4</span>
+        <span>AMessage::postAndAwaitResponse</span>
+        </a></li><li>
+        <a class="is-flex" href="#AMessage-postReply">
+        <span class="has-mr-6">2.5</span>
+        <span>AMessage::postReply</span>
+        </a></li><li>
+        <a class="is-flex" href="#AMessage-senderAwaitsResponse">
+        <span class="has-mr-6">2.6</span>
+        <span>AMessage::senderAwaitsResponse</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#AHandler">
+        <span class="has-mr-6">3</span>
+        <span>AHandler</span>
+        </a></li></ul>
+        </div>
+    </div>
+</div>
+    
+    
+    <div class="column-right-shadow is-hidden-widescreen ">
+        
+    </div>
+    
+</div>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <!-- <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="/images/logo2.png" alt="Android多媒体深入之ALooper分析" height="28">
+                
+                </a> -->
+                <p class="is-size-7">
+                    &copy; 2020 zhenyu&nbsp;
+                    Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a
+                        href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank">Icarus</a>
+                    
+                </p>
+            </div>
+            <div class="level-end">
+                
+            </div>
+        </div>
+    </div>
+</footer>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("zh-CN");</script>
+
+<script>
+var IcarusThemeSettings = {
+    article: {
+        highlight: {
+            clipboard: true,
+            fold: 'unfolded'
+        }
+    }
+};
+</script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+
+
+
+    
+    
+<script src="/js/animation.js"></script>
+
+    
+    
+<script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+<script src="/js/gallery.js" defer></script>
+
+    
+    
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    MathJax.Hub.Config({
+        'HTML-CSS': {
+            matchFontHeight: false
+        },
+        SVG: {
+            matchFontHeight: false
+        },
+        CommonHTML: {
+            matchFontHeight: false
+        },
+        tex2jax: {
+            inlineMath: [
+                ['$','$'],
+                ['\\(','\\)']
+            ]
+        }
+    });
+});
+</script>
+    
+    
+<a id="back-to-top" title="回到顶端" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="想要查找什么..." />
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: '文章',
+                PAGES: '页面',
+                CATEGORIES: '分类',
+                TAGS: '标签',
+                UNTITLED: '(无标题)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+</body>
+
+</html>
