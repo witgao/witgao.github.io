@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html  lang="zh">
+
+<head>
+    <meta charset="utf-8" />
+
+<meta name="generator" content="Hexo 3.9.0" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<title>Android图形架构总览 - 富贵山庄</title>
+
+
+    <meta name="description" content="在AOSP中，多媒体相关代码主要在av/media和base/media两个目录。其中base/media中重点在其jni目录，这里面就是libmedia_jni.so的代码，也就是Java层多媒体API对应的JNI模块。av/media中包含了Android多媒体服务的具体实现，包含了MediaPlayerService、Stagefright引擎等。  Java层API通过JNI调用Nativ">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android图形架构总览">
+<meta property="og:url" content="https://witgao.com/Android多媒体架构总览/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:description" content="在AOSP中，多媒体相关代码主要在av/media和base/media两个目录。其中base/media中重点在其jni目录，这里面就是libmedia_jni.so的代码，也就是Java层多媒体API对应的JNI模块。av/media中包含了Android多媒体服务的具体实现，包含了MediaPlayerService、Stagefright引擎等。  Java层API通过JNI调用Nativ">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://witgao.com/images/26.jpg">
+<meta property="og:updated_time" content="2020-09-08T07:05:11.658Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android图形架构总览">
+<meta name="twitter:description" content="在AOSP中，多媒体相关代码主要在av/media和base/media两个目录。其中base/media中重点在其jni目录，这里面就是libmedia_jni.so的代码，也就是Java层多媒体API对应的JNI模块。av/media中包含了Android多媒体服务的具体实现，包含了MediaPlayerService、Stagefright引擎等。  Java层API通过JNI调用Nativ">
+<meta name="twitter:image" content="https://witgao.com/images/26.jpg">
+
+
+
+
+
+
+
+<link rel="icon" href="/images/favicon1.svg">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/default.css">
+
+
+    
+    
+<style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+    
+    
+    
+    
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+    
+    
+    
+    
+    
+    
+    
+    <link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+    
+    
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body class="is-3-column">
+    <nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="/images/logo2.png" alt="Android图形架构总览" height="28">
+            
+            </a>
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item"
+                href="/">燕子坞</a>
+                
+                <a class="navbar-item"
+                href="/archives">听香水榭</a>
+                
+                <a class="navbar-item"
+                href="/categories">还施水阁</a>
+                
+                <a class="navbar-item"
+                href="/about">思过崖</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    <a class="navbar-item" target="_blank" title="Download on GitHub" href="https://github.com/witgao/blog">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                <a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;">
+                    <i class="fas fa-list-ul"></i>
+                </a>
+                
+                
+                <a class="navbar-item search" title="搜索" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-9-widescreen has-order-2 column-main">
+<div class="card">
+    
+    <div class="card-image">
+        <span  class="image is-7by1">
+        <img class="thumbnail" src="/images/26.jpg" alt="Android图形架构总览">
+        </span>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-01-31T16:00:00.000Z">2020-02-01</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/">刀枪棍棒（Android）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/五虎断门刀（Android原生）/">五虎断门刀（Android原生）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    7 分钟 读完 (大约 988 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            Android图形架构总览
+            
+        </h1>
+        <div class="content">
+            <p>在AOSP中，多媒体相关代码主要在<strong>av/media</strong>和<strong>base/media</strong>两个目录。其中<strong>base/media</strong>中重点在其jni目录，这里面就是libmedia_jni.so的代码，也就是Java层多媒体API对应的JNI模块。<strong>av/media</strong>中包含了Android多媒体服务的具体实现，包含了MediaPlayerService、Stagefright引擎等。</p>
+<blockquote>
+<p>Java层API通过JNI调用Native层（libmedia_jni.so），Native层通过Binder IPC调用到相关Service进程，获取相关服务，而Service进程通过Open MAX调用硬件层实现</p>
+</blockquote>
+<p>下面这张图是AOSP官网中展示的多媒体架构图<br><img src="/images/Android多媒体架构总览.resources/ape_fwk_media.png" alt="7aa032a7cf128cb6660a82a4b31326c3"></p>
+<h4 id="Java层API"><a href="#Java层API" class="headerlink" title="Java层API"></a>Java层API</h4><p><strong>base/media/java</strong>目录中包含了全部的多媒体模块API，包含了我们熟悉的MediaPlayer、MediaRecorder、MediaCodec等。这些API在import的时候，都会开始加载libmedia_jni.so，并注册native方法映射。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">static</span> &#123;</span><br><span class="line">    System.loadLibrary(<span class="hljs-string">"media_jni"</span>);</span><br><span class="line">    native_init();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="Native层JNI"><a href="#Native层JNI" class="headerlink" title="Native层JNI"></a>Native层JNI</h4><p>在<strong>base/media/jni/android_media_MediaPlayer.cpp</strong>中定义了libmedia_jni.so的JNI_OnLoad方法，在方法中注册了整个多媒体API需要的native方法映射。</p>
+<a id="more"></a>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function">jint <span class="hljs-title">JNI_OnLoad</span><span class="hljs-params">(JavaVM* vm, <span class="hljs-keyword">void</span>* <span class="hljs-comment">/* reserved */</span>)</span></span></span><br><span class="line"><span class="hljs-function"></span>&#123;</span><br><span class="line">    JNIEnv* env = <span class="hljs-literal">NULL</span>;</span><br><span class="line">    jint result = <span class="hljs-number">-1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (vm-&gt;GetEnv((<span class="hljs-keyword">void</span>**) &amp;env, JNI_VERSION_1_4) != JNI_OK) &#123;</span><br><span class="line">        ALOGE(<span class="hljs-string">"ERROR: GetEnv failed\n"</span>);</span><br><span class="line">        <span class="hljs-keyword">goto</span> bail;</span><br><span class="line">    &#125;</span><br><span class="line">    assert(env != <span class="hljs-literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (register_android_media_ImageWriter(env) != JNI_OK) &#123;</span><br><span class="line">        ALOGE(<span class="hljs-string">"ERROR: ImageWriter native registration failed"</span>);</span><br><span class="line">        <span class="hljs-keyword">goto</span> bail;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (register_android_media_ImageReader(env) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        ALOGE(<span class="hljs-string">"ERROR: ImageReader native registration failed"</span>);</span><br><span class="line">        <span class="hljs-keyword">goto</span> bail;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (register_android_media_JetPlayer(env) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        ALOGE(<span class="hljs-string">"ERROR: JetPlayer native registration failed"</span>);</span><br><span class="line">        <span class="hljs-keyword">goto</span> bail;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (register_android_media_MediaPlayer(env) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        ALOGE(<span class="hljs-string">"ERROR: MediaPlayer native registration failed\n"</span>);</span><br><span class="line">        <span class="hljs-keyword">goto</span> bail;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (register_android_media_MediaRecorder(env) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        ALOGE(<span class="hljs-string">"ERROR: MediaRecorder native registration failed\n"</span>);</span><br><span class="line">        <span class="hljs-keyword">goto</span> bail;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (register_android_media_MediaScanner(env) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        ALOGE(<span class="hljs-string">"ERROR: MediaScanner native registration failed\n"</span>);</span><br><span class="line">        <span class="hljs-keyword">goto</span> bail;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (register_android_media_MediaMetadataRetriever(env) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        ALOGE(<span class="hljs-string">"ERROR: MediaMetadataRetriever native registration failed\n"</span>);</span><br><span class="line">        <span class="hljs-keyword">goto</span> bail;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (register_android_media_ResampleInputStream(env) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        ALOGE(<span class="hljs-string">"ERROR: ResampleInputStream native registration failed\n"</span>);</span><br><span class="line">        <span class="hljs-keyword">goto</span> bail;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (register_android_media_MediaProfiles(env) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        ALOGE(<span class="hljs-string">"ERROR: MediaProfiles native registration failed"</span>);</span><br><span class="line">        <span class="hljs-keyword">goto</span> bail;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (register_android_mtp_MtpDatabase(env) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        ALOGE(<span class="hljs-string">"ERROR: MtpDatabase native registration failed"</span>);</span><br><span class="line">        <span class="hljs-keyword">goto</span> bail;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (register_android_mtp_MtpDevice(env) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        ALOGE(<span class="hljs-string">"ERROR: MtpDevice native registration failed"</span>);</span><br><span class="line">        <span class="hljs-keyword">goto</span> bail;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (register_android_mtp_MtpServer(env) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        ALOGE(<span class="hljs-string">"ERROR: MtpServer native registration failed"</span>);</span><br><span class="line">        <span class="hljs-keyword">goto</span> bail;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (register_android_media_MediaCodec(env) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        ALOGE(<span class="hljs-string">"ERROR: MediaCodec native registration failed"</span>);</span><br><span class="line">        <span class="hljs-keyword">goto</span> bail;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (register_android_media_MediaSync(env) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        ALOGE(<span class="hljs-string">"ERROR: MediaSync native registration failed"</span>);</span><br><span class="line">        <span class="hljs-keyword">goto</span> bail;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (register_android_media_MediaExtractor(env) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        ALOGE(<span class="hljs-string">"ERROR: MediaCodec native registration failed"</span>);</span><br><span class="line">        <span class="hljs-keyword">goto</span> bail;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (register_android_media_MediaMuxer(env) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        ALOGE(<span class="hljs-string">"ERROR: MediaMuxer native registration failed"</span>);</span><br><span class="line">        <span class="hljs-keyword">goto</span> bail;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (register_android_media_MediaCodecList(env) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        ALOGE(<span class="hljs-string">"ERROR: MediaCodec native registration failed"</span>);</span><br><span class="line">        <span class="hljs-keyword">goto</span> bail;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (register_android_media_Crypto(env) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        ALOGE(<span class="hljs-string">"ERROR: MediaCodec native registration failed"</span>);</span><br><span class="line">        <span class="hljs-keyword">goto</span> bail;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (register_android_media_Drm(env) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        ALOGE(<span class="hljs-string">"ERROR: MediaDrm native registration failed"</span>);</span><br><span class="line">        <span class="hljs-keyword">goto</span> bail;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (register_android_media_Descrambler(env) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        ALOGE(<span class="hljs-string">"ERROR: MediaDescrambler native registration failed"</span>);</span><br><span class="line">        <span class="hljs-keyword">goto</span> bail;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">if</span> (register_android_media_MediaHTTPConnection(env) &lt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">        ALOGE(<span class="hljs-string">"ERROR: MediaHTTPConnection native registration failed"</span>);</span><br><span class="line">        <span class="hljs-keyword">goto</span> bail;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">/* success -- return valid version number */</span></span><br><span class="line">    result = JNI_VERSION_1_4;</span><br><span class="line"></span><br><span class="line">bail:</span><br><span class="line">    <span class="hljs-keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在Native层一般会创建一个与Java层同名的对象来一一对应，两个对象互相持有引用，借助JNI来交互。在Native的实现中，会通过Binder IPC向指定的Service进程获取到一个Client，通过Client向服务进程请求分配一个实现的实例，然后应用进程使用该实例完成对应的功能。</p>
+<h4 id="服务层进程"><a href="#服务层进程" class="headerlink" title="服务层进程"></a>服务层进程</h4><p>上面提到的MediaPlayerService、Stagefright引擎等都是运行在独立的进程上，应用进程通过Binder IPC来与服务进程进行交互，Bilder IPC代理位于<strong>av/media/libmedia</strong>目录中。</p>
+<p>在7.0时，为了安全考虑，将整个多媒体服务进程拆分成多个进程，每个功能都拥有独立的进程。<br><img src="/images/Android多媒体架构总览.resources/ape_media_split.png" alt="c15ea0f74719090c0cbe1e33318cfb9d"></p>
+<h4 id="硬件集成层OpenMax"><a href="#硬件集成层OpenMax" class="headerlink" title="硬件集成层OpenMax"></a>硬件集成层OpenMax</h4><p>OpenMax全称是Open Media Acceleration，是一个免费的多媒体API标准，提供了音频视频等常用处理操作的接口，是对硬件功能的抽象，减少了应用层适配硬件的复杂度。<br>对于应用层来说，只需要调用OpenMAX对应功能的API即可，具体SOC芯片上的实现无需关心。</p>
+
+        </div>
+        
+        <ul class="post-copyright">
+            <li><strong>本文标题：</strong><a href="https://witgao.com/Android多媒体架构总览/">Android图形架构总览</a></li>
+            <li><strong>本文作者：</strong><a href="https://witgao.com">zhenyu</a></li>
+            <li><strong>本文链接：</strong><a href="https://witgao.com/Android多媒体架构总览/">https://witgao.com/Android多媒体架构总览/</a></li>
+            <li><strong>发布时间：</strong>2020-02-01</li>
+            <li><strong>版权声明：</strong>本博客所有文章除特别声明外，均采用 <a
+                    href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="external nofollow"
+                    target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明出处！
+            </li>
+        </ul>
+        
+        
+        
+        
+    </div>
+</div>
+
+
+
+
+
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        <div class="level-start">
+            <a class="level level-item has-link-grey  article-nav-prev"
+                href="/Android多媒体深入之ALooper分析/">
+                <i class="level-item fas fa-chevron-left"></i>
+                <span class="level-item">Android多媒体深入之ALooper分析</span>
+            </a>
+        </div>
+        
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next"
+                href="/Flutter深入之插件新API-Embedding-V2/">
+                <span class="level-item">Flutter深入之插件新API——Embedding-V2</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+    </div>
+</div>
+
+
+</div>
+                
+
+
+
+
+<div
+    class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left ">
+    
+    
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered" style="flex-shrink: 1">
+                <div>
+                    
+                    <figure class="image is-128x128 has-mb-6">
+                        <img class="" src="/images/avatar1.png" alt="zhenyu">
+                    </figure>
+                    
+                    <p class="is-size-4 is-block">
+                        zhenyu
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        富贵山庄无富贵，只留欢乐在此间
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>杭州</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        文章
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        46
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        分类
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        9
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        标签
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        0
+                    </p>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="level">
+            <a class="level-item button is-link is-rounded" href="https://github.com/witgao" target="_blank">
+                关注我</a>
+        </div>
+        
+        
+        
+    </div>
+</div>
+    
+    
+<div class="card widget column-left is-sticky" id="toc">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                目录
+            </h3>
+            <ul class="menu-list"><li>
+        <a class="is-flex" href="#Java层API">
+        <span class="has-mr-6">1</span>
+        <span>Java层API</span>
+        </a></li><li>
+        <a class="is-flex" href="#Native层JNI">
+        <span class="has-mr-6">2</span>
+        <span>Native层JNI</span>
+        </a></li><li>
+        <a class="is-flex" href="#服务层进程">
+        <span class="has-mr-6">3</span>
+        <span>服务层进程</span>
+        </a></li><li>
+        <a class="is-flex" href="#硬件集成层OpenMax">
+        <span class="has-mr-6">4</span>
+        <span>硬件集成层OpenMax</span>
+        </a></li></ul>
+        </div>
+    </div>
+</div>
+    
+    
+    <div class="column-right-shadow is-hidden-widescreen ">
+        
+    </div>
+    
+</div>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <!-- <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="/images/logo2.png" alt="Android图形架构总览" height="28">
+                
+                </a> -->
+                <p class="is-size-7">
+                    &copy; 2020 zhenyu&nbsp;
+                    Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a
+                        href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank">Icarus</a>
+                    
+                </p>
+            </div>
+            <div class="level-end">
+                
+            </div>
+        </div>
+    </div>
+</footer>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("zh-CN");</script>
+
+<script>
+var IcarusThemeSettings = {
+    article: {
+        highlight: {
+            clipboard: true,
+            fold: 'unfolded'
+        }
+    }
+};
+</script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+
+
+
+    
+    
+<script src="/js/animation.js"></script>
+
+    
+    
+<script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+<script src="/js/gallery.js" defer></script>
+
+    
+    
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    MathJax.Hub.Config({
+        'HTML-CSS': {
+            matchFontHeight: false
+        },
+        SVG: {
+            matchFontHeight: false
+        },
+        CommonHTML: {
+            matchFontHeight: false
+        },
+        tex2jax: {
+            inlineMath: [
+                ['$','$'],
+                ['\\(','\\)']
+            ]
+        }
+    });
+});
+</script>
+    
+    
+<a id="back-to-top" title="回到顶端" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="想要查找什么..." />
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: '文章',
+                PAGES: '页面',
+                CATEGORIES: '分类',
+                TAGS: '标签',
+                UNTITLED: '(无标题)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+</body>
+
+</html>

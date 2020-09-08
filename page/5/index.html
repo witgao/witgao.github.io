@@ -128,6 +128,69 @@
     
 <div class="card">
     
+    <div class="card-image">
+        <a href="/FFmpeg深入之avformat-open-input/" class="image is-7by1">
+        <img class="thumbnail" src="/images/2.jpeg" alt="FFmpeg深入之avformat_open_input">
+        </a>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2019-09-30T01:48:04.000Z">2019-09-30</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    37 分钟 读完 (大约 5523 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/FFmpeg深入之avformat-open-input/">FFmpeg深入之avformat_open_input</a>
+            
+        </h1>
+        <div class="content">
+            <figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta"># libavformat/avformat.h</span></span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">/**</span></span><br><span class="line"><span class="hljs-comment"> * 读取多媒体文件头信息</span></span><br><span class="line"><span class="hljs-comment"> * 此时并未开始解码，开启的流通过avformat_close_input()关闭。</span></span><br><span class="line"><span class="hljs-comment"> *</span></span><br><span class="line"><span class="hljs-comment"> * @param ps AVFormatContext (通过avformat_alloc_context创建)，可以传NULL。    </span></span><br><span class="line"><span class="hljs-comment"> * @param url 多媒体URL</span></span><br><span class="line"><span class="hljs-comment"> * @param fmt 指定解封装的格式，传NULL时将自动检测.</span></span><br><span class="line"><span class="hljs-comment"> * @param options  解封装参数自定义，可以传NULL</span></span><br><span class="line"><span class="hljs-comment"> *</span></span><br><span class="line"><span class="hljs-comment"> * @return 0 成功</span></span><br><span class="line"><span class="hljs-comment"> */</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">avformat_open_input</span><span class="hljs-params">(AVFormatContext **ps, <span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *url, AVInputFormat *fmt, AVDictionary **options)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>方法调用流程图</p>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/FFmpeg深入之avformat-open-input/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
     <div class="card-content article ">
         
         <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
@@ -498,68 +561,6 @@
 
 
 
-    
-<div class="card">
-    
-    <div class="card-content article ">
-        
-        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
-            <div class="level-left">
-                <time class="level-item has-text-grey"
-                    datetime="2018-06-27T16:00:00.000Z">2018-06-28</time>
-                
-                <div class="level-item">
-                    <a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/">刀枪棍棒（Android）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/五虎断门刀（Android原生）/">五虎断门刀（Android原生）</a>
-                </div>
-                
-                
-                <span class="level-item has-text-grey">
-                    
-                    
-                    24 分钟 读完 (大约 3656 个字)
-                </span>
-                
-                
-            </div>
-        </div>
-        
-        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
-            
-            <a class="has-link-black-ter" href="/Android-ReactNative通信流程/">Android-ReactNative通信流程</a>
-            
-        </h1>
-        <div class="content">
-            <h4 id="JNI注册"><a href="#JNI注册" class="headerlink" title="JNI注册"></a>JNI注册</h4><p>Android中注册JNI方法有两种方式，一种是静态注册，一种是动态注册。</p>
-<h5 id="动态注册"><a href="#动态注册" class="headerlink" title="动态注册"></a>动态注册</h5><p>因为JNI允许我们提供一个函数映射表(native函数和jni函数对应表)。而在执行System.loadLibrary加载so库时，会执行该so的JNI_OnLoad函数，利用这个时机可以动态注册JIN方法。具体实现的话是通过JNINativeMethod结构保存映射关系，然后通过RegisterNatives函数来将该映射关系注册。</p>
-<h5 id="静态注册"><a href="#静态注册" class="headerlink" title="静态注册"></a>静态注册</h5><p>如果没有在JNI_OnLoad中将JNI方法注册(将方法在进程中的地址增加到ClassObject-&gt;directMethods中)，则在调用的时候解析javah风格的函数(比如Java_com_example_hellojni_HelloJni_stringFromJNI)，进行静态注册。静态注册根据函数名来建立java方法和jni函数的对应关系。静态注册需要根据方法名本地搜索，比较耗时。</p>
-<h5 id="RN中的JNI注册"><a href="#RN中的JNI注册" class="headerlink" title="RN中的JNI注册"></a>RN中的JNI注册</h5><h6 id="JNI-OnLoad"><a href="#JNI-OnLoad" class="headerlink" title="JNI_OnLoad"></a>JNI_OnLoad</h6><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta"># src/main/jni/react/jni/OnLoad.cpp</span></span><br><span class="line"><span class="hljs-keyword">extern</span> <span class="hljs-string">"C"</span> <span class="hljs-function">JNIEXPORT jint <span class="hljs-title">JNI_OnLoad</span><span class="hljs-params">(JavaVM* vm, <span class="hljs-keyword">void</span>* reserved)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-comment">// 调用各个类的注册方法</span></span><br><span class="line">  <span class="hljs-keyword">return</span> initialize(vm, [] &#123;</span><br><span class="line">    gloginit::initialize();</span><br><span class="line">    JSCJavaScriptExecutorHolder::registerNatives();</span><br><span class="line">    ProxyJavaScriptExecutorHolder::registerNatives();</span><br><span class="line">    CatalystInstanceImpl::registerNatives();</span><br><span class="line">    CxxModuleWrapperBase::registerNatives();</span><br><span class="line">    CxxModuleWrapper::registerNatives();</span><br><span class="line">    JCxxCallbackImpl::registerNatives();</span><br><span class="line">    NativeArray::registerNatives();</span><br><span class="line">    NativeDeltaClient::registerNatives();</span><br><span class="line">    ReadableNativeArray::registerNatives();</span><br><span class="line">    WritableNativeArray::registerNatives();</span><br><span class="line">    NativeMap::registerNatives();</span><br><span class="line">    ReadableNativeMap::registerNatives();</span><br><span class="line">    WritableNativeMap::registerNatives();</span><br><span class="line">    ReadableNativeMapKeySetIterator::registerNatives();</span><br><span class="line"></span><br><span class="line">    #ifdef WITH_INSPECTOR</span><br><span class="line">    JInspector::registerNatives();</span><br><span class="line">    #endif</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h6 id="CatalystInstanceImpl-registerNatives"><a href="#CatalystInstanceImpl-registerNatives" class="headerlink" title="CatalystInstanceImpl.registerNatives"></a>CatalystInstanceImpl.registerNatives</h6><p>先拿CatalystInstanceImpl来举例子，先准备好映射数据，然后构建映射表，再通过FindClass获取对应java类的引用，通过这些参数使用RegisterNatives函数来注册。</p>
-<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta"># src/main/jni/react/jni/CatalystInstanceImpl.h </span></span><br><span class="line"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">CatalystInstanceImpl</span> :</span> <span class="hljs-keyword">public</span> jni::HybridClass&lt;CatalystInstanceImpl&gt; &#123;</span><br><span class="line"> <span class="hljs-comment">// 该类对应的Java类，通过该路径来加载java类的class引用</span></span><br><span class="line"> <span class="hljs-keyword">public</span>:</span><br><span class="line">  <span class="hljs-keyword">static</span> <span class="hljs-keyword">constexpr</span> <span class="hljs-keyword">auto</span> kJavaDescriptor = <span class="hljs-string">"Lcom/facebook/react/bridge/CatalystInstanceImpl;"</span>;</span><br><span class="line"></span><br><span class="line">  <span class="hljs-keyword">static</span> jni::local_ref&lt;jhybriddata&gt; initHybrid(jni::alias_ref&lt;jclass&gt;);</span><br><span class="line">  ~CatalystInstanceImpl() override;</span><br><span class="line"></span><br><span class="line">  <span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">registerNatives</span><span class="hljs-params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta"># src/main/jni/react/jni/CatalysInstanceImpl.cpp </span></span><br><span class="line"><span class="hljs-keyword">void</span> CatalystInstanceImpl::registerNatives() &#123;</span><br><span class="line">  registerHybrid(&#123;</span><br><span class="line">    <span class="hljs-comment">// 返回&#123;java方法名，java类命名空间(CatalysInstanceImpl.kJavaDescriptor),JNIMethod指针&#125;</span></span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"initHybrid"</span>, CatalystInstanceImpl::initHybrid),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"initializeBridge"</span>, CatalystInstanceImpl::initializeBridge),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"jniExtendNativeModules"</span>, CatalystInstanceImpl::extendNativeModules),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"jniSetSourceURL"</span>, CatalystInstanceImpl::jniSetSourceURL),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"jniRegisterSegment"</span>, CatalystInstanceImpl::jniRegisterSegment),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"jniLoadScriptFromAssets"</span>, CatalystInstanceImpl::jniLoadScriptFromAssets),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"jniLoadScriptFromFile"</span>, CatalystInstanceImpl::jniLoadScriptFromFile),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"jniLoadScriptFromDeltaBundle"</span>, CatalystInstanceImpl::jniLoadScriptFromDeltaBundle),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"jniCallJSFunction"</span>, CatalystInstanceImpl::jniCallJSFunction),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"jniCallJSCallback"</span>, CatalystInstanceImpl::jniCallJSCallback),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"setGlobalVariable"</span>, CatalystInstanceImpl::setGlobalVariable),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"getJavaScriptContext"</span>, CatalystInstanceImpl::getJavaScriptContext),</span><br><span class="line">    makeNativeMethod(<span class="hljs-string">"jniHandleMemoryPressure"</span>, CatalystInstanceImpl::handleMemoryPressure),</span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  JNativeRunnable::registerNatives();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-        </div>
-        
-        
-        
-        <div class="level is-mobile">
-            <div class="level-start">
-                <div class="level-item">
-                    <a class="button is-size-7 is-light"
-                        href="/Android-ReactNative通信流程/#more">阅读更多</a>
-                </div>
-            </div>
-        </div>
-        
-        
-    </div>
-</div>
-
-
-
-
-
-
-
-
 
     
 <div class="card card-transparent">
@@ -632,7 +633,7 @@
                         文章
                     </p>
                     <p class="title has-text-weight-normal">
-                        45
+                        46
                     </p>
                 </div>
             </div>
@@ -708,7 +709,7 @@
                 <span class="level-item">刀枪棍棒（Android）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">13</span>
+                <span class="level-item tag">14</span>
             </span>
         </a><ul><li>
         <a class="level is-marginless" href="/categories/刀枪棍棒（Android）/五虎断门刀（Android原生）/">
@@ -716,7 +717,7 @@
                 <span class="level-item">五虎断门刀（Android原生）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">9</span>
+                <span class="level-item tag">10</span>
             </span>
         </a></li><li>
         <a class="level is-marginless" href="/categories/刀枪棍棒（Android）/伏魔杖法（Flutter）/">
@@ -943,7 +944,7 @@
                             <span class="level-item">二月 2020</span>
                         </span>
                         <span class="level-end">
-                            <span class="level-item tag">3</span>
+                            <span class="level-item tag">4</span>
                         </span>
                     </a>
                 </li>
@@ -1261,7 +1262,7 @@
                             <span class="level-item">二月 2020</span>
                         </span>
                         <span class="level-end">
-                            <span class="level-item tag">3</span>
+                            <span class="level-item tag">4</span>
                         </span>
                     </a>
                 </li>
