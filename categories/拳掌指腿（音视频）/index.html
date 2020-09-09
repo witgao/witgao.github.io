@@ -140,6 +140,82 @@
 <div class="card">
     
     <div class="card-image">
+        <a href="/WebRTC源码初探之Android平台视频采集/" class="image is-7by1">
+        <img class="thumbnail" src="/images/27.jpeg" alt="Android多媒体架构总览">
+        </a>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-09-08T16:00:00.000Z">2020-09-09</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/弹指神通（WebRTC）/">弹指神通（WebRTC）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    17 分钟 读完 (大约 2582 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/WebRTC源码初探之Android平台视频采集/">Android多媒体架构总览</a>
+            
+        </h1>
+        <div class="content">
+            <p>WebRTC的采集模块中提供了多个平台的音视频采集实现，这里我们针对Android平台来分析一下WebRTC的采集模块。</p>
+<p>在讲解之前有几个概念需要明白</p>
+<ul>
+<li><strong>Source</strong>: 在WebRTC中将一切数据的来源都抽象成一个Source</li>
+<li><strong>Track</strong>: 在WebRTC中一个Track代表一路音频或视频,一个Track需要通过一个Source来创建</li>
+<li><strong>Sink</strong>: 在WebRTC中将数据的消费都抽象成一个Sink，将一个Sink添加到一个Track上，就可以收到对应Source的数据</li>
+</ul>
+<h4 id="VideoCapturer"><a href="#VideoCapturer" class="headerlink" title="VideoCapturer"></a>VideoCapturer</h4><p>VideoCapturer是设备采集模块对外提供的控制接口，通过CameraEnumerator来创建。</p>
+<p>通过CameraEnumerator可以检测当前设备上Camera设备的支持情况，然后通过createCapturer函数可以开启指定Camera设备进行采集，VideoCapturer对采集提供一些逻辑控制。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> VideoCapturer <span class="hljs-title">createVideoCapturer</span><span class="hljs-params">(Context context)</span> </span>&#123;</span><br><span class="line">  CameraEnumerator enumerator = Camera2Enumerator.isSupported(context)</span><br><span class="line">      ? <span class="hljs-keyword">new</span> Camera2Enumerator(context)</span><br><span class="line">      : <span class="hljs-keyword">new</span> Camera1Enumerator();</span><br><span class="line">  <span class="hljs-keyword">return</span> enumerator.createCapturer(enumerator.getDeviceNames()[<span class="hljs-number">0</span>], <span class="hljs-keyword">null</span> <span class="hljs-comment">/* eventsHandler */</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h5 id="CameraEnumerator"><a href="#CameraEnumerator" class="headerlink" title="CameraEnumerator"></a>CameraEnumerator</h5><p>CameraEnumerator负责提供对Camera设备信息的获取、以及负责创建CameraCapturer，具体实现有Camera1Enumerator和Camera2Enumerator。</p>
+<h5 id="CameraCapturer"><a href="#CameraCapturer" class="headerlink" title="CameraCapturer"></a>CameraCapturer</h5><p>CameraCapturer是对采集操作的封装，对外提供了开始采集、结束采集、设置采集参数等接口，负责创建CameraSession，对CameraSession的功能进行接口封装。CameraCapturer的具体实现有Camera1Capturer和Camera2Capturer。</p>
+<h5 id="CameraSession"><a href="#CameraSession" class="headerlink" title="CameraSession"></a>CameraSession</h5><p>CameraSession是对AndroidCameraApi的包装，具体实现有Camera1Session和Camera2Session。</p>
+<h4 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h4><p>CameraApi支持两种类型的数据回调，一种是字节流，另一种是纹理。这两种类型适合不同的场景，字节流类型对于FFmpeg等软编码比较方便，但是如果想要使用OpenGL-ES来对数据进行处理，那么就需要将字节流转换成纹理才行；纹理类型对OpenGL-ES处理比较方便，但是只有MediaCodec才支持纹理的编码，如果想要使用FFmpeg软编码，需要将纹理数据提取成字节流。</p>
+<p>Camera1Session两种类型的数据都支持，通过参数captureToTexture来控制返回的数据类型。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">Camera1Enumerator</span><span class="hljs-params">(<span class="hljs-keyword">boolean</span> captureToTexture)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">this</span>.captureToTexture = captureToTexture;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>Camera2Session只支持纹理类型的数据返回，并没有实现Camera2的字节流数据返回。（Camera2可以通过ImageReader获取字节流，但是硬件兼容性太差，不同厂商实现不一致）</p>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/WebRTC源码初探之Android平台视频采集/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-image">
         <a href="/音视频开发之H.264码流结构与编码原理/" class="image is-7by1">
         <img class="thumbnail" src="/images/23.jpg" alt="音视频开发之H.264码流结构与编码原理">
         </a>
@@ -742,82 +818,6 @@
 
 
 
-    
-<div class="card">
-    
-    <div class="card-image">
-        <a href="/音视频开发之Android录制视频/" class="image is-7by1">
-        <img class="thumbnail" src="/images/10.jpeg" alt="音视频开发之Android录制视频">
-        </a>
-    </div>
-    
-    <div class="card-content article ">
-        
-        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
-            <div class="level-left">
-                <time class="level-item has-text-grey"
-                    datetime="2020-07-20T16:00:00.000Z">2020-07-21</time>
-                
-                <div class="level-item">
-                    <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
-                </div>
-                
-                
-                <span class="level-item has-text-grey">
-                    
-                    
-                    19 分钟 读完 (大约 2803 个字)
-                </span>
-                
-                
-            </div>
-        </div>
-        
-        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
-            
-            <a class="has-link-black-ter" href="/音视频开发之Android录制视频/">音视频开发之Android录制视频</a>
-            
-        </h1>
-        <div class="content">
-            <p>FFmpeg对于Android平台的视频输入设备API有一定的支持，但是比较局限，只支持Android N以上的版本，低版本无法使用。</p>
-<p>其原因是因为FFmpeg采用的是Android N推出的native层camera API来实现的(NDK中的libcamera2ndk.so），而并非采用JNI的方式来调用Java层camera API。</p>
-<h3 id="Android平台视频录制API"><a href="#Android平台视频录制API" class="headerlink" title="Android平台视频录制API"></a>Android平台视频录制API</h3><p>对于视频录制API，Android平台上有两套API实现，一套是老版的Camera1，另一套是Android L之后推出的Camera2。</p>
-<p>Camera1使用起来较为简单，但是功能相对较少，不支持多纹理输出。Camera2的API功能上虽然更加强大，但是API设计的非常底层化，不利于理解，并且YUV_420_888的数据格式，国内各大产商在实现上留下的坑太多。</p>
-<p>Jetpack组件中，Google推出了全新的CameraX组件，对Camera1和Camera2进行了统一的封装，使得API更加简单易用。</p>
-<h4 id="Camera1"><a href="#Camera1" class="headerlink" title="Camera1"></a>Camera1</h4><h5 id="获取Camera设备信息"><a href="#获取Camera设备信息" class="headerlink" title="获取Camera设备信息"></a>获取Camera设备信息</h5><ul>
-<li>Camera.getNumberOfCameras() : 获取Camera设备数量 </li>
-<li>index : 索引就是后续会使用的CameraID</li>
-<li>Camera.CameraInfo : Camera设备信息  </li>
-<li>Camera.getCameraInfo(index, info) : 获取指定索引的Camera设备信息，存储到info对象中</li>
-<li>Camera.CameraInfo.facing : 相机面对的方向，前置还是后置 CAMERA_FACING_BACK or CAMERA_FACING_FRONT.</li>
-<li>Camera.CameraInfo.orientation : 相机图像的方向，获取到的图像需要顺时针旋转该角度才能正常显示。值为0、90、180、270。（因为我们拿手机一般是竖着拿，但是摄像头可能是向左横着或向右横着被安装的）</li>
-<li>Camera.open : 获取指定索引位置的Camera设备实例。</li>
-</ul>
-<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 遍历所有的camera设备</span></span><br><span class="line"><span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> index = <span class="hljs-number">0</span>; index &lt; android.hardware.Camera.getNumberOfCameras(); ++index) &#123;</span><br><span class="line">  <span class="hljs-comment">// 获取camera设备信息</span></span><br><span class="line">  android.hardware.Camera.CameraInfo info = <span class="hljs-keyword">new</span> android.hardware.Camera.CameraInfo();</span><br><span class="line">  android.hardware.Camera.getCameraInfo(index, info);</span><br><span class="line">  String facing =</span><br><span class="line">        (info.facing == android.hardware.Camera.CameraInfo.CAMERA_FACING_FRONT) ? <span class="hljs-string">"front"</span> : <span class="hljs-string">"back"</span>; </span><br><span class="line">  <span class="hljs-keyword">final</span> android.hardware.Camera camera;</span><br><span class="line">  <span class="hljs-keyword">try</span> &#123;</span><br><span class="line">      <span class="hljs-comment">// 开启camera设备，获取camera实例</span></span><br><span class="line">      camera = android.hardware.Camera.open(cameraId);</span><br><span class="line">  &#125; <span class="hljs-keyword">catch</span> (RuntimeException e) &#123;</span><br><span class="line">      callback.onFailure(FailureType.ERROR, e.getMessage());</span><br><span class="line">      <span class="hljs-keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-        </div>
-        
-        
-        
-        <div class="level is-mobile">
-            <div class="level-start">
-                <div class="level-item">
-                    <a class="button is-size-7 is-light"
-                        href="/音视频开发之Android录制视频/#more">阅读更多</a>
-                </div>
-            </div>
-        </div>
-        
-        
-    </div>
-</div>
-
-
-
-
-
-
-
-
 
     
 <div class="card card-transparent">
@@ -892,7 +892,7 @@
                         分类
                     </p>
                     <p class="title has-text-weight-normal">
-                        9
+                        10
                     </p>
                 </div>
             </div>
@@ -934,7 +934,7 @@
                 <span class="level-item">内功心法（CS基础）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">13</span>
+                <span class="level-item tag">12</span>
             </span>
         </a><ul><li>
         <a class="level is-marginless" href="/categories/内功心法（CS基础）/北冥神功（编程语言）/">
@@ -950,7 +950,7 @@
                 <span class="level-item">神照功（网络协议）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">9</span>
+                <span class="level-item tag">8</span>
             </span>
         </a></li></ul></li><li>
         <a class="level is-marginless" href="/categories/刀枪棍棒（Android）/">
@@ -982,7 +982,7 @@
                 <span class="level-item">拳掌指腿（音视频）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">19</span>
+                <span class="level-item tag">20</span>
             </span>
         </a><ul><li>
         <a class="level is-marginless" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">
@@ -991,6 +991,14 @@
             </span>
             <span class="level-end">
                 <span class="level-item tag">11</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/拳掌指腿（音视频）/弹指神通（WebRTC）/">
+            <span class="level-start">
+                <span class="level-item">弹指神通（WebRTC）</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
             </span>
         </a></li><li>
         <a class="level is-marginless" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">
@@ -1014,6 +1022,25 @@
         <h3 class="menu-label">
             最新文章
         </h3>
+        
+        <article class="media">
+            
+            <a href="/WebRTC源码初探之Android平台视频采集/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/27.jpeg" alt="Android多媒体架构总览">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-09-08T16:00:00.000Z">2020-09-09</time></div>
+                    <a href="/WebRTC源码初探之Android平台视频采集/" class="title has-link-black-ter is-size-6 has-text-weight-normal">Android多媒体架构总览</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/弹指神通（WebRTC）/">弹指神通（WebRTC）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
         
         <article class="media">
             
@@ -1091,25 +1118,6 @@
             </div>
         </article>
         
-        <article class="media">
-            
-            <a href="/音视频开发之ffplay队列分析/" class="media-left">
-                <p class="image is-64x64">
-                    <img class="thumbnail" src="/images/15.jpg" alt="音视频开发之ffplay队列分析">
-                </p>
-            </a>
-            
-            <div class="media-content">
-                <div class="content">
-                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-01T16:00:00.000Z">2020-08-02</time></div>
-                    <a href="/音视频开发之ffplay队列分析/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之ffplay队列分析</a>
-                    <p class="is-size-7 is-uppercase">
-                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
-                    </p>
-                </div>
-            </div>
-        </article>
-        
     </div>
 </div>
         
@@ -1120,6 +1128,17 @@
                 归档
             </h3>
             <ul class="menu-list">
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/09/">
+                        <span class="level-start">
+                            <span class="level-item">九月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
                 
                 <li>
                     <a class="level is-marginless" href="/archives/2020/08/">
@@ -1292,7 +1311,7 @@
                             <span class="level-item">十二月 2017</span>
                         </span>
                         <span class="level-end">
-                            <span class="level-item tag">7</span>
+                            <span class="level-item tag">6</span>
                         </span>
                     </a>
                 </li>
@@ -1335,6 +1354,25 @@
         
         <article class="media">
             
+            <a href="/WebRTC源码初探之Android平台视频采集/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/27.jpeg" alt="Android多媒体架构总览">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-09-08T16:00:00.000Z">2020-09-09</time></div>
+                    <a href="/WebRTC源码初探之Android平台视频采集/" class="title has-link-black-ter is-size-6 has-text-weight-normal">Android多媒体架构总览</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/弹指神通（WebRTC）/">弹指神通（WebRTC）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
             <a href="/音视频开发之H.264码流结构与编码原理/" class="media-left">
                 <p class="image is-64x64">
                     <img class="thumbnail" src="/images/23.jpg" alt="音视频开发之H.264码流结构与编码原理">
@@ -1409,25 +1447,6 @@
             </div>
         </article>
         
-        <article class="media">
-            
-            <a href="/音视频开发之ffplay队列分析/" class="media-left">
-                <p class="image is-64x64">
-                    <img class="thumbnail" src="/images/15.jpg" alt="音视频开发之ffplay队列分析">
-                </p>
-            </a>
-            
-            <div class="media-content">
-                <div class="content">
-                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-01T16:00:00.000Z">2020-08-02</time></div>
-                    <a href="/音视频开发之ffplay队列分析/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之ffplay队列分析</a>
-                    <p class="is-size-7 is-uppercase">
-                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
-                    </p>
-                </div>
-            </div>
-        </article>
-        
     </div>
 </div>
     
@@ -1438,6 +1457,17 @@
                 归档
             </h3>
             <ul class="menu-list">
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/09/">
+                        <span class="level-start">
+                            <span class="level-item">九月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
                 
                 <li>
                     <a class="level is-marginless" href="/archives/2020/08/">
@@ -1610,7 +1640,7 @@
                             <span class="level-item">十二月 2017</span>
                         </span>
                         <span class="level-end">
-                            <span class="level-item tag">7</span>
+                            <span class="level-item tag">6</span>
                         </span>
                     </a>
                 </li>

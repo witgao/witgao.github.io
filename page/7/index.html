@@ -133,6 +133,58 @@
         <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
             <div class="level-left">
                 <time class="level-item has-text-grey"
+                    datetime="2017-12-20T16:00:00.000Z">2017-12-21</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/内功心法（CS基础）/">内功心法（CS基础）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/内功心法（CS基础）/神照功（网络协议）/">神照功（网络协议）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    4 分钟 读完 (大约 564 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/Pipeline之Handler链/">Pipeline之Handler链</a>
+            
+        </h1>
+        <div class="content">
+            <p>ChannelPipeline采用责任链模式设计。在责任链模式中，由每个对象对其下个对象的引用而连接起来的一条链，请求在这条链上传递，知道链上某个对象处理该请求并中止传递。发送请求者并不知道链上的哪个对象处理该请求，从而使得系统可以在不影响发送端的情况下动态的重新分配责任。<br><img src="/images/Netty-pipeline责任链.png" alt="Netty-pipeline责任链"></p>
+<h3 id="DefaultChannelPipeline"><a href="#DefaultChannelPipeline" class="headerlink" title="DefaultChannelPipeline"></a>DefaultChannelPipeline</h3><p>Handler链的默认实现类，维护了链中的头结点和尾结点，DefaultChannelPipeline对象在构建时，就会创建头结点和尾结点对象。之后添加的Handler都会添加到两者中间，addLast会添加到尾结点的前面，addFirst会添加到头结点的后面。在添加时可以给Handler指定名称，如果名称有重复会抛出异常。<br>Handler分为两种，一种是实现ChannelInboundHandler接口的，一种是实现ChannelOutboundHandler接口的。ChannelInboundHandler接口主要处理从外到内的请求，将远端操作通知本地（比如注册，激活，读等），从Head结点开始传递，直到tail结点。而ChannelOutboundHandler接口主要处理从内到外的操作，将本地操作通知远端（比如连接，绑定，写）等，从tail结点开始传递，到Head结点后转由unsafe类进行真正处理。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tail = <span class="hljs-keyword">new</span> TailContext(<span class="hljs-keyword">this</span>); <span class="hljs-comment">// tail实现了ChannelInboundHandler接口</span></span><br><span class="line">head = <span class="hljs-keyword">new</span> HeadContext(<span class="hljs-keyword">this</span>); <span class="hljs-comment">// head实现了ChannelOutboundHandler和ChannelInboundHandler接口</span></span><br></pre></td></tr></table></figure></p>
+<p>上文讲到的ServerBootstrapAcceptor类，就是一个ChannelInboundHandlerAdapter类型的Handler。所以当连接完成对上层发出通知时，通知从Head结点开始传递，到达ServerBootstrapAcceptor中处理并中止传递。</p>
+<h3 id="AbstractChannelHandlerContext"><a href="#AbstractChannelHandlerContext" class="headerlink" title="AbstractChannelHandlerContext"></a>AbstractChannelHandlerContext</h3><p>AbstractChannelHandlerContext是对ChannelHandler的一个包装类，Pipeline中真正的对象实际上是AbstractChannelHandlerContext。在AbstractChannelHandlerContext中维护了next、prev属性，所以这是一个双向链表结构。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">volatile</span> AbstractChannelHandlerContext next; <span class="hljs-comment">// 下个结点</span></span><br><span class="line"><span class="hljs-keyword">volatile</span> AbstractChannelHandlerContext prev; <span class="hljs-comment">// 上个结点</span></span><br><span class="line"><span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> ChannelHandler handler; <span class="hljs-comment">// 真正Handler对象</span></span><br></pre></td></tr></table></figure></p>
+<p>接下来讲到的编解码器也是根据Pipeline来实现的。</p>
+
+        </div>
+        
+        
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
                     datetime="2017-12-18T16:00:00.000Z">2017-12-19</time>
                 
                 <div class="level-item">
@@ -346,80 +398,6 @@
 
 
 
-    
-<div class="card">
-    
-    <div class="card-content article ">
-        
-        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
-            <div class="level-left">
-                <time class="level-item has-text-grey"
-                    datetime="2017-12-12T16:00:00.000Z">2017-12-13</time>
-                
-                <div class="level-item">
-                    <a class="has-link-grey -link" href="/categories/内功心法（CS基础）/">内功心法（CS基础）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/内功心法（CS基础）/神照功（网络协议）/">神照功（网络协议）</a>
-                </div>
-                
-                
-                <span class="level-item has-text-grey">
-                    
-                    
-                    11 分钟 读完 (大约 1641 个字)
-                </span>
-                
-                
-            </div>
-        </div>
-        
-        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
-            
-            <a class="has-link-black-ter" href="/TCP讲解/">TCP讲解</a>
-            
-        </h1>
-        <div class="content">
-            <p>TCP是一个面向连接的、可靠的、流协议。在OSI模型中属于传输层协议。</p>
-<h3 id="序列号"><a href="#序列号" class="headerlink" title="序列号"></a>序列号</h3><p>序列号是按顺序给发送数据的每个字节都标上的编号。接收端查询接收数据TCP首部的序列号和数据的长度，计算出自己下一步应该接收的序列号，将其作为确认应答返回给发送端。</p>
-<h3 id="确认应答"><a href="#确认应答" class="headerlink" title="确认应答"></a>确认应答</h3><p>当发送端的数据到达接收端主机时，接收端主机会返回一个已经收到消息的通知，这个消息叫做确认应答（ACK）。如果在一定时间内没有收到ACK，发送端认为可能丢包，则进行重发。接收端主机如果收到相同数据会放弃接收该数据，不会造成重复接收相同数据的情况。</p>
-<h3 id="超时重发"><a href="#超时重发" class="headerlink" title="超时重发"></a>超时重发</h3><p>TCP每次发包都会计算往返时间及其偏差，并将这个时间作为重发超时的时间，如果超过该时间仍然没有收到接收端的确认应答，则认为发送超时，准备重发。如果重发一定次数仍然失败，则判断网络异常，强制关闭连接。<br>因为有重发机制，所以数据并不是一发送就从缓冲区中删除，而是等到接收端的确认应答返回，确认该数据已经被接收，才会从缓冲区删除。</p>
-<h3 id="连接管理"><a href="#连接管理" class="headerlink" title="连接管理"></a>连接管理</h3><h4 id="三次握手"><a href="#三次握手" class="headerlink" title="三次握手"></a>三次握手</h4><p>TCP在数据通信之前，通过TCP首部发送一个SYN包作为建立连接的请求并等待确认应答，如果接收端发来确认应答，则认为可以进行数据通信，并向接收端返回确认应答。因此连接的建立需要来回发送三个包才能完成。</p>
-<ol>
-<li>客户端发送SYN(向服务端请求建立连接)</li>
-<li>服务端发送SYN/ACK（通知客户端服务端已经准备好了）</li>
-<li>客户端回应ACK(通知服务端客户端已经准备好了)</li>
-</ol>
-<p>三次握手后，双方都知道对方已经准备好了，连接建立。<br><img src="/images/TCP三次握手.png" alt="TCP三次握手"></p>
-<h4 id="四次挥手"><a href="#四次挥手" class="headerlink" title="四次挥手"></a>四次挥手</h4><p>在通信结束后也会进行断开连接的处理，发送FIN包给接收端。由于TCP是全双工模式，可以单端发送数据，所以需要4次挥手。<br>2、3步不能合并，是因为此时服务端可能还有数据没有发送，不能立刻就关闭，所以先发送ACK回应，等数据处理完再发送FIN请求客户端关闭。</p>
-<ol>
-<li>客户端发送FIN/ACK（向服务端请求断开连接，标明客户端没有数据需要发送，可以关闭，但是还可以接收服务端数据）</li>
-<li>服务端回应ACK(通知客户端可以关闭连接)</li>
-<li>服务端发送FIN/ACK（向客户端请求断开连接，标明服务端没有数据需要发送，可以关闭）</li>
-<li>客户端回应ACK(通知服务端可以关闭连接，服务端关闭连接，客户端等待一段时间后也关闭连接)</li>
-</ol>
-<p><img src="/images/TCP四次挥手.png" alt="TCP四次挥手"><br></p>
-        </div>
-        
-        
-        
-        <div class="level is-mobile">
-            <div class="level-start">
-                <div class="level-item">
-                    <a class="button is-size-7 is-light"
-                        href="/TCP讲解/#more">阅读更多</a>
-                </div>
-            </div>
-        </div>
-        
-        
-    </div>
-</div>
-
-
-
-
-
-
-
-
 
     
 <div class="card card-transparent">
@@ -498,7 +476,7 @@
                         分类
                     </p>
                     <p class="title has-text-weight-normal">
-                        9
+                        10
                     </p>
                 </div>
             </div>
@@ -540,7 +518,7 @@
                 <span class="level-item">内功心法（CS基础）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">13</span>
+                <span class="level-item tag">12</span>
             </span>
         </a><ul><li>
         <a class="level is-marginless" href="/categories/内功心法（CS基础）/北冥神功（编程语言）/">
@@ -556,7 +534,7 @@
                 <span class="level-item">神照功（网络协议）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">9</span>
+                <span class="level-item tag">8</span>
             </span>
         </a></li></ul></li><li>
         <a class="level is-marginless" href="/categories/刀枪棍棒（Android）/">
@@ -588,7 +566,7 @@
                 <span class="level-item">拳掌指腿（音视频）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">19</span>
+                <span class="level-item tag">20</span>
             </span>
         </a><ul><li>
         <a class="level is-marginless" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">
@@ -597,6 +575,14 @@
             </span>
             <span class="level-end">
                 <span class="level-item tag">11</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/拳掌指腿（音视频）/弹指神通（WebRTC）/">
+            <span class="level-start">
+                <span class="level-item">弹指神通（WebRTC）</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
             </span>
         </a></li><li>
         <a class="level is-marginless" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">
@@ -620,6 +606,25 @@
         <h3 class="menu-label">
             最新文章
         </h3>
+        
+        <article class="media">
+            
+            <a href="/WebRTC源码初探之Android平台视频采集/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/27.jpeg" alt="Android多媒体架构总览">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-09-08T16:00:00.000Z">2020-09-09</time></div>
+                    <a href="/WebRTC源码初探之Android平台视频采集/" class="title has-link-black-ter is-size-6 has-text-weight-normal">Android多媒体架构总览</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/弹指神通（WebRTC）/">弹指神通（WebRTC）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
         
         <article class="media">
             
@@ -697,25 +702,6 @@
             </div>
         </article>
         
-        <article class="media">
-            
-            <a href="/音视频开发之ffplay队列分析/" class="media-left">
-                <p class="image is-64x64">
-                    <img class="thumbnail" src="/images/15.jpg" alt="音视频开发之ffplay队列分析">
-                </p>
-            </a>
-            
-            <div class="media-content">
-                <div class="content">
-                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-01T16:00:00.000Z">2020-08-02</time></div>
-                    <a href="/音视频开发之ffplay队列分析/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之ffplay队列分析</a>
-                    <p class="is-size-7 is-uppercase">
-                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
-                    </p>
-                </div>
-            </div>
-        </article>
-        
     </div>
 </div>
         
@@ -726,6 +712,17 @@
                 归档
             </h3>
             <ul class="menu-list">
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/09/">
+                        <span class="level-start">
+                            <span class="level-item">九月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
                 
                 <li>
                     <a class="level is-marginless" href="/archives/2020/08/">
@@ -898,7 +895,7 @@
                             <span class="level-item">十二月 2017</span>
                         </span>
                         <span class="level-end">
-                            <span class="level-item tag">7</span>
+                            <span class="level-item tag">6</span>
                         </span>
                     </a>
                 </li>
@@ -941,6 +938,25 @@
         
         <article class="media">
             
+            <a href="/WebRTC源码初探之Android平台视频采集/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/27.jpeg" alt="Android多媒体架构总览">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-09-08T16:00:00.000Z">2020-09-09</time></div>
+                    <a href="/WebRTC源码初探之Android平台视频采集/" class="title has-link-black-ter is-size-6 has-text-weight-normal">Android多媒体架构总览</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/弹指神通（WebRTC）/">弹指神通（WebRTC）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
             <a href="/音视频开发之H.264码流结构与编码原理/" class="media-left">
                 <p class="image is-64x64">
                     <img class="thumbnail" src="/images/23.jpg" alt="音视频开发之H.264码流结构与编码原理">
@@ -1015,25 +1031,6 @@
             </div>
         </article>
         
-        <article class="media">
-            
-            <a href="/音视频开发之ffplay队列分析/" class="media-left">
-                <p class="image is-64x64">
-                    <img class="thumbnail" src="/images/15.jpg" alt="音视频开发之ffplay队列分析">
-                </p>
-            </a>
-            
-            <div class="media-content">
-                <div class="content">
-                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-01T16:00:00.000Z">2020-08-02</time></div>
-                    <a href="/音视频开发之ffplay队列分析/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之ffplay队列分析</a>
-                    <p class="is-size-7 is-uppercase">
-                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
-                    </p>
-                </div>
-            </div>
-        </article>
-        
     </div>
 </div>
     
@@ -1044,6 +1041,17 @@
                 归档
             </h3>
             <ul class="menu-list">
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/09/">
+                        <span class="level-start">
+                            <span class="level-item">九月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
                 
                 <li>
                     <a class="level is-marginless" href="/archives/2020/08/">
@@ -1216,7 +1224,7 @@
                             <span class="level-item">十二月 2017</span>
                         </span>
                         <span class="level-end">
-                            <span class="level-item tag">7</span>
+                            <span class="level-item tag">6</span>
                         </span>
                     </a>
                 </li>

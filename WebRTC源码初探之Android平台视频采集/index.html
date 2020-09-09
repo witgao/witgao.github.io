@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html  lang="zh">
+
+<head>
+    <meta charset="utf-8" />
+
+<meta name="generator" content="Hexo 3.9.0" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<title>Android多媒体架构总览 - 富贵山庄</title>
+
+
+    <meta name="description" content="WebRTC的采集模块中提供了多个平台的音视频采集实现，这里我们针对Android平台来分析一下WebRTC的采集模块。 在讲解之前有几个概念需要明白  Source: 在WebRTC中将一切数据的来源都抽象成一个Source Track: 在WebRTC中一个Track代表一路音频或视频,一个Track需要通过一个Source来创建 Sink: 在WebRTC中将数据的消费都抽象成一个Sink，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android多媒体架构总览">
+<meta property="og:url" content="https://witgao.com/WebRTC源码初探之Android平台视频采集/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:description" content="WebRTC的采集模块中提供了多个平台的音视频采集实现，这里我们针对Android平台来分析一下WebRTC的采集模块。 在讲解之前有几个概念需要明白  Source: 在WebRTC中将一切数据的来源都抽象成一个Source Track: 在WebRTC中一个Track代表一路音频或视频,一个Track需要通过一个Source来创建 Sink: 在WebRTC中将数据的消费都抽象成一个Sink，">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://witgao.com/images/27.jpeg">
+<meta property="og:updated_time" content="2020-09-09T08:34:46.293Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android多媒体架构总览">
+<meta name="twitter:description" content="WebRTC的采集模块中提供了多个平台的音视频采集实现，这里我们针对Android平台来分析一下WebRTC的采集模块。 在讲解之前有几个概念需要明白  Source: 在WebRTC中将一切数据的来源都抽象成一个Source Track: 在WebRTC中一个Track代表一路音频或视频,一个Track需要通过一个Source来创建 Sink: 在WebRTC中将数据的消费都抽象成一个Sink，">
+<meta name="twitter:image" content="https://witgao.com/images/27.jpeg">
+
+
+
+
+
+
+
+<link rel="icon" href="/images/favicon1.svg">
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.7.2/css/bulma.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:400,600|Source+Code+Pro">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/default.css">
+
+
+    
+    
+<style>body>.footer,body>.navbar,body>.section{opacity:0}</style>
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css">
+
+    
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.css">
+
+    
+    
+    
+    
+<link rel="stylesheet" href="/css/back-to-top.css">
+
+    
+    
+    
+    
+    
+    
+    
+    <link rel="stylesheet" href="/css/progressbar.css">
+<script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script>
+    
+    
+    
+
+
+<link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body class="is-3-column">
+    <nav class="navbar navbar-main">
+    <div class="container">
+        <div class="navbar-brand is-flex-center">
+            <a class="navbar-item navbar-logo" href="/">
+            
+                <img src="/images/logo2.png" alt="Android多媒体架构总览" height="28">
+            
+            </a>
+        </div>
+        <div class="navbar-menu">
+            
+            <div class="navbar-start">
+                
+                <a class="navbar-item"
+                href="/">燕子坞</a>
+                
+                <a class="navbar-item"
+                href="/archives">听香水榭</a>
+                
+                <a class="navbar-item"
+                href="/categories">还施水阁</a>
+                
+                <a class="navbar-item"
+                href="/about">思过崖</a>
+                
+            </div>
+            
+            <div class="navbar-end">
+                
+                    
+                    <a class="navbar-item" target="_blank" title="Download on GitHub" href="https://github.com/witgao/blog">
+                        
+                        <i class="fab fa-github"></i>
+                        
+                    </a>
+                    
+                
+                
+                <a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;">
+                    <i class="fas fa-list-ul"></i>
+                </a>
+                
+                
+                <a class="navbar-item search" title="搜索" href="javascript:;">
+                    <i class="fas fa-search"></i>
+                </a>
+                
+            </div>
+        </div>
+    </div>
+</nav>
+    
+    <section class="section">
+        <div class="container">
+            <div class="columns">
+                <div class="column is-8-tablet is-8-desktop is-9-widescreen has-order-2 column-main">
+<div class="card">
+    
+    <div class="card-image">
+        <span  class="image is-7by1">
+        <img class="thumbnail" src="/images/27.jpeg" alt="Android多媒体架构总览">
+        </span>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-09-08T16:00:00.000Z">2020-09-09</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/弹指神通（WebRTC）/">弹指神通（WebRTC）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    17 分钟 读完 (大约 2582 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            Android多媒体架构总览
+            
+        </h1>
+        <div class="content">
+            <p>WebRTC的采集模块中提供了多个平台的音视频采集实现，这里我们针对Android平台来分析一下WebRTC的采集模块。</p>
+<p>在讲解之前有几个概念需要明白</p>
+<ul>
+<li><strong>Source</strong>: 在WebRTC中将一切数据的来源都抽象成一个Source</li>
+<li><strong>Track</strong>: 在WebRTC中一个Track代表一路音频或视频,一个Track需要通过一个Source来创建</li>
+<li><strong>Sink</strong>: 在WebRTC中将数据的消费都抽象成一个Sink，将一个Sink添加到一个Track上，就可以收到对应Source的数据</li>
+</ul>
+<h4 id="VideoCapturer"><a href="#VideoCapturer" class="headerlink" title="VideoCapturer"></a>VideoCapturer</h4><p>VideoCapturer是设备采集模块对外提供的控制接口，通过CameraEnumerator来创建。</p>
+<p>通过CameraEnumerator可以检测当前设备上Camera设备的支持情况，然后通过createCapturer函数可以开启指定Camera设备进行采集，VideoCapturer对采集提供一些逻辑控制。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> VideoCapturer <span class="hljs-title">createVideoCapturer</span><span class="hljs-params">(Context context)</span> </span>&#123;</span><br><span class="line">  CameraEnumerator enumerator = Camera2Enumerator.isSupported(context)</span><br><span class="line">      ? <span class="hljs-keyword">new</span> Camera2Enumerator(context)</span><br><span class="line">      : <span class="hljs-keyword">new</span> Camera1Enumerator();</span><br><span class="line">  <span class="hljs-keyword">return</span> enumerator.createCapturer(enumerator.getDeviceNames()[<span class="hljs-number">0</span>], <span class="hljs-keyword">null</span> <span class="hljs-comment">/* eventsHandler */</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h5 id="CameraEnumerator"><a href="#CameraEnumerator" class="headerlink" title="CameraEnumerator"></a>CameraEnumerator</h5><p>CameraEnumerator负责提供对Camera设备信息的获取、以及负责创建CameraCapturer，具体实现有Camera1Enumerator和Camera2Enumerator。</p>
+<h5 id="CameraCapturer"><a href="#CameraCapturer" class="headerlink" title="CameraCapturer"></a>CameraCapturer</h5><p>CameraCapturer是对采集操作的封装，对外提供了开始采集、结束采集、设置采集参数等接口，负责创建CameraSession，对CameraSession的功能进行接口封装。CameraCapturer的具体实现有Camera1Capturer和Camera2Capturer。</p>
+<h5 id="CameraSession"><a href="#CameraSession" class="headerlink" title="CameraSession"></a>CameraSession</h5><p>CameraSession是对AndroidCameraApi的包装，具体实现有Camera1Session和Camera2Session。</p>
+<h4 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h4><p>CameraApi支持两种类型的数据回调，一种是字节流，另一种是纹理。这两种类型适合不同的场景，字节流类型对于FFmpeg等软编码比较方便，但是如果想要使用OpenGL-ES来对数据进行处理，那么就需要将字节流转换成纹理才行；纹理类型对OpenGL-ES处理比较方便，但是只有MediaCodec才支持纹理的编码，如果想要使用FFmpeg软编码，需要将纹理数据提取成字节流。</p>
+<p>Camera1Session两种类型的数据都支持，通过参数captureToTexture来控制返回的数据类型。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">Camera1Enumerator</span><span class="hljs-params">(<span class="hljs-keyword">boolean</span> captureToTexture)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">this</span>.captureToTexture = captureToTexture;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>Camera2Session只支持纹理类型的数据返回，并没有实现Camera2的字节流数据返回。（Camera2可以通过ImageReader获取字节流，但是硬件兼容性太差，不同厂商实现不一致）</p>
+<a id="more"></a>
+<h5 id="VideoFrame"><a href="#VideoFrame" class="headerlink" title="VideoFrame"></a>VideoFrame</h5><p>WebRTC将一帧视频数据封装成一个VideoFrame，一帧视频记录三个值，视频帧的方向、时间、数据buffer。其中Buffer有两种，对应着两种数据类型。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">VideoFrame</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">RefCounted</span> </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Buffer buffer; <span class="hljs-comment">// 数据buffer</span></span><br><span class="line">  <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> rotation; <span class="hljs-comment">// 方向</span></span><br><span class="line">  <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">long</span> timestampNs; <span class="hljs-comment">// 时间戳</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h6 id="I420Buffer"><a href="#I420Buffer" class="headerlink" title="I420Buffer"></a>I420Buffer</h6><p>字节流类型buffer。字节流类型只支持I420格式的数据，在Buffer中分别保存了Y、U、V三个ByteBuffer。其实现类为JavaI420Buffer。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">I420Buffer</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Buffer</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-meta">@CalledByNative</span>(<span class="hljs-string">"I420Buffer"</span>) <span class="hljs-function">ByteBuffer <span class="hljs-title">getDataY</span><span class="hljs-params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-meta">@CalledByNative</span>(<span class="hljs-string">"I420Buffer"</span>) <span class="hljs-function">ByteBuffer <span class="hljs-title">getDataU</span><span class="hljs-params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-meta">@CalledByNative</span>(<span class="hljs-string">"I420Buffer"</span>) <span class="hljs-function">ByteBuffer <span class="hljs-title">getDataV</span><span class="hljs-params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-meta">@CalledByNative</span>(<span class="hljs-string">"I420Buffer"</span>) <span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">getStrideY</span><span class="hljs-params">()</span></span>;</span><br><span class="line">    <span class="hljs-meta">@CalledByNative</span>(<span class="hljs-string">"I420Buffer"</span>) <span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">getStrideU</span><span class="hljs-params">()</span></span>;</span><br><span class="line">    <span class="hljs-meta">@CalledByNative</span>(<span class="hljs-string">"I420Buffer"</span>) <span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">getStrideV</span><span class="hljs-params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">JavaI420Buffer</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">VideoFrame</span>.<span class="hljs-title">I420Buffer</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> width;</span><br><span class="line">    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> height;</span><br><span class="line">    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> ByteBuffer dataY;</span><br><span class="line">    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> ByteBuffer dataU;</span><br><span class="line">    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> ByteBuffer dataV;</span><br><span class="line">    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> strideY;</span><br><span class="line">    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> strideU;</span><br><span class="line">    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> strideV;</span><br><span class="line">    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> RefCountDelegate refCountDelegate;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h5 id="TextureBuffer、"><a href="#TextureBuffer、" class="headerlink" title="TextureBuffer、"></a>TextureBuffer、</h5><p>纹理类型buffer。对于纹理在Android上有两种类型，一种是通用的RGB纹理，另一种是扩展的OES纹理（OES纹理支持跨线程使用），Android系统API使用的都是OES纹理。对于纹理来说，需要保存纹理类型、纹理ID、变换矩阵。其实现类为TextureBufferImpl。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">TextureBuffer</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Buffer</span> </span>&#123;</span><br><span class="line">    <span class="hljs-keyword">enum</span> Type &#123;</span><br><span class="line">      OES(GLES11Ext.GL_TEXTURE_EXTERNAL_OES),</span><br><span class="line">      RGB(GLES20.GL_TEXTURE_2D);</span><br><span class="line"></span><br><span class="line">      <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> glTarget;</span><br><span class="line"></span><br><span class="line">      <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-title">Type</span><span class="hljs-params">(<span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> glTarget)</span> </span>&#123;</span><br><span class="line">        <span class="hljs-keyword">this</span>.glTarget = glTarget;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">getGlTarget</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">        <span class="hljs-keyword">return</span> glTarget;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function">Type <span class="hljs-title">getType</span><span class="hljs-params">()</span></span>;</span><br><span class="line">    <span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">getTextureId</span><span class="hljs-params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-function">Matrix <span class="hljs-title">getTransformMatrix</span><span class="hljs-params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TextureBufferImpl</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">VideoFrame</span>.<span class="hljs-title">TextureBuffer</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="hljs-comment">// This is the full resolution the texture has in memory after applying the transformation matrix</span></span><br><span class="line">    <span class="hljs-comment">// that might include cropping. This resolution is useful to know when sampling the texture to</span></span><br><span class="line">    <span class="hljs-comment">// avoid downscaling artifacts.</span></span><br><span class="line">    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> unscaledWidth;</span><br><span class="line">    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> unscaledHeight;</span><br><span class="line">    <span class="hljs-comment">// This is the resolution that has been applied after cropAndScale().</span></span><br><span class="line">    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> width;</span><br><span class="line">    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> height;</span><br><span class="line">    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Type type;</span><br><span class="line">    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> id;</span><br><span class="line">    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Matrix transformMatrix;</span><br><span class="line">    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Handler toI420Handler;</span><br><span class="line">    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> YuvConverter yuvConverter;</span><br><span class="line">    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> RefCountDelegate refCountDelegate;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="VideoSource"><a href="#VideoSource" class="headerlink" title="VideoSource"></a>VideoSource</h4><h5 id="Java层API"><a href="#Java层API" class="headerlink" title="Java层API"></a>Java层API</h5><p>前面说过Source代表一个数据源，Source可以生成一个监听（videoSource.getCapturerObserver()）设置到Capturer中来获取数据。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 通过工厂方法创建VideoSource</span></span><br><span class="line">videoSource = factory.createVideoSource(capturer.isScreencast());</span><br><span class="line"><span class="hljs-comment">// 注册数据监听</span></span><br><span class="line">capturer.initialize(surfaceTextureHelper, appContext, videoSource.getCapturerObserver());</span><br><span class="line"><span class="hljs-comment">// 开始捕捉</span></span><br><span class="line">capturer.startCapture(videoWidth, videoHeight, videoFps);</span><br></pre></td></tr></table></figure></p>
+<p>我们来看一下VideoSource中CapturerObserver是如何处理的<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> CapturerObserver capturerObserver = <span class="hljs-keyword">new</span> CapturerObserver() &#123;</span><br><span class="line">   <span class="hljs-meta">@Override</span></span><br><span class="line">   <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onCapturerStarted</span><span class="hljs-params">(<span class="hljs-keyword">boolean</span> success)</span> </span>&#123;</span><br><span class="line">       <span class="hljs-comment">// 开始捕捉</span></span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="hljs-meta">@Override</span></span><br><span class="line">   <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onCapturerStopped</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">       <span class="hljs-comment">// 停止捕捉</span></span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="hljs-meta">@Override</span></span><br><span class="line">   <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onFrameCaptured</span><span class="hljs-params">(VideoFrame frame)</span> </span>&#123;</span><br><span class="line">     <span class="hljs-comment">// 对数据进行预处理</span></span><br><span class="line">     VideoFrame adaptedFrame = VideoProcessor.applyFrameAdaptationParameters(frame, parameters);</span><br><span class="line">     <span class="hljs-keyword">if</span> (adaptedFrame != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">       <span class="hljs-comment">// 将数据传递到Native层的VideoSource</span></span><br><span class="line">       nativeAndroidVideoTrackSource.onFrameCaptured(adaptedFrame);</span><br><span class="line">       adaptedFrame.release();</span><br><span class="line">     &#125;</span><br><span class="line">   &#125;</span><br><span class="line"> &#125;;</span><br></pre></td></tr></table></figure></p>
+<h5 id="Native层API"><a href="#Native层API" class="headerlink" title="Native层API"></a>Native层API</h5><p>Native层的VideoSource接口叫VideoTrackSourceInterface，其实现类为JavaVideoTrackSourceImpl。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 通过静态工厂方法创建VideoSource</span></span><br><span class="line">video_source_ = webrtc::CreateJavaVideoSource(env, signaling_thread_.get(),</span><br><span class="line">                                              <span class="hljs-comment">/* is_screencast= */</span> <span class="hljs-literal">false</span>,</span><br><span class="line">                                              <span class="hljs-comment">/* align_timestamps= */</span> <span class="hljs-literal">true</span>);</span><br></pre></td></tr></table></figure>
+<p>在JavaVideoTrackSourceImpl中，会创建一个AndroidVideoTrackSource对象，这个对象负责具体的数据接收和分发。通过CreateJavaNativeCapturerObserver创建Java层的<br>NativeCapturerObserver对象，将AndroidVideoTrackSource放入到NativeCapturerObserver中。</p>
+<p>通过GetJavaVideoCapturerObserver可以获得刚创建的NativeCapturerObserver对象，这是一个Java对象，可以直接交给Java层的VideoCapturer，在initialize时注入到VideoCapturer中。</p>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">JavaVideoTrackSourceImpl</span> :</span> <span class="hljs-keyword">public</span> JavaVideoTrackSourceInterface &#123;</span><br><span class="line"> <span class="hljs-keyword">public</span>:</span><br><span class="line">  JavaVideoTrackSourceImpl(JNIEnv* env,</span><br><span class="line">                           rtc::Thread* signaling_thread,</span><br><span class="line">                           <span class="hljs-keyword">bool</span> is_screencast,</span><br><span class="line">                           <span class="hljs-keyword">bool</span> align_timestamps)</span><br><span class="line">      : android_video_track_source_(</span><br><span class="line">            <span class="hljs-keyword">new</span> rtc::RefCountedObject&lt;jni::AndroidVideoTrackSource&gt;(</span><br><span class="line">                signaling_thread,</span><br><span class="line">                env,</span><br><span class="line">                is_screencast,</span><br><span class="line">                align_timestamps)),</span><br><span class="line">        native_capturer_observer_(jni::CreateJavaNativeCapturerObserver(</span><br><span class="line">            env,</span><br><span class="line">            android_video_track_source_)) &#123;&#125;</span><br><span class="line">            </span><br><span class="line">ScopedJavaLocalRef&lt;jobject&gt; GetJavaVideoCapturerObserver(</span><br><span class="line">      JNIEnv* env) override &#123;</span><br><span class="line">    <span class="hljs-keyword">return</span> ScopedJavaLocalRef&lt;jobject&gt;(env, native_capturer_observer_);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在NativeCapturerObserver中维护的NativeAndroidVideoTrackSource就是Native层的AndroidVideoTrackSource对象，当onFrameCaptured触发的时候，会调用Native对象的onFrameCaptured。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">NativeCapturerObserver</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">CapturerObserver</span> </span>&#123;</span><br><span class="line">  <span class="hljs-comment">// Native层的AndroidVideoTrackSource对象</span></span><br><span class="line">  <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> NativeAndroidVideoTrackSource nativeAndroidVideoTrackSource;</span><br><span class="line"></span><br><span class="line">  <span class="hljs-meta">@CalledByNative</span></span><br><span class="line">  <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">NativeCapturerObserver</span><span class="hljs-params">(<span class="hljs-keyword">long</span> nativeSource)</span> </span>&#123;</span><br><span class="line">    <span class="hljs-keyword">this</span>.nativeAndroidVideoTrackSource = <span class="hljs-keyword">new</span> NativeAndroidVideoTrackSource(nativeSource);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="hljs-meta">@Override</span></span><br><span class="line">  <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onCapturerStarted</span><span class="hljs-params">(<span class="hljs-keyword">boolean</span> success)</span> </span>&#123;</span><br><span class="line">    nativeAndroidVideoTrackSource.setState(success);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="hljs-meta">@Override</span></span><br><span class="line">  <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onCapturerStopped</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">    nativeAndroidVideoTrackSource.setState(<span class="hljs-comment">/* isLive= */</span> <span class="hljs-keyword">false</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="hljs-meta">@Override</span></span><br><span class="line">  <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onFrameCaptured</span><span class="hljs-params">(VideoFrame frame)</span> </span>&#123;</span><br><span class="line">    <span class="hljs-keyword">final</span> VideoProcessor.FrameAdaptationParameters parameters =</span><br><span class="line">        nativeAndroidVideoTrackSource.adaptFrame(frame);</span><br><span class="line">    <span class="hljs-keyword">if</span> (parameters == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">      <span class="hljs-comment">// Drop frame.</span></span><br><span class="line">      <span class="hljs-keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-comment">// 预处理帧</span></span><br><span class="line">    <span class="hljs-keyword">final</span> VideoFrame.Buffer adaptedBuffer =</span><br><span class="line">        frame.getBuffer().cropAndScale(parameters.cropX, parameters.cropY, parameters.cropWidth,</span><br><span class="line">            parameters.cropHeight, parameters.scaleWidth, parameters.scaleHeight);</span><br><span class="line">    <span class="hljs-comment">// 将数据通知到Native层</span></span><br><span class="line">    nativeAndroidVideoTrackSource.onFrameCaptured(</span><br><span class="line">        <span class="hljs-keyword">new</span> VideoFrame(adaptedBuffer, frame.getRotation(), parameters.timestampNs));</span><br><span class="line">    adaptedBuffer.release();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="VideoTrack"><a href="#VideoTrack" class="headerlink" title="VideoTrack"></a>VideoTrack</h4><p>一个Track代表一个音频或视频轨道，这里是创建一个视频轨道，需要指定视频源。</p>
+<h5 id="Java层API-1"><a href="#Java层API-1" class="headerlink" title="Java层API"></a>Java层API</h5><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 通过VideoSource创建VideoTrack</span></span><br><span class="line">localVideoTrack = factory.createVideoTrack(VIDEO_TRACK_ID, videoSource);</span><br></pre></td></tr></table></figure>
+<h5 id="Native层API-1"><a href="#Native层API-1" class="headerlink" title="Native层API"></a>Native层API</h5><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 通过VideoSource创建VideoTrack</span></span><br><span class="line">rtc::scoped_refptr&lt;webrtc::VideoTrackInterface&gt; local_video_track =</span><br><span class="line">    pcf_-&gt;CreateVideoTrack(<span class="hljs-string">"video"</span>, video_source_);</span><br></pre></td></tr></table></figure>
+<h4 id="VideoSink"><a href="#VideoSink" class="headerlink" title="VideoSink"></a>VideoSink</h4><p>一个Sink代表一个消费者，负责消费一个Track上的数据。</p>
+<h5 id="Java层API-2"><a href="#Java层API-2" class="headerlink" title="Java层API"></a>Java层API</h5><p>将一个Sink的实例添加到Track上，那么当Track上的Source获取到数据后，就会调用Sink的onFrame函数，将数据传过来。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">localVideoTrack.addSink(localRender);</span><br></pre></td></tr></table></figure></p>
+<p>VideoSink只定义了一个函数，这个函数是给Native层调用的，Native层的Track会通过JNI调用Sink的onFrame方法，将VideoFrame数据传过来。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">VideoSink</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="hljs-meta">@CalledByNative</span> <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">onFrame</span><span class="hljs-params">(VideoFrame frame)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>VideoSink的实现类有VideoFileRenderer、SurfaceViewRenderer、SurfaceEglRenderer、AndroidVideoDecoder等，我们可以想到，需要消费视频数据的有两种目的，一种是使用视频数据来进行渲染显示，另一种是使用视频数据来进行编码。</p>
+<ul>
+<li>SurfaceViewRenderer就是基于SurfaceView来实现的Sink，可以直接将接收到的数据显示到SurfaceView上。</li>
+<li>AndroidVideoDecoder就是基于MediaCodec来实现的Sink，可以直接将接收到的数据送到MediaCodec中进行编码。</li>
+<li>VideoFileRenderer是直接将视频数据写入到文件中的Sink。</li>
+</ul>
+<h5 id="Native层API-2"><a href="#Native层API-2" class="headerlink" title="Native层API"></a>Native层API</h5><p>对于Native层的Sink，其接口是VideoSinkInterface，有几个主要实现</p>
+<ul>
+<li>VideoSinkWrapper：这个是对Java层的Sink进行包装。</li>
+<li>VideoStreamEncoder：这个是负责编码处理的Sink。</li>
+<li>VideoObserver：这个可以通过设置callback获取到Sink收到的数据。</li>
+</ul>
+<figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-comment">// 使用Java层的Sink进行包装，最终会通过JNI调用到Java层Sink的OnFrame方法</span></span><br><span class="line">local_sink_ = webrtc::JavaToNativeVideoSink(env, local_sink.obj());</span><br><span class="line">  </span><br><span class="line">local_video_track-&gt;AddOrUpdateSink(local_sink_.get(), rtc::VideoSinkWants());</span><br></pre></td></tr></table></figure>
+<p>通过VideoTrack的添加方法，我们可以看到，添加一个Sink到Track上，实际上是添加到Source上。<br><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">void</span> VideoTrack::AddOrUpdateSink(rtc::VideoSinkInterface&lt;VideoFrame&gt;* sink,</span><br><span class="line">                                 <span class="hljs-keyword">const</span> rtc::VideoSinkWants&amp; wants) &#123;</span><br><span class="line">  RTC_DCHECK(worker_thread_-&gt;IsCurrent());</span><br><span class="line">  VideoSourceBase::AddOrUpdateSink(sink, wants);</span><br><span class="line">  rtc::VideoSinkWants modified_wants = wants;</span><br><span class="line">  modified_wants.black_frames = !enabled();</span><br><span class="line">  <span class="hljs-comment">// 将Sink添加到Source上</span></span><br><span class="line">  video_source_-&gt;AddOrUpdateSink(sink, modified_wants);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>上面讲过，VideoSource的实现类是JavaVideoTrackSourceImpl，最终会调用到其内部的AndroidVideoTrackSource对象，AndroidVideoTrackSource对象使用VideoBroadcaster专门用来管理Sink。<br><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">void</span> VideoBroadcaster::AddOrUpdateSink(</span><br><span class="line">    VideoSinkInterface&lt;webrtc::VideoFrame&gt;* sink,</span><br><span class="line">    <span class="hljs-keyword">const</span> VideoSinkWants&amp; wants) &#123;</span><br><span class="line">  RTC_DCHECK(sink != <span class="hljs-literal">nullptr</span>);</span><br><span class="line">  rtc::<span class="hljs-function">CritScope <span class="hljs-title">cs</span><span class="hljs-params">(&amp;sinks_and_wants_lock_)</span></span>;</span><br><span class="line">  <span class="hljs-keyword">if</span> (!FindSinkPair(sink)) &#123;</span><br><span class="line">    <span class="hljs-comment">// |Sink| is a new sink, which didn't receive previous frame.</span></span><br><span class="line">    previous_frame_sent_to_all_sinks_ = <span class="hljs-literal">false</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// 将sink添加到内部的数组中</span></span><br><span class="line">  VideoSourceBase::AddOrUpdateSink(sink, wants);</span><br><span class="line">  UpdateWants();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>上面讲Source的时候讲过，会将AndroidVideoTrackSource包装成Java层的Observer，交给Java层的VideoCapturer，然后当数据产生时，会调用到Native层的OnFrameCaptured进行通知<br><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">void</span> AndroidVideoTrackSource::OnFrameCaptured(</span><br><span class="line">    JNIEnv* env,</span><br><span class="line">    jint j_rotation,</span><br><span class="line">    jlong j_timestamp_ns,</span><br><span class="line">    <span class="hljs-keyword">const</span> JavaRef&lt;jobject&gt;&amp; j_video_frame_buffer) &#123;</span><br><span class="line">  <span class="hljs-comment">// 将Java层的VideoFrame转换成Native层的VideoFrame</span></span><br><span class="line">  rtc::scoped_refptr&lt;VideoFrameBuffer&gt; buffer =</span><br><span class="line">      AndroidVideoBuffer::Create(env, j_video_frame_buffer);</span><br><span class="line">  <span class="hljs-keyword">const</span> VideoRotation rotation = jintToVideoRotation(j_rotation);</span><br><span class="line"></span><br><span class="line">  <span class="hljs-comment">// AdaptedVideoTrackSource handles applying rotation for I420 frames.</span></span><br><span class="line">  <span class="hljs-keyword">if</span> (apply_rotation() &amp;&amp; rotation != kVideoRotation_0)</span><br><span class="line">    buffer = buffer-&gt;ToI420();</span><br><span class="line"></span><br><span class="line">  OnFrame(VideoFrame::Builder()</span><br><span class="line">              .set_video_frame_buffer(buffer)</span><br><span class="line">              .set_rotation(rotation)</span><br><span class="line">              .set_timestamp_us(j_timestamp_ns / rtc::kNumNanosecsPerMicrosec)</span><br><span class="line">              .build());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>在数据产生时，会通知到VideoBroadcaster，根据添加的Sink集合，调用Sink的OnFrame方法对数据进行下发。<br><figure class="highlight c++ hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">void</span> VideoBroadcaster::OnFrame(<span class="hljs-keyword">const</span> webrtc::VideoFrame&amp; frame) &#123;</span><br><span class="line">  rtc::<span class="hljs-function">CritScope <span class="hljs-title">cs</span><span class="hljs-params">(&amp;sinks_and_wants_lock_)</span></span>;</span><br><span class="line">  <span class="hljs-keyword">bool</span> current_frame_was_discarded = <span class="hljs-literal">false</span>;</span><br><span class="line">  <span class="hljs-comment">// 遍历所有Sink</span></span><br><span class="line">  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">auto</span>&amp; sink_pair : sink_pairs()) &#123;</span><br><span class="line">    <span class="hljs-keyword">if</span> (sink_pair.wants.rotation_applied &amp;&amp;</span><br><span class="line">        frame.rotation() != webrtc::kVideoRotation_0) &#123;</span><br><span class="line">      <span class="hljs-comment">// Calls to OnFrame are not synchronized with changes to the sink wants.</span></span><br><span class="line">      <span class="hljs-comment">// When rotation_applied is set to true, one or a few frames may get here</span></span><br><span class="line">      <span class="hljs-comment">// with rotation still pending. Protect sinks that don't expect any</span></span><br><span class="line">      <span class="hljs-comment">// pending rotation.</span></span><br><span class="line">      RTC_LOG(LS_VERBOSE) &lt;&lt; <span class="hljs-string">"Discarding frame with unexpected rotation."</span>;</span><br><span class="line">      sink_pair.sink-&gt;OnDiscardedFrame();</span><br><span class="line">      current_frame_was_discarded = <span class="hljs-literal">true</span>;</span><br><span class="line">      <span class="hljs-keyword">continue</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-keyword">if</span> (sink_pair.wants.black_frames) &#123;</span><br><span class="line">      webrtc::VideoFrame black_frame =</span><br><span class="line">          webrtc::VideoFrame::Builder()</span><br><span class="line">              .set_video_frame_buffer(</span><br><span class="line">                  GetBlackFrameBuffer(frame.width(), frame.height()))</span><br><span class="line">              .set_rotation(frame.rotation())</span><br><span class="line">              .set_timestamp_us(frame.timestamp_us())</span><br><span class="line">              .set_id(frame.id())</span><br><span class="line">              .build();</span><br><span class="line">      sink_pair.sink-&gt;OnFrame(black_frame);</span><br><span class="line">    &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (!previous_frame_sent_to_all_sinks_ &amp;&amp; frame.has_update_rect()) &#123;</span><br><span class="line">      <span class="hljs-comment">// Since last frame was not sent to some sinks, no reliable update</span></span><br><span class="line">      <span class="hljs-comment">// information is available, so we need to clear the update rect.</span></span><br><span class="line">      webrtc::VideoFrame copy = frame;</span><br><span class="line">      copy.clear_update_rect();</span><br><span class="line">      sink_pair.sink-&gt;OnFrame(copy);</span><br><span class="line">    &#125; <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">      sink_pair.sink-&gt;OnFrame(frame);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  previous_frame_sent_to_all_sinks_ = !current_frame_was_discarded;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+
+        </div>
+        
+        <ul class="post-copyright">
+            <li><strong>本文标题：</strong><a href="https://witgao.com/WebRTC源码初探之Android平台视频采集/">Android多媒体架构总览</a></li>
+            <li><strong>本文作者：</strong><a href="https://witgao.com">zhenyu</a></li>
+            <li><strong>本文链接：</strong><a href="https://witgao.com/WebRTC源码初探之Android平台视频采集/">https://witgao.com/WebRTC源码初探之Android平台视频采集/</a></li>
+            <li><strong>发布时间：</strong>2020-09-09</li>
+            <li><strong>版权声明：</strong>本博客所有文章除特别声明外，均采用 <a
+                    href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="external nofollow"
+                    target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明出处！
+            </li>
+        </ul>
+        
+        
+        
+        
+    </div>
+</div>
+
+
+
+
+
+<div class="card card-transparent">
+    <div class="level post-navigation is-flex-wrap is-mobile">
+        
+        
+        <div class="level-end">
+            <a class="level level-item has-link-grey  article-nav-next"
+                href="/音视频开发之H.264码流结构与编码原理/">
+                <span class="level-item">音视频开发之H.264码流结构与编码原理</span>
+                <i class="level-item fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+    </div>
+</div>
+
+
+</div>
+                
+
+
+
+
+<div
+    class="column is-4-tablet is-4-desktop is-3-widescreen  has-order-1 column-left ">
+    
+    
+<div class="card widget">
+    <div class="card-content">
+        <nav class="level">
+            <div class="level-item has-text-centered" style="flex-shrink: 1">
+                <div>
+                    
+                    <figure class="image is-128x128 has-mb-6">
+                        <img class="" src="/images/avatar1.png" alt="zhenyu">
+                    </figure>
+                    
+                    <p class="is-size-4 is-block">
+                        zhenyu
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-block">
+                        富贵山庄无富贵，只留欢乐在此间
+                    </p>
+                    
+                    
+                    <p class="is-size-6 is-flex is-flex-center has-text-grey">
+                        <i class="fas fa-map-marker-alt has-mr-7"></i>
+                        <span>杭州</span>
+                    </p>
+                    
+                </div>
+            </div>
+        </nav>
+        <nav class="level is-mobile">
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        文章
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        46
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        分类
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        10
+                    </p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered is-marginless">
+                <div>
+                    <p class="heading">
+                        标签
+                    </p>
+                    <p class="title has-text-weight-normal">
+                        0
+                    </p>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="level">
+            <a class="level-item button is-link is-rounded" href="https://github.com/witgao" target="_blank">
+                关注我</a>
+        </div>
+        
+        
+        
+    </div>
+</div>
+    
+    
+<div class="card widget column-left is-sticky" id="toc">
+    <div class="card-content">
+        <div class="menu">
+            <h3 class="menu-label">
+                目录
+            </h3>
+            <ul class="menu-list"><li>
+        <a class="is-flex" href="#VideoCapturer">
+        <span class="has-mr-6">1</span>
+        <span>VideoCapturer</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#CameraEnumerator">
+        <span class="has-mr-6">1.1</span>
+        <span>CameraEnumerator</span>
+        </a></li><li>
+        <a class="is-flex" href="#CameraCapturer">
+        <span class="has-mr-6">1.2</span>
+        <span>CameraCapturer</span>
+        </a></li><li>
+        <a class="is-flex" href="#CameraSession">
+        <span class="has-mr-6">1.3</span>
+        <span>CameraSession</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#数据类型">
+        <span class="has-mr-6">2</span>
+        <span>数据类型</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#VideoFrame">
+        <span class="has-mr-6">2.1</span>
+        <span>VideoFrame</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#I420Buffer">
+        <span class="has-mr-6">2.1.1</span>
+        <span>I420Buffer</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#TextureBuffer、">
+        <span class="has-mr-6">2.2</span>
+        <span>TextureBuffer、</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#VideoSource">
+        <span class="has-mr-6">3</span>
+        <span>VideoSource</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#Java层API">
+        <span class="has-mr-6">3.1</span>
+        <span>Java层API</span>
+        </a></li><li>
+        <a class="is-flex" href="#Native层API">
+        <span class="has-mr-6">3.2</span>
+        <span>Native层API</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#VideoTrack">
+        <span class="has-mr-6">4</span>
+        <span>VideoTrack</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#Java层API-1">
+        <span class="has-mr-6">4.1</span>
+        <span>Java层API</span>
+        </a></li><li>
+        <a class="is-flex" href="#Native层API-1">
+        <span class="has-mr-6">4.2</span>
+        <span>Native层API</span>
+        </a></li></ul></li><li>
+        <a class="is-flex" href="#VideoSink">
+        <span class="has-mr-6">5</span>
+        <span>VideoSink</span>
+        </a><ul class="menu-list"><li>
+        <a class="is-flex" href="#Java层API-2">
+        <span class="has-mr-6">5.1</span>
+        <span>Java层API</span>
+        </a></li><li>
+        <a class="is-flex" href="#Native层API-2">
+        <span class="has-mr-6">5.2</span>
+        <span>Native层API</span>
+        </a></li></ul></li></ul>
+        </div>
+    </div>
+</div>
+    
+    
+    <div class="column-right-shadow is-hidden-widescreen ">
+        
+    </div>
+    
+</div>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+    <div class="container">
+        <div class="level">
+            <div class="level-start has-text-centered-mobile">
+                <!-- <a class="footer-logo is-block has-mb-6" href="/">
+                
+                    <img src="/images/logo2.png" alt="Android多媒体架构总览" height="28">
+                
+                </a> -->
+                <p class="is-size-7">
+                    &copy; 2020 zhenyu&nbsp;
+                    Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a
+                        href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank">Icarus</a>
+                    
+                </p>
+            </div>
+            <div class="level-end">
+                
+            </div>
+        </div>
+    </div>
+</footer>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script>
+<script>moment.locale("zh-CN");</script>
+
+<script>
+var IcarusThemeSettings = {
+    article: {
+        highlight: {
+            clipboard: true,
+            fold: 'unfolded'
+        }
+    }
+};
+</script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script>
+
+
+
+    
+    
+<script src="/js/animation.js"></script>
+
+    
+    
+<script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script>
+<script src="/js/gallery.js" defer></script>
+
+    
+    
+<div id="outdated">
+    <h6>Your browser is out-of-date!</h6>
+    <p>Update your browser to view this website correctly. <a id="btnUpdateBrowser" href="http://outdatedbrowser.com/">Update
+            my browser now </a></p>
+    <p class="last"><a href="#" id="btnCloseUpdateBrowser" title="Close">&times;</a></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/outdatedbrowser@1.1.5/outdatedbrowser/outdatedbrowser.min.js" defer></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        outdatedBrowser({
+            bgColor: '#f25648',
+            color: '#ffffff',
+            lowerThan: 'flex'
+        });
+    });
+</script>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    MathJax.Hub.Config({
+        'HTML-CSS': {
+            matchFontHeight: false
+        },
+        SVG: {
+            matchFontHeight: false
+        },
+        CommonHTML: {
+            matchFontHeight: false
+        },
+        tex2jax: {
+            inlineMath: [
+                ['$','$'],
+                ['\\(','\\)']
+            ]
+        }
+    });
+});
+</script>
+    
+    
+<a id="back-to-top" title="回到顶端" href="javascript:;">
+    <i class="fas fa-chevron-up"></i>
+</a>
+<script src="/js/back-to-top.js" defer></script>
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+<script src="/js/main.js" defer></script>
+
+    
+    <div class="searchbox ins-search">
+    <div class="searchbox-container ins-search-container">
+        <div class="searchbox-input-wrapper">
+            <input type="text" class="searchbox-input ins-search-input" placeholder="想要查找什么..." />
+            <span class="searchbox-close ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="searchbox-result-wrapper ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function (window) {
+        var INSIGHT_CONFIG = {
+            TRANSLATION: {
+                POSTS: '文章',
+                PAGES: '页面',
+                CATEGORIES: '分类',
+                TAGS: '标签',
+                UNTITLED: '(无标题)',
+            },
+            CONTENT_URL: '/content.json',
+        };
+        window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+    })(window);
+</script>
+<script src="/js/insight.js" defer></script>
+<link rel="stylesheet" href="/css/search.css">
+<link rel="stylesheet" href="/css/insight.css">
+    
+</body>
+
+</html>

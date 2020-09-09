@@ -129,6 +129,82 @@
 <div class="card">
     
     <div class="card-image">
+        <a href="/WebRTC源码初探之Android平台视频采集/" class="image is-7by1">
+        <img class="thumbnail" src="/images/27.jpeg" alt="Android多媒体架构总览">
+        </a>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-09-08T16:00:00.000Z">2020-09-09</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/弹指神通（WebRTC）/">弹指神通（WebRTC）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    17 分钟 读完 (大约 2582 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/WebRTC源码初探之Android平台视频采集/">Android多媒体架构总览</a>
+            
+        </h1>
+        <div class="content">
+            <p>WebRTC的采集模块中提供了多个平台的音视频采集实现，这里我们针对Android平台来分析一下WebRTC的采集模块。</p>
+<p>在讲解之前有几个概念需要明白</p>
+<ul>
+<li><strong>Source</strong>: 在WebRTC中将一切数据的来源都抽象成一个Source</li>
+<li><strong>Track</strong>: 在WebRTC中一个Track代表一路音频或视频,一个Track需要通过一个Source来创建</li>
+<li><strong>Sink</strong>: 在WebRTC中将数据的消费都抽象成一个Sink，将一个Sink添加到一个Track上，就可以收到对应Source的数据</li>
+</ul>
+<h4 id="VideoCapturer"><a href="#VideoCapturer" class="headerlink" title="VideoCapturer"></a>VideoCapturer</h4><p>VideoCapturer是设备采集模块对外提供的控制接口，通过CameraEnumerator来创建。</p>
+<p>通过CameraEnumerator可以检测当前设备上Camera设备的支持情况，然后通过createCapturer函数可以开启指定Camera设备进行采集，VideoCapturer对采集提供一些逻辑控制。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> VideoCapturer <span class="hljs-title">createVideoCapturer</span><span class="hljs-params">(Context context)</span> </span>&#123;</span><br><span class="line">  CameraEnumerator enumerator = Camera2Enumerator.isSupported(context)</span><br><span class="line">      ? <span class="hljs-keyword">new</span> Camera2Enumerator(context)</span><br><span class="line">      : <span class="hljs-keyword">new</span> Camera1Enumerator();</span><br><span class="line">  <span class="hljs-keyword">return</span> enumerator.createCapturer(enumerator.getDeviceNames()[<span class="hljs-number">0</span>], <span class="hljs-keyword">null</span> <span class="hljs-comment">/* eventsHandler */</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h5 id="CameraEnumerator"><a href="#CameraEnumerator" class="headerlink" title="CameraEnumerator"></a>CameraEnumerator</h5><p>CameraEnumerator负责提供对Camera设备信息的获取、以及负责创建CameraCapturer，具体实现有Camera1Enumerator和Camera2Enumerator。</p>
+<h5 id="CameraCapturer"><a href="#CameraCapturer" class="headerlink" title="CameraCapturer"></a>CameraCapturer</h5><p>CameraCapturer是对采集操作的封装，对外提供了开始采集、结束采集、设置采集参数等接口，负责创建CameraSession，对CameraSession的功能进行接口封装。CameraCapturer的具体实现有Camera1Capturer和Camera2Capturer。</p>
+<h5 id="CameraSession"><a href="#CameraSession" class="headerlink" title="CameraSession"></a>CameraSession</h5><p>CameraSession是对AndroidCameraApi的包装，具体实现有Camera1Session和Camera2Session。</p>
+<h4 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h4><p>CameraApi支持两种类型的数据回调，一种是字节流，另一种是纹理。这两种类型适合不同的场景，字节流类型对于FFmpeg等软编码比较方便，但是如果想要使用OpenGL-ES来对数据进行处理，那么就需要将字节流转换成纹理才行；纹理类型对OpenGL-ES处理比较方便，但是只有MediaCodec才支持纹理的编码，如果想要使用FFmpeg软编码，需要将纹理数据提取成字节流。</p>
+<p>Camera1Session两种类型的数据都支持，通过参数captureToTexture来控制返回的数据类型。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">Camera1Enumerator</span><span class="hljs-params">(<span class="hljs-keyword">boolean</span> captureToTexture)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">this</span>.captureToTexture = captureToTexture;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>Camera2Session只支持纹理类型的数据返回，并没有实现Camera2的字节流数据返回。（Camera2可以通过ImageReader获取字节流，但是硬件兼容性太差，不同厂商实现不一致）</p>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/WebRTC源码初探之Android平台视频采集/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-image">
         <a href="/音视频开发之H.264码流结构与编码原理/" class="image is-7by1">
         <img class="thumbnail" src="/images/23.jpg" alt="音视频开发之H.264码流结构与编码原理">
         </a>
@@ -531,63 +607,6 @@
 
 
 
-    
-<div class="card">
-    
-    <div class="card-image">
-        <a href="/音视频开发之SDL2播放音频/" class="image is-7by1">
-        <img class="thumbnail" src="/images/13.jpg" alt="音视频开发之SDL2播放音频">
-        </a>
-    </div>
-    
-    <div class="card-content article ">
-        
-        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
-            <div class="level-left">
-                <time class="level-item has-text-grey"
-                    datetime="2020-07-31T16:00:00.000Z">2020-08-01</time>
-                
-                <div class="level-item">
-                    <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
-                </div>
-                
-                
-                <span class="level-item has-text-grey">
-                    
-                    
-                    5 分钟 读完 (大约 688 个字)
-                </span>
-                
-                
-            </div>
-        </div>
-        
-        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
-            
-            <a class="has-link-black-ter" href="/音视频开发之SDL2播放音频/">音视频开发之SDL2播放音频</a>
-            
-        </h1>
-        <div class="content">
-            <p>使用SDL来播放音频非常简单，只需要根据指定的参数开启音频设备，然后设置音频回调函数，在音频回调函数中，将数据写入到指定的buffer中即可。<br>对于音频播放来讲，是音频设备主动向我们要数据，而并非我们主动写入数据到音频设备，音频设备维护了一个数据缓冲区，会将数据存放在缓冲区中进行逐一播放，当缓冲区中有空位时，就会通过回调函数向我们要数据，当缓冲区中数据已经填满时，则不会回调。</p>
-<h4 id="开启音频设备"><a href="#开启音频设备" class="headerlink" title="开启音频设备"></a>开启音频设备</h4><p>SDL_AudioSpec是对音频参数的组合，开启音频设备的时候需要传入一组期望的参数组合，开启成功后会返回一个真正开启的参数组合。</p>
-<figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">SDL_AudioSpec wanted_spec, spec;</span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">// 设置SDL音频播放参数</span></span><br><span class="line"></span><br><span class="line"><span class="hljs-comment">// 设置 采样率、声道数</span></span><br><span class="line">wanted_nb_channels = av_get_channel_layout_nb_channels(wanted_channel_layout);</span><br><span class="line">wanted_spec.channels = wanted_nb_channels;</span><br><span class="line">wanted_spec.freq = wanted_sample_rate;</span><br><span class="line"></span><br><span class="line">  </span><br><span class="line"><span class="hljs-comment">// 采样位数</span></span><br><span class="line">wanted_spec.format = AUDIO_S16SYS;</span><br><span class="line"><span class="hljs-comment">// 静音</span></span><br><span class="line">wanted_spec.silence = <span class="hljs-number">0</span>;</span><br><span class="line"><span class="hljs-comment">// 缓冲区样本数量（单声道样本数量）</span></span><br><span class="line">wanted_spec.samples =</span><br><span class="line">    FFMAX(SDL_AUDIO_MIN_BUFFER_SIZE,</span><br><span class="line">          <span class="hljs-number">2</span> &lt;&lt; av_log2(wanted_spec.freq / SDL_AUDIO_MAX_CALLBACKS_PER_SEC));</span><br><span class="line"><span class="hljs-comment">// 回调函数</span></span><br><span class="line">wanted_spec.callback = sdl_audio_callback;</span><br><span class="line"><span class="hljs-comment">// 回调函数参数</span></span><br><span class="line">wanted_spec.userdata = opaque;</span><br><span class="line"><span class="hljs-comment">// 开启音频播放设备，如果开启失败，则更换参数不断重试</span></span><br><span class="line"><span class="hljs-keyword">while</span> (</span><br><span class="line">    !(audio_dev = SDL_OpenAudioDevice(<span class="hljs-literal">NULL</span>, <span class="hljs-number">0</span>, &amp;wanted_spec, &amp;spec,</span><br><span class="line">                                      SDL_AUDIO_ALLOW_FREQUENCY_CHANGE |</span><br><span class="line">                                          SDL_AUDIO_ALLOW_CHANNELS_CHANGE))) &#123;</span><br><span class="line">  <span class="hljs-comment">// 更换参数组合，重新尝试</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="回调函数"><a href="#回调函数" class="headerlink" title="回调函数"></a>回调函数</h4><p>回调函数是在一个单独的线程中，第一个参数就是开启设备时设置的回调函数上下文。第二个参数就是需要写入的缓冲区，第三个参数是需要的数据字节大小。<br><figure class="highlight c hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">sdl_audio_callback</span><span class="hljs-params">(<span class="hljs-keyword">void</span> *opaque, Uint8 *stream, <span class="hljs-keyword">int</span> len)</span> </span>&#123;</span><br><span class="line">  VideoState *is = opaque;</span><br><span class="line">  <span class="hljs-keyword">int</span> audio_size, len1;</span><br><span class="line"></span><br><span class="line">  <span class="hljs-keyword">while</span> (len &gt; <span class="hljs-number">0</span>) &#123;</span><br><span class="line">    <span class="hljs-comment">// 计算还未读取的字节大小</span></span><br><span class="line">    len1 = is-&gt;audio_buf_size - is-&gt;audio_buf_index;</span><br><span class="line">    <span class="hljs-comment">// 如果为读取的字节大小大于音频设备想要的大小，则使用音频设备想要的大小</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (len1 &gt; len) len1 = len;</span><br><span class="line">    <span class="hljs-comment">// 将audio_buf中的数据copy到stream中</span></span><br><span class="line">    <span class="hljs-keyword">if</span> (!is-&gt;muted &amp;&amp; is-&gt;audio_buf &amp;&amp; is-&gt;audio_volume == SDL_MIX_MAXVOLUME)</span><br><span class="line">      <span class="hljs-built_in">memcpy</span>(stream, (<span class="hljs-keyword">uint8_t</span> *)is-&gt;audio_buf + is-&gt;audio_buf_index, len1);</span><br><span class="line">    <span class="hljs-keyword">else</span> &#123;</span><br><span class="line">      <span class="hljs-built_in">memset</span>(stream, <span class="hljs-number">0</span>, len1);</span><br><span class="line">      <span class="hljs-keyword">if</span> (!is-&gt;muted &amp;&amp; is-&gt;audio_buf)</span><br><span class="line">        SDL_MixAudioFormat(stream,</span><br><span class="line">                           (<span class="hljs-keyword">uint8_t</span> *)is-&gt;audio_buf + is-&gt;audio_buf_index,</span><br><span class="line">                           AUDIO_S16SYS, len1, is-&gt;audio_volume);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="hljs-comment">// 减去已经传递给音频设备的buffer大小，如果剩下的还有，则再次读取传递</span></span><br><span class="line">    len -= len1;</span><br><span class="line">    <span class="hljs-comment">// stream加上偏移量</span></span><br><span class="line">    stream += len1;</span><br><span class="line">    <span class="hljs-comment">// 更新audio_buf的偏移量</span></span><br><span class="line">    is-&gt;audio_buf_index += len1;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-
-        </div>
-        
-        
-        
-        
-    </div>
-</div>
-
-
-
-
-
-
-
-
 
     
 <div class="card card-transparent">
@@ -666,7 +685,7 @@
                         分类
                     </p>
                     <p class="title has-text-weight-normal">
-                        9
+                        10
                     </p>
                 </div>
             </div>
@@ -708,7 +727,7 @@
                 <span class="level-item">内功心法（CS基础）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">13</span>
+                <span class="level-item tag">12</span>
             </span>
         </a><ul><li>
         <a class="level is-marginless" href="/categories/内功心法（CS基础）/北冥神功（编程语言）/">
@@ -724,7 +743,7 @@
                 <span class="level-item">神照功（网络协议）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">9</span>
+                <span class="level-item tag">8</span>
             </span>
         </a></li></ul></li><li>
         <a class="level is-marginless" href="/categories/刀枪棍棒（Android）/">
@@ -756,7 +775,7 @@
                 <span class="level-item">拳掌指腿（音视频）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">19</span>
+                <span class="level-item tag">20</span>
             </span>
         </a><ul><li>
         <a class="level is-marginless" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">
@@ -765,6 +784,14 @@
             </span>
             <span class="level-end">
                 <span class="level-item tag">11</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/拳掌指腿（音视频）/弹指神通（WebRTC）/">
+            <span class="level-start">
+                <span class="level-item">弹指神通（WebRTC）</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
             </span>
         </a></li><li>
         <a class="level is-marginless" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">
@@ -788,6 +815,25 @@
         <h3 class="menu-label">
             最新文章
         </h3>
+        
+        <article class="media">
+            
+            <a href="/WebRTC源码初探之Android平台视频采集/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/27.jpeg" alt="Android多媒体架构总览">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-09-08T16:00:00.000Z">2020-09-09</time></div>
+                    <a href="/WebRTC源码初探之Android平台视频采集/" class="title has-link-black-ter is-size-6 has-text-weight-normal">Android多媒体架构总览</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/弹指神通（WebRTC）/">弹指神通（WebRTC）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
         
         <article class="media">
             
@@ -865,25 +911,6 @@
             </div>
         </article>
         
-        <article class="media">
-            
-            <a href="/音视频开发之ffplay队列分析/" class="media-left">
-                <p class="image is-64x64">
-                    <img class="thumbnail" src="/images/15.jpg" alt="音视频开发之ffplay队列分析">
-                </p>
-            </a>
-            
-            <div class="media-content">
-                <div class="content">
-                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-01T16:00:00.000Z">2020-08-02</time></div>
-                    <a href="/音视频开发之ffplay队列分析/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之ffplay队列分析</a>
-                    <p class="is-size-7 is-uppercase">
-                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
-                    </p>
-                </div>
-            </div>
-        </article>
-        
     </div>
 </div>
         
@@ -894,6 +921,17 @@
                 归档
             </h3>
             <ul class="menu-list">
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/09/">
+                        <span class="level-start">
+                            <span class="level-item">九月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
                 
                 <li>
                     <a class="level is-marginless" href="/archives/2020/08/">
@@ -1066,7 +1104,7 @@
                             <span class="level-item">十二月 2017</span>
                         </span>
                         <span class="level-end">
-                            <span class="level-item tag">7</span>
+                            <span class="level-item tag">6</span>
                         </span>
                     </a>
                 </li>
@@ -1109,6 +1147,25 @@
         
         <article class="media">
             
+            <a href="/WebRTC源码初探之Android平台视频采集/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/27.jpeg" alt="Android多媒体架构总览">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-09-08T16:00:00.000Z">2020-09-09</time></div>
+                    <a href="/WebRTC源码初探之Android平台视频采集/" class="title has-link-black-ter is-size-6 has-text-weight-normal">Android多媒体架构总览</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/弹指神通（WebRTC）/">弹指神通（WebRTC）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
             <a href="/音视频开发之H.264码流结构与编码原理/" class="media-left">
                 <p class="image is-64x64">
                     <img class="thumbnail" src="/images/23.jpg" alt="音视频开发之H.264码流结构与编码原理">
@@ -1183,25 +1240,6 @@
             </div>
         </article>
         
-        <article class="media">
-            
-            <a href="/音视频开发之ffplay队列分析/" class="media-left">
-                <p class="image is-64x64">
-                    <img class="thumbnail" src="/images/15.jpg" alt="音视频开发之ffplay队列分析">
-                </p>
-            </a>
-            
-            <div class="media-content">
-                <div class="content">
-                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-01T16:00:00.000Z">2020-08-02</time></div>
-                    <a href="/音视频开发之ffplay队列分析/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之ffplay队列分析</a>
-                    <p class="is-size-7 is-uppercase">
-                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
-                    </p>
-                </div>
-            </div>
-        </article>
-        
     </div>
 </div>
     
@@ -1212,6 +1250,17 @@
                 归档
             </h3>
             <ul class="menu-list">
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/09/">
+                        <span class="level-start">
+                            <span class="level-item">九月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
                 
                 <li>
                     <a class="level is-marginless" href="/archives/2020/08/">
@@ -1384,7 +1433,7 @@
                             <span class="level-item">十二月 2017</span>
                         </span>
                         <span class="level-end">
-                            <span class="level-item tag">7</span>
+                            <span class="level-item tag">6</span>
                         </span>
                     </a>
                 </li>

@@ -133,6 +133,79 @@
         <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
             <div class="level-left">
                 <time class="level-item has-text-grey"
+                    datetime="2018-07-01T16:00:00.000Z">2018-07-02</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/">刀枪棍棒（Android）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/五虎断门刀（Android原生）/">五虎断门刀（Android原生）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    26 分钟 读完 (大约 3908 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/Android-ReactNative启动流程/">Android-ReactNative通信流程</a>
+            
+        </h1>
+        <div class="content">
+            <h4 id="ReactAndroid"><a href="#ReactAndroid" class="headerlink" title="ReactAndroid"></a>ReactAndroid</h4><h5 id="ReactActivity"><a href="#ReactActivity" class="headerlink" title="ReactActivity"></a>ReactActivity</h5><p>一个ReactActivity对应着一个RN组件(通过AppRegistry.registerComponent注册)，而ReactActivity的功能都包装在ReactActivityDelegate中。</p>
+<p>ReactActivity实际上类似于一个浏览器窗口，在一个窗口内对一个网页访问，并进行页面的跳转和回退。</p>
+<h5 id="ReactRootView"><a href="#ReactRootView" class="headerlink" title="ReactRootView"></a>ReactRootView</h5><p>ReactRootView是ReactNative组件的根布局，是一个ViewGroup(继承自FrameLayout)，所有的RN视图都会被添加到该布局下，然后该布局会被添加到Activity上，因此每个ReactActivity都有着一个ReactRootView。RN组件内的页面跳转实际上就是在该ReactRootView上重绘。</p>
+<h5 id="ReactNativeHost"><a href="#ReactNativeHost" class="headerlink" title="ReactNativeHost"></a>ReactNativeHost</h5><p>每个RN组件的配置，设置jsbundle文件的文件名和js模块名称以及开发模式等。</p>
+<ul>
+<li>getJSMainModuleName : 远程服务获取bundle时，获取的模块名称</li>
+<li>getBundleAssetName : 本地加载bundle时，获取asset文件的文件名</li>
+<li>getUseDeveloperSupport : 是否开启debug模式</li>
+<li>getPackages :  配置js和native通信module，必须包含MainReactPackage</li>
+<li>ReactInstanceManager :  与js通信的管理类，CatalystInstance是一个异步JSC桥梁，提供了调用js方法的JavaAPI</li>
+</ul>
+<p>每个ReactActivity都需要一个Host配置，对应不同的jsbundle配置。在ReactActivity中默认会去获取Application中的ReactNativeHost，默认Application需要继承ReactApplication接口，并实现其getReactNativeHost方法。如果我们不想在Application中实现该接口(必须我们有多个RN组件需要多个ReactNativeHost对象)，就必须重写ReactActivity中getReactNativeHost方法。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">protected</span> ReactNativeHost <span class="hljs-title">getReactNativeHost</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">return</span> ((ReactApplication) getPlainActivity().getApplication()).getReactNativeHost();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="加载RN组件"><a href="#加载RN组件" class="headerlink" title="加载RN组件"></a>加载RN组件</h4><h5 id="启动ReactActivity"><a href="#启动ReactActivity" class="headerlink" title="启动ReactActivity"></a>启动ReactActivity</h5><p>首先启动ReactActivity，创建ReactActivity时会同时创建ReactActivityDelegate，ReactActivity的getMainComponentName方法对应的是js组件的注册名称(js中AppRegistry.registerComponent注册时的appKey)，在ReactActivity的onCreate回调中，开始加载该js组件。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onCreate</span><span class="hljs-params">(Bundle savedInstanceState)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">if</span> (mMainComponentName != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">    loadApp(mMainComponentName);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title">loadApp</span><span class="hljs-params">(String appKey)</span> </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">if</span> (mReactRootView != <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalStateException(<span class="hljs-string">"Cannot loadApp while app is already running."</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// 创建根布局</span></span><br><span class="line">  mReactRootView = createRootView();</span><br><span class="line">  <span class="hljs-comment">// 启动该js组件，加载jsbundle文件，并通过jsc来构建virtualDom来解析js组件</span></span><br><span class="line">  <span class="hljs-comment">// 将js控件解析成对应的View，并添加到根布局上，组成视图树。</span></span><br><span class="line">  mReactRootView.startReactApplication(</span><br><span class="line">    <span class="hljs-comment">// 创建js通信管理器</span></span><br><span class="line">    getReactNativeHost().getReactInstanceManager(),</span><br><span class="line">    appKey,</span><br><span class="line">    getLaunchOptions());</span><br><span class="line">  <span class="hljs-comment">// 将解析完成的布局放到Activity中渲染</span></span><br><span class="line">  getPlainActivity().setContentView(mReactRootView);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="创建ReactRootView"><a href="#创建ReactRootView" class="headerlink" title="创建ReactRootView"></a>创建ReactRootView</h5><p>ReactRootView继承FrameLayout，是整个RN组件的根布局，解析出来的View都会添加到该布局上。该View主要处理了测量和事件的分发拦截，包括触摸、手势、焦点等。还设置了OnGlobalLayout监听，该方法会在布局重新layout或者系统UI发生改变时触发(具体在ViewRootImpl.performTraversals中)，在该监听中将发生的改变通知给js模块。</p>
+<figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-meta">@Override</span></span><br><span class="line"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onGlobalLayout</span><span class="hljs-params">()</span> </span>&#123;</span><br><span class="line">  <span class="hljs-keyword">if</span> (mReactInstanceManager == <span class="hljs-keyword">null</span> || !mIsAttachedToInstance ||</span><br><span class="line">    mReactInstanceManager.getCurrentReactContext() == <span class="hljs-keyword">null</span>) &#123;</span><br><span class="line">    <span class="hljs-keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="hljs-comment">// 键盘状态改变</span></span><br><span class="line">  checkForKeyboardEvents();</span><br><span class="line">  <span class="hljs-comment">// 屏幕方向改变</span></span><br><span class="line">  checkForDeviceOrientationChanges();</span><br><span class="line">  <span class="hljs-comment">// 屏幕分辨率改变</span></span><br><span class="line">  checkForDeviceDimensionsChanges();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="创建ReactInstanceManager"><a href="#创建ReactInstanceManager" class="headerlink" title="创建ReactInstanceManager"></a>创建ReactInstanceManager</h5><p>ReactInstanceManager是一个CatalystInstance实例的管理者，而CatalysInstance是一个异步的JSC桥梁，负责与js进行通信，调用js方法。</p>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/Android-ReactNative启动流程/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
                     datetime="2018-06-27T16:00:00.000Z">2018-06-28</time>
                 
                 <div class="level-item">
@@ -507,58 +580,6 @@ N-->O[attach时替换Activity的上下文]</pre>
 
 
 
-    
-<div class="card">
-    
-    <div class="card-content article ">
-        
-        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
-            <div class="level-left">
-                <time class="level-item has-text-grey"
-                    datetime="2017-12-20T16:00:00.000Z">2017-12-21</time>
-                
-                <div class="level-item">
-                    <a class="has-link-grey -link" href="/categories/内功心法（CS基础）/">内功心法（CS基础）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/内功心法（CS基础）/神照功（网络协议）/">神照功（网络协议）</a>
-                </div>
-                
-                
-                <span class="level-item has-text-grey">
-                    
-                    
-                    4 分钟 读完 (大约 564 个字)
-                </span>
-                
-                
-            </div>
-        </div>
-        
-        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
-            
-            <a class="has-link-black-ter" href="/Pipeline之Handler链/">Pipeline之Handler链</a>
-            
-        </h1>
-        <div class="content">
-            <p>ChannelPipeline采用责任链模式设计。在责任链模式中，由每个对象对其下个对象的引用而连接起来的一条链，请求在这条链上传递，知道链上某个对象处理该请求并中止传递。发送请求者并不知道链上的哪个对象处理该请求，从而使得系统可以在不影响发送端的情况下动态的重新分配责任。<br><img src="/images/Netty-pipeline责任链.png" alt="Netty-pipeline责任链"></p>
-<h3 id="DefaultChannelPipeline"><a href="#DefaultChannelPipeline" class="headerlink" title="DefaultChannelPipeline"></a>DefaultChannelPipeline</h3><p>Handler链的默认实现类，维护了链中的头结点和尾结点，DefaultChannelPipeline对象在构建时，就会创建头结点和尾结点对象。之后添加的Handler都会添加到两者中间，addLast会添加到尾结点的前面，addFirst会添加到头结点的后面。在添加时可以给Handler指定名称，如果名称有重复会抛出异常。<br>Handler分为两种，一种是实现ChannelInboundHandler接口的，一种是实现ChannelOutboundHandler接口的。ChannelInboundHandler接口主要处理从外到内的请求，将远端操作通知本地（比如注册，激活，读等），从Head结点开始传递，直到tail结点。而ChannelOutboundHandler接口主要处理从内到外的操作，将本地操作通知远端（比如连接，绑定，写）等，从tail结点开始传递，到Head结点后转由unsafe类进行真正处理。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tail = <span class="hljs-keyword">new</span> TailContext(<span class="hljs-keyword">this</span>); <span class="hljs-comment">// tail实现了ChannelInboundHandler接口</span></span><br><span class="line">head = <span class="hljs-keyword">new</span> HeadContext(<span class="hljs-keyword">this</span>); <span class="hljs-comment">// head实现了ChannelOutboundHandler和ChannelInboundHandler接口</span></span><br></pre></td></tr></table></figure></p>
-<p>上文讲到的ServerBootstrapAcceptor类，就是一个ChannelInboundHandlerAdapter类型的Handler。所以当连接完成对上层发出通知时，通知从Head结点开始传递，到达ServerBootstrapAcceptor中处理并中止传递。</p>
-<h3 id="AbstractChannelHandlerContext"><a href="#AbstractChannelHandlerContext" class="headerlink" title="AbstractChannelHandlerContext"></a>AbstractChannelHandlerContext</h3><p>AbstractChannelHandlerContext是对ChannelHandler的一个包装类，Pipeline中真正的对象实际上是AbstractChannelHandlerContext。在AbstractChannelHandlerContext中维护了next、prev属性，所以这是一个双向链表结构。<br><figure class="highlight java hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="hljs-keyword">volatile</span> AbstractChannelHandlerContext next; <span class="hljs-comment">// 下个结点</span></span><br><span class="line"><span class="hljs-keyword">volatile</span> AbstractChannelHandlerContext prev; <span class="hljs-comment">// 上个结点</span></span><br><span class="line"><span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> ChannelHandler handler; <span class="hljs-comment">// 真正Handler对象</span></span><br></pre></td></tr></table></figure></p>
-<p>接下来讲到的编解码器也是根据Pipeline来实现的。</p>
-
-        </div>
-        
-        
-        
-        
-    </div>
-</div>
-
-
-
-
-
-
-
-
 
     
 <div class="card card-transparent">
@@ -639,7 +660,7 @@ N-->O[attach时替换Activity的上下文]</pre>
                         分类
                     </p>
                     <p class="title has-text-weight-normal">
-                        9
+                        10
                     </p>
                 </div>
             </div>
@@ -681,7 +702,7 @@ N-->O[attach时替换Activity的上下文]</pre>
                 <span class="level-item">内功心法（CS基础）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">13</span>
+                <span class="level-item tag">12</span>
             </span>
         </a><ul><li>
         <a class="level is-marginless" href="/categories/内功心法（CS基础）/北冥神功（编程语言）/">
@@ -697,7 +718,7 @@ N-->O[attach时替换Activity的上下文]</pre>
                 <span class="level-item">神照功（网络协议）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">9</span>
+                <span class="level-item tag">8</span>
             </span>
         </a></li></ul></li><li>
         <a class="level is-marginless" href="/categories/刀枪棍棒（Android）/">
@@ -729,7 +750,7 @@ N-->O[attach时替换Activity的上下文]</pre>
                 <span class="level-item">拳掌指腿（音视频）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">19</span>
+                <span class="level-item tag">20</span>
             </span>
         </a><ul><li>
         <a class="level is-marginless" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">
@@ -738,6 +759,14 @@ N-->O[attach时替换Activity的上下文]</pre>
             </span>
             <span class="level-end">
                 <span class="level-item tag">11</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/拳掌指腿（音视频）/弹指神通（WebRTC）/">
+            <span class="level-start">
+                <span class="level-item">弹指神通（WebRTC）</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
             </span>
         </a></li><li>
         <a class="level is-marginless" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">
@@ -761,6 +790,25 @@ N-->O[attach时替换Activity的上下文]</pre>
         <h3 class="menu-label">
             最新文章
         </h3>
+        
+        <article class="media">
+            
+            <a href="/WebRTC源码初探之Android平台视频采集/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/27.jpeg" alt="Android多媒体架构总览">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-09-08T16:00:00.000Z">2020-09-09</time></div>
+                    <a href="/WebRTC源码初探之Android平台视频采集/" class="title has-link-black-ter is-size-6 has-text-weight-normal">Android多媒体架构总览</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/弹指神通（WebRTC）/">弹指神通（WebRTC）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
         
         <article class="media">
             
@@ -838,25 +886,6 @@ N-->O[attach时替换Activity的上下文]</pre>
             </div>
         </article>
         
-        <article class="media">
-            
-            <a href="/音视频开发之ffplay队列分析/" class="media-left">
-                <p class="image is-64x64">
-                    <img class="thumbnail" src="/images/15.jpg" alt="音视频开发之ffplay队列分析">
-                </p>
-            </a>
-            
-            <div class="media-content">
-                <div class="content">
-                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-01T16:00:00.000Z">2020-08-02</time></div>
-                    <a href="/音视频开发之ffplay队列分析/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之ffplay队列分析</a>
-                    <p class="is-size-7 is-uppercase">
-                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
-                    </p>
-                </div>
-            </div>
-        </article>
-        
     </div>
 </div>
         
@@ -867,6 +896,17 @@ N-->O[attach时替换Activity的上下文]</pre>
                 归档
             </h3>
             <ul class="menu-list">
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/09/">
+                        <span class="level-start">
+                            <span class="level-item">九月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
                 
                 <li>
                     <a class="level is-marginless" href="/archives/2020/08/">
@@ -1039,7 +1079,7 @@ N-->O[attach时替换Activity的上下文]</pre>
                             <span class="level-item">十二月 2017</span>
                         </span>
                         <span class="level-end">
-                            <span class="level-item tag">7</span>
+                            <span class="level-item tag">6</span>
                         </span>
                     </a>
                 </li>
@@ -1082,6 +1122,25 @@ N-->O[attach时替换Activity的上下文]</pre>
         
         <article class="media">
             
+            <a href="/WebRTC源码初探之Android平台视频采集/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/27.jpeg" alt="Android多媒体架构总览">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-09-08T16:00:00.000Z">2020-09-09</time></div>
+                    <a href="/WebRTC源码初探之Android平台视频采集/" class="title has-link-black-ter is-size-6 has-text-weight-normal">Android多媒体架构总览</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/弹指神通（WebRTC）/">弹指神通（WebRTC）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
             <a href="/音视频开发之H.264码流结构与编码原理/" class="media-left">
                 <p class="image is-64x64">
                     <img class="thumbnail" src="/images/23.jpg" alt="音视频开发之H.264码流结构与编码原理">
@@ -1156,25 +1215,6 @@ N-->O[attach时替换Activity的上下文]</pre>
             </div>
         </article>
         
-        <article class="media">
-            
-            <a href="/音视频开发之ffplay队列分析/" class="media-left">
-                <p class="image is-64x64">
-                    <img class="thumbnail" src="/images/15.jpg" alt="音视频开发之ffplay队列分析">
-                </p>
-            </a>
-            
-            <div class="media-content">
-                <div class="content">
-                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-01T16:00:00.000Z">2020-08-02</time></div>
-                    <a href="/音视频开发之ffplay队列分析/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之ffplay队列分析</a>
-                    <p class="is-size-7 is-uppercase">
-                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
-                    </p>
-                </div>
-            </div>
-        </article>
-        
     </div>
 </div>
     
@@ -1185,6 +1225,17 @@ N-->O[attach时替换Activity的上下文]</pre>
                 归档
             </h3>
             <ul class="menu-list">
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/09/">
+                        <span class="level-start">
+                            <span class="level-item">九月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
                 
                 <li>
                     <a class="level is-marginless" href="/archives/2020/08/">
@@ -1357,7 +1408,7 @@ N-->O[attach时替换Activity的上下文]</pre>
                             <span class="level-item">十二月 2017</span>
                         </span>
                         <span class="level-end">
-                            <span class="level-item tag">7</span>
+                            <span class="level-item tag">6</span>
                         </span>
                     </a>
                 </li>

@@ -129,6 +129,82 @@
 <div class="card">
     
     <div class="card-image">
+        <a href="/音视频开发之基础篇/" class="image is-7by1">
+        <img class="thumbnail" src="/images/7.jpeg" alt="音视频开发之基础篇">
+        </a>
+    </div>
+    
+    <div class="card-content article ">
+        
+        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
+            <div class="level-left">
+                <time class="level-item has-text-grey"
+                    datetime="2020-02-29T16:00:00.000Z">2020-03-01</time>
+                
+                <div class="level-item">
+                    <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">七伤拳（音视频基础）</a>
+                </div>
+                
+                
+                <span class="level-item has-text-grey">
+                    
+                    
+                    36 分钟 读完 (大约 5326 个字)
+                </span>
+                
+                
+            </div>
+        </div>
+        
+        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
+            
+            <a class="has-link-black-ter" href="/音视频开发之基础篇/">音视频开发之基础篇</a>
+            
+        </h1>
+        <div class="content">
+            <h3 id="本篇重点"><a href="#本篇重点" class="headerlink" title="本篇重点"></a>本篇重点</h3><blockquote>
+<p>音视频基础概念与相关术语的讲解</p>
+</blockquote>
+<h3 id="什么是视频"><a href="#什么是视频" class="headerlink" title="什么是视频"></a>什么是视频</h3><h4 id="图像的组成"><a href="#图像的组成" class="headerlink" title="图像的组成"></a>图像的组成</h4><p>在说视频之前，我们来聊一下图像，<strong>图像是人对视觉感知的物质再现</strong>。图像是使用像素点阵来表示的，每个像素点都分配有特定的颜色和位置值。像素也是图像显示的基本单位，通常一幅1080x1920的图片，就是长度1920个像素点，宽度1080个像素点组成的矩阵。</p>
+<h4 id="颜色空间"><a href="#颜色空间" class="headerlink" title="颜色空间"></a>颜色空间</h4><p>像素点除了有位置外还需要有颜色信息，那么颜色在计算机中是如何表示呢？</p>
+<p>在计算机中颜色空间有很多，这里我们介绍下常用的两种颜色空间，RGB颜色空间和YUV颜色空间。</p>
+<h5 id="RGB颜色空间"><a href="#RGB颜色空间" class="headerlink" title="RGB颜色空间"></a>RGB颜色空间</h5><p>RGB颜色空间是由红绿蓝三原色来定义，通过三原色混合成所有的颜色，这应该是我们最熟悉的一种颜色空间。</p>
+<h5 id="YUV颜色空间"><a href="#YUV颜色空间" class="headerlink" title="YUV颜色空间"></a>YUV颜色空间</h5><p>Y表示亮度，U和V表示色度和浓度。早期的YUV实际上是用在彩色电视和黑白电视的交替上，感兴趣历史的同学可以点击<a href="https://zh.wikipedia.org/wiki/YUV" target="_blank" rel="noopener">YUV</a>查看相关资料。YUV颜色空间在数字媒体中广泛使用是由于人类对亮度的的敏感度高于对色度的敏感度，但是在数字媒体中使用的是个变体，叫YCbCr，其中Cb是指蓝色色度，Cr就是红色色度。像JPEG、MPEG都是采用此格式，后续一般讲的YUV都是指YCbCr。(Y的值是根据RGB值计算出来的，所以Cg的值可以通过CbCr计算出来，所以在传输的时候只需要传输YCbCr)</p>
+<figure class="highlight plain hljs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">计算公式: </span><br><span class="line">    Y = KrR+KgG+Kb*B（k为权重值,ITU-R推荐的BT.601中定义Kb=0.114,Kr=0.299,Kb+Kr+Kg=1）</span><br><span class="line">    Cb=B-Y</span><br><span class="line">    Cr=R-Y</span><br><span class="line">    Cg=G-Y</span><br></pre></td></tr></table></figure>
+<p>YCbCr会按照一定的采样比对色度数据进行采样，采样比通常表示为 <strong>J​ : a : ​b</strong>，表示在一个宽为J像素、高为2像素的采样区域中进行采样，J表示采样的宽度，通常是4，a表示第一行色度采样数，b表示第二行色度采样数与第一行色度采样的不同样点数。</p>
+<p><img src="/images/ycbcr.png" alt="YCbCr采样比"></p>
+<p>最常见的采样比是 4:2:0 ，表示宽为4，第一行有两个色度采样点，第二行与第一行完全相同。所以总共有八个亮度采样点和两个色度采样点，每个亮度采样点需要记录一个值Y，而每个色度采样点都需要记录两个值Cb和Cr。最终需要记录的值为 8Y+2Cr+2Cb = 12，而如果使用RGB来记录则会需要3x8=24。</p>
+<blockquote>
+<p>YCbCr的优势就在于，在达到最大压缩率的情况下，能够保证对人眼感知的失真度最小。拿4:2:0来说足足压缩了一半。</p>
+</blockquote>
+        </div>
+        
+        
+        
+        <div class="level is-mobile">
+            <div class="level-start">
+                <div class="level-item">
+                    <a class="button is-size-7 is-light"
+                        href="/音视频开发之基础篇/#more">阅读更多</a>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+
+
+
+
+    
+<div class="card">
+    
+    <div class="card-image">
         <a href="/Android多媒体深入之MediaPlayer分析/" class="image is-7by1">
         <img class="thumbnail" src="/images/24.jpg" alt="Android多媒体深入之MediaPlayer分析">
         </a>
@@ -511,66 +587,6 @@
 
 
 
-    
-<div class="card">
-    
-    <div class="card-content article ">
-        
-        <div class="level article-meta is-size-7 is-uppercase is-mobile is-overflow-x-auto">
-            <div class="level-left">
-                <time class="level-item has-text-grey"
-                    datetime="2019-10-14T16:00:00.000Z">2019-10-15</time>
-                
-                <div class="level-item">
-                    <a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/">刀枪棍棒（Android）</a>&nbsp;/&nbsp;<a class="has-link-grey -link" href="/categories/刀枪棍棒（Android）/五虎断门刀（Android原生）/">五虎断门刀（Android原生）</a>
-                </div>
-                
-                
-                <span class="level-item has-text-grey">
-                    
-                    
-                    16 分钟 读完 (大约 2391 个字)
-                </span>
-                
-                
-            </div>
-        </div>
-        
-        <h1 class="title is-size-3 is-size-4-mobile has-text-weight-normal">
-            
-            <a class="has-link-black-ter" href="/Android图形架构总览/">Android图形架构总览</a>
-            
-        </h1>
-        <div class="content">
-            <h3 id="图形渲染流程"><a href="#图形渲染流程" class="headerlink" title="图形渲染流程"></a>图形渲染流程</h3><p>​    在Android中，所有的渲染都是将内容绘制到对应的Surface上，Surface作为BufferQueue的生产方，每当发生入队操作时，都会通知BufferQueue创建者进行消费，也就是SurfaceFlinger，由SurfaceFlinger进行合并，然后发送到显示器进行显示。</p>
-<p>下面这张图描述了关键组件的工作流程:</p>
-<p><img src="/images/ape_fwk_graphics.png" alt="工作流程"></p>
-<ol>
-<li><p>当前一个可见的界面被创建时，会通过WindowManager去创建一个Window对象，而每一个Window对象中都会包含一个Surface对象，该对象由WindowManager向SurfaceFlinger请求创建。Surface中包含一个BufferQueue，它由SurfaceFlinger向HAL层调用Gralloc对其进行内存分配。</p></li></ol>
-        </div>
-        
-        
-        
-        <div class="level is-mobile">
-            <div class="level-start">
-                <div class="level-item">
-                    <a class="button is-size-7 is-light"
-                        href="/Android图形架构总览/#more">阅读更多</a>
-                </div>
-            </div>
-        </div>
-        
-        
-    </div>
-</div>
-
-
-
-
-
-
-
-
 
     
 <div class="card card-transparent">
@@ -655,7 +671,7 @@
                         分类
                     </p>
                     <p class="title has-text-weight-normal">
-                        9
+                        10
                     </p>
                 </div>
             </div>
@@ -697,7 +713,7 @@
                 <span class="level-item">内功心法（CS基础）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">13</span>
+                <span class="level-item tag">12</span>
             </span>
         </a><ul><li>
         <a class="level is-marginless" href="/categories/内功心法（CS基础）/北冥神功（编程语言）/">
@@ -713,7 +729,7 @@
                 <span class="level-item">神照功（网络协议）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">9</span>
+                <span class="level-item tag">8</span>
             </span>
         </a></li></ul></li><li>
         <a class="level is-marginless" href="/categories/刀枪棍棒（Android）/">
@@ -745,7 +761,7 @@
                 <span class="level-item">拳掌指腿（音视频）</span>
             </span>
             <span class="level-end">
-                <span class="level-item tag">19</span>
+                <span class="level-item tag">20</span>
             </span>
         </a><ul><li>
         <a class="level is-marginless" href="/categories/拳掌指腿（音视频）/七伤拳（音视频基础）/">
@@ -754,6 +770,14 @@
             </span>
             <span class="level-end">
                 <span class="level-item tag">11</span>
+            </span>
+        </a></li><li>
+        <a class="level is-marginless" href="/categories/拳掌指腿（音视频）/弹指神通（WebRTC）/">
+            <span class="level-start">
+                <span class="level-item">弹指神通（WebRTC）</span>
+            </span>
+            <span class="level-end">
+                <span class="level-item tag">1</span>
             </span>
         </a></li><li>
         <a class="level is-marginless" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">
@@ -777,6 +801,25 @@
         <h3 class="menu-label">
             最新文章
         </h3>
+        
+        <article class="media">
+            
+            <a href="/WebRTC源码初探之Android平台视频采集/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/27.jpeg" alt="Android多媒体架构总览">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-09-08T16:00:00.000Z">2020-09-09</time></div>
+                    <a href="/WebRTC源码初探之Android平台视频采集/" class="title has-link-black-ter is-size-6 has-text-weight-normal">Android多媒体架构总览</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/弹指神通（WebRTC）/">弹指神通（WebRTC）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
         
         <article class="media">
             
@@ -854,25 +897,6 @@
             </div>
         </article>
         
-        <article class="media">
-            
-            <a href="/音视频开发之ffplay队列分析/" class="media-left">
-                <p class="image is-64x64">
-                    <img class="thumbnail" src="/images/15.jpg" alt="音视频开发之ffplay队列分析">
-                </p>
-            </a>
-            
-            <div class="media-content">
-                <div class="content">
-                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-01T16:00:00.000Z">2020-08-02</time></div>
-                    <a href="/音视频开发之ffplay队列分析/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之ffplay队列分析</a>
-                    <p class="is-size-7 is-uppercase">
-                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
-                    </p>
-                </div>
-            </div>
-        </article>
-        
     </div>
 </div>
         
@@ -883,6 +907,17 @@
                 归档
             </h3>
             <ul class="menu-list">
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/09/">
+                        <span class="level-start">
+                            <span class="level-item">九月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
                 
                 <li>
                     <a class="level is-marginless" href="/archives/2020/08/">
@@ -1055,7 +1090,7 @@
                             <span class="level-item">十二月 2017</span>
                         </span>
                         <span class="level-end">
-                            <span class="level-item tag">7</span>
+                            <span class="level-item tag">6</span>
                         </span>
                     </a>
                 </li>
@@ -1098,6 +1133,25 @@
         
         <article class="media">
             
+            <a href="/WebRTC源码初探之Android平台视频采集/" class="media-left">
+                <p class="image is-64x64">
+                    <img class="thumbnail" src="/images/27.jpeg" alt="Android多媒体架构总览">
+                </p>
+            </a>
+            
+            <div class="media-content">
+                <div class="content">
+                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-09-08T16:00:00.000Z">2020-09-09</time></div>
+                    <a href="/WebRTC源码初探之Android平台视频采集/" class="title has-link-black-ter is-size-6 has-text-weight-normal">Android多媒体架构总览</a>
+                    <p class="is-size-7 is-uppercase">
+                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/弹指神通（WebRTC）/">弹指神通（WebRTC）</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+        
+        <article class="media">
+            
             <a href="/音视频开发之H.264码流结构与编码原理/" class="media-left">
                 <p class="image is-64x64">
                     <img class="thumbnail" src="/images/23.jpg" alt="音视频开发之H.264码流结构与编码原理">
@@ -1172,25 +1226,6 @@
             </div>
         </article>
         
-        <article class="media">
-            
-            <a href="/音视频开发之ffplay队列分析/" class="media-left">
-                <p class="image is-64x64">
-                    <img class="thumbnail" src="/images/15.jpg" alt="音视频开发之ffplay队列分析">
-                </p>
-            </a>
-            
-            <div class="media-content">
-                <div class="content">
-                    <div><time class="has-text-grey is-size-7 is-uppercase" datetime="2020-08-01T16:00:00.000Z">2020-08-02</time></div>
-                    <a href="/音视频开发之ffplay队列分析/" class="title has-link-black-ter is-size-6 has-text-weight-normal">音视频开发之ffplay队列分析</a>
-                    <p class="is-size-7 is-uppercase">
-                        <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/">拳掌指腿（音视频）</a> / <a class="has-link-grey -link" href="/categories/拳掌指腿（音视频）/降龙十八掌（FFmpeg）/">降龙十八掌（FFmpeg）</a>
-                    </p>
-                </div>
-            </div>
-        </article>
-        
     </div>
 </div>
     
@@ -1201,6 +1236,17 @@
                 归档
             </h3>
             <ul class="menu-list">
+                
+                <li>
+                    <a class="level is-marginless" href="/archives/2020/09/">
+                        <span class="level-start">
+                            <span class="level-item">九月 2020</span>
+                        </span>
+                        <span class="level-end">
+                            <span class="level-item tag">1</span>
+                        </span>
+                    </a>
+                </li>
                 
                 <li>
                     <a class="level is-marginless" href="/archives/2020/08/">
@@ -1373,7 +1419,7 @@
                             <span class="level-item">十二月 2017</span>
                         </span>
                         <span class="level-end">
-                            <span class="level-item tag">7</span>
+                            <span class="level-item tag">6</span>
                         </span>
                     </a>
                 </li>
