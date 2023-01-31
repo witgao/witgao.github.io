@@ -196,7 +196,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://witgao.com/2020/03/05/av/FFmpeg%E6%B7%B1%E5%85%A5%E4%B9%8Bffmpeg-parse-options/">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2020/03/05/av/FFmpeg%E6%B7%B1%E5%85%A5%E4%B9%8Bavformat-open-input/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.png">
@@ -214,7 +214,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2020/03/05/av/FFmpeg%E6%B7%B1%E5%85%A5%E4%B9%8Bffmpeg-parse-options/" class="post-title-link" itemprop="url">FFmpeg深入之ffmpeg_parse_options</a>
+          <a href="/2020/03/05/av/FFmpeg%E6%B7%B1%E5%85%A5%E4%B9%8Bavformat-open-input/" class="post-title-link" itemprop="url">FFmpeg深入之avformat_open_input</a>
         </h2>
 
         <div class="post-meta-container">
@@ -243,14 +243,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>3.1k</span>
+      <span>4.5k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>11 分钟</span>
+      <span>16 分钟</span>
     </span>
 </div>
 
@@ -261,16 +261,10 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h1 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ffmpeg [global_options] &#123;[input_file_options] -i input_url&#125; ... &#123;[output_file_options] output_url&#125; ...</span><br></pre></td></tr></table></figure>
-
-<p>根据FFmpeg官方文档定义，FFmpeg命令由 全局参数+{输入参数+输入源}+{输出参数+输出流} 组成。其中全局参数可放在任何地方，输入参数必须放在输入源之前。</p>
-<p>例：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ffmpeg -i video.mp4 -i 1.png -i 1.mp3 -filter_complex &quot;[0:v]scale=750:1334,pad=750:1334:0:0:black[source];[source][1:v]overlay=x=0:y=0[result]&quot; -map &quot;[result]&quot; -map 2:a -s 540x960 -t 7 -shortest -movflags faststart -y output.mp4</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>那么当FFmpeg接收到上面这样一串字符命令时，是如何解析和处理的？</p>
+          <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta"># libavformat/avformat.h</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 读取多媒体文件头信息</span></span><br><span class="line"><span class="comment"> * 此时并未开始解码，开启的流通过avformat_close_input()关闭。</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * @param ps AVFormatContext (通过avformat_alloc_context创建)，可以传NULL。    </span></span><br><span class="line"><span class="comment"> * @param url 多媒体URL</span></span><br><span class="line"><span class="comment"> * @param fmt 指定解封装的格式，传NULL时将自动检测.</span></span><br><span class="line"><span class="comment"> * @param options  解封装参数自定义，可以传NULL</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * @return 0 成功</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">avformat_open_input</span><span class="params">(AVFormatContext **ps, <span class="type">const</span> <span class="type">char</span> *url, AVInputFormat *fmt, AVDictionary **options)</span>;</span><br></pre></td></tr></table></figure>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2020/03/05/av/FFmpeg%E6%B7%B1%E5%85%A5%E4%B9%8Bffmpeg-parse-options/#more" rel="contents">
+              <a class="btn" href="/2020/03/05/av/FFmpeg%E6%B7%B1%E5%85%A5%E4%B9%8Bavformat-open-input/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
