@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha256-Z1K5uhUaJXA7Ll0XrZ/0JhX4lAtZFpT6jkKrEDT0drU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"witgao.com","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.14.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="FFmpeg对于Android平台的视频输入设备API有一定的支持，但是比较局限，只支持Android N以上的版本，低版本无法使用。 其原因是因为FFmpeg采用的是Android N推出的native层camera API来实现的(NDK中的libcamera2ndk.so），而并非采用JNI的方式来调用Java层camera API。 Android平台视频录制API对于视频录制API，An">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android录制视频">
+<meta property="og:url" content="https://witgao.com/2020/07/21/av/Android%E5%BD%95%E5%88%B6%E8%A7%86%E9%A2%91/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:description" content="FFmpeg对于Android平台的视频输入设备API有一定的支持，但是比较局限，只支持Android N以上的版本，低版本无法使用。 其原因是因为FFmpeg采用的是Android N推出的native层camera API来实现的(NDK中的libcamera2ndk.so），而并非采用JNI的方式来调用Java层camera API。 Android平台视频录制API对于视频录制API，An">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-07-20T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-01-31T03:28:12.899Z">
+<meta property="article:author" content="高振宇">
+<meta property="article:tag" content="Android">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://witgao.com/2020/07/21/av/Android%E5%BD%95%E5%88%B6%E8%A7%86%E9%A2%91/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://witgao.com/2020/07/21/av/Android%E5%BD%95%E5%88%B6%E8%A7%86%E9%A2%91/","path":"2020/07/21/av/Android录制视频/","title":"Android录制视频"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Android录制视频 | 富贵山庄</title>
+  
+
+
+
+
+
+
+  <script async defer data-website-id="" src=""></script>
+
+  <script defer data-domain="" src=""></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">富贵山庄</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">恒者行远，思者常新</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Android%E5%B9%B3%E5%8F%B0%E8%A7%86%E9%A2%91%E5%BD%95%E5%88%B6API"><span class="nav-number">1.</span> <span class="nav-text">Android平台视频录制API</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Camera1"><span class="nav-number">1.1.</span> <span class="nav-text">Camera1</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96Camera%E8%AE%BE%E5%A4%87%E4%BF%A1%E6%81%AF"><span class="nav-number">1.1.1.</span> <span class="nav-text">获取Camera设备信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE%E9%87%87%E9%9B%86%E5%8F%82%E6%95%B0"><span class="nav-number">1.1.2.</span> <span class="nav-text">设置采集参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE%E8%BE%93%E5%87%BA"><span class="nav-number">1.1.3.</span> <span class="nav-text">设置输出</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Texture%E6%A0%BC%E5%BC%8F"><span class="nav-number">1.1.3.1.</span> <span class="nav-text">Texture格式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ByteArray%E6%A0%BC%E5%BC%8F"><span class="nav-number">1.1.3.2.</span> <span class="nav-text">ByteArray格式</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%87%E9%9B%86"><span class="nav-number">1.1.4.</span> <span class="nav-text">采集</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Camera2"><span class="nav-number">1.2.</span> <span class="nav-text">Camera2</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96Camera%E8%AE%BE%E5%A4%87%E4%BF%A1%E6%81%AF-1"><span class="nav-number">1.2.1.</span> <span class="nav-text">获取Camera设备信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE%E9%87%87%E9%9B%86%E5%8F%82%E6%95%B0-1"><span class="nav-number">1.2.2.</span> <span class="nav-text">设置采集参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE%E8%BE%93%E5%87%BA-1"><span class="nav-number">1.2.3.</span> <span class="nav-text">设置输出</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ImageReader"><span class="nav-number">1.2.3.1.</span> <span class="nav-text">ImageReader</span></a></li></ol></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="高振宇"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">高振宇</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">33</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/witgao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;witgao" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:witgao328@gmail.com" title="E-Mail → mailto:witgao328@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2020/07/21/av/Android%E5%BD%95%E5%88%B6%E8%A7%86%E9%A2%91/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="高振宇">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Android录制视频 | 富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android录制视频
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-07-21 00:00:00" itemprop="dateCreated datePublished" datetime="2020-07-21T00:00:00+08:00">2020-07-21</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/" itemprop="url" rel="index"><span itemprop="name">音视频</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>9 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>FFmpeg对于Android平台的视频输入设备API有一定的支持，但是比较局限，只支持Android N以上的版本，低版本无法使用。</p>
+<p>其原因是因为FFmpeg采用的是Android N推出的native层camera API来实现的(NDK中的libcamera2ndk.so），而并非采用JNI的方式来调用Java层camera API。</p>
+<h1 id="Android平台视频录制API"><a href="#Android平台视频录制API" class="headerlink" title="Android平台视频录制API"></a>Android平台视频录制API</h1><p>对于视频录制API，Android平台上有两套API实现，一套是老版的Camera1，另一套是Android L之后推出的Camera2。</p>
+<p>Camera1使用起来较为简单，但是功能相对较少，不支持多纹理输出。Camera2的API功能上虽然更加强大，但是API设计的非常底层化，不利于理解，并且YUV_420_888的数据格式，国内各大产商在实现上留下的坑太多。</p>
+<p>Jetpack组件中，Google推出了全新的CameraX组件，对Camera1和Camera2进行了统一的封装，使得API更加简单易用。</p>
+<span id="more"></span>
+
+<h2 id="Camera1"><a href="#Camera1" class="headerlink" title="Camera1"></a>Camera1</h2><h3 id="获取Camera设备信息"><a href="#获取Camera设备信息" class="headerlink" title="获取Camera设备信息"></a>获取Camera设备信息</h3><ul>
+<li>Camera.getNumberOfCameras() : 获取Camera设备数量 </li>
+<li>index : 索引就是后续会使用的CameraID</li>
+<li>Camera.CameraInfo : Camera设备信息  </li>
+<li>Camera.getCameraInfo(index, info) : 获取指定索引的Camera设备信息，存储到info对象中</li>
+<li>Camera.CameraInfo.facing : 相机面对的方向，前置还是后置 CAMERA_FACING_BACK or CAMERA_FACING_FRONT.</li>
+<li>Camera.CameraInfo.orientation : 相机图像的方向，获取到的图像需要顺时针旋转该角度才能正常显示。值为0、90、180、270。（因为我们拿手机一般是竖着拿，但是摄像头可能是向左横着或向右横着被安装的）</li>
+<li>Camera.open : 获取指定索引位置的Camera设备实例。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 遍历所有的camera设备</span></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> <span class="variable">index</span> <span class="operator">=</span> <span class="number">0</span>; index &lt; android.hardware.Camera.getNumberOfCameras(); ++index) &#123;</span><br><span class="line">  <span class="comment">// 获取camera设备信息</span></span><br><span class="line">  android.hardware.Camera.<span class="type">CameraInfo</span> <span class="variable">info</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">android</span>.hardware.Camera.CameraInfo();</span><br><span class="line">  android.hardware.Camera.getCameraInfo(index, info);</span><br><span class="line">  <span class="type">String</span> <span class="variable">facing</span> <span class="operator">=</span></span><br><span class="line">        (info.facing == android.hardware.Camera.CameraInfo.CAMERA_FACING_FRONT) ? <span class="string">&quot;front&quot;</span> : <span class="string">&quot;back&quot;</span>; </span><br><span class="line">  <span class="keyword">final</span> android.hardware.Camera camera;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">      <span class="comment">// 开启camera设备，获取camera实例</span></span><br><span class="line">      camera = android.hardware.Camera.open(cameraId);</span><br><span class="line">  &#125; <span class="keyword">catch</span> (RuntimeException e) &#123;</span><br><span class="line">      callback.onFailure(FailureType.ERROR, e.getMessage());</span><br><span class="line">      <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="设置采集参数"><a href="#设置采集参数" class="headerlink" title="设置采集参数"></a>设置采集参数</h3><p>设置采集的尺寸、格式、对焦、闪光灯、白平衡等</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 获取相机设备的参数集</span></span><br><span class="line"><span class="keyword">final</span> android.hardware.Camera.<span class="type">Parameters</span> <span class="variable">parameters</span> <span class="operator">=</span> camera.getParameters();</span><br><span class="line"><span class="comment">// 获取手机支持的对焦模式（为了应对各手机厂商的差异，一般在设置某个功能时，先判断当前手机是否支持该功能）</span></span><br><span class="line"><span class="keyword">final</span> List&lt;String&gt; focusModes = parameters.getSupportedFocusModes();</span><br><span class="line"><span class="comment">// 设置FPS的区间</span></span><br><span class="line">parameters.setPreviewFpsRange(framerate.min, framerate.max);</span><br><span class="line"><span class="comment">// 设置预览尺寸</span></span><br><span class="line">parameters.setPreviewSize(width, height);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 设置预览数据的像素格式，一般设置NV21</span></span><br><span class="line">parameters.setPreviewFormat(ImageFormat.NV21);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 视频稳像</span></span><br><span class="line"><span class="keyword">if</span> (parameters.isVideoStabilizationSupported()) &#123;</span><br><span class="line">  parameters.setVideoStabilization(<span class="literal">true</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 如果当前手机支持，则设置对焦模式为 FOCUS_MODE_CONTINUOUS_VIDEO</span></span><br><span class="line"><span class="keyword">if</span> (focusModes.contains(android.hardware.Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO)) &#123;</span><br><span class="line">  parameters.setFocusMode(android.hardware.Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 设置参数，重启相机才生效</span></span><br><span class="line">camera.setParameters(parameters);</span><br><span class="line"><span class="comment">// 设置相机预览显示的图像方向</span></span><br><span class="line">camera.setDisplayOrientation(<span class="number">0</span> <span class="comment">/* degrees */</span>);</span><br></pre></td></tr></table></figure>
+
+<p>下面的代码就是设置相机预览显示的图像角度根据activity显示的方向来调整</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">setCameraDisplayOrientation</span><span class="params">(Activity activity,</span></span><br><span class="line"><span class="params">      <span class="type">int</span> cameraId, android.hardware.Camera camera)</span> &#123;</span><br><span class="line">  android.hardware.Camera.<span class="type">CameraInfo</span> <span class="variable">info</span> <span class="operator">=</span></span><br><span class="line">          <span class="keyword">new</span> <span class="title class_">android</span>.hardware.Camera.CameraInfo();</span><br><span class="line">  android.hardware.Camera.getCameraInfo(cameraId, info);</span><br><span class="line"> <span class="type">int</span> <span class="variable">rotation</span> <span class="operator">=</span> activity.getWindowManager().getDefaultDisplay()</span><br><span class="line">          .getRotation();</span><br><span class="line">  <span class="type">int</span> <span class="variable">degrees</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">switch</span> (rotation) &#123;</span><br><span class="line">      <span class="keyword">case</span> Surface.ROTATION_0: degrees = <span class="number">0</span>; <span class="keyword">break</span>;</span><br><span class="line">      <span class="keyword">case</span> Surface.ROTATION_90: degrees = <span class="number">90</span>; <span class="keyword">break</span>;</span><br><span class="line">      <span class="keyword">case</span> Surface.ROTATION_180: degrees = <span class="number">180</span>; <span class="keyword">break</span>;</span><br><span class="line">      <span class="keyword">case</span> Surface.ROTATION_270: degrees = <span class="number">270</span>; <span class="keyword">break</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="type">int</span> result;</span><br><span class="line">  <span class="keyword">if</span> (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) &#123;</span><br><span class="line">      <span class="comment">// 前置相机是镜像的</span></span><br><span class="line">      result = (info.orientation + degrees) % <span class="number">360</span>;</span><br><span class="line">      result = (<span class="number">360</span> - result) % <span class="number">360</span>;  </span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;  </span><br><span class="line">      <span class="comment">// 后置相机</span></span><br><span class="line">      result = (info.orientation - degrees + <span class="number">360</span>) % <span class="number">360</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  camera.setDisplayOrientation(result);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<!-- more -->
+
+<h3 id="设置输出"><a href="#设置输出" class="headerlink" title="设置输出"></a>设置输出</h3><p>获取输出数据有两种方式，一种是设置一个SurfaceTexture采用纹理进行接收；另一种是通过设置回调直接接收byte array数据。</p>
+<h4 id="Texture格式"><a href="#Texture格式" class="headerlink" title="Texture格式"></a>Texture格式</h4><p>SurfaceTexture有两种方式获取，一种是通过系统的SurfaceView或者TextureView来获取，另一种就是自建OES纹理，通过构造函数new。</p>
+<ul>
+<li>通过系统的View来获取的SurfaceTexture，相机设备将数据写入后，系统View会自动取出数据更新显示。</li>
+<li>自己创建的SurfaceTexture可以通过设置OnFrameAvailableListener来监听数据的变更，当相机设备写入数据时，会触发回调，在回调中使用updateTexImage从队列中取出一个数据绑定到OES纹理中，使用OES纹理来进行绘制显示或者编码输入等操作。<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">  camera.setPreviewTexture(getSurfaceTexture());</span><br><span class="line">&#125; <span class="keyword">catch</span> (IOException | RuntimeException e) &#123;</span><br><span class="line">  camera.release();</span><br><span class="line">  callback.onFailure(FailureType.ERROR, e.getMessage());</span><br><span class="line">  <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="ByteArray格式"><a href="#ByteArray格式" class="headerlink" title="ByteArray格式"></a>ByteArray格式</h4><p>对于ByteArray格式的回调设置，又有两种方式，一种是setPreviewCallback方法，另一种是setPreviewCallbackWithBuffer方法。</p>
+<ul>
+<li>第一种onPreviewFrame回调方法会在每一帧数据准备好了就调用，回调时机是不可控的。</li>
+<li>第二种方式是在需要在前一帧的onPreviewFrame方法中调用addCallbackBuffer方法，下一帧的onPreviewFrame才会调用，同时addCallbackBuffer方法的参数的byte数据就是每一帧的原数据。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 设置回调</span></span><br><span class="line">camera.setPreviewCallback(<span class="keyword">new</span> <span class="title class_">Camera</span>.PreviewCallback() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onPreviewFrame</span><span class="params">(<span class="type">byte</span>[] data, Camera camera)</span> &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="type">int</span> <span class="variable">frameSize</span> <span class="operator">=</span> captureFormat.frameSize();</span><br><span class="line"><span class="keyword">final</span> <span class="type">ByteBuffer</span> <span class="variable">buffer</span> <span class="operator">=</span> ByteBuffer.allocateDirect(frameSize);</span><br><span class="line"><span class="comment">// 设置数据回调的buffer</span></span><br><span class="line">camera.addCallbackBuffer(buffer.array());</span><br><span class="line"><span class="comment">// 设置回调</span></span><br><span class="line">camera.setPreviewCallbackWithBuffer(<span class="keyword">new</span> <span class="title class_">android</span>.hardware.Camera.PreviewCallback() &#123;</span><br><span class="line"> <span class="meta">@Override</span></span><br><span class="line"> <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onPreviewFrame</span><span class="params">(<span class="keyword">final</span> <span class="type">byte</span>[] data, android.hardware.Camera callbackCamera)</span> &#123;</span><br><span class="line">    <span class="comment">// 获取下一个回调</span></span><br><span class="line">    camera.addCallbackBuffer(data);</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="采集"><a href="#采集" class="headerlink" title="采集"></a>采集</h3><ul>
+<li>startPreview : 开启预览，数据开始回调，更改采集参数后需要重新开启预览才生效</li>
+<li>stopPreview : 停止预览<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">  camera.startPreview();</span><br><span class="line">&#125; <span class="keyword">catch</span> (RuntimeException e) &#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">camera.stopPreview();</span><br><span class="line">camera.release();</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="Camera2"><a href="#Camera2" class="headerlink" title="Camera2"></a>Camera2</h2><h3 id="获取Camera设备信息-1"><a href="#获取Camera设备信息-1" class="headerlink" title="获取Camera设备信息"></a>获取Camera设备信息</h3><p>Camera设备的获取需要通过系统服务来操作。</p>
+<ul>
+<li>getCameraIdList : 获取camera设备列表</li>
+<li>getCameraCharacteristics : 获取指定camera设备参数集，通过对应的KEY从参数集中获取到各种参数值</li>
+<li><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">this</span>.cameraManager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);</span><br><span class="line"></span><br><span class="line">String[] cameraIdList = cameraManager.getCameraIdList();</span><br><span class="line"><span class="keyword">for</span> (String cameraId : cameraIdList) &#123;</span><br><span class="line">    <span class="type">CameraCharacteristics</span> <span class="variable">characteristics</span> <span class="operator">=</span> cameraManager.getCameraCharacteristics(cameraId);</span><br><span class="line">    <span class="comment">// 获取相机面对的方向，CameraMetadata.LENS_FACING_BACK or CameraMetadata.LENS_FACING_FRONT</span></span><br><span class="line">    <span class="type">String</span> <span class="variable">facing</span> <span class="operator">=</span> characteristics.get(CameraCharacteristics.LENS_FACING) == CameraMetadata.LENS_FACING_BACK;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      <span class="comment">// 开启camera设备，设置开启回调，以及指定camera回调执行的线程</span></span><br><span class="line">      cameraManager.openCamera(cameraId, <span class="keyword">new</span> <span class="title class_">CameraStateCallback</span>(), cameraThreadHandler);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (CameraAccessException e) &#123;</span><br><span class="line">      <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+camera设备状态回调，在回调中可以开启一次会话，在会话中可以进行数据的请求<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">class</span> <span class="title class_">CameraStateCallback</span> <span class="keyword">extends</span> <span class="title class_">CameraDevice</span>.StateCallback &#123;</span><br><span class="line">    <span class="keyword">private</span> String <span class="title function_">getErrorDescription</span><span class="params">(<span class="type">int</span> errorCode)</span> &#123;</span><br><span class="line">      <span class="keyword">switch</span> (errorCode) &#123;</span><br><span class="line">        <span class="keyword">case</span> CameraDevice.StateCallback.ERROR_CAMERA_DEVICE:</span><br><span class="line">          <span class="keyword">return</span> <span class="string">&quot;Camera device has encountered a fatal error.&quot;</span>;</span><br><span class="line">        <span class="keyword">case</span> CameraDevice.StateCallback.ERROR_CAMERA_DISABLED:</span><br><span class="line">          <span class="keyword">return</span> <span class="string">&quot;Camera device could not be opened due to a device policy.&quot;</span>;</span><br><span class="line">        <span class="keyword">case</span> CameraDevice.StateCallback.ERROR_CAMERA_IN_USE:</span><br><span class="line">          <span class="keyword">return</span> <span class="string">&quot;Camera device is in use already.&quot;</span>;</span><br><span class="line">        <span class="keyword">case</span> CameraDevice.StateCallback.ERROR_CAMERA_SERVICE:</span><br><span class="line">          <span class="keyword">return</span> <span class="string">&quot;Camera service has encountered a fatal error.&quot;</span>;</span><br><span class="line">        <span class="keyword">case</span> CameraDevice.StateCallback.ERROR_MAX_CAMERAS_IN_USE:</span><br><span class="line">          <span class="keyword">return</span> <span class="string">&quot;Camera device could not be opened because&quot;</span></span><br><span class="line">              + <span class="string">&quot; there are too many other open camera devices.&quot;</span>;</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">          <span class="keyword">return</span> <span class="string">&quot;Unknown camera error: &quot;</span> + errorCode;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onDisconnected</span><span class="params">(CameraDevice camera)</span> &#123;</span><br><span class="line">      <span class="comment">// camera设备断开连接</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onError</span><span class="params">(CameraDevice camera, <span class="type">int</span> errorCode)</span> &#123;</span><br><span class="line">      <span class="comment">// 发生错误</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onOpened</span><span class="params">(CameraDevice camera)</span> &#123;</span><br><span class="line">      <span class="comment">// camera设备成功开启</span></span><br><span class="line">      cameraDevice = camera;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// 创建采集会话，设置采集输出的Surface集合，可同时输出到多个Surface中</span></span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">        camera.createCaptureSession(</span><br><span class="line">            Arrays.asList(surface), <span class="keyword">new</span> <span class="title class_">CaptureSessionCallback</span>(), cameraThreadHandler);</span><br><span class="line">      &#125; <span class="keyword">catch</span> (CameraAccessException e) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onClosed</span><span class="params">(CameraDevice camera)</span> &#123;</span><br><span class="line">      <span class="comment">// camera设备关闭</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="设置采集参数-1"><a href="#设置采集参数-1" class="headerlink" title="设置采集参数"></a>设置采集参数</h3><p>采集会话创建成功后，可以设置采集的参数，然后创建采集请求，进行数据的采集</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">class</span> <span class="title class_">CaptureSessionCallback</span> <span class="keyword">extends</span> <span class="title class_">CameraCaptureSession</span>.StateCallback &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onConfigureFailed</span><span class="params">(CameraCaptureSession session)</span> &#123;</span><br><span class="line">      <span class="comment">// 配置失败</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onConfigured</span><span class="params">(CameraCaptureSession session)</span> &#123;</span><br><span class="line">      <span class="comment">// 设置采集参数</span></span><br><span class="line">      captureSession = session;</span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">// 创建视频采集请求构建器，设置采集的参数</span></span><br><span class="line">        <span class="keyword">final</span> CaptureRequest.<span class="type">Builder</span> <span class="variable">captureRequestBuilder</span> <span class="operator">=</span></span><br><span class="line">            cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);</span><br><span class="line">        <span class="comment">// 设置FPS的区间</span></span><br><span class="line">        captureRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE,</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">Range</span>&lt;Integer&gt;(framerate.min,framerate.max));</span><br><span class="line">        <span class="comment">// 设置闪光灯模式</span></span><br><span class="line">        captureRequestBuilder.set(</span><br><span class="line">            CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);</span><br><span class="line">        captureRequestBuilder.set(CaptureRequest.CONTROL_AE_LOCK, <span class="literal">false</span>);</span><br><span class="line">        <span class="comment">// 设置视频稳像</span></span><br><span class="line">        chooseStabilizationMode(captureRequestBuilder);</span><br><span class="line">        <span class="comment">// 设置对焦模式</span></span><br><span class="line">        chooseFocusMode(captureRequestBuilder);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 添加采集输出目标，可添加多个，添加的目标必须在createCaptureSession的集合中</span></span><br><span class="line">        captureRequestBuilder.addTarget(surface);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 重复发送请求，开始采集</span></span><br><span class="line">        session.setRepeatingRequest(</span><br><span class="line">            captureRequestBuilder.build(), <span class="keyword">new</span> <span class="title class_">CameraCaptureCallback</span>(), cameraThreadHandler);</span><br><span class="line">      &#125; <span class="keyword">catch</span> (CameraAccessException e) &#123;</span><br><span class="line">        reportError(<span class="string">&quot;Failed to start capture request. &quot;</span> + e);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 优先采用光学稳像，其次采用软件稳像</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">chooseStabilizationMode</span><span class="params">(CaptureRequest.Builder captureRequestBuilder)</span> &#123;</span><br><span class="line">      <span class="keyword">final</span> <span class="type">int</span>[] availableOpticalStabilization = cameraCharacteristics.get(</span><br><span class="line">          CameraCharacteristics.LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION);</span><br><span class="line">      <span class="keyword">if</span> (availableOpticalStabilization != <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> mode : availableOpticalStabilization) &#123;</span><br><span class="line">          <span class="keyword">if</span> (mode == CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE_ON) &#123;</span><br><span class="line">            captureRequestBuilder.set(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE,</span><br><span class="line">                CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE_ON);</span><br><span class="line">            captureRequestBuilder.set(CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE,</span><br><span class="line">                CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE_OFF);</span><br><span class="line">            Logging.d(TAG, <span class="string">&quot;Using optical stabilization.&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">// If no optical mode is available, try software.</span></span><br><span class="line">      <span class="keyword">final</span> <span class="type">int</span>[] availableVideoStabilization = cameraCharacteristics.get(</span><br><span class="line">          CameraCharacteristics.CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES);</span><br><span class="line">      <span class="keyword">for</span> (<span class="type">int</span> mode : availableVideoStabilization) &#123;</span><br><span class="line">        <span class="keyword">if</span> (mode == CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE_ON) &#123;</span><br><span class="line">          captureRequestBuilder.set(CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE,</span><br><span class="line">              CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE_ON);</span><br><span class="line">          captureRequestBuilder.set(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE,</span><br><span class="line">              CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE_OFF);</span><br><span class="line">          Logging.d(TAG, <span class="string">&quot;Using video stabilization.&quot;</span>);</span><br><span class="line">          <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      Logging.d(TAG, <span class="string">&quot;Stabilization not available.&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 设置对焦模式</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">chooseFocusMode</span><span class="params">(CaptureRequest.Builder captureRequestBuilder)</span> &#123;</span><br><span class="line">      <span class="keyword">final</span> <span class="type">int</span>[] availableFocusModes =</span><br><span class="line">          cameraCharacteristics.get(CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES);</span><br><span class="line">      <span class="keyword">for</span> (<span class="type">int</span> mode : availableFocusModes) &#123;</span><br><span class="line">        <span class="keyword">if</span> (mode == CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO) &#123;</span><br><span class="line">          captureRequestBuilder.set(</span><br><span class="line">              CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO);</span><br><span class="line">          Logging.d(TAG, <span class="string">&quot;Using continuous video auto-focus.&quot;</span>);</span><br><span class="line">          <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      Logging.d(TAG, <span class="string">&quot;Auto-focus is not available.&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="设置输出-1"><a href="#设置输出-1" class="headerlink" title="设置输出"></a>设置输出</h3><p>Camera2中数据的输出都是通过设置Surface来接收，可以同时设置多个Surface，Surface可以通过SurfaceTexture来创建。</p>
+<ul>
+<li>采用系统的SurfaceView、TextureView生成的Surface，设置给Camera，对相机采集的数据进行预览显示</li>
+<li>采用系统的ImageReader生成的Surface来接收指定格式的图像数据</li>
+<li>采用自己创建的SurfaceTexture来接收数据，通过设置OnFrameAvailableListener来监听数据的变更，当相机设备写入数据时，会触发回调，在回调中使用updateTexImage从队列中取出一个数据绑定到OES纹理中，使用OES纹理来进行绘制显示或者编码输入等操作。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建采集会话，设置采集输出的Surface集合，可同时输出到多个Surface中</span></span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">  camera.createCaptureSession(</span><br><span class="line">      Arrays.asList(surface), <span class="keyword">new</span> <span class="title class_">CaptureSessionCallback</span>(), cameraThreadHandler);</span><br><span class="line">&#125; <span class="keyword">catch</span> (CameraAccessException e) &#123;</span><br><span class="line">  <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 会话创建成功后，在创建采集请求时，添加对应的输出目标就可以将采集请求到的数据传入到目标中</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 添加采集输出目标，可添加多个，添加的目标必须在createCaptureSession的集合中</span></span><br><span class="line">captureRequestBuilder.addTarget(surface);</span><br><span class="line"><span class="comment">// 重复请求，开始采集</span></span><br><span class="line">session.setRepeatingRequest(</span><br><span class="line">      captureRequestBuilder.build(), <span class="keyword">new</span> <span class="title class_">CameraCaptureCallback</span>(), cameraThreadHandler);</span><br></pre></td></tr></table></figure>
+
+<h4 id="ImageReader"><a href="#ImageReader" class="headerlink" title="ImageReader"></a>ImageReader</h4><p>ImageReader是跟随Camera2出来的，用来接收相机采集的数据，在拍照时可以设置ImageFormat.JPEG格式，如果想要获取原始数据，则需要设置成ImageFormat.YUV_420_888。</p>
+<p>ImageFormat.YUV_420_888格式，是指YUV_420格式，其内部具体格式可以是NV12、NV21、YV12、I420中的任何一种，也就是说如果设置的是YUV_420_888格式，则设备返回的数据格式需要根据其返回的具体数据去判断。（这点在国内手机上各不相同，有些个别低端手机给的数据不符合官方文档上的要求）</p>
+<p>对于ImageReader来说，最最重要的就是理解好YUV_420_888格式。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建ImageReader对象，指定接收的数据尺寸和数据格式以及缓冲区大小</span></span><br><span class="line"><span class="type">ImageReader</span> <span class="variable">imageReader</span> <span class="operator">=</span> ImageReader.newInstance(width, height, ImageFormat.JPEG, <span class="number">2</span>);</span><br><span class="line"><span class="comment">// 获取Surface，添加到会话请求的目标中作为输出</span></span><br><span class="line"><span class="type">Surface</span> <span class="variable">surface</span> <span class="operator">=</span> imageReader.getSurface();</span><br><span class="line"><span class="comment">// 设置数据回调</span></span><br><span class="line">imageReader.setOnImageAvailableListener(<span class="keyword">new</span> <span class="title class_">ImageReader</span>.OnImageAvailableListener() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onImageAvailable</span><span class="params">(ImageReader reader)</span> &#123;</span><br><span class="line">        <span class="comment">// 获取采集到的数据</span></span><br><span class="line">        <span class="type">Image</span> <span class="variable">image</span> <span class="operator">=</span> reader.acquireNextImage();</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 操作</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 释放</span></span><br><span class="line">        image.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;, mCameraHandler);</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>高振宇
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://witgao.com/2020/07/21/av/Android%E5%BD%95%E5%88%B6%E8%A7%86%E9%A2%91/" title="Android录制视频">https://witgao.com/2020/07/21/av/Android录制视频/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/Android/" rel="tag"><i class="fa fa-tag"></i> Android</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/07/20/av/Android%E5%BD%95%E5%88%B6%E9%9F%B3%E9%A2%91/" rel="prev" title="Android录制音频">
+                  <i class="fa fa-chevron-left"></i> Android录制音频
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/07/22/av/Android%E6%92%AD%E6%94%BE%E9%9F%B3%E9%A2%91/" rel="next" title="Android播放音频">
+                  Android播放音频 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">高振宇</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">75k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:33</span>
+  </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

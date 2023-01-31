@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha256-Z1K5uhUaJXA7Ll0XrZ/0JhX4lAtZFpT6jkKrEDT0drU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"witgao.com","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.14.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="MediaCodec介绍MediaCodec是Android平台上用来访问编码器和解码器的组件。 工作流程">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android硬件编解码">
+<meta property="og:url" content="https://witgao.com/2020/04/22/av/Android%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:description" content="MediaCodec介绍MediaCodec是Android平台上用来访问编码器和解码器的组件。 工作流程">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://witgao.com/2020/04/22/av/Android%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81/mediacodec-processes.png">
+<meta property="og:image" content="https://witgao.com/2020/04/22/av/Android%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81/mediacodec-surface-processes.png">
+<meta property="og:image" content="https://witgao.com/2020/04/22/av/Android%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81/mediacodec-status.png">
+<meta property="og:image" content="https://witgao.com/2020/04/22/av/Android%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81/mediacodec-csd.png">
+<meta property="article:published_time" content="2020-04-21T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-01-31T05:06:49.668Z">
+<meta property="article:author" content="高振宇">
+<meta property="article:tag" content="Android">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://witgao.com/2020/04/22/av/Android%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81/mediacodec-processes.png">
+
+
+<link rel="canonical" href="https://witgao.com/2020/04/22/av/Android%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://witgao.com/2020/04/22/av/Android%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81/","path":"2020/04/22/av/Android硬件编解码/","title":"Android硬件编解码"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Android硬件编解码 | 富贵山庄</title>
+  
+
+
+
+
+
+
+  <script async defer data-website-id="" src=""></script>
+
+  <script defer data-domain="" src=""></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">富贵山庄</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">恒者行远，思者常新</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#MediaCodec%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.</span> <span class="nav-text">MediaCodec介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="nav-number">1.1.</span> <span class="nav-text">工作流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.2.</span> <span class="nav-text">数据类型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E5%A7%8B%E6%95%B0%E6%8D%AE"><span class="nav-number">1.2.1.</span> <span class="nav-text">原始数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%8B%E7%BC%A9%E6%95%B0%E6%8D%AE"><span class="nav-number">1.2.2.</span> <span class="nav-text">压缩数据</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%84%E4%BB%B6%E7%8A%B6%E6%80%81"><span class="nav-number">1.3.</span> <span class="nav-text">组件状态</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97"><span class="nav-number">2.</span> <span class="nav-text">使用指南</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E7%BC%96%E8%A7%A3%E7%A0%81%E5%99%A8"><span class="nav-number">2.1.</span> <span class="nav-text">创建编解码器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E7%A0%81%E5%99%A8"><span class="nav-number">2.1.1.</span> <span class="nav-text">编码器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E7%A0%81%E5%99%A8"><span class="nav-number">2.1.2.</span> <span class="nav-text">解码器</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">2.2.</span> <span class="nav-text">初始化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E7%A0%81%E5%99%A8-1"><span class="nav-number">2.2.1.</span> <span class="nav-text">编码器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E7%A0%81%E5%99%A8-1"><span class="nav-number">2.2.2.</span> <span class="nav-text">解码器</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Codec-specific-Data"><span class="nav-number">2.3.</span> <span class="nav-text">Codec-specific Data</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%84%E7%90%86"><span class="nav-number">2.4.</span> <span class="nav-text">处理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%8C%E6%AD%A5API"><span class="nav-number">2.4.1.</span> <span class="nav-text">同步API</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%82%E6%AD%A5API"><span class="nav-number">2.4.2.</span> <span class="nav-text">异步API</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90"><span class="nav-number">3.</span> <span class="nav-text">源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA"><span class="nav-number">3.1.</span> <span class="nav-text">创建</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MediaCodec-%E5%88%9B%E5%BB%BA"><span class="nav-number">3.1.1.</span> <span class="nav-text">MediaCodec 创建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ACode-%E5%88%9B%E5%BB%BA"><span class="nav-number">3.1.2.</span> <span class="nav-text">ACode 创建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#OMX-Codec-%E5%88%9B%E5%BB%BA"><span class="nav-number">3.1.3.</span> <span class="nav-text">OMX Codec 创建</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="高振宇"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">高振宇</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">33</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/witgao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;witgao" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:witgao328@gmail.com" title="E-Mail → mailto:witgao328@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2020/04/22/av/Android%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="高振宇">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Android硬件编解码 | 富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android硬件编解码
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-04-22 00:00:00" itemprop="dateCreated datePublished" datetime="2020-04-22T00:00:00+08:00">2020-04-22</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/" itemprop="url" rel="index"><span itemprop="name">音视频</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>11 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="MediaCodec介绍"><a href="#MediaCodec介绍" class="headerlink" title="MediaCodec介绍"></a>MediaCodec介绍</h1><p>MediaCodec是Android平台上用来访问编码器和解码器的组件。</p>
+<h2 id="工作流程"><a href="#工作流程" class="headerlink" title="工作流程"></a>工作流程</h2><p><img src="/2020/04/22/av/Android%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81/mediacodec-processes.png" alt="mediacodec-processes"></p>
+<span id="more"></span>
+
+<p>MediaCodec中维护了两个BufferQueue，一个用来存放输入数据，一个用来存放输出数据。对于编码来说，InputBufferQueue用来接收视频原始YUV数据，经过Codec编码处理后，将编码后的数据放入到OutputBufferQueue中输出。而对于解码来说，InputBufferQueue用来接收视频编码数据，经过Codec解码处理后，将解码后的视频原始YUV数据放入到OutputBufferQueue中输出。</p>
+<p>BufferQueue的数量是有限的，每次通过dequeueInputBuffer从InputBufferQueue中获取一个空的buffer索引，将输入数据填充到该buffer，通过queueInputBuffer通知Codec该索引位置的buffer已经填充了数据，可以开始处理了。然后通过dequeueOutputBuffer从OutputBufferQueue中获取处理完毕的buffer索引，获取到该buffer中的数据进行渲染或封装，使用完后，通过releaseOutputBuffer通知Codec释放该buffer中的数据（也可以让Codec进行数据的渲染）。</p>
+<p>MediaCodec的数据分为两种，一种是原始音视频数据，一种是压缩数据。上面讲到这两种数据都是使用bytebuffer来处理的，输入层获取到空的buffer后需要将数据copy到该buffer中，而输出层获取到buffer后也需要将数据copy出来进行消费，大量的数据copy是很影响性能的。</p>
+<p>针对原始音视频数据，MediaCodec提供了更加高效的方式来避免了数据的copy，那就是Surface。对于解码器来说，可以通过在configure的时候，设置OutputSurface来接收输出的Buffer，这样就不需要从OutputBufferQueue中copy数据了。而对于编码器来说，可以通过createInputSurface方法创建一个用来输入的Surface，这样就不需要往InputBufferQueue里copy数据了。</p>
+<p><img src="/2020/04/22/av/Android%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81/mediacodec-surface-processes.png" alt="mediacodec-surface-processes"></p>
+<h2 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h2><h3 id="原始数据"><a href="#原始数据" class="headerlink" title="原始数据"></a>原始数据</h3><p>音频原始数据类型是一个PCM音频数据帧，视频原始数据类型由color_format决定，常用的有以下两种：</p>
+<ul>
+<li><strong>Surface Format</strong> ：这种类型的format数据，表明使用的GraphicBuffer，这是一个内存共享的缓冲区。（CodecCapabilities#COLOR_FormatSurface ）。</li>
+<li><strong>YUV Format</strong> ：YUV颜色格式，支持多种YUV格式（CodecCapabilities#COLOR_FormatYUV420Flexible ）。</li>
+</ul>
+<blockquote>
+<p>在configure的时候，对于编码器来说可以指定编码器输出的数据的format，对于解码器来说可以指定解码器输入的format。</p>
+<p>对于编码器，如果输入的时候使用的是Surface，则format需要设置为COLOR_FormatSurface。而对于解码器来说输入的format一般从媒体文件中读取。</p>
+</blockquote>
+<h3 id="压缩数据"><a href="#压缩数据" class="headerlink" title="压缩数据"></a>压缩数据</h3><p>对于视频来说，buffer中是一帧的压缩数据，对于音频来说，buffer中是一个单元的压缩数据，buffer中包含的都是完整的一帧或一个单元的数据。</p>
+<h2 id="组件状态"><a href="#组件状态" class="headerlink" title="组件状态"></a>组件状态</h2><p><img src="/2020/04/22/av/Android%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81/mediacodec-status.png"></p>
+<p><strong>Stopped</strong>：创建了一个MediaCodec对象后，默认为Uninitialized状态，调用configure方法后，状态变为Configured，通过reset可以重新配置。</p>
+<p><strong>Executing</strong>：调用start方法后，状态就变为了Flushed，第一次调用dequeueInputBuffer时，状态变为Running，当通过queueInputBuffer写入了一个EOS标记后，则状态变为End of Stream，可以通过flush方法重新回到Flushed状态。</p>
+<p><strong>Released</strong>：调用release进入到Released状态。</p>
+<h1 id="使用指南"><a href="#使用指南" class="headerlink" title="使用指南"></a>使用指南</h1><h2 id="创建编解码器"><a href="#创建编解码器" class="headerlink" title="创建编解码器"></a>创建编解码器</h2><h3 id="编码器"><a href="#编码器" class="headerlink" title="编码器"></a>编码器</h3><p>通过制定的mimeType创建一个编码器，比如 “video&#x2F;avc” ，如果当前设备不支持该type则会抛IllegalArgumentException异常。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mVideoEncoder = MediaCodec.createEncoderByType(<span class="string">&quot;mimeType&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>通过<strong>MediaCodecList</strong>查询当前设备是否支持该mimeType的编码。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="type">int</span> <span class="variable">numCodecs</span> <span class="operator">=</span> MediaCodecList.getCodecCount();</span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; numCodecs; i++) &#123;</span><br><span class="line">     <span class="keyword">final</span> <span class="type">MediaCodecInfo</span> <span class="variable">codecInfo</span> <span class="operator">=</span> MediaCodecList.getCodecInfoAt(i);</span><br><span class="line">     <span class="keyword">if</span> (!codecInfo.isEncoder()) &#123;   </span><br><span class="line">          <span class="keyword">continue</span>;</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="comment">// select first codec that match a specific MIME type and color format</span></span><br><span class="line">     <span class="keyword">final</span> String[] types = codecInfo.getSupportedTypes();</span><br><span class="line">     <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">j</span> <span class="operator">=</span> <span class="number">0</span>; j &lt; types.length; j++) &#123;</span><br><span class="line">     <span class="keyword">if</span> (types[j].equalsIgnoreCase(mimeType)) &#123;</span><br><span class="line">          ...</span><br><span class="line">     &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="解码器"><a href="#解码器" class="headerlink" title="解码器"></a>解码器</h3><p>通过mimeType就可以快速的创建一个解码器，关于媒体文件的mimeType获取可以使用<strong>MediaExtractor.getTrackFormat</strong>，如果当前设备不支持该type则会抛IllegalArgumentException异常。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mVideoDecoder = MediaCodec.createDecoderByType(<span class="string">&quot;mimeType&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>通过<strong>MediaCodecList</strong>查询当前设备是否支持该mimeType的解码。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="type">int</span> <span class="variable">numCodecs</span> <span class="operator">=</span> MediaCodecList.getCodecCount();</span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; numCodecs; i++) &#123;</span><br><span class="line">     <span class="keyword">final</span> <span class="type">MediaCodecInfo</span> <span class="variable">codecInfo</span> <span class="operator">=</span> MediaCodecList.getCodecInfoAt(i);</span><br><span class="line">     <span class="keyword">if</span> (codecInfo.isEncoder()) &#123;   </span><br><span class="line">          <span class="keyword">continue</span>;</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="comment">// select first codec that match a specific MIME type and color format</span></span><br><span class="line">     <span class="keyword">final</span> String[] types = codecInfo.getSupportedTypes();</span><br><span class="line">     <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">j</span> <span class="operator">=</span> <span class="number">0</span>; j &lt; types.length; j++) &#123;</span><br><span class="line">     <span class="keyword">if</span> (types[j].equalsIgnoreCase(mimeType)) &#123;</span><br><span class="line">          ...</span><br><span class="line">     &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h2><h3 id="编码器-1"><a href="#编码器-1" class="headerlink" title="编码器"></a>编码器</h3><p>在创建完编码器之后，需要对编码器进行confiigure。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">configure</span><span class="params">(</span></span><br><span class="line"><span class="params">            <span class="meta">@Nullable</span> MediaFormat format,</span></span><br><span class="line"><span class="params">            <span class="meta">@Nullable</span> Surface surface, <span class="meta">@Nullable</span> MediaCrypto crypto,</span></span><br><span class="line"><span class="params">            <span class="meta">@ConfigureFlag</span> <span class="type">int</span> flags)</span> &#123;</span><br><span class="line">       </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对于编码器来说</p>
+<p>第一个参数MediaFormat是指定编码器输出的数据格式。这个格式需要我们自己去计算制定，</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 配置编码器输出格式</span></span><br><span class="line">mVideoEncoderFormat = MediaFormat.createVideoFormat(MIME_TYPE, mNewWidth, mNewHeight);</span><br><span class="line"><span class="comment">// 设置color_format，如果使用的是InputSurface，则设置为FormatSurface</span></span><br><span class="line">mVideoEncoderFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);</span><br><span class="line"><span class="comment">// 码率</span></span><br><span class="line">mVideoEncoderFormat.setInteger(MediaFormat.KEY_BIT_RATE, mNewBitRate);</span><br><span class="line"><span class="comment">// 帧率</span></span><br><span class="line">mVideoEncoderFormat.setInteger(MediaFormat.KEY_FRAME_RATE, OUTPUT_FRAME_RATE);</span><br><span class="line"><span class="comment">// gop</span></span><br><span class="line">mVideoEncoderFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, OUTPUT_IFRAME_INTERVAL);</span><br></pre></td></tr></table></figure>
+
+<p>第二个参数是OutputSurface，对于编码器来说忽略。</p>
+<p>第三个参数是加密相关，可忽略。</p>
+<p>第四个参数是编码标记，编码器需要加上 MediaCodec.CONFIGURE_FLAG_ENCODE 标记。</p>
+<h3 id="解码器-1"><a href="#解码器-1" class="headerlink" title="解码器"></a>解码器</h3><p>在创建完解码器之后，需要对解码器进行configure。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">configure</span><span class="params">(</span></span><br><span class="line"><span class="params">            <span class="meta">@Nullable</span> MediaFormat format,</span></span><br><span class="line"><span class="params">            <span class="meta">@Nullable</span> Surface surface, <span class="meta">@Nullable</span> MediaCrypto crypto,</span></span><br><span class="line"><span class="params">            <span class="meta">@ConfigureFlag</span> <span class="type">int</span> flags)</span> &#123;</span><br><span class="line">       </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对于解码器来说</p>
+<p>第一个参数MediaFormat是指定解码器输入的数据格式。一般来说是通过<strong>MediaExtractor.getTrackFormat</strong>从媒体文件中获取，但是其中有几点需要注意。</p>
+<ol>
+<li>最好先将KEY_LEVEL的值设置为null（<code>MediaFormat.setString(KEY_LEVEL, null)</code>），因为这个值经常不准。</li>
+<li>在5.0的设备上，MediaCodecList.findDecoder<code>/</code>EncoderForFormat<code>不得包含frame rate。使用</code>（<code>MediaFormat.setString(MediaFormat.KEY_FRAME_RATE, null)</code>）清除格式中的任何现有帧率设置。</li>
+</ol>
+<p>第二个参数是OutputSurface，解码完成后，通过releaseOutputBuffer可将解码后数据直接输出到该Surface中。</p>
+<p>第三个参数是加密相关，可忽略。</p>
+<p>第四个参数是解码器也可忽略。</p>
+<h2 id="Codec-specific-Data"><a href="#Codec-specific-Data" class="headerlink" title="Codec-specific Data"></a>Codec-specific Data</h2><p>对于某些格式，特别是AAC音频和H.264和H.265视频格式要求实际数据前需要包含设置数据或编解码器特定数据的多个缓冲区。 处理这种压缩格式时，必须在<code>start()</code>之后和任何帧数据之前将此数据提交给编解码器。 此类数据必须在输入时<code>queueInputBuffer</code>使用标<strong>BUFFER_FLAG_CODEC_CONFIG</strong>进行标记。</p>
+<p>关于CSD，其实在封装篇讲过，在muxer写入第一帧之前，需要写入CSD数据。</p>
+<p><img src="/2020/04/22/av/Android%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81/mediacodec-csd.png" alt="mediacodec-csd"></p>
+<p>对于解码器来说，<strong>MediaExtractor.getTrackFormat</strong>可以直接获取到媒体文件的CSD信息。</p>
+<p>对于编码器来说，在MediaCodec.INFO_OUTPUT_FORMAT_CHANGED回调时，使用mVideoEncoder.getOutputFormat() 可以获取到附带CSD信息的Format。</p>
+<h2 id="处理"><a href="#处理" class="headerlink" title="处理"></a>处理</h2><p>根据API历史，MediaCodec提供了三套处理API。</p>
+<table>
+<thead>
+<tr>
+<th align="left">Processing Mode</th>
+<th align="left">API version &lt;&#x3D; 20</th>
+<th align="left">API version &gt;&#x3D; 21</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">Synchronous API using buffer arrays</td>
+<td align="left">Supported</td>
+<td align="left">已过时</td>
+</tr>
+<tr>
+<td align="left">Synchronous API using buffers</td>
+<td align="left">Not Available</td>
+<td align="left">Supported</td>
+</tr>
+<tr>
+<td align="left">Asynchronous API using buffers</td>
+<td align="left">Not Available</td>
+<td align="left">Supported</td>
+</tr>
+</tbody></table>
+<h3 id="同步API"><a href="#同步API" class="headerlink" title="同步API"></a>同步API</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建</span></span><br><span class="line"><span class="type">MediaCodec</span> <span class="variable">codec</span> <span class="operator">=</span> MediaCodec.createByCodecName(name);</span><br><span class="line"><span class="comment">// 初始化</span></span><br><span class="line">codec.configure(format, …);</span><br><span class="line"><span class="type">MediaFormat</span> <span class="variable">outputFormat</span> <span class="operator">=</span> codec.getOutputFormat(); </span><br><span class="line"><span class="comment">// 启动</span></span><br><span class="line">codec.start();</span><br><span class="line"><span class="keyword">for</span> (;;) &#123;</span><br><span class="line">  <span class="comment">// 从InputBufferQueue中获取空闲索引</span></span><br><span class="line">  <span class="type">int</span> <span class="variable">inputBufferId</span> <span class="operator">=</span> codec.dequeueInputBuffer(timeoutUs);</span><br><span class="line">  <span class="keyword">if</span> (inputBufferId &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="comment">// 获取空闲索引对应的buffer</span></span><br><span class="line">    <span class="type">ByteBuffer</span> <span class="variable">inputBuffer</span> <span class="operator">=</span> codec.getInputBuffer(…);</span><br><span class="line">    <span class="comment">// 向buffer中写入数据</span></span><br><span class="line">    …</span><br><span class="line">    <span class="keyword">if</span> (inputDown) &#123;</span><br><span class="line">      	<span class="comment">// 输入结束的时候，向InputBufferQueue中写入一个EOS的标记，通知编码器。</span></span><br><span class="line">    		codec.queueInputBuffer(inputBufferId, <span class="number">0</span>, <span class="number">0</span>, 		<span class="number">0L</span>,MediaCodec.BUFFER_FLAG_END_OF_STREAM);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 通知Codec数据写入</span></span><br><span class="line">        codec.queueInputBuffer(inputBufferId, …);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 从OutputBufferQueue中获取处理完成的索引</span></span><br><span class="line">  <span class="type">int</span> <span class="variable">outputBufferId</span> <span class="operator">=</span> codec.dequeueOutputBuffer(…);</span><br><span class="line">  <span class="keyword">if</span> (outputBufferId &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="comment">// 获取到处理完成的数据和格式</span></span><br><span class="line">    <span class="type">ByteBuffer</span> <span class="variable">outputBuffer</span> <span class="operator">=</span> codec.getOutputBuffer(outputBufferId);</span><br><span class="line">    <span class="type">MediaFormat</span> <span class="variable">bufferFormat</span> <span class="operator">=</span> codec.getOutputFormat(outputBufferId); </span><br><span class="line">    <span class="comment">// 封装或渲染</span></span><br><span class="line">    …</span><br><span class="line">    <span class="comment">// 释放该buffer</span></span><br><span class="line">    codec.releaseOutputBuffer(outputBufferId, …);</span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span> (outputBufferId == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) &#123;</span><br><span class="line">    <span class="comment">// 数据格式发生变化</span></span><br><span class="line">    outputFormat = codec.getOutputFormat(); </span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">codec.stop();</span><br><span class="line">codec.release();</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="异步API"><a href="#异步API" class="headerlink" title="异步API"></a>异步API</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建</span></span><br><span class="line"><span class="type">MediaCodec</span> <span class="variable">codec</span> <span class="operator">=</span> MediaCodec.createByCodecName(name);</span><br><span class="line">MediaFormat mOutputFormat; </span><br><span class="line"><span class="comment">// 异步回调</span></span><br><span class="line">codec.setCallback(<span class="keyword">new</span> <span class="title class_">MediaCodec</span>.Callback() &#123;</span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="keyword">void</span> <span class="title function_">onInputBufferAvailable</span><span class="params">(MediaCodec mc, <span class="type">int</span> inputBufferId)</span> &#123;</span><br><span class="line">    <span class="comment">// InputBufferQueue有空闲buffer回调</span></span><br><span class="line">    <span class="type">ByteBuffer</span> <span class="variable">inputBuffer</span> <span class="operator">=</span> codec.getInputBuffer(inputBufferId);</span><br><span class="line">    <span class="comment">// 写入数据</span></span><br><span class="line">    …</span><br><span class="line">    <span class="comment">// 通知Codec</span></span><br><span class="line">    codec.queueInputBuffer(inputBufferId, …);</span><br><span class="line">  &#125;</span><br><span class="line"> </span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="keyword">void</span> <span class="title function_">onOutputBufferAvailable</span><span class="params">(MediaCodec mc, <span class="type">int</span> outputBufferId, …)</span> &#123;</span><br><span class="line">    <span class="comment">// OutputBufferQueue有处理完成的buffer回调</span></span><br><span class="line">    <span class="type">ByteBuffer</span> <span class="variable">outputBuffer</span> <span class="operator">=</span> codec.getOutputBuffer(outputBufferId);</span><br><span class="line">    <span class="type">MediaFormat</span> <span class="variable">bufferFormat</span> <span class="operator">=</span> codec.getOutputFormat(outputBufferId); </span><br><span class="line">    <span class="comment">// 处理数据</span></span><br><span class="line">    …</span><br><span class="line">    <span class="comment">// 释放buffer</span></span><br><span class="line">    codec.releaseOutputBuffer(outputBufferId, …);</span><br><span class="line">  &#125;</span><br><span class="line"> </span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="keyword">void</span> <span class="title function_">onOutputFormatChanged</span><span class="params">(MediaCodec mc, MediaFormat format)</span> &#123;</span><br><span class="line">    <span class="comment">// Codec数据格式发生变化</span></span><br><span class="line">    mOutputFormat = format;</span><br><span class="line">  &#125;</span><br><span class="line"> </span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="keyword">void</span> <span class="title function_">onError</span><span class="params">(…)</span> &#123;</span><br><span class="line">    …</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 初始化</span></span><br><span class="line">codec.configure(format, …);</span><br><span class="line">mOutputFormat = codec.getOutputFormat(); </span><br><span class="line"><span class="comment">// 启动</span></span><br><span class="line">codec.start();</span><br><span class="line"><span class="comment">// 等待处理</span></span><br><span class="line">…</span><br><span class="line">codec.stop();</span><br><span class="line">codec.release();</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<ol>
+<li><p>在输入结束后，需要写入EOS标记，此时buffer可为空，需要注意的是一旦写入EOS标记后，就不可以再向InputBufferQueue中写入数据了。</p>
+</li>
+<li><p>一旦设置了OutputSurface，则不可以访问OutputBufferQueue，对应API会返回null。</p>
+</li>
+<li><p>一旦设置了InputSurface，则不可以访问InputBufferQueue，对应API会抛异常或返回null。</p>
+</li>
+<li><p>在<code>M</code>版本之前，软件解码器在渲染到Surface上时可能未应用旋转。</p>
+</li>
+<li><p>Codec在处理的第一帧的数据一定要是关键帧。</p>
+</li>
+</ol>
+</blockquote>
+<h1 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h1><h2 id="创建"><a href="#创建" class="headerlink" title="创建"></a>创建</h2><h3 id="MediaCodec-创建"><a href="#MediaCodec-创建" class="headerlink" title="MediaCodec 创建"></a>MediaCodec 创建</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// static</span></span><br><span class="line">sp&lt;MediaCodec&gt; <span class="title function_">MediaCodec::CreateByType</span><span class="params">(</span></span><br><span class="line"><span class="params">        <span class="type">const</span> sp&lt;ALooper&gt; &amp;looper, <span class="type">const</span> AString &amp;mime, <span class="type">bool</span> encoder, <span class="type">status_t</span> *err, <span class="type">pid_t</span> pid,</span></span><br><span class="line"><span class="params">        <span class="type">uid_t</span> uid)</span> &#123;</span><br><span class="line">    Vector&lt;AString&gt; matchingCodecs;</span><br><span class="line">		<span class="comment">// 查找该mimeType对应的编解码器</span></span><br><span class="line">    MediaCodecList::findMatchingCodecs(</span><br><span class="line">            mime.c_str(),</span><br><span class="line">            encoder,</span><br><span class="line">            <span class="number">0</span>,</span><br><span class="line">            &amp;matchingCodecs);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (err != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        *err = NAME_NOT_FOUND;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">size_t</span> i = <span class="number">0</span>; i &lt; matchingCodecs.size(); ++i) &#123;</span><br><span class="line">      	<span class="comment">// 创建MediaCodec</span></span><br><span class="line">        sp&lt;MediaCodec&gt; codec = new MediaCodec(looper, pid, uid);</span><br><span class="line">        AString componentName = matchingCodecs[i];</span><br><span class="line">        <span class="comment">// 初始化编解码器</span></span><br><span class="line">        <span class="type">status_t</span> ret = codec-&gt;init(componentName);</span><br><span class="line">        <span class="keyword">if</span> (err != <span class="literal">NULL</span>) &#123;</span><br><span class="line">            *err = ret;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (ret == OK) &#123;</span><br><span class="line">            <span class="keyword">return</span> codec;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="ACode-创建"><a href="#ACode-创建" class="headerlink" title="ACode 创建"></a>ACode 创建</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">status_t</span> <span class="title function_">MediaCodec::init</span><span class="params">(<span class="type">const</span> AString &amp;name)</span> &#123;</span><br><span class="line">    mResourceManagerService-&gt;init();</span><br><span class="line">		<span class="comment">// 编解码器名称</span></span><br><span class="line">    mInitName = name;</span><br><span class="line">    AString tmp = name;</span><br><span class="line">  </span><br><span class="line">    <span class="type">const</span> sp&lt;IMediaCodecList&gt; mcl = MediaCodecList::getInstance();</span><br><span class="line">		...</span><br><span class="line">    <span class="comment">// 查找该编解码器</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">const</span> AString &amp;codecName : &#123; name, tmp &#125;) &#123;</span><br><span class="line">        <span class="type">ssize_t</span> codecIdx = mcl-&gt;findCodecByName(codecName.c_str());</span><br><span class="line">        <span class="keyword">if</span> (codecIdx &lt; <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 获取该编解码器信息</span></span><br><span class="line">        mCodecInfo = mcl-&gt;getCodecInfo(codecIdx);</span><br><span class="line">        ...</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// 创建ACodec</span></span><br><span class="line">    mCodec = GetCodecBase(name, mCodecInfo-&gt;getOwnerName());</span><br><span class="line">		...</span><br><span class="line">    mLooper-&gt;registerHandler(this);</span><br><span class="line"></span><br><span class="line">    mCodec-&gt;setCallback(</span><br><span class="line">            <span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;CodecBase::CodecCallback&gt;(</span><br><span class="line">                    new CodecCallback(new AMessage(kWhatCodecNotify, this))));</span><br><span class="line">    mBufferChannel = mCodec-&gt;getBufferChannel();</span><br><span class="line">    mBufferChannel-&gt;setCallback(</span><br><span class="line">            <span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;CodecBase::BufferCallback&gt;(</span><br><span class="line">                    new BufferCallback(new AMessage(kWhatCodecNotify, this))));</span><br><span class="line">		<span class="comment">// 创建Init消息</span></span><br><span class="line">    sp&lt;AMessage&gt; msg = new AMessage(kWhatInit, this);</span><br><span class="line">    msg-&gt;setObject(<span class="string">&quot;codecInfo&quot;</span>, mCodecInfo);</span><br><span class="line">    msg-&gt;setString(<span class="string">&quot;name&quot;</span>, name);</span><br><span class="line">		...</span><br><span class="line">    <span class="type">status_t</span> err;</span><br><span class="line">    Vector&lt;MediaResource&gt; resources;</span><br><span class="line">    MediaResource::Type type =</span><br><span class="line">            secureCodec ? MediaResource::kSecureCodec : MediaResource::kNonSecureCodec;</span><br><span class="line">    MediaResource::SubType subtype =</span><br><span class="line">            mIsVideo ? MediaResource::kVideoCodec : MediaResource::kAudioCodec;</span><br><span class="line">    resources.push_back(MediaResource(type, subtype, <span class="number">1</span>));</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt;= kMaxRetry; ++i) &#123;</span><br><span class="line">        <span class="keyword">if</span> (i &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="comment">// Don&#x27;t try to reclaim resource for the first time.</span></span><br><span class="line">            <span class="keyword">if</span> (!mResourceManagerService-&gt;reclaimResource(resources)) &#123;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        sp&lt;AMessage&gt; response;</span><br><span class="line">        <span class="comment">// 发送Init消息，连接OMX服务，创建解码器实例</span></span><br><span class="line">        err = PostAndAwaitResponse(msg, &amp;response);</span><br><span class="line">        <span class="keyword">if</span> (!isResourceError(err)) &#123;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> err;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="OMX-Codec-创建"><a href="#OMX-Codec-创建" class="headerlink" title="OMX Codec 创建"></a>OMX Codec 创建</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">bool</span> ACodec::UninitializedState::onAllocateComponent(<span class="type">const</span> sp&lt;AMessage&gt; &amp;msg) &#123;</span><br><span class="line">    ALOGV(<span class="string">&quot;onAllocateComponent&quot;</span>);</span><br><span class="line"></span><br><span class="line">    CHECK(mCodec-&gt;mOMXNode == <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">    sp&lt;AMessage&gt; notify = new AMessage(kWhatOMXMessageList, mCodec);</span><br><span class="line">    notify-&gt;setInt32(<span class="string">&quot;generation&quot;</span>, mCodec-&gt;mNodeGeneration + <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">    sp&lt;RefBase&gt; obj;</span><br><span class="line">    CHECK(msg-&gt;findObject(<span class="string">&quot;codecInfo&quot;</span>, &amp;obj));</span><br><span class="line">    sp&lt;MediaCodecInfo&gt; info = (MediaCodecInfo *)obj.get();</span><br><span class="line">    <span class="keyword">if</span> (info == nullptr) &#123;</span><br><span class="line">        ALOGE(<span class="string">&quot;Unexpected nullptr for codec information&quot;</span>);</span><br><span class="line">        mCodec-&gt;signalError(OMX_ErrorUndefined, UNKNOWN_ERROR);</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    AString owner = (info-&gt;getOwnerName() == nullptr) ? <span class="string">&quot;default&quot;</span> : info-&gt;getOwnerName();</span><br><span class="line"></span><br><span class="line">    AString componentName;</span><br><span class="line">    CHECK(msg-&gt;findString(<span class="string">&quot;componentName&quot;</span>, &amp;componentName));</span><br><span class="line"></span><br><span class="line">    sp&lt;CodecObserver&gt; observer = new CodecObserver(notify);</span><br><span class="line">    sp&lt;IOMX&gt; omx;</span><br><span class="line">    sp&lt;IOMXNode&gt; omxNode;</span><br><span class="line"></span><br><span class="line">    <span class="type">status_t</span> err = NAME_NOT_FOUND;</span><br><span class="line">    OMXClient client;</span><br><span class="line">    <span class="comment">// 连接OMX服务</span></span><br><span class="line">    <span class="keyword">if</span> (client.connect(owner.c_str()) != OK) &#123;</span><br><span class="line">        mCodec-&gt;signalError(OMX_ErrorUndefined, NO_INIT);</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    omx = client.interface();</span><br><span class="line"></span><br><span class="line">    <span class="type">pid_t</span> tid = gettid();</span><br><span class="line">    <span class="type">int</span> prevPriority = androidGetThreadPriority(tid);</span><br><span class="line">    androidSetThreadPriority(tid, ANDROID_PRIORITY_FOREGROUND);</span><br><span class="line">  	<span class="comment">// 创建编解码器实例</span></span><br><span class="line">    err = omx-&gt;allocateNode(componentName.c_str(), observer, &amp;omxNode);</span><br><span class="line">    androidSetThreadPriority(tid, prevPriority);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (err != OK) &#123;</span><br><span class="line">        ALOGE(<span class="string">&quot;Unable to instantiate codec &#x27;%s&#x27; with err %#x.&quot;</span>, componentName.c_str(), err);</span><br><span class="line"></span><br><span class="line">        mCodec-&gt;signalError((OMX_ERRORTYPE)err, makeNoSideEffectStatus(err));</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    mDeathNotifier = new DeathNotifier(new AMessage(kWhatOMXDied, mCodec));</span><br><span class="line">    <span class="keyword">auto</span> tOmxNode = omxNode-&gt;getHalInterface&lt;IOmxNode&gt;();</span><br><span class="line">    <span class="keyword">if</span> (tOmxNode &amp;&amp; !tOmxNode-&gt;linkToDeath(mDeathNotifier, <span class="number">0</span>)) &#123;</span><br><span class="line">        mDeathNotifier.clear();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ++mCodec-&gt;mNodeGeneration;</span><br><span class="line"></span><br><span class="line">    mCodec-&gt;mComponentName = componentName;</span><br><span class="line">    mCodec-&gt;mRenderTracker.setComponentName(componentName);</span><br><span class="line">    mCodec-&gt;mFlags = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (componentName.endsWith(<span class="string">&quot;.secure&quot;</span>)) &#123;</span><br><span class="line">        mCodec-&gt;mFlags |= kFlagIsSecure;</span><br><span class="line">        mCodec-&gt;mFlags |= kFlagIsGrallocUsageProtected;</span><br><span class="line">        mCodec-&gt;mFlags |= kFlagPushBlankBuffersToNativeWindowOnShutdown;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    mCodec-&gt;mOMX = omx;</span><br><span class="line">    mCodec-&gt;mOMXNode = omxNode;</span><br><span class="line">    mCodec-&gt;mCallback-&gt;onComponentAllocated(mCodec-&gt;mComponentName.c_str());</span><br><span class="line">    mCodec-&gt;changeState(mCodec-&gt;mLoadedState);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>Omx 创建</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Omx::Omx() :</span><br><span class="line">    mMaster(new OMXMaster()),</span><br><span class="line">    mParser() &#123;</span><br><span class="line">    (<span class="type">void</span>)mParser.parseXmlFilesInSearchDirs();</span><br><span class="line">    (<span class="type">void</span>)mParser.parseXmlPath(mParser.defaultProfilingResultsXmlPath);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>OMXMaster 创建</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">	OMXMaster::OMXMaster() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="type">pid_t</span> pid = getpid();</span><br><span class="line">    <span class="type">char</span> filename[<span class="number">20</span>];</span><br><span class="line">    <span class="built_in">snprintf</span>(filename, <span class="keyword">sizeof</span>(filename), <span class="string">&quot;/proc/%d/comm&quot;</span>, pid);</span><br><span class="line">    <span class="type">int</span> fd = open(filename, O_RDONLY);</span><br><span class="line">    <span class="keyword">if</span> (fd &lt; <span class="number">0</span>) &#123;</span><br><span class="line">      ALOGW(<span class="string">&quot;couldn&#x27;t determine process name&quot;</span>);</span><br><span class="line">      strlcpy(mProcessName, <span class="string">&quot;&lt;unknown&gt;&quot;</span>, <span class="keyword">sizeof</span>(mProcessName));</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="type">ssize_t</span> len = read(fd, mProcessName, <span class="keyword">sizeof</span>(mProcessName));</span><br><span class="line">      <span class="keyword">if</span> (len &lt; <span class="number">2</span>) &#123;</span><br><span class="line">        ALOGW(<span class="string">&quot;couldn&#x27;t determine process name&quot;</span>);</span><br><span class="line">        strlcpy(mProcessName, <span class="string">&quot;&lt;unknown&gt;&quot;</span>, <span class="keyword">sizeof</span>(mProcessName));</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// the name is newline terminated, so erase the newline</span></span><br><span class="line">        mProcessName[len - <span class="number">1</span>] = <span class="number">0</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      close(fd);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    addVendorPlugin();</span><br><span class="line">    addPlatformPlugin();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">OMXMaster::addVendorPlugin</span><span class="params">()</span> &#123;</span><br><span class="line">    addPlugin(<span class="string">&quot;libstagefrighthw.so&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">OMXMaster::addPlatformPlugin</span><span class="params">()</span> &#123;</span><br><span class="line">    addPlugin(<span class="string">&quot;libstagefright_softomx_plugin.so&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">OMXMaster::addPlugin</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *libname)</span> &#123;</span><br><span class="line">    <span class="type">void</span> *libHandle = android_load_sphal_library(libname, RTLD_NOW);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (libHandle == <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">typedef</span> OMXPluginBase *(*CreateOMXPluginFunc)();</span><br><span class="line">    CreateOMXPluginFunc createOMXPlugin =</span><br><span class="line">        (CreateOMXPluginFunc)dlsym(</span><br><span class="line">                libHandle, <span class="string">&quot;createOMXPlugin&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (!createOMXPlugin)</span><br><span class="line">        createOMXPlugin = (CreateOMXPluginFunc)dlsym(</span><br><span class="line">                libHandle, <span class="string">&quot;_ZN7android15createOMXPluginEv&quot;</span>);</span><br><span class="line"></span><br><span class="line">    OMXPluginBase *plugin = nullptr;</span><br><span class="line">    <span class="keyword">if</span> (createOMXPlugin) &#123;</span><br><span class="line">        plugin = (*createOMXPlugin)();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (plugin) &#123;</span><br><span class="line">        mPlugins.push_back(&#123; plugin, libHandle &#125;);</span><br><span class="line">        addPlugin(plugin);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        android_unload_sphal_library(libHandle);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>创建 编解码器实例</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line">Return&lt;<span class="type">void</span>&gt; <span class="title function_">Omx::allocateNode</span><span class="params">(</span></span><br><span class="line"><span class="params">        <span class="type">const</span> hidl_string&amp; name,</span></span><br><span class="line"><span class="params">        <span class="type">const</span> sp&lt;IOmxObserver&gt;&amp; observer,</span></span><br><span class="line"><span class="params">        allocateNode_cb _hidl_cb)</span> &#123;</span><br><span class="line"></span><br><span class="line">    using ::android::IOMXNode;</span><br><span class="line">    using ::android::IOMXObserver;</span><br><span class="line"></span><br><span class="line">    sp&lt;OMXNodeInstance&gt; instance;</span><br><span class="line">    &#123;</span><br><span class="line">        Mutex::Autolock <span class="title function_">autoLock</span><span class="params">(mLock)</span>;</span><br><span class="line">        <span class="keyword">if</span> (mLiveNodes.size() == kMaxNodeInstances) &#123;</span><br><span class="line">            _hidl_cb(toStatus(NO_MEMORY), nullptr);</span><br><span class="line">            <span class="keyword">return</span> Void();</span><br><span class="line">        &#125;</span><br><span class="line">				<span class="comment">// 创建编解码器实例</span></span><br><span class="line">        instance = new OMXNodeInstance(</span><br><span class="line">                this, new LWOmxObserver(observer), name.c_str());</span><br><span class="line"></span><br><span class="line">        OMX_COMPONENTTYPE *handle;</span><br><span class="line">      	<span class="comment">// 生成实例</span></span><br><span class="line">        OMX_ERRORTYPE err = mMaster-&gt;makeComponentInstance(</span><br><span class="line">                name.c_str(), &amp;OMXNodeInstance::kCallbacks,</span><br><span class="line">                instance.get(), &amp;handle);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (err != OMX_ErrorNone) &#123;</span><br><span class="line">            LOG(ERROR) &lt;&lt; <span class="string">&quot;Failed to allocate omx component &quot;</span></span><br><span class="line">                    <span class="string">&quot;&#x27;&quot;</span> &lt;&lt; name.c_str() &lt;&lt; <span class="string">&quot;&#x27; &quot;</span></span><br><span class="line">                    <span class="string">&quot; err=&quot;</span> &lt;&lt; asString(err) &lt;&lt;</span><br><span class="line">                    <span class="string">&quot;(0x&quot;</span> &lt;&lt; <span class="built_in">std</span>::hex &lt;&lt; <span class="type">unsigned</span>(err) &lt;&lt; <span class="string">&quot;)&quot;</span>;</span><br><span class="line">            _hidl_cb(toStatus(StatusFromOMXError(err)), nullptr);</span><br><span class="line">            <span class="keyword">return</span> Void();</span><br><span class="line">        &#125;</span><br><span class="line">        instance-&gt;setHandle(handle);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Find quirks from mParser</span></span><br><span class="line">        <span class="type">const</span> <span class="keyword">auto</span>&amp; codec = mParser.getCodecMap().find(name.c_str());</span><br><span class="line">        <span class="keyword">if</span> (codec == mParser.getCodecMap().cend()) &#123;</span><br><span class="line">            LOG(WARNING) &lt;&lt; <span class="string">&quot;Failed to obtain quirks for omx component &quot;</span></span><br><span class="line">                    <span class="string">&quot;&#x27;&quot;</span> &lt;&lt; name.c_str() &lt;&lt; <span class="string">&quot;&#x27; &quot;</span></span><br><span class="line">                    <span class="string">&quot;from XML files&quot;</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="type">uint32_t</span> quirks = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">const</span> <span class="keyword">auto</span>&amp; quirk : codec-&gt;second.quirkSet) &#123;</span><br><span class="line">                <span class="keyword">if</span> (quirk == <span class="string">&quot;quirk::requires-allocate-on-input-ports&quot;</span>) &#123;</span><br><span class="line">                    quirks |= OMXNodeInstance::</span><br><span class="line">                            kRequiresAllocateBufferOnInputPorts;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span> (quirk == <span class="string">&quot;quirk::requires-allocate-on-output-ports&quot;</span>) &#123;</span><br><span class="line">                    quirks |= OMXNodeInstance::</span><br><span class="line">                            kRequiresAllocateBufferOnOutputPorts;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            instance-&gt;setQuirks(quirks);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        mLiveNodes.add(observer.get(), instance);</span><br><span class="line">        mNode2Observer.add(instance.get(), observer.get());</span><br><span class="line">    &#125;</span><br><span class="line">    observer-&gt;linkToDeath(this, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    _hidl_cb(toStatus(OK), new TWOmxNode(instance));</span><br><span class="line">    <span class="keyword">return</span> Void();</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>高振宇
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://witgao.com/2020/04/22/av/Android%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81/" title="Android硬件编解码">https://witgao.com/2020/04/22/av/Android硬件编解码/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/Android/" rel="tag"><i class="fa fa-tag"></i> Android</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/04/12/av/Android%E7%A1%AC%E4%BB%B6%E8%A7%A3%E5%B0%81%E8%A3%85/" rel="prev" title="Android硬件解封装">
+                  <i class="fa fa-chevron-left"></i> Android硬件解封装
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/05/24/c++/%E9%9D%99%E6%80%81%E5%BA%93%E4%B8%8E%E5%8A%A8%E6%80%81%E5%BA%93%E4%B9%8B%E9%97%B4%E7%9A%84%E9%82%A3%E4%BA%9B%E4%BA%8B/" rel="next" title="静态库与动态库之间的那些事">
+                  静态库与动态库之间的那些事 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">高振宇</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">75k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:33</span>
+  </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

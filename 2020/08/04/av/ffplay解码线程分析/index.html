@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha256-Z1K5uhUaJXA7Ll0XrZ/0JhX4lAtZFpT6jkKrEDT0drU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"witgao.com","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.14.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="视频解码线程轮询不断从Packet队列中取出一帧数据进行解码，然后将解码数据放入到Frame队列中。 123456789101112131415161718192021for (;;) &amp;#123;  &#x2F;&#x2F; 获取一帧解码数据  ret &#x3D; get_video_frame(is, frame);  if (ret &lt; 0) goto the_end;  if (!ret) continue;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ffplay解码线程分析">
+<meta property="og:url" content="https://witgao.com/2020/08/04/av/ffplay%E8%A7%A3%E7%A0%81%E7%BA%BF%E7%A8%8B%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:description" content="视频解码线程轮询不断从Packet队列中取出一帧数据进行解码，然后将解码数据放入到Frame队列中。 123456789101112131415161718192021for (;;) &amp;#123;  &#x2F;&#x2F; 获取一帧解码数据  ret &#x3D; get_video_frame(is, frame);  if (ret &lt; 0) goto the_end;  if (!ret) continue;">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-08-03T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-01-31T03:26:55.876Z">
+<meta property="article:author" content="高振宇">
+<meta property="article:tag" content="FFmpeg">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://witgao.com/2020/08/04/av/ffplay%E8%A7%A3%E7%A0%81%E7%BA%BF%E7%A8%8B%E5%88%86%E6%9E%90/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://witgao.com/2020/08/04/av/ffplay%E8%A7%A3%E7%A0%81%E7%BA%BF%E7%A8%8B%E5%88%86%E6%9E%90/","path":"2020/08/04/av/ffplay解码线程分析/","title":"ffplay解码线程分析"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>ffplay解码线程分析 | 富贵山庄</title>
+  
+
+
+
+
+
+
+  <script async defer data-website-id="" src=""></script>
+
+  <script defer data-domain="" src=""></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">富贵山庄</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">恒者行远，思者常新</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%A7%86%E9%A2%91%E8%A7%A3%E7%A0%81%E7%BA%BF%E7%A8%8B"><span class="nav-number">1.</span> <span class="nav-text">视频解码线程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BD%AE%E8%AF%A2"><span class="nav-number">1.1.</span> <span class="nav-text">轮询</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E7%A0%81"><span class="nav-number">1.1.1.</span> <span class="nav-text">解码</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E7%A0%81-1"><span class="nav-number">1.1.1.1.</span> <span class="nav-text">解码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%A2%E5%B8%A7"><span class="nav-number">1.1.1.2.</span> <span class="nav-text">丢帧</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%A5%E9%98%9F"><span class="nav-number">1.1.2.</span> <span class="nav-text">入队</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%9F%B3%E9%A2%91%E8%A7%A3%E7%A0%81%E7%BA%BF%E7%A8%8B"><span class="nav-number">2.</span> <span class="nav-text">音频解码线程</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="高振宇"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">高振宇</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">33</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/witgao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;witgao" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:witgao328@gmail.com" title="E-Mail → mailto:witgao328@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2020/08/04/av/ffplay%E8%A7%A3%E7%A0%81%E7%BA%BF%E7%A8%8B%E5%88%86%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="高振宇">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="ffplay解码线程分析 | 富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ffplay解码线程分析
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-08-04 00:00:00" itemprop="dateCreated datePublished" datetime="2020-08-04T00:00:00+08:00">2020-08-04</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/" itemprop="url" rel="index"><span itemprop="name">音视频</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.5k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>5 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="视频解码线程"><a href="#视频解码线程" class="headerlink" title="视频解码线程"></a>视频解码线程</h1><h2 id="轮询"><a href="#轮询" class="headerlink" title="轮询"></a>轮询</h2><p>不断从Packet队列中取出一帧数据进行解码，然后将解码数据放入到Frame队列中。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (;;) &#123;</span><br><span class="line">  <span class="comment">// 获取一帧解码数据</span></span><br><span class="line">  ret = get_video_frame(is, frame);</span><br><span class="line">  <span class="keyword">if</span> (ret &lt; <span class="number">0</span>) <span class="keyword">goto</span> the_end;</span><br><span class="line">  <span class="keyword">if</span> (!ret) <span class="keyword">continue</span>;</span><br><span class="line">  ...</span><br><span class="line">      </span><br><span class="line">    <span class="comment">// 根据帧率计算每帧的显示时长</span></span><br><span class="line">    duration = (frame_rate.num &amp;&amp; frame_rate.den</span><br><span class="line">                    ? av_q2d((AVRational)&#123;frame_rate.den, frame_rate.num&#125;)</span><br><span class="line">                    : <span class="number">0</span>);</span><br><span class="line">    <span class="comment">// 将帧的PTS转换为秒</span></span><br><span class="line">    pts = (frame-&gt;pts == AV_NOPTS_VALUE) ? NAN : frame-&gt;pts * av_q2d(tb);</span><br><span class="line">    <span class="comment">// 将解码后的帧数据放入到视频原始数据队列中</span></span><br><span class="line">    ret = queue_picture(is, frame, pts, duration, frame-&gt;pkt_pos,</span><br><span class="line">                        is-&gt;viddec.pkt_serial);</span><br><span class="line">    av_frame_unref(frame);</span><br><span class="line">  ...</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (ret &lt; <span class="number">0</span>) <span class="keyword">goto</span> the_end;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<h3 id="解码"><a href="#解码" class="headerlink" title="解码"></a>解码</h3><h4 id="解码-1"><a href="#解码-1" class="headerlink" title="解码"></a>解码</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">decoder_decode_frame</span><span class="params">(Decoder *d, AVFrame *frame, AVSubtitle *sub)</span> &#123;</span><br><span class="line">  <span class="type">int</span> ret = AVERROR(EAGAIN);</span><br><span class="line">  <span class="comment">// 轮询解码，直到解码一帧成功</span></span><br><span class="line">  <span class="comment">// 1. 先尝试从解码器中获取，获取成功则直接返回</span></span><br><span class="line">  <span class="comment">// 2. 不成功，则从Packet队列中获取一帧数据，顺便丢弃一些过时数据</span></span><br><span class="line">  <span class="comment">// 3. 将获取的一帧数据送给解码器进行解码</span></span><br><span class="line">  <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">    AVPacket pkt;</span><br><span class="line">    <span class="comment">// 比较Packet队列的序号是否相同，是否是过时的数据</span></span><br><span class="line">    <span class="keyword">if</span> (d-&gt;<span class="built_in">queue</span>-&gt;serial == d-&gt;pkt_serial) &#123;</span><br><span class="line">      <span class="comment">// 不断的尝试从解码器中获取已经解码完成的帧，直到获取成功</span></span><br><span class="line">      <span class="keyword">do</span> &#123;</span><br><span class="line">        <span class="comment">// Packet队列是否退出</span></span><br><span class="line">        <span class="keyword">if</span> (d-&gt;<span class="built_in">queue</span>-&gt;abort_request) <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        <span class="comment">// 尝试从解码器中获取已经解码完成的帧</span></span><br><span class="line">        <span class="keyword">switch</span> (d-&gt;avctx-&gt;codec_type) &#123;</span><br><span class="line">          <span class="keyword">case</span> AVMEDIA_TYPE_VIDEO:</span><br><span class="line">            <span class="comment">// 从解码器中获取解码完成的视频帧</span></span><br><span class="line">            ret = avcodec_receive_frame(d-&gt;avctx, frame);</span><br><span class="line">            <span class="keyword">if</span> (ret &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">              <span class="comment">// 获取成功，重置PTS</span></span><br><span class="line">              <span class="keyword">if</span> (decoder_reorder_pts == <span class="number">-1</span>) &#123;</span><br><span class="line">                frame-&gt;pts = frame-&gt;best_effort_timestamp;</span><br><span class="line">              &#125; <span class="keyword">else</span> <span class="keyword">if</span> (!decoder_reorder_pts) &#123;</span><br><span class="line">                frame-&gt;pts = frame-&gt;pkt_dts;</span><br><span class="line">              &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">          <span class="keyword">case</span> AVMEDIA_TYPE_AUDIO:</span><br><span class="line">            <span class="comment">// 从解码器中获取解码完成的音频帧</span></span><br><span class="line">            ret = avcodec_receive_frame(d-&gt;avctx, frame);</span><br><span class="line">            <span class="keyword">if</span> (ret &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">              AVRational tb = (AVRational)&#123;<span class="number">1</span>, frame-&gt;sample_rate&#125;;</span><br><span class="line">              <span class="comment">// 获取成功，重置PTS</span></span><br><span class="line">              <span class="keyword">if</span> (frame-&gt;pts != AV_NOPTS_VALUE)</span><br><span class="line">                frame-&gt;pts =</span><br><span class="line">                    av_rescale_q(frame-&gt;pts, d-&gt;avctx-&gt;pkt_timebase, tb);</span><br><span class="line">              <span class="keyword">else</span> <span class="keyword">if</span> (d-&gt;next_pts != AV_NOPTS_VALUE)</span><br><span class="line">                frame-&gt;pts = av_rescale_q(d-&gt;next_pts, d-&gt;next_pts_tb, tb);</span><br><span class="line">              <span class="keyword">if</span> (frame-&gt;pts != AV_NOPTS_VALUE) &#123;</span><br><span class="line">                d-&gt;next_pts = frame-&gt;pts + frame-&gt;nb_samples;</span><br><span class="line">                d-&gt;next_pts_tb = tb;</span><br><span class="line">              &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (ret == AVERROR_EOF) &#123;</span><br><span class="line">          <span class="comment">// 如果流解码结束，记录本次结束的Packet队列的序号</span></span><br><span class="line">          d-&gt;finished = d-&gt;pkt_serial;</span><br><span class="line">          <span class="comment">// 刷新解码上下文，以便再次解码，不刷新则不能再解码了</span></span><br><span class="line">          avcodec_flush_buffers(d-&gt;avctx);</span><br><span class="line">          <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 如果获取成功，则直接返回</span></span><br><span class="line">        <span class="keyword">if</span> (ret &gt;= <span class="number">0</span>) <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">      &#125; <span class="keyword">while</span> (ret != AVERROR(EAGAIN));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 如果Packet队列的序号不相同，则开始丢弃这些过时的数据</span></span><br><span class="line">    <span class="keyword">do</span> &#123;</span><br><span class="line">      <span class="comment">// 如果Packet队列中已经空了，则唤醒read线程继续读取数据</span></span><br><span class="line">      <span class="keyword">if</span> (d-&gt;<span class="built_in">queue</span>-&gt;nb_packets == <span class="number">0</span>) SDL_CondSignal(d-&gt;empty_queue_cond);</span><br><span class="line">      <span class="comment">// packet_pending用于失败重新发送</span></span><br><span class="line">      <span class="keyword">if</span> (d-&gt;packet_pending) &#123;</span><br><span class="line">        <span class="comment">// 重新复制pkt</span></span><br><span class="line">        av_packet_move_ref(&amp;pkt, &amp;d-&gt;pkt);</span><br><span class="line">        <span class="comment">//去掉重发标记</span></span><br><span class="line">        d-&gt;packet_pending = <span class="number">0</span>;</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 从Packet队列中读取一个新的Packet，存在pkt中，并将获取的pkt的序号赋值给d-&gt;pkt_serial</span></span><br><span class="line">        <span class="keyword">if</span> (packet_queue_get(d-&gt;<span class="built_in">queue</span>, &amp;pkt, <span class="number">1</span>, &amp;d-&gt;pkt_serial) &lt; <span class="number">0</span>) <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125; <span class="keyword">while</span> (d-&gt;<span class="built_in">queue</span>-&gt;serial != d-&gt;pkt_serial);</span><br><span class="line">    <span class="comment">// 如果获取到的是flush_pkt分割标记</span></span><br><span class="line">    <span class="keyword">if</span> (pkt.data == flush_pkt.data) &#123;</span><br><span class="line">      <span class="comment">// 清空解码器</span></span><br><span class="line">      avcodec_flush_buffers(d-&gt;avctx);</span><br><span class="line">      <span class="comment">// 重新开始</span></span><br><span class="line">      d-&gt;finished = <span class="number">0</span>;</span><br><span class="line">      <span class="comment">// pts重新计算</span></span><br><span class="line">      d-&gt;next_pts = d-&gt;start_pts;</span><br><span class="line">      d-&gt;next_pts_tb = d-&gt;start_pts_tb;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="comment">// 获取到正常数据</span></span><br><span class="line">      <span class="keyword">if</span> (d-&gt;avctx-&gt;codec_type == AVMEDIA_TYPE_SUBTITLE) &#123;</span><br><span class="line">        <span class="comment">// 字幕数据</span></span><br><span class="line">        <span class="type">int</span> got_frame = <span class="number">0</span>;</span><br><span class="line">        ret = avcodec_decode_subtitle2(d-&gt;avctx, sub, &amp;got_frame, &amp;pkt);</span><br><span class="line">        <span class="keyword">if</span> (ret &lt; <span class="number">0</span>) &#123;</span><br><span class="line">          ret = AVERROR(EAGAIN);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          <span class="keyword">if</span> (got_frame &amp;&amp; !pkt.data) &#123;</span><br><span class="line">            d-&gt;packet_pending = <span class="number">1</span>;</span><br><span class="line">            av_packet_move_ref(&amp;d-&gt;pkt, &amp;pkt);</span><br><span class="line">          &#125;</span><br><span class="line">          ret = got_frame ? <span class="number">0</span> : (pkt.data ? AVERROR(EAGAIN) : AVERROR_EOF);</span><br><span class="line">        &#125;</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 音频或视频数据，发送给解码器进行解码</span></span><br><span class="line">        <span class="keyword">if</span> (avcodec_send_packet(d-&gt;avctx, &amp;pkt) == AVERROR(EAGAIN)) &#123;</span><br><span class="line">          av_log(d-&gt;avctx, AV_LOG_ERROR,</span><br><span class="line">                 <span class="string">&quot;Receive_frame and send_packet both returned EAGAIN, which is &quot;</span></span><br><span class="line">                 <span class="string">&quot;an API violation.\n&quot;</span>);</span><br><span class="line">          <span class="comment">// 解码失败，标记重发</span></span><br><span class="line">          d-&gt;packet_pending = <span class="number">1</span>;</span><br><span class="line">          <span class="comment">// 将Packet还给pkt对象，用于下次重新发送</span></span><br><span class="line">          av_packet_move_ref(&amp;d-&gt;pkt, &amp;pkt);</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      av_packet_unref(&amp;pkt);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<!-- more -->
+
+<h4 id="丢帧"><a href="#丢帧" class="headerlink" title="丢帧"></a>丢帧</h4><p>解码完成后，对过时的帧进行丢弃</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">get_video_frame</span><span class="params">(VideoState *is, AVFrame *frame)</span> &#123;</span><br><span class="line">  <span class="type">int</span> got_picture;</span><br><span class="line">  <span class="comment">// 解码，将解码的结果放入到frame中</span></span><br><span class="line">  <span class="keyword">if</span> ((got_picture = decoder_decode_frame(&amp;is-&gt;viddec, frame, <span class="literal">NULL</span>)) &lt; <span class="number">0</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (got_picture) &#123;</span><br><span class="line">    <span class="comment">// 解码成功</span></span><br><span class="line">    <span class="type">double</span> dpts = NAN;</span><br><span class="line">    <span class="comment">// 将当前帧的PTS转换成秒</span></span><br><span class="line">    <span class="keyword">if</span> (frame-&gt;pts != AV_NOPTS_VALUE)</span><br><span class="line">      dpts = av_q2d(is-&gt;video_st-&gt;time_base) * frame-&gt;pts;</span><br><span class="line">    <span class="comment">// 采样横纵比</span></span><br><span class="line">    frame-&gt;sample_aspect_ratio =</span><br><span class="line">        av_guess_sample_aspect_ratio(is-&gt;ic, is-&gt;video_st, frame);</span><br><span class="line">    <span class="comment">// 丢帧操作，如果同步模式不是视频为主，则判断是否要丢帧</span></span><br><span class="line">    <span class="keyword">if</span> (framedrop &gt; <span class="number">0</span> ||</span><br><span class="line">        (framedrop &amp;&amp; get_master_sync_type(is) != AV_SYNC_VIDEO_MASTER)) &#123;</span><br><span class="line">      <span class="keyword">if</span> (frame-&gt;pts != AV_NOPTS_VALUE) &#123;</span><br><span class="line">        <span class="comment">// 计算主时钟和当前帧要显示的时间差</span></span><br><span class="line">        <span class="type">double</span> diff = dpts - get_master_clock(is);</span><br><span class="line">        <span class="comment">// 大致意思当当前帧的时间小于主时钟的时间时，就需要进行丢帧操作</span></span><br><span class="line">        <span class="keyword">if</span> (!isnan(diff) &amp;&amp; <span class="built_in">fabs</span>(diff) &lt; AV_NOSYNC_THRESHOLD &amp;&amp;</span><br><span class="line">            diff - is-&gt;frame_last_filter_delay &lt; <span class="number">0</span> &amp;&amp;</span><br><span class="line">            is-&gt;viddec.pkt_serial == is-&gt;vidclk.serial &amp;&amp;</span><br><span class="line">            is-&gt;videoq.nb_packets) &#123;</span><br><span class="line">          <span class="comment">// 丢帧次数+1</span></span><br><span class="line">          is-&gt;frame_drops_early++;</span><br><span class="line">          <span class="comment">// 是否frame</span></span><br><span class="line">          av_frame_unref(frame);</span><br><span class="line">          <span class="comment">// 标记未获取到解码数据</span></span><br><span class="line">          got_picture = <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> got_picture;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="入队"><a href="#入队" class="headerlink" title="入队"></a>入队</h3><p>frame_queue_peek_writable方法中，如果Frame队列已经满了，则会进行阻塞，否则返回一个可写的Frame对象，将数据写入到Frame对象中，调用frame_queue_push通知Frame队列写入完成，整个入队操作就完成了。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">queue_picture</span><span class="params">(VideoState *is, AVFrame *src_frame, <span class="type">double</span> pts,</span></span><br><span class="line"><span class="params">                         <span class="type">double</span> duration, <span class="type">int64_t</span> pos, <span class="type">int</span> serial)</span> &#123;</span><br><span class="line">  Frame *vp;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 从视频原始数据队列中获取一个可以写入的帧，vp</span></span><br><span class="line">  <span class="keyword">if</span> (!(vp = frame_queue_peek_writable(&amp;is-&gt;pictq))) <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  <span class="comment">// 采样横纵比</span></span><br><span class="line">  vp-&gt;sar = src_frame-&gt;sample_aspect_ratio;</span><br><span class="line">  vp-&gt;uploaded = <span class="number">0</span>;</span><br><span class="line">  <span class="comment">// w h 像素格式</span></span><br><span class="line">  vp-&gt;width = src_frame-&gt;width;</span><br><span class="line">  vp-&gt;height = src_frame-&gt;height;</span><br><span class="line">  vp-&gt;format = src_frame-&gt;format;</span><br><span class="line">  <span class="comment">// pts 时长 序号</span></span><br><span class="line">  vp-&gt;pts = pts;</span><br><span class="line">  vp-&gt;duration = duration;</span><br><span class="line">  vp-&gt;pos = pos;</span><br><span class="line">  vp-&gt;serial = serial;</span><br><span class="line">  <span class="comment">// 更改窗口的大小</span></span><br><span class="line">  set_default_window_size(vp-&gt;width, vp-&gt;height, vp-&gt;sar);</span><br><span class="line">  <span class="comment">// 将AVFrame数据复制到vp中</span></span><br><span class="line">  av_frame_move_ref(vp-&gt;frame, src_frame);</span><br><span class="line">  <span class="comment">// 通知视频原始数据队列，数据已经写入完成</span></span><br><span class="line">  frame_queue_push(&amp;is-&gt;pictq);</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="音频解码线程"><a href="#音频解码线程" class="headerlink" title="音频解码线程"></a>音频解码线程</h1><p>解码和入队的逻辑和视频一样，调用decoder_decode_frame进行解码，解码成功则got_frame为1，再调用frame_queue_peek_writable和frame_queue_push进行入队。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">do</span> &#123;</span><br><span class="line">  <span class="comment">// 解码，将解码的结果放入到frame中</span></span><br><span class="line">  <span class="keyword">if</span> ((got_frame = decoder_decode_frame(&amp;is-&gt;auddec, frame, <span class="literal">NULL</span>)) &lt; <span class="number">0</span>)</span><br><span class="line">    <span class="keyword">goto</span> the_end;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (got_frame) &#123;</span><br><span class="line">    <span class="comment">// 解码成功</span></span><br><span class="line">    <span class="comment">// 音频帧的采样率</span></span><br><span class="line">    tb = (AVRational)&#123;<span class="number">1</span>, frame-&gt;sample_rate&#125;;</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">      <span class="comment">// 从音频的原始数据队列中取出一个可写入的帧 af,</span></span><br><span class="line">      <span class="comment">// 如果返回null，则表明Packet队列已经退出，不会再有数据增加了，直接结束解码</span></span><br><span class="line">      <span class="keyword">if</span> (!(af = frame_queue_peek_writable(&amp;is-&gt;sampq))) <span class="keyword">goto</span> the_end;</span><br><span class="line">      <span class="comment">// 设置帧的PTS</span></span><br><span class="line">      af-&gt;pts =</span><br><span class="line">          (frame-&gt;pts == AV_NOPTS_VALUE) ? NAN : frame-&gt;pts * av_q2d(tb);</span><br><span class="line">      <span class="comment">// 设置帧在流中的位置</span></span><br><span class="line">      af-&gt;pos = frame-&gt;pkt_pos;</span><br><span class="line">      <span class="comment">// 设置帧的序号</span></span><br><span class="line">      af-&gt;serial = is-&gt;auddec.pkt_serial;</span><br><span class="line">      <span class="comment">// 设置帧的时长</span></span><br><span class="line">      af-&gt;duration =</span><br><span class="line">          av_q2d((AVRational)&#123;frame-&gt;nb_samples, frame-&gt;sample_rate&#125;);</span><br><span class="line">      <span class="comment">// 将帧数据赋值到af中</span></span><br><span class="line">      av_frame_move_ref(af-&gt;frame, frame);</span><br><span class="line">      <span class="comment">// 通知音频的原始数据队列，数据已经成功写入</span></span><br><span class="line">      frame_queue_push(&amp;is-&gt;sampq);</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line">  &#125;</span><br><span class="line">&#125; <span class="keyword">while</span> (ret &gt;= <span class="number">0</span> || ret == AVERROR(EAGAIN) || ret == AVERROR_EOF);</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>高振宇
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://witgao.com/2020/08/04/av/ffplay%E8%A7%A3%E7%A0%81%E7%BA%BF%E7%A8%8B%E5%88%86%E6%9E%90/" title="ffplay解码线程分析">https://witgao.com/2020/08/04/av/ffplay解码线程分析/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/FFmpeg/" rel="tag"><i class="fa fa-tag"></i> FFmpeg</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/08/03/av/ffplay%E8%A7%A3%E5%A4%8D%E7%94%A8%E7%BA%BF%E7%A8%8B%E5%88%86%E6%9E%90/" rel="prev" title="ffplay解复用线程分析">
+                  <i class="fa fa-chevron-left"></i> ffplay解复用线程分析
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/08/05/av/ffplay%E6%B8%B2%E6%9F%93%E7%BA%BF%E7%A8%8B%E5%88%86%E6%9E%90/" rel="next" title="ffplay渲染线程分析">
+                  ffplay渲染线程分析 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">高振宇</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">75k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:33</span>
+  </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

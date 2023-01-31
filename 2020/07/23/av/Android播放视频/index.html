@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha256-Z1K5uhUaJXA7Ll0XrZ/0JhX4lAtZFpT6jkKrEDT0drU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"witgao.com","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.14.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="图像的显示最终都是由显示器完成的，显示器通过接收到的颜色矩阵来进行对应的显示。而颜色矩阵的产生一般有两种，一种是通过GPU来进行渲染生成，另一种是通过CPU来进行渲染生成。其中GPU比较适合来处理这件事情，所以其效率高。（硬件加速也就是指使用GPU来进行渲染加速） 在Android平台上，GPU渲染的API有两套，一套就是OpenGL-ES，另一套就是7.0后推出的Vulkan。目前使用最多的还是">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android播放视频">
+<meta property="og:url" content="https://witgao.com/2020/07/23/av/Android%E6%92%AD%E6%94%BE%E8%A7%86%E9%A2%91/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:description" content="图像的显示最终都是由显示器完成的，显示器通过接收到的颜色矩阵来进行对应的显示。而颜色矩阵的产生一般有两种，一种是通过GPU来进行渲染生成，另一种是通过CPU来进行渲染生成。其中GPU比较适合来处理这件事情，所以其效率高。（硬件加速也就是指使用GPU来进行渲染加速） 在Android平台上，GPU渲染的API有两套，一套就是OpenGL-ES，另一套就是7.0后推出的Vulkan。目前使用最多的还是">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-07-22T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-01-31T03:28:18.785Z">
+<meta property="article:author" content="高振宇">
+<meta property="article:tag" content="Android">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://witgao.com/2020/07/23/av/Android%E6%92%AD%E6%94%BE%E8%A7%86%E9%A2%91/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://witgao.com/2020/07/23/av/Android%E6%92%AD%E6%94%BE%E8%A7%86%E9%A2%91/","path":"2020/07/23/av/Android播放视频/","title":"Android播放视频"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Android播放视频 | 富贵山庄</title>
+  
+
+
+
+
+
+
+  <script async defer data-website-id="" src=""></script>
+
+  <script defer data-domain="" src=""></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">富贵山庄</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">恒者行远，思者常新</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%8E%A5%E5%85%A5%E5%8E%9F%E7%94%9F%E6%B8%B2%E6%9F%93%E4%BD%93%E7%B3%BB"><span class="nav-number">1.</span> <span class="nav-text">接入原生渲染体系</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Surface%E4%B8%8EEGLSurface"><span class="nav-number">2.</span> <span class="nav-text">Surface与EGLSurface</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#EGLSurface%E4%B8%8EEGLContext"><span class="nav-number">3.</span> <span class="nav-text">EGLSurface与EGLContext</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#OpenGL-ES%E6%B8%B2%E6%9F%93%E7%BA%B9%E7%90%86"><span class="nav-number">4.</span> <span class="nav-text">OpenGL-ES渲染纹理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BAProgram"><span class="nav-number">4.1.</span> <span class="nav-text">创建Program</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BAVertex%E7%9D%80%E8%89%B2%E5%99%A8"><span class="nav-number">4.1.1.</span> <span class="nav-text">创建Vertex着色器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BAFragment%E7%9D%80%E8%89%B2%E5%99%A8"><span class="nav-number">4.1.2.</span> <span class="nav-text">创建Fragment着色器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BAProgram-1"><span class="nav-number">4.1.3.</span> <span class="nav-text">创建Program</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE%E5%9D%90%E6%A0%87"><span class="nav-number">4.2.</span> <span class="nav-text">设置坐标</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE%E7%BA%B9%E7%90%86"><span class="nav-number">4.3.</span> <span class="nav-text">设置纹理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%98%E5%88%B6"><span class="nav-number">4.4.</span> <span class="nav-text">绘制</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="高振宇"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">高振宇</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">33</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/witgao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;witgao" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:witgao328@gmail.com" title="E-Mail → mailto:witgao328@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2020/07/23/av/Android%E6%92%AD%E6%94%BE%E8%A7%86%E9%A2%91/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="高振宇">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Android播放视频 | 富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android播放视频
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-07-23 00:00:00" itemprop="dateCreated datePublished" datetime="2020-07-23T00:00:00+08:00">2020-07-23</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/" itemprop="url" rel="index"><span itemprop="name">音视频</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>5 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>图像的显示最终都是由显示器完成的，显示器通过接收到的颜色矩阵来进行对应的显示。而颜色矩阵的产生一般有两种，一种是通过GPU来进行渲染生成，另一种是通过CPU来进行渲染生成。其中GPU比较适合来处理这件事情，所以其效率高。（硬件加速也就是指使用GPU来进行渲染加速）</p>
+<p>在Android平台上，GPU渲染的API有两套，一套就是OpenGL-ES，另一套就是7.0后推出的Vulkan。目前使用最多的还是OpenGL-ES。</p>
+<span id="more"></span>
+
+<p>整个渲染流程中主要节点如下:<br>SurfaceFlinger &lt;- SurfaceView &lt;- Surface &lt;- EGLSurface &lt;- EGLContext &lt;- OpenGL-ES</p>
+<h1 id="接入原生渲染体系"><a href="#接入原生渲染体系" class="headerlink" title="接入原生渲染体系"></a>接入原生渲染体系</h1><p>Android原生平台上封装了一整套View体系用来进行图像的渲染和显示，所以任何的渲染都必须基于这个体系才能正确的显示出来。</p>
+<p>View系统中提供了两个View可以用来进行自定义渲染，一个是SurfaceView，另一个是TextureView。（关于SurfaceView和TextureView可以看我之前写的<a href="">Android图形架构总览</a>。</p>
+<p>只要将图形数据写入到SurfaceView或TextureView的Surface中，那么最终SurfaceFlinger服务就会将图形内容显示到显卡上。</p>
+<p>所以对于播放视频来说，就是要将视频每一帧的图像数据写入到SurfaceView或TextureView的Surface中即可。</p>
+<p>SurfaceView可以通过addCallback来接收来自原生渲染的生命周期回调，通过getSurface来获取内部的Surface对象。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">this</span>.getHolder().addCallback();</span><br><span class="line"><span class="built_in">this</span>.getHolder().getSurface()</span><br></pre></td></tr></table></figure>
+
+<p>TextureView可以通过setSurfaceTextureListener来接收生命周期回调，通过getSurfaceTexture可以获取到SurfaceTexture。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">setSurfaceTextureListener();</span><br><span class="line"><span class="type">Surface</span> <span class="variable">surface</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Surface</span>(getSurfaceTexture());</span><br></pre></td></tr></table></figure>
+
+<h1 id="Surface与EGLSurface"><a href="#Surface与EGLSurface" class="headerlink" title="Surface与EGLSurface"></a>Surface与EGLSurface</h1><p>一个Surface对象，可以关联一个EGLSurface对象（window_surface)，window_surface可以通过swap方法将其内部图像缓冲数据传入到Surface中（其它类型的EGLSurface是不可以的）。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建一个提供给opengl-es绘制的surface（display，配置，原生window，指定属性）</span></span><br><span class="line"><span class="keyword">if</span> (!(eglSurface = <span class="built_in">eglCreateWindowSurface</span>(display, config, aNativeWindow, <span class="number">0</span>))) &#123;</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line"><span class="comment">// android中创建NativeWindow</span></span><br><span class="line">ANativeWindow *pNativeWindow = <span class="built_in">ANativeWindow_fromSurface</span>(jenv, surface);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h1 id="EGLSurface与EGLContext"><a href="#EGLSurface与EGLContext" class="headerlink" title="EGLSurface与EGLContext"></a>EGLSurface与EGLContext</h1><p>EGLContext是与线程相关的，一个线程中只能激活一个EGLContext，激活的EGLContext关联一个EGLSurface，激活后，在当前线程调用OpenGL-ES的API都将作用到EGLSurface的缓冲区中。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建context，在context中保存了opengl-es的状态信息 （display，配置，共享context的handle 一般设为null，属性）</span></span><br><span class="line"><span class="comment">// 一个display可以创建多个context</span></span><br><span class="line"><span class="keyword">if</span> (!(context = <span class="built_in">eglCreateContext</span>(display, config, <span class="number">0</span>, context_attribs))) &#123;</span><br><span class="line">     <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 将上面创建的context绑定到当前线程上，并将context与surface进行关联。当makeCurrent执行后，就可以调用opengl-es的api对context中的状态集进行设定，</span></span><br><span class="line"><span class="comment">// 然后进而向surface中绘制内容，再把surface中的内容读取出来。</span></span><br><span class="line"><span class="comment">// 一个线程中enable状态的context只能有一个，如果当前线程已经有了一个enable状态的context，那么会先执行其flush操作，将没有执行完成的命令全部执行完成，然后将其改为disable状态，将新传入的context改为enable状态。</span></span><br><span class="line"><span class="comment">// 如果想要释放当前的context,也就是将当前的context disable,那么将第二个和第三个参数设置为 EGL_NO_SURFACE,第四个参数设置为 EGL_NO_CONTEXT即可。</span></span><br><span class="line"><span class="comment">// context enable后，视口大小和裁剪大小都会被设置为surface的尺寸</span></span><br><span class="line"><span class="keyword">if</span> (!<span class="built_in">eglMakeCurrent</span>(display, eglSurface, eglSurface, context)) &#123;</span><br><span class="line">     <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="OpenGL-ES渲染纹理"><a href="#OpenGL-ES渲染纹理" class="headerlink" title="OpenGL-ES渲染纹理"></a>OpenGL-ES渲染纹理</h1><p>当我们准备好了EGLSurface和EGLContext后，那么接下来就是创建OpenGL—ES的Program进行纹理的绘制了。</p>
+<h2 id="创建Program"><a href="#创建Program" class="headerlink" title="创建Program"></a>创建Program</h2><h3 id="创建Vertex着色器"><a href="#创建Vertex着色器" class="headerlink" title="创建Vertex着色器"></a>创建Vertex着色器</h3><figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">precision</span> <span class="keyword">mediump</span> <span class="type">float</span>;</span><br><span class="line"><span class="keyword">attribute</span> <span class="keyword">highp</span> <span class="type">vec4</span> aPosition;</span><br><span class="line"><span class="keyword">attribute</span> <span class="keyword">highp</span> <span class="type">vec2</span> aTextureCoord;</span><br><span class="line"><span class="keyword">varying</span> <span class="type">vec2</span> textureCoordinate;</span><br><span class="line"><span class="type">void</span> main() &#123;</span><br><span class="line">    <span class="built_in">gl_Position</span>  = aPosition;</span><br><span class="line">    textureCoordinate = aTextureCoord.xy;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="创建Fragment着色器"><a href="#创建Fragment着色器" class="headerlink" title="创建Fragment着色器"></a>创建Fragment着色器</h3><figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">precision</span> <span class="keyword">mediump</span> <span class="type">float</span>;</span><br><span class="line"><span class="keyword">varying</span> <span class="keyword">highp</span> <span class="type">vec2</span> textureCoordinate;</span><br><span class="line"><span class="keyword">uniform</span> <span class="keyword">lowp</span> <span class="type">sampler2D</span> inputTextureY;</span><br><span class="line"><span class="keyword">uniform</span> <span class="keyword">lowp</span> <span class="type">sampler2D</span> inputTextureU;</span><br><span class="line"><span class="keyword">uniform</span> <span class="keyword">lowp</span> <span class="type">sampler2D</span> inputTextureV;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> main() &#123;</span><br><span class="line">    <span class="type">vec3</span> yuv;</span><br><span class="line">    <span class="type">vec3</span> rgb;</span><br><span class="line">    yuv.r = <span class="built_in">texture2D</span>(inputTextureY, textureCoordinate).r - (<span class="number">16.0</span> / <span class="number">255.0</span>);</span><br><span class="line">    yuv.g = <span class="built_in">texture2D</span>(inputTextureU, textureCoordinate).r - <span class="number">0.5</span>;</span><br><span class="line">    yuv.b = <span class="built_in">texture2D</span>(inputTextureV, textureCoordinate).r - <span class="number">0.5</span>;</span><br><span class="line">    rgb = <span class="type">mat3</span>(<span class="number">1.164</span>,  <span class="number">1.164</span>,  <span class="number">1.164</span>,</span><br><span class="line">               <span class="number">0.0</span>,   <span class="number">-0.213</span>,  <span class="number">2.112</span>,</span><br><span class="line">               <span class="number">1.793</span>, <span class="number">-0.533</span>,    <span class="number">0.0</span>) * yuv;</span><br><span class="line">    <span class="built_in">gl_FragColor</span> = <span class="type">vec4</span>(rgb, <span class="number">1.0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<!-- more -->
+
+<h3 id="创建Program-1"><a href="#创建Program-1" class="headerlink" title="创建Program"></a>创建Program</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建Program</span></span><br><span class="line">programHandle = OpenGLUtils::<span class="built_in">createProgram</span>(vertexShader, fragmentShader);</span><br><span class="line"><span class="comment">// 获取顶点坐标变量</span></span><br><span class="line">positionHandle = <span class="built_in">glGetAttribLocation</span>(programHandle, <span class="string">&quot;aPosition&quot;</span>);</span><br><span class="line"><span class="comment">// 获取纹理坐标变量</span></span><br><span class="line">texCoordinateHandle = <span class="built_in">glGetAttribLocation</span>(programHandle, <span class="string">&quot;aTextureCoord&quot;</span>);</span><br><span class="line"><span class="comment">// 获取YUV纹理变量</span></span><br><span class="line">inputTextureHandle[<span class="number">0</span>] = <span class="built_in">glGetUniformLocation</span>(programHandle, <span class="string">&quot;inputTextureY&quot;</span>);</span><br><span class="line">inputTextureHandle[<span class="number">1</span>] = <span class="built_in">glGetUniformLocation</span>(programHandle, <span class="string">&quot;inputTextureU&quot;</span>);</span><br><span class="line">inputTextureHandle[<span class="number">2</span>] = <span class="built_in">glGetUniformLocation</span>(programHandle, <span class="string">&quot;inputTextureV&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 使用Program</span></span><br><span class="line"><span class="built_in">glUseProgram</span>(programHandle);</span><br><span class="line"><span class="comment">// 创建三个纹理，用来接收YUV数据</span></span><br><span class="line"><span class="keyword">if</span> (textures[<span class="number">0</span>] == <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="built_in">glGenTextures</span>(<span class="number">3</span>, textures);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">3</span>; ++i) &#123;</span><br><span class="line">    <span class="built_in">glActiveTexture</span>(GL_TEXTURE0 + i);</span><br><span class="line">    <span class="built_in">glBindTexture</span>(GL_TEXTURE_2D, textures[i]);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">glTexParameteri</span>(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);</span><br><span class="line">    <span class="built_in">glTexParameteri</span>(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);</span><br><span class="line">    <span class="built_in">glTexParameterf</span>(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);</span><br><span class="line">    <span class="built_in">glTexParameterf</span>(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);</span><br><span class="line">    <span class="built_in">glUniform1i</span>(inputTextureHandle[i], i);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="设置坐标"><a href="#设置坐标" class="headerlink" title="设置坐标"></a>设置坐标</h2><p>对于图像来说，首先创建一个平面矩形，然后在其上贴上纹理即可。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 矩形坐标，原点在屏幕中心，x、y轴为(-1,1)</span></span><br><span class="line"><span class="type">static</span> <span class="type">const</span>  <span class="type">float</span> vertices[] = &#123;</span><br><span class="line">        <span class="number">-1.0f</span>, <span class="number">-1.0f</span>,  <span class="comment">// left,  bottom</span></span><br><span class="line">        <span class="number">1.0f</span>,  <span class="number">-1.0f</span>,  <span class="comment">// right, bottom</span></span><br><span class="line">        <span class="number">-1.0f</span>,  <span class="number">1.0f</span>,  <span class="comment">// left,  top</span></span><br><span class="line">        <span class="number">1.0f</span>,   <span class="number">1.0f</span>,  <span class="comment">// right, top</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">// 纹理坐标，原点在屏幕左上角，x、y轴为(0,1)</span></span><br><span class="line"><span class="type">static</span> <span class="type">const</span> <span class="type">float</span> texture_vertices[] = &#123;</span><br><span class="line">        <span class="number">0.0f</span>, <span class="number">1.0f</span>, <span class="comment">// left, top</span></span><br><span class="line">        <span class="number">1.0f</span>, <span class="number">1.0f</span>, <span class="comment">// right, top</span></span><br><span class="line">        <span class="number">0.0f</span>, <span class="number">0.0f</span>, <span class="comment">// left, bottom</span></span><br><span class="line">        <span class="number">1.0f</span>, <span class="number">0.0f</span>, <span class="comment">// right, bottom</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 绑定顶点坐标</span></span><br><span class="line"><span class="built_in">glVertexAttribPointer</span>(positionHandle, <span class="number">2</span>, GL_FLOAT, GL_FALSE, <span class="number">0</span>, vertices);</span><br><span class="line"><span class="built_in">glEnableVertexAttribArray</span>(positionHandle);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 绑定纹理坐标</span></span><br><span class="line"><span class="built_in">glVertexAttribPointer</span>(texCoordinateHandle, <span class="number">2</span>, GL_FLOAT, GL_FALSE, <span class="number">0</span>, texture_vertices);</span><br><span class="line"><span class="built_in">glEnableVertexAttribArray</span>(texCoordinateHandle);</span><br></pre></td></tr></table></figure>
+
+<h2 id="设置纹理"><a href="#设置纹理" class="headerlink" title="设置纹理"></a>设置纹理</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 更新绑定纹理的数据</span></span><br><span class="line"><span class="comment">// 这里处理的是YUV420p格式的数据，所以UV是Y的一半</span></span><br><span class="line"><span class="type">const</span> GLsizei heights[<span class="number">3</span>] = &#123; texture-&gt;height, texture-&gt;height / <span class="number">2</span>, texture-&gt;height / <span class="number">2</span>&#125;;</span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">3</span>; ++i) &#123;</span><br><span class="line">    <span class="comment">// 激活前面创建的YUV纹理</span></span><br><span class="line">    <span class="built_in">glActiveTexture</span>(GL_TEXTURE0 + i);</span><br><span class="line">    <span class="comment">// 绑定纹理</span></span><br><span class="line">    <span class="built_in">glBindTexture</span>(GL_TEXTURE_2D, textures[i]);</span><br><span class="line">    <span class="comment">// 将对应的YUV数据设置到纹理上</span></span><br><span class="line">    <span class="built_in">glTexImage2D</span>(GL_TEXTURE_2D,</span><br><span class="line">                 <span class="number">0</span>,</span><br><span class="line">                 GL_LUMINANCE,</span><br><span class="line">                 texture-&gt;pitches[i],</span><br><span class="line">                 heights[i],</span><br><span class="line">                 <span class="number">0</span>,</span><br><span class="line">                 GL_LUMINANCE,</span><br><span class="line">                 GL_UNSIGNED_BYTE,</span><br><span class="line">                 <span class="comment">// 具体数据</span></span><br><span class="line">                 texture-&gt;pixels[i]);</span><br><span class="line">    <span class="comment">// 设置纹理变量对应的纹理单元层</span></span><br><span class="line">    <span class="built_in">glUniform1i</span>(inputTextureHandle[i], i);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="绘制"><a href="#绘制" class="headerlink" title="绘制"></a>绘制</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 绘制平面矩形</span></span><br><span class="line"><span class="built_in">glDrawArrays</span>(GL_TRIANGLE_STRIP, <span class="number">0</span>, <span class="number">4</span>);</span><br></pre></td></tr></table></figure>
+
+<p>将OpenGL-ES生成的图像数据加入到EGLSurface绑定的Surface中</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 当opengl-es将内容绘制完成，调用该方法将该缓冲区加入到Surface的BufferQueue中</span></span><br><span class="line"><span class="keyword">if</span> (!<span class="built_in">eglSwapBuffers</span>(display, eglSurface)) &#123;</span><br><span class="line">     <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>高振宇
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://witgao.com/2020/07/23/av/Android%E6%92%AD%E6%94%BE%E8%A7%86%E9%A2%91/" title="Android播放视频">https://witgao.com/2020/07/23/av/Android播放视频/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/Android/" rel="tag"><i class="fa fa-tag"></i> Android</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/07/22/av/Android%E6%92%AD%E6%94%BE%E9%9F%B3%E9%A2%91/" rel="prev" title="Android播放音频">
+                  <i class="fa fa-chevron-left"></i> Android播放音频
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/08/02/av/ffplay%E9%98%9F%E5%88%97%E5%88%86%E6%9E%90/" rel="next" title="ffplay队列分析">
+                  ffplay队列分析 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">高振宇</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">75k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:33</span>
+  </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

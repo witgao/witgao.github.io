@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha256-Z1K5uhUaJXA7Ll0XrZ/0JhX4lAtZFpT6jkKrEDT0drU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"witgao.com","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.14.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="本篇重点 音视频基础概念与相关术语的讲解  什么是视频图像的组成在说视频之前，我们来聊一下图像，图像是人对视觉感知的物质再现。图像是使用像素点阵来表示的，每个像素点都分配有特定的颜色和位置值。像素也是图像显示的基本单位，通常一幅1080x1920的图片，就是长度1920个像素点，宽度1080个像素点组成的矩阵。 颜色空间像素点除了有位置外还需要有颜色信息，那么颜色在计算机中是如何表示呢？ 在计算机">
+<meta property="og:type" content="article">
+<meta property="og:title" content="音视频基础介绍">
+<meta property="og:url" content="https://witgao.com/2020/03/01/av/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80%E4%BB%8B%E7%BB%8D/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:description" content="本篇重点 音视频基础概念与相关术语的讲解  什么是视频图像的组成在说视频之前，我们来聊一下图像，图像是人对视觉感知的物质再现。图像是使用像素点阵来表示的，每个像素点都分配有特定的颜色和位置值。像素也是图像显示的基本单位，通常一幅1080x1920的图片，就是长度1920个像素点，宽度1080个像素点组成的矩阵。 颜色空间像素点除了有位置外还需要有颜色信息，那么颜色在计算机中是如何表示呢？ 在计算机">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://witgao.com/2020/03/01/av/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80%E4%BB%8B%E7%BB%8D/ycbcr.png">
+<meta property="og:image" content="https://witgao.com/2020/03/01/av/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80%E4%BB%8B%E7%BB%8D/yuv420p.png">
+<meta property="og:image" content="https://witgao.com/2020/03/01/av/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80%E4%BB%8B%E7%BB%8D/yuv420sp.png">
+<meta property="og:image" content="https://witgao.com/2020/03/01/av/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80%E4%BB%8B%E7%BB%8D/video_basic_demo.gif">
+<meta property="og:image" content="https://witgao.com/2020/03/01/av/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80%E4%BB%8B%E7%BB%8D/video_fps_demo.gif">
+<meta property="og:image" content="https://witgao.com/2020/03/01/av/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80%E4%BB%8B%E7%BB%8D/pcm_encoded_signal.jpeg">
+<meta property="og:image" content="https://witgao.com/2020/03/01/av/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80%E4%BB%8B%E7%BB%8D/spatial_redundancy.jpeg">
+<meta property="og:image" content="https://witgao.com/2020/03/01/av/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80%E4%BB%8B%E7%BB%8D/time_redundancy.gif">
+<meta property="og:image" content="https://witgao.com/2020/03/01/av/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80%E4%BB%8B%E7%BB%8D/transform_coding.png">
+<meta property="og:image" content="https://witgao.com/2020/03/01/av/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80%E4%BB%8B%E7%BB%8D/transform_coding_1.png">
+<meta property="og:image" content="https://witgao.com/2020/03/01/av/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80%E4%BB%8B%E7%BB%8D/transform_coding_2.png">
+<meta property="og:image" content="https://witgao.com/2020/03/01/av/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80%E4%BB%8B%E7%BB%8D/transform_coding_3.png">
+<meta property="og:image" content="https://witgao.com/2020/03/01/av/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80%E4%BB%8B%E7%BB%8D/video_encode_flow.jpeg">
+<meta property="og:image" content="https://witgao.com/2020/03/01/av/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80%E4%BB%8B%E7%BB%8D/audio_encode_flow.jpeg">
+<meta property="og:image" content="https://witgao.com/2020/03/01/av/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80%E4%BB%8B%E7%BB%8D/soc%E8%8A%AF%E7%89%87.png">
+<meta property="article:published_time" content="2020-02-29T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-01-31T02:27:34.915Z">
+<meta property="article:author" content="高振宇">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://witgao.com/2020/03/01/av/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80%E4%BB%8B%E7%BB%8D/ycbcr.png">
+
+
+<link rel="canonical" href="https://witgao.com/2020/03/01/av/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80%E4%BB%8B%E7%BB%8D/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://witgao.com/2020/03/01/av/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80%E4%BB%8B%E7%BB%8D/","path":"2020/03/01/av/音视频基础介绍/","title":"音视频基础介绍"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>音视频基础介绍 | 富贵山庄</title>
+  
+
+
+
+
+
+
+  <script async defer data-website-id="" src=""></script>
+
+  <script defer data-domain="" src=""></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">富贵山庄</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">恒者行远，思者常新</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9C%AC%E7%AF%87%E9%87%8D%E7%82%B9"><span class="nav-number">1.</span> <span class="nav-text">本篇重点</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E8%A7%86%E9%A2%91"><span class="nav-number">2.</span> <span class="nav-text">什么是视频</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%BE%E5%83%8F%E7%9A%84%E7%BB%84%E6%88%90"><span class="nav-number">2.1.</span> <span class="nav-text">图像的组成</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A2%9C%E8%89%B2%E7%A9%BA%E9%97%B4"><span class="nav-number">2.2.</span> <span class="nav-text">颜色空间</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#RGB%E9%A2%9C%E8%89%B2%E7%A9%BA%E9%97%B4"><span class="nav-number">2.2.1.</span> <span class="nav-text">RGB颜色空间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#YUV%E9%A2%9C%E8%89%B2%E7%A9%BA%E9%97%B4"><span class="nav-number">2.2.2.</span> <span class="nav-text">YUV颜色空间</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#planar"><span class="nav-number">2.2.2.1.</span> <span class="nav-text">planar</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#semi-planar"><span class="nav-number">2.2.2.2.</span> <span class="nav-text">semi planar</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%86%E9%A2%91%E7%9A%84%E7%BB%84%E6%88%90"><span class="nav-number">2.3.</span> <span class="nav-text">视频的组成</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%86%E9%A2%91%E5%B8%A7"><span class="nav-number">2.3.1.</span> <span class="nav-text">视频帧</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%A7%E7%8E%87"><span class="nav-number">2.3.2.</span> <span class="nav-text">帧率</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%89%B2%E5%BD%A9%E4%BD%8D%E6%95%B0"><span class="nav-number">2.3.3.</span> <span class="nav-text">色彩位数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%BA%EF%BC%88%E6%89%A9%E5%B1%95%EF%BC%89"><span class="nav-number">2.3.4.</span> <span class="nav-text">场（扩展）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%BA%E7%B1%BB%E8%A7%86%E8%A7%89%E7%B3%BB%E7%BB%9FHVS%EF%BC%88%E6%89%A9%E5%B1%95%EF%BC%89"><span class="nav-number">2.4.</span> <span class="nav-text">人类视觉系统HVS（扩展）</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E9%9F%B3%E9%A2%91"><span class="nav-number">3.</span> <span class="nav-text">什么是音频</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A3%B0%E9%9F%B3%E7%9A%84%E4%BA%A7%E7%94%9F"><span class="nav-number">3.1.</span> <span class="nav-text">声音的产生</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A3%B0%E9%9F%B3%E7%9A%84%E4%B8%89%E8%A6%81%E7%B4%A0"><span class="nav-number">3.1.1.</span> <span class="nav-text">声音的三要素</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PCM"><span class="nav-number">3.2.</span> <span class="nav-text">PCM</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%87%87%E6%A0%B7"><span class="nav-number">3.3.</span> <span class="nav-text">采样</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%87%E6%A0%B7%E7%8E%87"><span class="nav-number">3.3.1.</span> <span class="nav-text">采样率</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%87%E6%A0%B7%E4%BD%8D%E6%95%B0"><span class="nav-number">3.3.2.</span> <span class="nav-text">采样位数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A3%B0%E9%81%93"><span class="nav-number">3.3.3.</span> <span class="nav-text">声道</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%87%8F%E5%8C%96"><span class="nav-number">3.4.</span> <span class="nav-text">量化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E7%A0%81"><span class="nav-number">3.5.</span> <span class="nav-text">编码</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E7%BC%96%E7%A0%81"><span class="nav-number">4.</span> <span class="nav-text">为什么要编码</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%86%E9%A2%91%E7%BC%96%E7%A0%81"><span class="nav-number">4.1.</span> <span class="nav-text">视频编码</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E7%A0%81%E5%8E%9F%E7%90%86"><span class="nav-number">4.1.1.</span> <span class="nav-text">编码原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%A2%84%E6%B5%8B%E7%BC%96%E7%A0%81"><span class="nav-number">4.1.1.1.</span> <span class="nav-text">预测编码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%98%E6%8D%A2%E7%BC%96%E7%A0%81"><span class="nav-number">4.1.1.2.</span> <span class="nav-text">变换编码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%86%B5%E7%BC%96%E7%A0%81"><span class="nav-number">4.1.1.3.</span> <span class="nav-text">熵编码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%96%E7%A0%81%E6%A8%A1%E5%9E%8B%EF%BC%88%E6%89%A9%E5%B1%95%EF%BC%89"><span class="nav-number">4.1.1.4.</span> <span class="nav-text">编码模型（扩展）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E7%BC%96%E7%A0%81%E6%A0%BC%E5%BC%8F"><span class="nav-number">4.1.2.</span> <span class="nav-text">常见编码格式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#H-264%E4%B8%8EMPEG-4-AVC%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-number">4.1.3.</span> <span class="nav-text">H.264与MPEG-4 AVC的关系</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Annex-B%E6%A0%BC%E5%BC%8F%E5%92%8CAVCC%E6%A0%BC%E5%BC%8F%EF%BC%88%E6%89%A9%E5%B1%95%EF%BC%89"><span class="nav-number">4.1.3.1.</span> <span class="nav-text">Annex B格式和AVCC格式（扩展）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#H-265%E4%B8%8EMPEG-H-HEVC"><span class="nav-number">4.1.4.</span> <span class="nav-text">H.265与MPEG-H HEVC</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9F%B3%E9%A2%91%E7%BC%96%E7%A0%81"><span class="nav-number">4.2.</span> <span class="nav-text">音频编码</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E7%A0%81%E5%8E%9F%E7%90%86-1"><span class="nav-number">4.2.1.</span> <span class="nav-text">编码原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%A2%91%E8%B0%B1%E6%8E%A9%E8%94%BD%E6%95%88%E5%BA%94"><span class="nav-number">4.2.1.1.</span> <span class="nav-text">频谱掩蔽效应</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%B6%E5%9F%9F%E6%8E%A9%E8%94%BD%E6%95%88%E5%BA%94"><span class="nav-number">4.2.1.2.</span> <span class="nav-text">时域掩蔽效应</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%96%E7%A0%81%E6%A8%A1%E5%9E%8B%EF%BC%88%E6%89%A9%E5%B1%95%EF%BC%89-1"><span class="nav-number">4.2.1.3.</span> <span class="nav-text">编码模型（扩展）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E7%BC%96%E7%A0%81%E6%A0%BC%E5%BC%8F-1"><span class="nav-number">4.2.2.</span> <span class="nav-text">常见编码格式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ACC%E8%A7%84%E6%A0%BC"><span class="nav-number">4.2.2.1.</span> <span class="nav-text">ACC规格</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AAV%E6%A0%BC%E5%BC%8F"><span class="nav-number">4.2.2.2.</span> <span class="nav-text">AAV格式</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E5%B0%81%E8%A3%85%EF%BC%9F"><span class="nav-number">5.</span> <span class="nav-text">为什么要封装？</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E5%B0%81%E8%A3%85%E6%A0%BC%E5%BC%8F"><span class="nav-number">5.1.</span> <span class="nav-text">常见封装格式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MPEG%E6%A0%BC%E5%BC%8F"><span class="nav-number">5.1.1.</span> <span class="nav-text">MPEG格式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#QuickTime-File-Format%E6%A0%BC%E5%BC%8F"><span class="nav-number">5.1.2.</span> <span class="nav-text">QuickTime File Format格式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Flash-Video%E6%A0%BC%E5%BC%8F"><span class="nav-number">5.1.3.</span> <span class="nav-text">Flash Video格式</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%A1%AC%E8%A7%A3%E4%B8%8E%E8%BD%AF%E8%A7%A3%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">6.</span> <span class="nav-text">硬解与软解的区别</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A1%AC%E8%A7%A3%E7%A0%81"><span class="nav-number">6.1.</span> <span class="nav-text">硬解码</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#SOC%E8%8A%AF%E7%89%87"><span class="nav-number">6.1.1.</span> <span class="nav-text">SOC芯片</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Android%E5%B9%B3%E5%8F%B0MediaCodec"><span class="nav-number">6.1.2.</span> <span class="nav-text">Android平台MediaCodec</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IOS%E5%B9%B3%E5%8F%B0VideoToolBox"><span class="nav-number">6.1.3.</span> <span class="nav-text">IOS平台VideoToolBox</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BD%AF%E8%A7%A3%E7%A0%81"><span class="nav-number">6.2.</span> <span class="nav-text">软解码</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="高振宇"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">高振宇</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">33</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/witgao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;witgao" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:witgao328@gmail.com" title="E-Mail → mailto:witgao328@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2020/03/01/av/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80%E4%BB%8B%E7%BB%8D/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="高振宇">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="音视频基础介绍 | 富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          音视频基础介绍
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-03-01 00:00:00" itemprop="dateCreated datePublished" datetime="2020-03-01T00:00:00+08:00">2020-03-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/" itemprop="url" rel="index"><span itemprop="name">音视频</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>4.9k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>18 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="本篇重点"><a href="#本篇重点" class="headerlink" title="本篇重点"></a>本篇重点</h1><blockquote>
+<p>音视频基础概念与相关术语的讲解</p>
+</blockquote>
+<h1 id="什么是视频"><a href="#什么是视频" class="headerlink" title="什么是视频"></a>什么是视频</h1><h2 id="图像的组成"><a href="#图像的组成" class="headerlink" title="图像的组成"></a>图像的组成</h2><p>在说视频之前，我们来聊一下图像，<strong>图像是人对视觉感知的物质再现</strong>。图像是使用像素点阵来表示的，每个像素点都分配有特定的颜色和位置值。像素也是图像显示的基本单位，通常一幅1080x1920的图片，就是长度1920个像素点，宽度1080个像素点组成的矩阵。</p>
+<h2 id="颜色空间"><a href="#颜色空间" class="headerlink" title="颜色空间"></a>颜色空间</h2><p>像素点除了有位置外还需要有颜色信息，那么颜色在计算机中是如何表示呢？</p>
+<p>在计算机中颜色空间有很多，这里我们介绍下常用的两种颜色空间，RGB颜色空间和YUV颜色空间。</p>
+<span id="more"></span>
+
+<h3 id="RGB颜色空间"><a href="#RGB颜色空间" class="headerlink" title="RGB颜色空间"></a>RGB颜色空间</h3><p>RGB颜色空间是由红绿蓝三原色来定义，通过三原色混合成所有的颜色，这应该是我们最熟悉的一种颜色空间。</p>
+<h3 id="YUV颜色空间"><a href="#YUV颜色空间" class="headerlink" title="YUV颜色空间"></a>YUV颜色空间</h3><p>Y表示亮度，U和V表示色度和浓度。早期的YUV实际上是用在彩色电视和黑白电视的交替上，感兴趣历史的同学可以点击<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/YUV">YUV</a>查看相关资料。YUV颜色空间在数字媒体中广泛使用是由于人类对亮度的的敏感度高于对色度的敏感度，但是在数字媒体中使用的是个变体，叫YCbCr，其中Cb是指蓝色色度，Cr就是红色色度。像JPEG、MPEG都是采用此格式，后续一般讲的YUV都是指YCbCr。(Y的值是根据RGB值计算出来的，所以Cg的值可以通过CbCr计算出来，所以在传输的时候只需要传输YCbCr)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">计算公式: </span><br><span class="line">    Y = KrR+KgG+Kb*B（k为权重值,ITU-R推荐的BT.601中定义Kb=0.114,Kr=0.299,Kb+Kr+Kg=1）</span><br><span class="line">    Cb=B-Y</span><br><span class="line">    Cr=R-Y</span><br><span class="line">    Cg=G-Y</span><br></pre></td></tr></table></figure>
+
+<p>YCbCr会按照一定的采样比对色度数据进行采样，采样比通常表示为 __J​ : a : ​b__，表示在一个宽为J像素、高为2像素的采样区域中进行采样，J表示采样的宽度，通常是4，a表示第一行色度采样数，b表示第二行色度采样数与第一行色度采样的不同样点数。</p>
+<p><img src="/2020/03/01/av/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80%E4%BB%8B%E7%BB%8D/ycbcr.png" alt="YCbCr采样比"></p>
+<p>最常见的采样比是 4:2:0 ，表示宽为4，第一行有两个色度采样点，第二行与第一行完全相同。所以总共有八个亮度采样点和两个色度采样点，每个亮度采样点需要记录一个值Y，而每个色度采样点都需要记录两个值Cb和Cr。最终需要记录的值为 8Y+2Cr+2Cb &#x3D; 12，而如果使用RGB来记录则会需要3x8&#x3D;24。</p>
+<blockquote>
+<p>YCbCr的优势就在于，在达到最大压缩率的情况下，能够保证对人眼感知的失真度最小。拿4:2:0来说足足压缩了一半。</p>
+</blockquote>
+<p>YUV按照存储方式又可以分为下面两种</p>
+<h4 id="planar"><a href="#planar" class="headerlink" title="planar"></a>planar</h4><p>YCbCr分别存储在不同的平面中。根据CbCr存储的顺序不同，又分为I420和YV12。</p>
+<p><img src="/2020/03/01/av/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80%E4%BB%8B%E7%BB%8D/yuv420p.png"></p>
+<ul>
+<li>I420 : 也叫YU12，先存储Y，再存Cb，最后存Cr，最终数据结果是 YYYY CbCb CrCr，也就是上图所展示的。</li>
+<li>YV12：先存储Y，再存Cr，最后存Cb，最终数据结果是 YYYY CrCr CbCb</li>
+</ul>
+<h4 id="semi-planar"><a href="#semi-planar" class="headerlink" title="semi planar"></a>semi planar</h4><p>Y单独一个平面，CbCr共用一个平面。根据CbCr存储的顺序不同，又分为NV12和NV21。</p>
+<p><img src="/2020/03/01/av/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80%E4%BB%8B%E7%BB%8D/yuv420sp.png"></p>
+<ul>
+<li>NV12：先存储Y，然后CbCr交替存储，最终数据结果为 YYYY CbCr CbCr，也就是上图所展示的。（IOS中使用）</li>
+<li>NV21：先存储Y，然后CrCb交替存储，最终数据结果为 YYYY CrCb CrCb。（Android中使用）</li>
+</ul>
+<h2 id="视频的组成"><a href="#视频的组成" class="headerlink" title="视频的组成"></a>视频的组成</h2><p>前面说了这么多图像，现在我们来说说视频，所谓视频就像下面动图中展示的一样，<strong>视频是由连续的图像组成</strong>。视频的原理就是利用人眼的特殊结构，当画面在快速切换时，画面会有残留，所以人感觉起来就像是连贯的动作。</p>
+<p><img src="/2020/03/01/av/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80%E4%BB%8B%E7%BB%8D/video_basic_demo.gif"></p>
+<h3 id="视频帧"><a href="#视频帧" class="headerlink" title="视频帧"></a>视频帧</h3><p>帧是视频流的一个基本单位，可以将其联想成一幅静态图像，一个YCbCr格式的图像。</p>
+<h3 id="帧率"><a href="#帧率" class="headerlink" title="帧率"></a>帧率</h3><p>帧率指的是视频每秒包含的帧数（FPS，Frame per second），帧率是衡量视频质量的一个重要指标。</p>
+<p><img src="/2020/03/01/av/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80%E4%BB%8B%E7%BB%8D/video_fps_demo.gif"></p>
+<p>帧率越高，则视频会越流畅，一般视频都是24-30帧之间，电影一般都保持在24帧，而手机一般拍摄都默认在30帧，最高可以拍摄60帧的视频。</p>
+<h3 id="色彩位数"><a href="#色彩位数" class="headerlink" title="色彩位数"></a>色彩位数</h3><p>表示一个像素中存储颜色所用的位数，位数越高，则颜色越丰富。常见的有8位、16位、24位、32位，其中24位是最常用的，称为真彩，而32位是在24位上加了8位表示透明度。</p>
+<h3 id="场（扩展）"><a href="#场（扩展）" class="headerlink" title="场（扩展）"></a>场（扩展）</h3><p>大家应该都听说过1080P，这是一种视频显示格式，那么大家有没有听过说1080I呢？</p>
+<p>1080I指的是在电视信号中，采用隔行交错扫描视频的信号格式。而1080P指的是用逐行扫描视频的显示格式。</p>
+<p>为什么会有隔行扫描呢？因为早期电视机没办法处理大量复杂的数据，没发观看高清电视，所以采用了隔行扫描，将每一帧图像，按照单行和双行分为两场，顶场和低场，两场交替显示。在PAL制式的电视台规定是每秒25帧，每帧两场，也就是每秒50场，所以PAL制式的扫描频率就是50HZ。</p>
+<h2 id="人类视觉系统HVS（扩展）"><a href="#人类视觉系统HVS（扩展）" class="headerlink" title="人类视觉系统HVS（扩展）"></a>人类视觉系统HVS（扩展）</h2><p>HVS由眼睛+神经+大脑组成。视频的一些设计就是根据HVS的特点来的。</p>
+<ul>
+<li>对高频信息不敏感 -&gt;  丢弃高频信息，只编码低频信息</li>
+<li>对高对比度更敏感 -&gt; 提高边缘信息的主观质量</li>
+<li>对亮度信息比色度信息更敏感 -&gt; 降低色度的解析度</li>
+<li>对运动的信息更敏感 -&gt; 对ROI区域进行特殊处理</li>
+</ul>
+<h1 id="什么是音频"><a href="#什么是音频" class="headerlink" title="什么是音频"></a>什么是音频</h1><p>上面讲了图像的数字化表现形式，那么声音如何数字化呢？</p>
+<h2 id="声音的产生"><a href="#声音的产生" class="headerlink" title="声音的产生"></a>声音的产生</h2><p>声音是由物体振动产生的，再通过空气、固体、液体等传输，传入人耳后振动耳膜，再通过听觉神经传递给大脑</p>
+<h3 id="声音的三要素"><a href="#声音的三要素" class="headerlink" title="声音的三要素"></a>声音的三要素</h3><ul>
+<li>音调 ：音频振动的快慢 （男生 &lt; 女生 &lt; 儿童）</li>
+<li>音量 ：振动的幅度</li>
+<li>音色 ：声波是由基波和谐波组合成，不同频谱的谐波比例不同，音色也就不同</li>
+</ul>
+<blockquote>
+<p>​	人类听觉范围 &#x3D; 次声波 ~ 20Hz ~ 20kHz ~ 超声波</p>
+</blockquote>
+<h2 id="PCM"><a href="#PCM" class="headerlink" title="PCM"></a>PCM</h2><p>声音是一种波，是一种模拟信号，模拟信号是指时间上和数值上连续的信号。而模拟信号想要用于计算机，就必须将模拟信号转为数字信号。而PCM（脉冲编码调制）就是将输入的模拟信号进行采样、量化、编码，最终输出为数字信号。</p>
+<blockquote>
+<p>​	模拟信号 -&gt; 采样 -&gt; 量化 -&gt; 编码 -&gt; 数字信号</p>
+</blockquote>
+<h2 id="采样"><a href="#采样" class="headerlink" title="采样"></a>采样</h2><p>采样就是把时间连续的模拟信号变成时间离散、幅度连续的数字信号。</p>
+<p><img src="/2020/03/01/av/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80%E4%BB%8B%E7%BB%8D/pcm_encoded_signal.jpeg"></p>
+<h3 id="采样率"><a href="#采样率" class="headerlink" title="采样率"></a>采样率</h3><p>采样率就是指每秒采集的样本数，常见的有 8k、16k、32k、44.1k、48k等。</p>
+<blockquote>
+<p>Nyquist采样定律：采样率大于或等于连续信号最高频率分量的2倍时，采样信号可以用来完美重构连续信号。而人类正常感知的频率在22.05kHz以下，所以最常见的采样率是44.1kHz，也就是每秒采样44100个采样点。</p>
+</blockquote>
+<h3 id="采样位数"><a href="#采样位数" class="headerlink" title="采样位数"></a>采样位数</h3><p>就是采样值的范围，一般有8位、16位、32位。位数越多，音量起伏的大小变化就能够更精细的被记录下来，还原度越高。一般采用的都是16位，32位太扩张了。</p>
+<h3 id="声道"><a href="#声道" class="headerlink" title="声道"></a>声道</h3><p>声音的通道的数目，指声音在录制和播放的时候在不同空间位置采集或回放的相互独立的音频信号，简单来说就是声音录制时的音频源数量或回放时相应的扬声器数量。分为单声道、双声道、多声道。其中双声道是使用最普遍的。</p>
+<h2 id="量化"><a href="#量化" class="headerlink" title="量化"></a>量化</h2><p>采样后的信号虽然在时间上是离散的，但是其值的取值范围依旧是无限的，所以需要将无限的值量化到一定范围内的有限值。</p>
+<h2 id="编码"><a href="#编码" class="headerlink" title="编码"></a>编码</h2><p>将量化后的采样值编码成二进制码流的过程称为编码。</p>
+<h1 id="为什么要编码"><a href="#为什么要编码" class="headerlink" title="为什么要编码"></a>为什么要编码</h1><p>当一个音视频文件生产的时候，就面临了两个问题：</p>
+<ul>
+<li>存储</li>
+<li>传输</li>
+</ul>
+<p>为什么存储和传输会是个问题呢？我们来计算下一个原始未压缩的视频会有多大，已一个1080x1920分辨率、帧率是30的90分钟视频为例</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">单帧大小 1920x1080 = 2073600个像素点，按照RGB来算就是 2073600x3byte = 6220800byte ≈ 5.9MB，按照YUV来计算就是 ≈ 2.9MB。</span><br><span class="line"></span><br><span class="line">一秒视频大小 2.9MBx30 = 87MB</span><br><span class="line">一秒音频大小 44100x2bytex2(声道) = 176400byte 约等于 0.168MB</span><br><span class="line"></span><br><span class="line">90分钟的视频大小 = 87MBx60x90 = 469800MB ≈ 459GB</span><br><span class="line">90分钟的音频大小 = 0.168MBx60x90 = 907.2MB</span><br></pre></td></tr></table></figure>
+
+<p>是不是很恐怖？一部电影居然就接近460GB了，想想当前的硬盘大小和网速，怎么可能存储和传输呢。</p>
+<p>所以必须要对视频进行编码，编码就是按指定的方式，将信息从一种形式转换成另一种形式。编码的目的，就是为了压缩，各种视频编码方式，都是为了将视频变得更小，便于存储和传输。</p>
+<h2 id="视频编码"><a href="#视频编码" class="headerlink" title="视频编码"></a>视频编码</h2><h3 id="编码原理"><a href="#编码原理" class="headerlink" title="编码原理"></a>编码原理</h3><p>压缩编码的核心思想就是去除冗余信息。常见的编码方式有预测编码和变换编码以及熵编码，其中预测编码是压缩率最大的一种。</p>
+<h4 id="预测编码"><a href="#预测编码" class="headerlink" title="预测编码"></a>预测编码</h4><p>帧内预测编码</p>
+<p>从空间角度出发，图像相邻像素之间有较强的相关性，可以从空间上去帧内像素之间的冗余。比如说下面这一帧，其中尘土的颜色、背景的颜色都是大致相同的，完全没有必要每个像素都记录一次颜色。</p>
+<p><img src="/2020/03/01/av/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80%E4%BB%8B%E7%BB%8D/spatial_redundancy.jpeg"></p>
+<p>帧间预测编码</p>
+<p>从时间角度出发，视频序列的相邻图像之间的内容有相似性，可以从时间上去除帧与帧之间的冗余。比如说下面这一个视频序列（假设这是一个2秒50帧的视频序列），我们可以发现这50帧里，除了结印的手在变动，其它地方都没有变化。那么其它未变的地方真的要存储50份一样的数据吗？是不是可以省略掉，存储一份就够了。</p>
+<p><img src="/2020/03/01/av/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80%E4%BB%8B%E7%BB%8D/time_redundancy.gif"></p>
+<h4 id="变换编码"><a href="#变换编码" class="headerlink" title="变换编码"></a>变换编码</h4><p>大多数视频图像都和上面展示的一样，变动的区域只是一小部分，大部分区域是不变的，可就是说低频区占大部分，高频区占小部分。然后将空间域的图像变换到频率域，会产生相关性很小的变换系数，然后再对变换系数进行量化，利用上面人类视觉体统特点所说到的，人对高频信息不敏感的特征，对低频区的系数进行细量化，对高频区的系数进行粗量化，从而降低信息传递量，达到压缩的目的。</p>
+<p>简单的解释变换，就是如下图所示，坐标系中有ABC三点，我们将坐标轴调整一下，ABC三点的坐标值就会变小。</p>
+<p><img src="/2020/03/01/av/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80%E4%BB%8B%E7%BB%8D/transform_coding.png"></p>
+<p>一个8x8的像素区域，假设其像素颜色值如下图所示</p>
+<p><img src="/2020/03/01/av/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80%E4%BB%8B%E7%BB%8D/transform_coding_1.png"></p>
+<p>像素区域经过DCT（离散余弦变换）变换后，生产的变换系数，如下图所示</p>
+<p><img src="/2020/03/01/av/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80%E4%BB%8B%E7%BB%8D/transform_coding_2.png"></p>
+<p>对变换系数进行量化，量化后大部分都会变成0，此时只需要将这些非0的值进行编码即可，入下图所示</p>
+<p><img src="/2020/03/01/av/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80%E4%BB%8B%E7%BB%8D/transform_coding_3.png"></p>
+<h4 id="熵编码"><a href="#熵编码" class="headerlink" title="熵编码"></a>熵编码</h4><p>利用信息的统计特性，使用新的编码来表示输入的数据，比如说哈夫曼编码、CABAC。简单解释就是给高频数据短码，给低频数据长码，比如 A 是高频数据，则编码为 01，G是低频数据，则编码为 01010001。</p>
+<h4 id="编码模型（扩展）"><a href="#编码模型（扩展）" class="headerlink" title="编码模型（扩展）"></a>编码模型（扩展）</h4><p><img src="/2020/03/01/av/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80%E4%BB%8B%E7%BB%8D/video_encode_flow.jpeg"></p>
+<h3 id="常见编码格式"><a href="#常见编码格式" class="headerlink" title="常见编码格式"></a>常见编码格式</h3><p>常见的编码格式有H.26x系列和MPEG系列，其中H.26x系统是由ITU组织（国际电信联盟）主导，而MPEG系列由ISO（国际标准化组织）下的MPEG（动态图像专家组）组织主导的。</p>
+<p>目前主流的H.264和H.265编码格式是由ITU和MPEG两个组织合力制定的。</p>
+<h3 id="H-264与MPEG-4-AVC的关系"><a href="#H-264与MPEG-4-AVC的关系" class="headerlink" title="H.264与MPEG-4 AVC的关系"></a>H.264与MPEG-4 AVC的关系</h3><p>在早期，ITU和MPEG两家组织都是各搞各的，ITU组织推行了H.261、H.262、H.263编码格式，而MPEG组织则推行了MPEG-1、MPEG-2、MPEG-3标准族群。后来两家组织准备合力制作新一代的视频编码标准，对于ITU组织来说，将这个新一代的编码标准命名为H.264，而对于MPEG来说，这个新一代的压缩标准只是其MPEG-4标准的第10部分，其第10部分叫做高级视频编码AVC（Advanced Video Coding）。</p>
+<p>所以可以简单的认为H.264就是MPEG-4 AVC。</p>
+<h4 id="Annex-B格式和AVCC格式（扩展）"><a href="#Annex-B格式和AVCC格式（扩展）" class="headerlink" title="Annex B格式和AVCC格式（扩展）"></a>Annex B格式和AVCC格式（扩展）</h4><ul>
+<li>Annex B格式</li>
+</ul>
+<p>这种格式的H.264码流用于实时流的传播中，其特点是码流中每个NALU（单元块）之间通过起始码来分割，起始码分为两种，一帧开始则用四个字节的1来表示，不是一帧开始就用三个字节的1来表示。</p>
+<blockquote>
+<p>H.264原始码流是由一系列的NALU组成（Network Abstraction Layer Unit），不同的NALU数据量不同。</p>
+</blockquote>
+<ul>
+<li>AVCC格式</li>
+</ul>
+<p>这种格式的H.264码流用于磁盘文件中（MP4等媒体文件），其特点是没有起始码，而是将起始码替换成了size，是为了应对存储文件的可随机访问特性。</p>
+<h3 id="H-265与MPEG-H-HEVC"><a href="#H-265与MPEG-H-HEVC" class="headerlink" title="H.265与MPEG-H HEVC"></a>H.265与MPEG-H HEVC</h3><p>H.265和H.264一样，依旧是ITU和MPEG两家合力制定的。H.265被定义在MPEG-H的第2部分，称为高效率视频编码 High Efficiency Video Coding。</p>
+<p>H.265的压缩率是H.264的两倍，并且支持4K清晰度，最高支持到8K。目前主流的设备基本都支持H.265编码。</p>
+<h2 id="音频编码"><a href="#音频编码" class="headerlink" title="音频编码"></a>音频编码</h2><h3 id="编码原理-1"><a href="#编码原理-1" class="headerlink" title="编码原理"></a>编码原理</h3><p>音频编码是在保证信号在听觉方面不产生失真的前提下，对音频数据进行尽可能大的压缩。其原理是<strong>通过去除声音信号中冗余成分来实现</strong>，所谓冗余成分就是指<strong>不在人耳听觉范围内的音频信号</strong>以及<strong>被掩蔽掉的音频信号</strong>。</p>
+<p>不在人耳听觉范围内的音频信号是因为人耳能够察觉的声音信号的频率范围为20Hz-20KHz，除此之外的频率是无法察觉的。</p>
+<p>被掩蔽掉的音频信号是因为当一个强音信号与一个弱音信号同时存在时，弱音信号将被强音信号所掩蔽而听不见，所以此时弱音信号可以视为冗余而不用传输。</p>
+<h4 id="频谱掩蔽效应"><a href="#频谱掩蔽效应" class="headerlink" title="频谱掩蔽效应"></a>频谱掩蔽效应</h4><p>相同音量下，频率低的被遮蔽；相同频率下，音量小的被遮蔽；</p>
+<h4 id="时域掩蔽效应"><a href="#时域掩蔽效应" class="headerlink" title="时域掩蔽效应"></a>时域掩蔽效应</h4><p>时间上相邻的声音之间也有掩蔽现象，分为超前掩蔽和滞后掩蔽。产生时域掩蔽的主要原因是人的大脑处理信息需要花费一定的时间，超前掩蔽很短，只有大约5<del>20ms，而滞后掩蔽可以持续50</del>200ms。</p>
+<h4 id="编码模型（扩展）-1"><a href="#编码模型（扩展）-1" class="headerlink" title="编码模型（扩展）"></a>编码模型（扩展）</h4><p><img src="/2020/03/01/av/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80%E4%BB%8B%E7%BB%8D/audio_encode_flow.jpeg"></p>
+<h3 id="常见编码格式-1"><a href="#常见编码格式-1" class="headerlink" title="常见编码格式"></a>常见编码格式</h3><p>如果说视频编码被H.264和H.265所统治，那么统治音频编码的就是AAC了。AAC全称是Advanced Audio Coding，是一个有损压缩的音频编码集。除了AAC编码外，Opus编码在即时通信领域上使用的比较广泛。</p>
+<h4 id="ACC规格"><a href="#ACC规格" class="headerlink" title="ACC规格"></a>ACC规格</h4><ul>
+<li>AAC-LC</li>
+</ul>
+<p>AAC-LC的全称是Advanced Audio Coding Low-Complexity，用于存储空间和计算能力有限的情况，这种类型没有使用预测和增益控制，瞬时噪声整形的阶数也比较低。</p>
+<ul>
+<li>AAC-LD</li>
+</ul>
+<p>AAC-LD的全称是Advanced Audio Coding Low-Delay，是源于AAC-LC，结合了感知音频编码和双向通道的低延时要求，减小的算法的延时。</p>
+<ul>
+<li><p>AAC-HE-V1</p>
+<p>核心思想是按频谱保存，将时域转换为频域，将低频编码保存为主要部分，将高频单独放大编码保存。</p>
+</li>
+<li><p>AAC-HE-V2</p>
+<p>核心思想是双声道中的声音存在某种相似性，只需存储一个声道的全部信息，然后花很少的字节用参数描述另一个声道和它不同的地方。</p>
+</li>
+</ul>
+<h4 id="AAV格式"><a href="#AAV格式" class="headerlink" title="AAV格式"></a>AAV格式</h4><ul>
+<li>ADIF格式</li>
+</ul>
+<p>ADIF是在MPEG-2中定义的，其特点是可以确定的找到这个音频数据的开始，解码必须在明确定义的开始处进行，这种格式常用在磁盘文件中。</p>
+<ul>
+<li>ADTS格式</li>
+</ul>
+<p>ADTS的特征是它有一个同步字的比特流，解码可以在这个流的任何位置开始，帧同步目的就是在于找出帧头在比特流中的位置，ADTS的同步字为三个字节的1111 1111 1111来表示。</p>
+<ul>
+<li>LATM格式</li>
+</ul>
+<p>LATM是在MPEG-4中制定的一种高效率的码流传输方式。</p>
+<h1 id="为什么要封装？"><a href="#为什么要封装？" class="headerlink" title="为什么要封装？"></a>为什么要封装？</h1><p>所谓封装就是定义一个容器，将视频、音频、字幕等数据都混合封装在容器中。容器使得媒体内容的同步播放变得简单，另外容器中还会存储媒体内容的基本信息以及媒体内容的帧索引，方便快速拖动和跳转到指定位置。</p>
+<h2 id="常见封装格式"><a href="#常见封装格式" class="headerlink" title="常见封装格式"></a>常见封装格式</h2><h3 id="MPEG格式"><a href="#MPEG格式" class="headerlink" title="MPEG格式"></a>MPEG格式</h3><p>后缀为（.mp4等），常用的一般是MPEG-4标准的第14部分定义的MP4文件格式。</p>
+<h3 id="QuickTime-File-Format格式"><a href="#QuickTime-File-Format格式" class="headerlink" title="QuickTime File Format格式"></a>QuickTime File Format格式</h3><p>后缀为 .mov ，苹果公司推出的一种视频封装格式，常用于苹果设备。</p>
+<h3 id="Flash-Video格式"><a href="#Flash-Video格式" class="headerlink" title="Flash Video格式"></a>Flash Video格式</h3><p>后缀为 .flv，Adobe Flash延伸出来的一种视频封装格式。</p>
+<h1 id="硬解与软解的区别"><a href="#硬解与软解的区别" class="headerlink" title="硬解与软解的区别"></a>硬解与软解的区别</h1><h2 id="硬解码"><a href="#硬解码" class="headerlink" title="硬解码"></a>硬解码</h2><p>调用soc中的专门模块来进行编解码，减少了对CPU的占用，且更加省电，但是缺点是在Android手机上，由于国内产商使用的芯片参差不齐，会有很多兼容性的问题。</p>
+<h3 id="SOC芯片"><a href="#SOC芯片" class="headerlink" title="SOC芯片"></a>SOC芯片</h3><p>手机SOC芯片，就是在一个芯片里面集成CPU、GPU、SP、ISP、RAM内存、WIFI控制器、基带芯片、音频芯片等。</p>
+<p><img src="/2020/03/01/av/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80%E4%BB%8B%E7%BB%8D/soc%E8%8A%AF%E7%89%87.png"></p>
+<h3 id="Android平台MediaCodec"><a href="#Android平台MediaCodec" class="headerlink" title="Android平台MediaCodec"></a>Android平台MediaCodec</h3><p>在Android平台的上，提供的编解码API就是MediaCodec，该API在21之前都只有Java层实现，在21后提供了C实现。MediaCodec与底层硬件的交互，是通过OpenMax来实现的。</p>
+<h3 id="IOS平台VideoToolBox"><a href="#IOS平台VideoToolBox" class="headerlink" title="IOS平台VideoToolBox"></a>IOS平台VideoToolBox</h3><h2 id="软解码"><a href="#软解码" class="headerlink" title="软解码"></a>软解码</h2><p>软解码是指通过CPU来对视频进行编解码处理，常用的开源库是FFmpeg，相对于硬解码来说，软解码的兼容性非常好，但是缺点也很明显，占用CPU，费电，在处理速度上会比硬解码慢。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>高振宇
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://witgao.com/2020/03/01/av/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%9F%BA%E7%A1%80%E4%BB%8B%E7%BB%8D/" title="音视频基础介绍">https://witgao.com/2020/03/01/av/音视频基础介绍/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2019/10/15/av/Android%E5%9B%BE%E5%BD%A2%E6%9E%B6%E6%9E%84%E6%80%BB%E8%A7%88/" rel="prev" title="Android图形架构总览">
+                  <i class="fa fa-chevron-left"></i> Android图形架构总览
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/03/05/av/FFmpeg%E6%B7%B1%E5%85%A5%E4%B9%8Bffmpeg-parse-options/" rel="next" title="FFmpeg深入之ffmpeg_parse_options">
+                  FFmpeg深入之ffmpeg_parse_options <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">高振宇</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">75k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:33</span>
+  </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha256-Z1K5uhUaJXA7Ll0XrZ/0JhX4lAtZFpT6jkKrEDT0drU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"witgao.com","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.14.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="码率控制视频编码的目标是尽可能多的节省比特的同时尽量保持视频质量，码率控制是平衡码率和质量的重要工具。 码率控制并不是视频编码框架中具体的一个模块，而是在整个视频编码过程中扮演控制着的角色，一方面接收来自编码器外部的要求（编码缓冲区大小、人为要求的目标输出码率），另一方面分析并处理这些要求，为了完成要求对编码参数做出选择（量化参数、编码模式、运动矢量）。 在整个码率控制过程中，最为重要的三个编码参">
+<meta property="og:type" content="article">
+<meta property="og:title" content="x265源码分析之码率控制">
+<meta property="og:url" content="https://witgao.com/2021/11/17/av/x265%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8B%E7%A0%81%E7%8E%87%E6%8E%A7%E5%88%B6/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:description" content="码率控制视频编码的目标是尽可能多的节省比特的同时尽量保持视频质量，码率控制是平衡码率和质量的重要工具。 码率控制并不是视频编码框架中具体的一个模块，而是在整个视频编码过程中扮演控制着的角色，一方面接收来自编码器外部的要求（编码缓冲区大小、人为要求的目标输出码率），另一方面分析并处理这些要求，为了完成要求对编码参数做出选择（量化参数、编码模式、运动矢量）。 在整个码率控制过程中，最为重要的三个编码参">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://witgao.com/2021/11/17/av/x265%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8B%E7%A0%81%E7%8E%87%E6%8E%A7%E5%88%B6/151546001_3_20190108085209443.jpg">
+<meta property="article:published_time" content="2021-11-16T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-01-31T02:36:20.851Z">
+<meta property="article:author" content="高振宇">
+<meta property="article:tag" content="x265">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://witgao.com/2021/11/17/av/x265%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8B%E7%A0%81%E7%8E%87%E6%8E%A7%E5%88%B6/151546001_3_20190108085209443.jpg">
+
+
+<link rel="canonical" href="https://witgao.com/2021/11/17/av/x265%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8B%E7%A0%81%E7%8E%87%E6%8E%A7%E5%88%B6/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://witgao.com/2021/11/17/av/x265%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8B%E7%A0%81%E7%8E%87%E6%8E%A7%E5%88%B6/","path":"2021/11/17/av/x265源码分析之码率控制/","title":"x265源码分析之码率控制"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>x265源码分析之码率控制 | 富贵山庄</title>
+  
+
+
+
+
+
+
+  <script async defer data-website-id="" src=""></script>
+
+  <script defer data-domain="" src=""></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">富贵山庄</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">恒者行远，思者常新</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%A0%81%E7%8E%87%E6%8E%A7%E5%88%B6"><span class="nav-number">1.</span> <span class="nav-text">码率控制</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%B8%A7%E9%97%B4%E7%BA%A7%E7%A0%81%E7%8E%87%E6%8E%A7%E5%88%B6"><span class="nav-number">2.</span> <span class="nav-text">帧间级码率控制</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ABR%E3%80%81CRF"><span class="nav-number">2.1.</span> <span class="nav-text">ABR、CRF</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#QScale"><span class="nav-number">2.1.1.</span> <span class="nav-text">QScale</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BD%AC%E6%8D%A2qp"><span class="nav-number">2.1.1.1.</span> <span class="nav-text">转换qp</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%80%BC"><span class="nav-number">2.1.2.</span> <span class="nav-text">初始值</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A4%8D%E6%9D%82%E5%BA%A6SATD"><span class="nav-number">2.1.2.1.</span> <span class="nav-text">复杂度SATD</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B8%A7%E5%86%85%E9%A2%84%E6%B5%8B"><span class="nav-number">2.1.2.1.1.</span> <span class="nav-text">帧内预测</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B8%A7%E9%97%B4%E9%A2%84%E6%B5%8B"><span class="nav-number">2.1.2.1.2.</span> <span class="nav-text">帧间预测</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A8%A1%E7%B3%8A%E5%A4%8D%E6%9D%82%E5%BA%A6"><span class="nav-number">2.1.2.2.</span> <span class="nav-text">模糊复杂度</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%84%9F%E7%9F%A5%E7%BC%96%E7%A0%81%E4%BC%98%E5%8C%96"><span class="nav-number">2.1.2.3.</span> <span class="nav-text">感知编码优化</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RateFactor%E4%BF%AE%E6%AD%A3"><span class="nav-number">2.1.3.</span> <span class="nav-text">RateFactor修正</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#CRF"><span class="nav-number">2.1.3.1.</span> <span class="nav-text">CRF</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%A6%96%E5%B8%A7"><span class="nav-number">2.1.3.1.1.</span> <span class="nav-text">首帧</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#I%E5%B8%A7%E3%80%81P%E5%B8%A7"><span class="nav-number">2.1.3.1.2.</span> <span class="nav-text">I帧、P帧</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#B%E5%B8%A7"><span class="nav-number">2.1.3.1.3.</span> <span class="nav-text">B帧</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ABR"><span class="nav-number">2.1.3.2.</span> <span class="nav-text">ABR</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#I%E5%B8%A7%E3%80%81P%E5%B8%A7-1"><span class="nav-number">2.1.3.2.1.</span> <span class="nav-text">I帧、P帧</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#B%E5%B8%A7-1"><span class="nav-number">2.1.3.2.2.</span> <span class="nav-text">B帧</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VBV%E4%BF%AE%E6%AD%A3"><span class="nav-number">2.1.4.</span> <span class="nav-text">VBV修正</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#VBV"><span class="nav-number">2.1.4.1.</span> <span class="nav-text">VBV</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%A2%84%E6%B5%8B%E5%A4%A7%E5%B0%8F"><span class="nav-number">2.1.4.2.</span> <span class="nav-text">预测大小</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%AE%E6%AD%A3"><span class="nav-number">2.1.4.3.</span> <span class="nav-text">修正</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#CBR"><span class="nav-number">2.1.4.4.</span> <span class="nav-text">CBR</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#StrictCbr"><span class="nav-number">2.1.4.4.1.</span> <span class="nav-text">StrictCbr</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CQP"><span class="nav-number">2.2.</span> <span class="nav-text">CQP</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="高振宇"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">高振宇</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">33</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/witgao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;witgao" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:witgao328@gmail.com" title="E-Mail → mailto:witgao328@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2021/11/17/av/x265%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8B%E7%A0%81%E7%8E%87%E6%8E%A7%E5%88%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="高振宇">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="x265源码分析之码率控制 | 富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          x265源码分析之码率控制
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-11-17 00:00:00" itemprop="dateCreated datePublished" datetime="2021-11-17T00:00:00+08:00">2021-11-17</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/" itemprop="url" rel="index"><span itemprop="name">音视频</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>15 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="码率控制"><a href="#码率控制" class="headerlink" title="码率控制"></a>码率控制</h1><p>视频编码的目标是尽可能多的节省比特的同时尽量保持视频质量，码率控制是平衡码率和质量的重要工具。</p>
+<p>码率控制并不是视频编码框架中具体的一个模块，而是在整个视频编码过程中扮演控制着的角色，一方面接收来自编码器外部的要求（编码缓冲区大小、人为要求的目标输出码率），另一方面分析并处理这些要求，为了完成要求对编码参数做出选择（量化参数、编码模式、运动矢量）。</p>
+<p>在整个码率控制过程中，最为重要的三个编码参数是量化参数、编码模式、运动矢量。</p>
+<p>在工业实现中一般都是选择量化参数建立率失真模型，将量化参数和编码模式、运动矢量分开，先有码率控制模块确定量化参数，再由RDO（率失真优化）确定编码模式和运动矢量。</p>
+<p>所以码率控制就是负责量化参数的确定。</p>
+<span id="more"></span>
+
+<h1 id="帧间级码率控制"><a href="#帧间级码率控制" class="headerlink" title="帧间级码率控制"></a>帧间级码率控制</h1><h2 id="ABR、CRF"><a href="#ABR、CRF" class="headerlink" title="ABR、CRF"></a>ABR、CRF</h2><p>帧间级别码率控制需要为每一帧分配QP，也就是分配每一帧的大小，每一帧的大小主要取决于两个变量：本帧的复杂度、码率预算。首先会根据每帧的复杂度，在帧与帧之间分配码率比例，然后根据码率预算，将每帧缩放到合适大小，这个缩放系数称为RateFactor，如果开启了VBV，还会经过VBV模块调整。ABR和CRF模式都是通过调整RateFactor实现。</p>
+<h3 id="QScale"><a href="#QScale" class="headerlink" title="QScale"></a>QScale</h3><h4 id="转换qp"><a href="#转换qp" class="headerlink" title="转换qp"></a>转换qp</h4><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">double</span> <span class="title">x265_qScale2qp</span><span class="params">(<span class="type">double</span> qScale)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">12.0</span> + <span class="number">6.0</span> * (<span class="type">double</span>)<span class="built_in">X265_LOG2</span>(qScale / <span class="number">0.85</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">double</span> <span class="title">x265_qp2qScale</span><span class="params">(<span class="type">double</span> qp)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0.85</span> * <span class="built_in">pow</span>(<span class="number">2.0</span>, (qp - <span class="number">12.0</span>) / <span class="number">6.0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="初始值"><a href="#初始值" class="headerlink" title="初始值"></a>初始值</h3><p>QScale的初始值由当前帧的复杂度计算得出</p>
+<h4 id="复杂度SATD"><a href="#复杂度SATD" class="headerlink" title="复杂度SATD"></a>复杂度SATD</h4><p>在帧类型决策时，会对帧进行1&#x2F;2下采样，对下采样后的小图进行预测，并计算SATD值。</p>
+<h5 id="帧内预测"><a href="#帧内预测" class="headerlink" title="帧内预测"></a>帧内预测</h5><p>在帧类型决策之前，会对每一帧都会进行预处理。在PreLookaheadGroup中进行下采样，并进行帧内预测，计算SATD值。</p>
+<p>下采样后，遍历每个8x8的CU，在35中预测模式下选出最优的SATD值。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">LookaheadTLD::lowresIntraEstimate</span><span class="params">(Lowres&amp; fenc, <span class="type">uint32_t</span> qgSize)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> cuY = <span class="number">0</span>; cuY &lt; heightInCU; cuY++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> cuX = <span class="number">0</span>; cuX &lt; widthInCU; cuX++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="type">const</span> <span class="type">int</span> cuXY = cuX + cuY * widthInCU;</span><br><span class="line">            ...</span><br><span class="line">    </span><br><span class="line">            <span class="comment">/* DC and planar */</span></span><br><span class="line">            primitives.cu[sizeIdx].intra_pred[DC_IDX](prediction, cuSize, samples, <span class="number">0</span>, cuSize &lt;= <span class="number">16</span>);</span><br><span class="line">            cost = <span class="built_in">satd</span>(fencIntra, cuSize, prediction, cuSize);</span><br><span class="line">            <span class="built_in">COPY2_IF_LT</span>(icost, cost, ilowmode, DC_IDX);</span><br><span class="line"></span><br><span class="line">            primitives.cu[sizeIdx].intra_pred[PLANAR_IDX](prediction, cuSize, neighbours[planar], <span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line">            cost = <span class="built_in">satd</span>(fencIntra, cuSize, prediction, cuSize);</span><br><span class="line">            <span class="built_in">COPY2_IF_LT</span>(icost, cost, ilowmode, PLANAR_IDX);</span><br><span class="line"></span><br><span class="line">            <span class="comment">/* scan angular predictions */</span></span><br><span class="line">            <span class="type">int</span> filter, acost = me.COST_MAX;</span><br><span class="line">            <span class="type">uint32_t</span> mode, alowmode = <span class="number">4</span>;</span><br><span class="line">            <span class="keyword">for</span> (mode = <span class="number">5</span>; mode &lt; <span class="number">35</span>; mode += <span class="number">5</span>)</span><br><span class="line">            &#123;</span><br><span class="line">                filter = !!(g_intraFilterFlags[mode] &amp; cuSize);</span><br><span class="line">                primitives.cu[sizeIdx].intra_pred[mode](prediction, cuSize, neighbours[filter], mode, cuSize &lt;= <span class="number">16</span>);</span><br><span class="line">                cost = <span class="built_in">satd</span>(fencIntra, cuSize, prediction, cuSize);</span><br><span class="line">                <span class="built_in">COPY2_IF_LT</span>(acost, cost, alowmode, mode);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            ...</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    fenc.costEst[<span class="number">0</span>][<span class="number">0</span>] = costEst;</span><br><span class="line">    fenc.costEstAq[<span class="number">0</span>][<span class="number">0</span>] = costEstAq;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="帧间预测"><a href="#帧间预测" class="headerlink" title="帧间预测"></a>帧间预测</h5><p>在帧类型决策之后，如果当前的码控模式不是CQP，则会在CostEstimateGroup中提前对帧进行成本估计，计算帧的SATD值。</p>
+<p>如果是I帧则直接使用帧内预测的SATD值，否则在参考帧中进行运动估计，计算每个8x8CU的运动矢量。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int64_t</span> <span class="title">CostEstimateGroup::estimateFrameCost</span><span class="params">(LookaheadTLD&amp; tld, <span class="type">int</span> p0, <span class="type">int</span> p1, <span class="type">int</span> b, <span class="type">bool</span> bIntraPenalty)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    Lowres*     fenc  = m_frames[b];</span><br><span class="line">    x265_param* param = m_lookahead.m_param;</span><br><span class="line">    <span class="type">int64_t</span>     score = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (fenc-&gt;costEst[b - p0][p1 - b] &gt;= <span class="number">0</span> &amp;&amp; fenc-&gt;rowSatds[b - p0][p1 - b][<span class="number">0</span>] != <span class="number">-1</span>)</span><br><span class="line">        score = fenc-&gt;costEst[b - p0][p1 - b];</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        ...</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="comment">/* Calculate MVs for 1/16th resolution*/</span></span><br><span class="line">            <span class="type">bool</span> lastRow;</span><br><span class="line">            lastRow = <span class="literal">true</span>;</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> cuY = m_lookahead.m_8x8Height - <span class="number">1</span>; cuY &gt;= <span class="number">0</span>; cuY--)</span><br><span class="line">            &#123;</span><br><span class="line">                fenc-&gt;rowSatds[b - p0][p1 - b][cuY] = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">for</span> (<span class="type">int</span> cuX = m_lookahead.m_8x8Width - <span class="number">1</span>; cuX &gt;= <span class="number">0</span>; cuX--)</span><br><span class="line">                    <span class="built_in">estimateCUCost</span>(tld, cuX, cuY, p0, p1, b, bDoSearch, lastRow, <span class="number">-1</span>, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">                lastRow = <span class="literal">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        score = fenc-&gt;costEst[b - p0][p1 - b];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> score;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<!-- more -->
+
+<h4 id="模糊复杂度"><a href="#模糊复杂度" class="headerlink" title="模糊复杂度"></a>模糊复杂度</h4><p>模糊复杂度是基于邻近已编码帧的复杂度加权平均得到，避免QP波动。</p>
+<p>m_shortTermCplxSum 当前非B帧及以前所有非B帧 satd * (fps&#x2F;25)的和，fps越大，权重越大<br>    Sum[i] &#x3D; Sum[i - 1] * 0.5 + satd * (fps &#x2F; 25)</p>
+<p>m_shortTermCplxCount 当前帧以前非B帧个数 + 1<br>    Count[i] &#x3D; Count[i - 1] * 0.5 + 1</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">m_shortTermCplxSum *= <span class="number">0.5</span>;</span><br><span class="line">m_shortTermCplxCount *= <span class="number">0.5</span>;</span><br><span class="line">m_shortTermCplxSum += m_currentSatd / (<span class="built_in">CLIP_DURATION</span>(m_frameDuration) / BASE_FRAME_DURATION);</span><br><span class="line">m_shortTermCplxCount++;</span><br><span class="line"><span class="comment">/* coeffBits to be used in 2-pass */</span></span><br><span class="line">rce-&gt;coeffBits = (<span class="type">int</span>)m_currentSatd;</span><br><span class="line">rce-&gt;blurredComplexity = m_shortTermCplxSum / m_shortTermCplxCount;</span><br></pre></td></tr></table></figure>
+
+<h4 id="感知编码优化"><a href="#感知编码优化" class="headerlink" title="感知编码优化"></a>感知编码优化</h4><p>对于复杂度高的场景，细节丢失比较难以发现，因此可以使用比较高的QP，可以对帧的复杂度进行压缩。qcomp是由外部控制的参数。</p>
+<p>rceq &#x3D; BlurCplx^(1 - qcomp);</p>
+<ul>
+<li>当qcomp &#x3D; 1，各帧的rceq都一样，分配给平缓帧和复杂度的比特都一样；</li>
+<li>当qcomp &#x3D; 0，相当于关闭了感知编码优化；</li>
+</ul>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (m_param-&gt;rc.cuTree &amp;&amp; !m_param-&gt;rc.hevcAq)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// Scale and units are obtained from rateNum and rateDenom for videos with fixed frame rates.</span></span><br><span class="line">    <span class="type">double</span> timescale = (<span class="type">double</span>)m_param-&gt;fpsDenom / (<span class="number">2</span> * m_param-&gt;fpsNum);</span><br><span class="line">    q = <span class="built_in">pow</span>(BASE_FRAME_DURATION / <span class="built_in">CLIP_DURATION</span>(<span class="number">2</span> * timescale), <span class="number">1</span> - m_param-&gt;rc.qCompress);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    q = <span class="built_in">pow</span>(rce-&gt;blurredComplexity, <span class="number">1</span> - m_param-&gt;rc.qCompress);</span><br></pre></td></tr></table></figure>
+
+<h3 id="RateFactor修正"><a href="#RateFactor修正" class="headerlink" title="RateFactor修正"></a>RateFactor修正</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">QScale = rceq / RateFactor;</span><br></pre></td></tr></table></figure>
+
+<h4 id="CRF"><a href="#CRF" class="headerlink" title="CRF"></a>CRF</h4><p>CRF（Constant RateFactor），可以保持整个视频流质量恒定。CRF接受一个固定的QP值，取值为0-51之间的整数，x265默认值时28，CRF增减6会导致码率减半或加倍。在CRF模式下，RateFactor是固定的，QScale是由每帧的复杂度决定。</p>
+<h5 id="首帧"><a href="#首帧" class="headerlink" title="首帧"></a>首帧</h5><p>在CRF模式下，首帧的QScale由CRF接受的QP值来决定，外部指定的QP都是P帧的QP，对于I帧需要作用ipFactor。ipFactor是I帧与P帧QP的偏移系数，pbFactor是P帧和B帧QP的偏移系数。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> CRF_INIT_QP (int)m_param-&gt;rc.rfConstant</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (m_qCompress != <span class="number">1</span> &amp;&amp; m_param-&gt;rc.rateControlMode == X265_RC_CRF)</span><br><span class="line">&#123;</span><br><span class="line">    q = <span class="built_in">x265_qp2qScale</span>(CRF_INIT_QP) / <span class="built_in">fabs</span>(m_param-&gt;rc.ipFactor);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="I帧、P帧"><a href="#I帧、P帧" class="headerlink" title="I帧、P帧"></a>I帧、P帧</h5><p>m_rateFactorConstant根据外部指定的QP来计算出来的固定RateFactor，除了首帧外，所有的非B帧都是使用该系数来压缩复杂度。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (m_param-&gt;rc.rateControlMode == X265_RC_CRF)</span><br><span class="line">&#123;</span><br><span class="line">    q = <span class="built_in">getQScale</span>(rce, m_rateFactorConstant);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>m_rateFactorConstant &#x3D; rceq &#x2F; QScale<br>m_rateFactorConstant根据公式反算回来，其中QScale为外部指定的QP，rceq为8x8CU个数 * 120。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> lowresCuWidth = ((m_param-&gt;sourceWidth / <span class="number">2</span>) + X265_LOWRES_CU_SIZE - <span class="number">1</span>) &gt;&gt; X265_LOWRES_CU_BITS;</span><br><span class="line"><span class="type">int</span> lowresCuHeight = ((m_param-&gt;sourceHeight / <span class="number">2</span>) + X265_LOWRES_CU_SIZE - <span class="number">1</span>) &gt;&gt; X265_LOWRES_CU_BITS;</span><br><span class="line">m_ncu = lowresCuWidth * lowresCuHeight;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (m_param-&gt;rc.rateControlMode == X265_RC_CRF)</span><br><span class="line">&#123;</span><br><span class="line">    m_param-&gt;rc.qp = (<span class="type">int</span>)m_param-&gt;rc.rfConstant;</span><br><span class="line">    m_param-&gt;rc.bitrate = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="type">double</span> baseCplx = m_ncu * (m_param-&gt;bframes ? <span class="number">120</span> : <span class="number">80</span>);</span><br><span class="line">    <span class="type">double</span> mbtree_offset = m_param-&gt;rc.cuTree ? (<span class="number">1.0</span> - m_param-&gt;rc.qCompress) * <span class="number">13.5</span> : <span class="number">0</span>;</span><br><span class="line">    m_rateFactorConstant = <span class="built_in">pow</span>(baseCplx, <span class="number">1</span> - m_qCompress) / <span class="built_in">x265_qp2qScale</span>(m_param-&gt;rc.rfConstant + mbtree_offset);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="B帧"><a href="#B帧" class="headerlink" title="B帧"></a>B帧</h5><p>B帧是没有独立码控的，B帧的QP是由参考帧的QP来决定。</p>
+<ul>
+<li>前向参考帧和后向参考帧都是I帧，QP &#x3D; 平均QP值</li>
+<li>前向参考帧为I帧，QP &#x3D; 后向参考帧</li>
+<li>后向参考帧为I帧，QP &#x3D; 前向参考帧</li>
+<li>都不是I帧，QP &#x3D; 按POC距离加权的平均QP值<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (m_sliceType == B_SLICE)</span><br><span class="line"> &#123;</span><br><span class="line">     <span class="comment">/* B-frames don&#x27;t have independent rate control, but rather get the</span></span><br><span class="line"><span class="comment">      * average QP of the two adjacent P-frames + an offset */</span></span><br><span class="line">     Slice* prevRefSlice = m_curSlice-&gt;m_refFrameList[<span class="number">0</span>][<span class="number">0</span>]-&gt;m_encData-&gt;m_slice;</span><br><span class="line">     Slice* nextRefSlice = m_curSlice-&gt;m_refFrameList[<span class="number">1</span>][<span class="number">0</span>]-&gt;m_encData-&gt;m_slice;</span><br><span class="line">     <span class="type">double</span> q0 = m_curSlice-&gt;m_refFrameList[<span class="number">0</span>][<span class="number">0</span>]-&gt;m_encData-&gt;m_avgQpRc;</span><br><span class="line">     <span class="type">double</span> q1 = m_curSlice-&gt;m_refFrameList[<span class="number">1</span>][<span class="number">0</span>]-&gt;m_encData-&gt;m_avgQpRc;</span><br><span class="line">     <span class="type">bool</span> i0 = prevRefSlice-&gt;m_sliceType == I_SLICE;</span><br><span class="line">     <span class="type">bool</span> i1 = nextRefSlice-&gt;m_sliceType == I_SLICE;</span><br><span class="line">     <span class="type">int</span> dt0 = <span class="built_in">abs</span>(m_curSlice-&gt;m_poc - prevRefSlice-&gt;m_poc);</span><br><span class="line">     <span class="type">int</span> dt1 = <span class="built_in">abs</span>(m_curSlice-&gt;m_poc - nextRefSlice-&gt;m_poc);</span><br><span class="line"></span><br><span class="line">     <span class="keyword">if</span> (i0 &amp;&amp; i1)</span><br><span class="line">         q = (q0 + q1) / <span class="number">2</span> + m_ipOffset;</span><br><span class="line">     <span class="keyword">else</span> <span class="keyword">if</span> (i0)</span><br><span class="line">         q = q1;</span><br><span class="line">     <span class="keyword">else</span> <span class="keyword">if</span> (i1)</span><br><span class="line">         q = q0;</span><br><span class="line">     <span class="keyword">else</span></span><br><span class="line">         q = (q0 * dt1 + q1 * dt0) / (dt0 + dt1);</span><br><span class="line"></span><br><span class="line">     <span class="keyword">if</span> (<span class="built_in">IS_REFERENCED</span>(curFrame))</span><br><span class="line">         q += m_pbOffset / <span class="number">2</span>;</span><br><span class="line">     <span class="keyword">else</span></span><br><span class="line">         q += m_pbOffset;</span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="ABR"><a href="#ABR" class="headerlink" title="ABR"></a>ABR</h4><p>平均比特率（Average Bitrate），给定一个目标码率，编码器计算如何达到这个码率。但是由于编码器在编码当前帧时是不知道后面还未编码的内容，所以它不得不猜测如何达到给定码率，这意味着码率要一直变化，因此ABR不是一种恒定码率模式而是可变码率模式。在ABR模式下，就是通过不断调整RateFactor来实现的平均码率控制。</p>
+<h5 id="I帧、P帧-1"><a href="#I帧、P帧-1" class="headerlink" title="I帧、P帧"></a>I帧、P帧</h5><p>在ABR模式下，RateFactor &#x3D; wanted_bits_window &#x2F; complexity_sum，其中wanted_bits_window表示已编码帧的目标文件大小，complexity_sum是系数。</p>
+<p>wanted_bits_window是(bitrate &#x2F; fps)的累积值，bitrate是外部指定的平均比特率，bitrate &#x2F; fps表示平均一帧的比特率，所以wanted_bits_window表示累积的期望比特大小。<br>complexity_sum是(bits * qscale &#x2F; rceq)的累积值，bits表示实际编码得到的帧大小</p>
+<p>初始化</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">m_cplxrSum = <span class="number">.01</span> * <span class="built_in">pow</span>(<span class="number">7.0e5</span>, m_qCompress) * <span class="built_in">pow</span>(m_ncu, <span class="number">0.5</span>) * tuneCplxFactor;</span><br><span class="line">m_wantedBitsWindow = m_bitrate * m_frameDuration;</span><br></pre></td></tr></table></figure>
+
+<p>当前帧编码结束后，更新</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (rce-&gt;sliceType != B_SLICE)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">/* The factor 1.5 is to tune up the actual bits, otherwise the cplxrSum is scaled too low</span></span><br><span class="line"><span class="comment">        * to improve short term compensation for next frame. */</span></span><br><span class="line">    m_cplxrSum += (bits * <span class="built_in">x265_qp2qScale</span>(rce-&gt;qpaRc) / rce-&gt;qRceq) - (rce-&gt;rowCplxrSum);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">/* Depends on the fact that B-frame&#x27;s QP is an offset from the following P-frame&#x27;s.</span></span><br><span class="line"><span class="comment">        * Not perfectly accurate with B-refs, but good enough. */</span></span><br><span class="line">    m_cplxrSum += (bits * <span class="built_in">x265_qp2qScale</span>(rce-&gt;qpaRc) / (rce-&gt;qRceq * <span class="built_in">fabs</span>(m_param-&gt;rc.pbFactor))) - (rce-&gt;rowCplxrSum);</span><br><span class="line">&#125;</span><br><span class="line">m_wantedBitsWindow += m_frameDuration * m_bitrate;</span><br></pre></td></tr></table></figure>
+
+<p>计算QScale</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">double</span> initialQScale = <span class="built_in">getQScale</span>(rce, m_wantedBitsWindow / m_cplxrSum);</span><br><span class="line">q = initialQScale;</span><br></pre></td></tr></table></figure>
+
+<p>在ABR模式下，首帧的QP不能超过37。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> ABR_INIT_QP_MAX (37)</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (m_framesDone == <span class="number">0</span> &amp;&amp; !m_isVbv &amp;&amp; m_param-&gt;rc.rateControlMode == X265_RC_ABR)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">/* for ABR alone, clip the first I frame qp */</span></span><br><span class="line">    lqmax = (m_isGrainEnabled &amp;&amp; m_lstep) ? <span class="built_in">x265_qp2qScale</span>(ABR_INIT_QP_GRAIN_MAX) :</span><br><span class="line">                    <span class="built_in">x265_qp2qScale</span>(ABR_INIT_QP_MAX);</span><br><span class="line">    q = <span class="built_in">X265_MIN</span>(lqmax, q);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="B帧-1"><a href="#B帧-1" class="headerlink" title="B帧"></a>B帧</h5><p>同CRF</p>
+<h3 id="VBV修正"><a href="#VBV修正" class="headerlink" title="VBV修正"></a>VBV修正</h3><h4 id="VBV"><a href="#VBV" class="headerlink" title="VBV"></a>VBV</h4><p>vbv模型假想编码码率通过一个容量受限的信道传输到解码设备，解码设备在解码前有一个缓存，解码器实时从缓存区取数据解码，vbv必须保证缓存区不上溢也不下溢。</p>
+<p>解码器的缓存可以理解成一个水池，如下图所示，水池的输入速度是恒定的，也就是设定的码率，水池的输出是不恒定的，就是视频的实际瞬时码率。</p>
+<p><img src="/2021/11/17/av/x265%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8B%E7%A0%81%E7%8E%87%E6%8E%A7%E5%88%B6/151546001_3_20190108085209443.jpg" alt="vbv model"></p>
+<p>缓存区的存在使得视频的瞬时码率可以在一定范围内波动，但是如果视频实际瞬时码率过大，从缓存区取数据的速度就会大于填数据的速度，这时缓存区有可能就被取空了，这叫做缓冲区的下溢。相反，如果视频实际瞬时码率过小，从缓存区取数据的速度就会小于填数据的速度，这时缓存区有可能就会溢出，这叫做缓存区的上溢。</p>
+<p>参数设置：<br>    –vbv-maxrate：设置缓存区最大填入速度（非CBR模式下，实际码率可以小于最大码率）<br>    –vbv-bufsize：设置缓存区大小<br>    –vbv-init：缓冲区初始充盈度，默认0.9<br>    –min-vbv-fullness：缓冲区最小充盈度，默认50<br>    –max-vbv-fullness：缓冲区最大充盈度，默认80</p>
+<p>vbv能容忍的最大码率波动和缓存区的大小，以及缓存区初始充盈程度有关。<br>假如：设置maxrate&#x3D;1M，bufsize &#x3D; 2M，缓存区初始是充盈的，假设某时峰值率是2M，那么能容忍的峰值的最大长度为2&#x2F;(2-1) &#x3D; 2s；<br>假如：某时峰值率是3M，那么能容忍的峰值的最大长度为2&#x2F;(3-1) &#x3D; 1s；</p>
+<p>获取速度：当前帧的预测大小<br>填入速度：vbv-maxrate &#x2F; fps</p>
+<p>CQP模式下<br>    无VBV<br>ABR模式下<br>    vbvBufferSize 必须设置<br>    vbvMaxBitrate &#x3D;&#x3D; 0 ? vbvMaxBitrate &#x3D; bitrate<br>    vbvMaxBitrate &lt; bitrate ? bitrate &#x3D; vbvMaxBitrate<br>    也就是在ABR模式下，vbvMaxBitrate必须&gt;&#x3D;bitrate</p>
+<p>CRF模式下<br>    vbvBufferSize 必须设置<br>    vbvMaxBitrate 必须设置</p>
+<h4 id="预测大小"><a href="#预测大小" class="headerlink" title="预测大小"></a>预测大小</h4><p>帧类型预测器，有四种类型小B帧、P帧、I帧、大B帧</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// p是当前预测类型对应的预测器，q是当前帧的QScale，var是当前帧的SATD值。</span></span><br><span class="line"><span class="function"><span class="type">double</span> <span class="title">RateControl::predictSize</span><span class="params">(Predictor *p, <span class="type">double</span> q, <span class="type">double</span> var)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> (p-&gt;coeff * var + p-&gt;offset) / (q * p-&gt;count);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>每一帧编码结束后，会根据实际编码的码率来调整对应类型的预测器，使得下一次同类型帧的预测更加准确。<br>(((bits * q) &#x2F; var) * var) &#x2F; q</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// var是当前帧的SATD值，bits是当前帧最终编码的大小。</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">RateControl::updatePredictor</span><span class="params">(Predictor *p, <span class="type">double</span> q, <span class="type">double</span> var, <span class="type">double</span> bits)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (var &lt; <span class="number">10</span>)</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    <span class="type">const</span> <span class="type">double</span> range = <span class="number">2</span>;</span><br><span class="line">    <span class="type">double</span> old_coeff = p-&gt;coeff / p-&gt;count;</span><br><span class="line">    <span class="type">double</span> old_offset = p-&gt;offset / p-&gt;count;</span><br><span class="line">    <span class="type">double</span> new_coeff = <span class="built_in">X265_MAX</span>((bits * q - old_offset) / var, p-&gt;coeffMin );</span><br><span class="line">    <span class="type">double</span> new_coeff_clipped = <span class="built_in">x265_clip3</span>(old_coeff / range, old_coeff * range, new_coeff);</span><br><span class="line">    <span class="type">double</span> new_offset = bits * q - new_coeff_clipped * var;</span><br><span class="line">    <span class="keyword">if</span> (new_offset &gt;= <span class="number">0</span>)</span><br><span class="line">        new_coeff = new_coeff_clipped;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        new_offset = <span class="number">0</span>;</span><br><span class="line">    p-&gt;count  *= p-&gt;decay;</span><br><span class="line">    p-&gt;coeff  *= p-&gt;decay;</span><br><span class="line">    p-&gt;offset *= p-&gt;decay;</span><br><span class="line">    p-&gt;count++;</span><br><span class="line">    p-&gt;coeff  += new_coeff;</span><br><span class="line">    p-&gt;offset += new_offset;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="修正"><a href="#修正" class="headerlink" title="修正"></a>修正</h4><p>预测当前帧以及后续帧的predictSize，模拟VBV的获取和填充，根据VBV剩余的充盈度来调整当前帧的QP，使得VBV充盈度保持在固定的范围内，当缓冲区保持在固定的水平，则说明输入和输出大致持平，也就是输出的实际码率和期望的码率相持平。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">double</span> <span class="title">RateControl::clipQscale</span><span class="params">(Frame* curFrame, RateControlEntry* rce, <span class="type">double</span> q)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (m_isVbv &amp;&amp; m_currentSatd &gt; <span class="number">0</span> &amp;&amp; curFrame)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> (m_param-&gt;lookaheadDepth || m_param-&gt;rc.cuTree ||</span><br><span class="line">            (m_param-&gt;scenecutThreshold || m_param-&gt;bHistBasedSceneCut) ||</span><br><span class="line">            (m_param-&gt;bFrameAdaptive &amp;&amp; m_param-&gt;bframes))</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="type">int</span> loopTerminate = <span class="number">0</span>;</span><br><span class="line">            <span class="comment">/* Avoid an infinite loop. */</span></span><br><span class="line">            <span class="comment">// 轮询调整QP，退出轮询有三种情况</span></span><br><span class="line">            <span class="comment">//      1. 使用当前QP进行模拟后，VBV充盈度在合理范围内</span></span><br><span class="line">            <span class="comment">//      2. 当前QP经过了上调又经过了下调，说明调整QP依旧无法使得VBV充盈度在合理范围内，继续下去只会浪费</span></span><br><span class="line">            <span class="comment">//      3. 轮询1000次</span></span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> iterations = <span class="number">0</span>; iterations &lt; <span class="number">1000</span> &amp;&amp; loopTerminate != <span class="number">3</span>; iterations++)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="type">double</span> frameQ[<span class="number">3</span>];</span><br><span class="line">                <span class="type">double</span> curBits;</span><br><span class="line">                <span class="comment">// 预测当前帧的大小</span></span><br><span class="line">                curBits = <span class="built_in">predictSize</span>(&amp;m_pred[m_predType], q, (<span class="type">double</span>)m_currentSatd);</span><br><span class="line">                <span class="comment">// m_bufferFill是当前VBV的充盈度，这里是VBV中获取当前帧大小的buffer</span></span><br><span class="line">                <span class="type">double</span> bufferFillCur = m_bufferFill - curBits;</span><br><span class="line">                <span class="type">double</span> targetFill;</span><br><span class="line">                <span class="type">double</span> totalDuration = m_frameDuration;</span><br><span class="line">                <span class="comment">// 后续帧由于没有开始编码，没有QP，使用当前帧的QP进行预测</span></span><br><span class="line">                frameQ[P_SLICE] = m_sliceType == I_SLICE ? q * m_param-&gt;rc.ipFactor : (m_sliceType == B_SLICE ? q / m_param-&gt;rc.pbFactor : q);</span><br><span class="line">                frameQ[B_SLICE] = frameQ[P_SLICE] * m_param-&gt;rc.pbFactor;</span><br><span class="line">                frameQ[I_SLICE] = frameQ[P_SLICE] / m_param-&gt;rc.ipFactor;</span><br><span class="line">                <span class="comment">/* Loop over the planned future frames. */</span></span><br><span class="line">                <span class="type">bool</span> iter = <span class="literal">true</span>;</span><br><span class="line">                <span class="comment">// 模拟后续1秒内所有帧的获取和填充</span></span><br><span class="line">                <span class="comment">// 退出模拟有三种情况</span></span><br><span class="line">                <span class="comment">//      1. VBV的充盈度小于0，发生了下溢</span></span><br><span class="line">                <span class="comment">//      2. 已经预测了一秒内所有帧</span></span><br><span class="line">                <span class="comment">//      3. 后续帧类型还没有预测</span></span><br><span class="line">                <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; bufferFillCur &gt;= <span class="number">0</span> &amp;&amp; iter ; j++)</span><br><span class="line">                &#123;</span><br><span class="line">                    <span class="type">int</span> type = curFrame-&gt;m_lowres.plannedType[j];</span><br><span class="line">                    <span class="keyword">if</span> (type == X265_TYPE_AUTO || totalDuration &gt;= <span class="number">1.0</span>)</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    <span class="comment">// 时间累加    </span></span><br><span class="line">                    totalDuration += m_frameDuration;</span><br><span class="line">                    <span class="comment">// 填入速度</span></span><br><span class="line">                    <span class="type">double</span> wantedFrameSize = m_vbvMaxRate * m_frameDuration;</span><br><span class="line">                    <span class="comment">// 没有上溢，填入</span></span><br><span class="line">                    <span class="keyword">if</span> (bufferFillCur + wantedFrameSize &lt;= m_bufferSize)</span><br><span class="line">                        bufferFillCur += wantedFrameSize;</span><br><span class="line">                    <span class="comment">// 获取下一帧SATD    </span></span><br><span class="line">                    <span class="type">int64_t</span> satd = curFrame-&gt;m_lowres.plannedSatd[j] &gt;&gt; (X265_DEPTH - <span class="number">8</span>);</span><br><span class="line">                    type = <span class="built_in">IS_X265_TYPE_I</span>(type) ? I_SLICE : <span class="built_in">IS_X265_TYPE_B</span>(type) ? B_SLICE : P_SLICE;</span><br><span class="line">                    <span class="type">int</span> predType = <span class="built_in">getPredictorType</span>(curFrame-&gt;m_lowres.plannedType[j], type);</span><br><span class="line">                    <span class="comment">// 预测下一帧大小</span></span><br><span class="line">                    curBits = <span class="built_in">predictSize</span>(&amp;m_pred[predType], frameQ[type], (<span class="type">double</span>)satd);</span><br><span class="line">                    <span class="comment">// 从VBV中获取</span></span><br><span class="line">                    bufferFillCur -= curBits;</span><br><span class="line">                    <span class="keyword">if</span> (!m_param-&gt;bResetZoneConfig &amp;&amp; ((<span class="type">uint64_t</span>)j == (m_param-&gt;reconfigWindowSize - <span class="number">1</span>)))</span><br><span class="line">                        iter = <span class="literal">false</span>;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                &#123;</span><br><span class="line">                    <span class="comment">/* Try to get the buffer at least 50% filled, but don&#x27;t set an impossible goal. */</span></span><br><span class="line">                    <span class="type">double</span> finalDur = <span class="number">1</span>;</span><br><span class="line">                    <span class="keyword">if</span> (m_param-&gt;rc.bStrictCbr)</span><br><span class="line">                    &#123;</span><br><span class="line">                        finalDur = <span class="built_in">x265_clip3</span>(<span class="number">0.4</span>, <span class="number">1.0</span>, totalDuration);</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="comment">// m_bufferSize * (1 - m_minBufferFill * finalDur) 是外部设置的最小充盈度</span></span><br><span class="line">                    targetFill = <span class="built_in">X265_MIN</span>(m_bufferFill + totalDuration * m_vbvMaxRate * <span class="number">0.5</span>, m_bufferSize * (<span class="number">1</span> - m_minBufferFill * finalDur));</span><br><span class="line">                    <span class="keyword">if</span> (bufferFillCur &lt; targetFill)</span><br><span class="line">                    &#123;</span><br><span class="line">                        <span class="comment">// 充盈度小于最小充盈度时，说明predictSize过大，需要提高QP</span></span><br><span class="line">                        q *= <span class="number">1.01</span>;</span><br><span class="line">                        loopTerminate |= <span class="number">1</span>;</span><br><span class="line">                        <span class="keyword">continue</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="comment">/* Try to get the buffer not more than 80% filled, but don&#x27;t set an impossible goal. */</span></span><br><span class="line">                    <span class="comment">// m_bufferSize * (1 - m_maxBufferFill * finalDur) 是外部设置的最大充盈度</span></span><br><span class="line">                    targetFill = <span class="built_in">x265_clip3</span>(m_bufferSize * (<span class="number">1</span> - m_maxBufferFill * finalDur), m_bufferSize, m_bufferFill - totalDuration * m_vbvMaxRate * <span class="number">0.5</span>);</span><br><span class="line">                    <span class="comment">// 非CBR模式下，实际码率可以小于最大码率</span></span><br><span class="line">                    <span class="keyword">if</span> ((m_isCbr || m_2pass) &amp;&amp; bufferFillCur &gt; targetFill &amp;&amp; !m_isSceneTransition)</span><br><span class="line">                    &#123;</span><br><span class="line">                        <span class="comment">// 充盈度大于最大充盈度，说明predictSize过小，需要减小QP</span></span><br><span class="line">                        q /= <span class="number">1.01</span>;</span><br><span class="line">                        loopTerminate |= <span class="number">2</span>;</span><br><span class="line">                        <span class="keyword">continue</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            q = <span class="built_in">X265_MAX</span>(q0 / <span class="number">2</span>, q);</span><br><span class="line">        &#125;</span><br><span class="line">       </span><br><span class="line">    &#125;</span><br><span class="line">   </span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">x265_clip3</span>(lmin, lmax, q);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="CBR"><a href="#CBR" class="headerlink" title="CBR"></a>CBR</h4><p>在ABR+VBV模式下，并且bitrate&#x3D;&#x3D;vbvMaxBitrate，开启CBR模式</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 当bitrate == MaxBitrate时，开启cbr；</span></span><br><span class="line">m_isCbr = m_param-&gt;rc.rateControlMode == X265_RC_ABR &amp;&amp; m_isVbv &amp;&amp; m_param-&gt;rc.vbvMaxBitrate &lt;= m_param-&gt;rc.bitrate;</span><br></pre></td></tr></table></figure>
+
+<p>开启CBR后，再VBV修正时，才会将码率控制在指定码率上，码率不足会降低QP</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// CBR模式下，降低QP，提高码率到指定码率</span></span><br><span class="line"><span class="keyword">if</span> ((m_isCbr || m_2pass) &amp;&amp; bufferFillCur &gt; targetFill &amp;&amp; !m_isSceneTransition)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 充盈度大于最大充盈度，说明predictSize过小，需要减小QP</span></span><br><span class="line">    q /= <span class="number">1.01</span>;</span><br><span class="line">    loopTerminate |= <span class="number">2</span>;</span><br><span class="line">    <span class="keyword">continue</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="StrictCbr"><a href="#StrictCbr" class="headerlink" title="StrictCbr"></a>StrictCbr</h5><p>只有在CBR模式下，才能开启严格CBR模式，开启StrictCbr模式后，当VBV上溢时，会将溢出的部分取出，填入oxff数据到编码数据中。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">RateControl::updateVbv</span><span class="params">(<span class="type">int64_t</span> bits, RateControlEntry* rce)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> predType = rce-&gt;sliceType;</span><br><span class="line">    <span class="type">int</span> filler = <span class="number">0</span>;</span><br><span class="line">    <span class="type">double</span> bufferBits;</span><br><span class="line"></span><br><span class="line">    m_bufferFillFinal -= bits;</span><br><span class="line">    m_bufferFillFinal = <span class="built_in">X265_MAX</span>(m_bufferFillFinal, <span class="number">0</span>);</span><br><span class="line">    m_bufferFillFinal += rce-&gt;bufferRate;</span><br><span class="line">    <span class="keyword">if</span> (m_param-&gt;csvLogLevel &gt;= <span class="number">2</span>)</span><br><span class="line">        m_unclippedBufferFillFinal = m_bufferFillFinal;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (m_param-&gt;rc.bStrictCbr)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// 当缓冲区充盈度超过了缓冲区大小，发生上溢</span></span><br><span class="line">        <span class="keyword">if</span> (m_bufferFillFinal &gt; m_bufferSize)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="comment">// 取出上溢的部分</span></span><br><span class="line">            filler = (<span class="type">int</span>)(m_bufferFillFinal - m_bufferSize);</span><br><span class="line">            filler += FILLER_OVERHEAD * <span class="number">8</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 消除溢出</span></span><br><span class="line">        m_bufferFillFinal -= filler;</span><br><span class="line">        bufferBits = <span class="built_in">X265_MIN</span>(bits + filler + m_bufferExcess, rce-&gt;bufferRate);</span><br><span class="line">        m_bufferExcess = <span class="built_in">X265_MAX</span>(m_bufferExcess - bufferBits + bits + filler, <span class="number">0</span>);</span><br><span class="line">        m_bufferFillActual += bufferBits - bits - filler;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">return</span> filler;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (filler &gt; <span class="number">0</span>)</span><br><span class="line">&#123;</span><br><span class="line">    filler = (filler - FILLER_OVERHEAD * <span class="number">8</span>) &gt;&gt; <span class="number">3</span>;</span><br><span class="line">    m_bs.<span class="built_in">resetBits</span>();</span><br><span class="line">    <span class="comment">// 向编码数据流中写入0xff，强行增加NALU的大小，解码器会忽略这些数据</span></span><br><span class="line">    <span class="keyword">while</span> (filler &gt; <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        m_bs.<span class="built_in">write</span>(<span class="number">0xff</span>, <span class="number">8</span>);</span><br><span class="line">        filler--;</span><br><span class="line">    &#125;</span><br><span class="line">    m_bs.<span class="built_in">writeByteAlignment</span>();</span><br><span class="line">    m_nalList.<span class="built_in">serialize</span>(NAL_UNIT_FILLER_DATA, m_bs);</span><br><span class="line">    bytes += m_nalList.m_nal[m_nalList.m_numNal - <span class="number">1</span>].sizeBytes;</span><br><span class="line">    bytes -= <span class="number">3</span>; <span class="comment">//exclude start code prefix</span></span><br><span class="line">    m_accessUnitBits = bytes &lt;&lt; <span class="number">3</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="CQP"><a href="#CQP" class="headerlink" title="CQP"></a>CQP</h2><p>固定QP（Constant QP），量化参数控制着压缩的大小，QP越大压缩率越高同时质量越低，QP越小压缩率越低同时质量越高，在H.265中QP的范围是0-51之间的整数，采用CQP模式会导致根据场景复杂度不同比特率波动很大，无法控制实际比特率。CQP模式下没有VBV。</p>
+<p>在无损模式下，P帧、I帧、B帧的QP都是一样的，在非无损模式下，外部设置的是P帧的QP，I帧和B帧会根据偏移系数进行偏移。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">m_qp = m_param-&gt;rc.qp;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (m_param-&gt;rc.rateControlMode == X265_RC_CQP)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (m_qp &amp;&amp; !m_param-&gt;bLossless)</span><br><span class="line">    &#123;</span><br><span class="line">        m_qpConstant[P_SLICE] = m_qp;</span><br><span class="line">        m_qpConstant[I_SLICE] = <span class="built_in">x265_clip3</span>(QP_MIN, QP_MAX_MAX, (<span class="type">int</span>)(m_qp - m_ipOffset + <span class="number">0.5</span>));</span><br><span class="line">        m_qpConstant[B_SLICE] = <span class="built_in">x265_clip3</span>(QP_MIN, QP_MAX_MAX, (<span class="type">int</span>)(m_qp + m_pbOffset + <span class="number">0.5</span>));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        m_qpConstant[P_SLICE] = m_qpConstant[I_SLICE] = m_qpConstant[B_SLICE] = m_qp;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对于大B帧，其QP是B帧和P帧的平均值</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (m_sliceType == B_SLICE &amp;&amp; <span class="built_in">IS_REFERENCED</span>(curFrame))</span><br><span class="line">    m_qp = (m_qpConstant[B_SLICE] + m_qpConstant[P_SLICE]) / <span class="number">2</span>; <span class="comment">// Bref</span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    m_qp = m_qpConstant[m_sliceType]; <span class="comment">// I/B/P</span></span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>高振宇
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://witgao.com/2021/11/17/av/x265%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8B%E7%A0%81%E7%8E%87%E6%8E%A7%E5%88%B6/" title="x265源码分析之码率控制">https://witgao.com/2021/11/17/av/x265源码分析之码率控制/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/x265/" rel="tag"><i class="fa fa-tag"></i> x265</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/07/20/c++/libc++%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8Bshared_ptr/" rel="prev" title="libc++源码分析之std::shared_ptr">
+                  <i class="fa fa-chevron-left"></i> libc++源码分析之std::shared_ptr
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/01/30/c++/libc++%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8Bstring/" rel="next" title="libc++源码分析之std::string">
+                  libc++源码分析之std::string <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">高振宇</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">75k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:33</span>
+  </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

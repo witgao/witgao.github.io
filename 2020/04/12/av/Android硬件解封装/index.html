@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha256-Z1K5uhUaJXA7Ll0XrZ/0JhX4lAtZFpT6jkKrEDT0drU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"witgao.com","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.14.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="硬件解封装Android平台针对音视频封装提供了MediaMuxer API，支持.mp4格式的封装；针对解封装提供了MediaExtractor API，支持.mp4等格式。 API架构在 frameworks&#x2F;base&#x2F;media 文件夹中提供了所有音视频相关的Java层API，本文中讲述的解封装API都定义在该处。而具体的服务实现都在 frameworks&#x2F;av">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android硬件解封装">
+<meta property="og:url" content="https://witgao.com/2020/04/12/av/Android%E7%A1%AC%E4%BB%B6%E8%A7%A3%E5%B0%81%E8%A3%85/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:description" content="硬件解封装Android平台针对音视频封装提供了MediaMuxer API，支持.mp4格式的封装；针对解封装提供了MediaExtractor API，支持.mp4等格式。 API架构在 frameworks&#x2F;base&#x2F;media 文件夹中提供了所有音视频相关的Java层API，本文中讲述的解封装API都定义在该处。而具体的服务实现都在 frameworks&#x2F;av">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://witgao.com/2020/04/12/av/Android%E7%A1%AC%E4%BB%B6%E8%A7%A3%E5%B0%81%E8%A3%85/android_muxer_demuxer.jpg">
+<meta property="og:image" content="https://witgao.com/2020/04/12/av/Android%E7%A1%AC%E4%BB%B6%E8%A7%A3%E5%B0%81%E8%A3%85/media_extractor_support.png">
+<meta property="og:image" content="https://witgao.com/2020/04/12/av/Android%E7%A1%AC%E4%BB%B6%E8%A7%A3%E5%B0%81%E8%A3%85/media_extractor_format_key.png">
+<meta property="og:image" content="https://witgao.com/2020/04/12/av/Android%E7%A1%AC%E4%BB%B6%E8%A7%A3%E5%B0%81%E8%A3%85/media_muxer_support.png">
+<meta property="og:image" content="https://witgao.com/2020/04/12/av/Android%E7%A1%AC%E4%BB%B6%E8%A7%A3%E5%B0%81%E8%A3%85/media_muxer_format_key.png">
+<meta property="article:published_time" content="2020-04-11T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-01-31T05:07:38.605Z">
+<meta property="article:author" content="高振宇">
+<meta property="article:tag" content="Android">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://witgao.com/2020/04/12/av/Android%E7%A1%AC%E4%BB%B6%E8%A7%A3%E5%B0%81%E8%A3%85/android_muxer_demuxer.jpg">
+
+
+<link rel="canonical" href="https://witgao.com/2020/04/12/av/Android%E7%A1%AC%E4%BB%B6%E8%A7%A3%E5%B0%81%E8%A3%85/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://witgao.com/2020/04/12/av/Android%E7%A1%AC%E4%BB%B6%E8%A7%A3%E5%B0%81%E8%A3%85/","path":"2020/04/12/av/Android硬件解封装/","title":"Android硬件解封装"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Android硬件解封装 | 富贵山庄</title>
+  
+
+
+
+
+
+
+  <script async defer data-website-id="" src=""></script>
+
+  <script defer data-domain="" src=""></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">富贵山庄</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">恒者行远，思者常新</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%A1%AC%E4%BB%B6%E8%A7%A3%E5%B0%81%E8%A3%85"><span class="nav-number">1.</span> <span class="nav-text">硬件解封装</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#API%E6%9E%B6%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">API架构</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MediaExtractor-%E8%A7%A3%E5%B0%81%E8%A3%85"><span class="nav-number">3.</span> <span class="nav-text">MediaExtractor 解封装</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%94%AF%E6%8C%81%E7%9A%84%E6%A0%BC%E5%BC%8F"><span class="nav-number">3.1.</span> <span class="nav-text">支持的格式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B3%A8%E5%86%8C%E8%A7%A3%E5%B0%81%E8%A3%85%E5%99%A8"><span class="nav-number">3.2.</span> <span class="nav-text">注册解封装器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E8%A7%A3%E5%B0%81%E8%A3%85%E5%99%A8"><span class="nav-number">3.3.</span> <span class="nav-text">创建解封装器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%89%E6%8B%A9%E6%9C%80%E5%90%88%E9%80%82%E7%9A%84%E8%A7%A3%E5%B0%81%E8%A3%85%E5%99%A8%E5%AE%9E%E4%BE%8B"><span class="nav-number">3.3.1.</span> <span class="nav-text">选择最合适的解封装器实例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#WAV%E8%A7%A3%E5%B0%81%E8%A3%85%E5%99%A8"><span class="nav-number">3.3.2.</span> <span class="nav-text">WAV解封装器</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%87%8D%E8%A6%81%E6%96%B9%E6%B3%95%E8%AF%A6%E8%A7%A3"><span class="nav-number">3.4.</span> <span class="nav-text">重要方法详解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#setDataSource"><span class="nav-number">3.4.1.</span> <span class="nav-text">setDataSource</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#selectTrack%E3%80%81unselectTrack"><span class="nav-number">3.4.2.</span> <span class="nav-text">selectTrack、unselectTrack</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#getTrackCount"><span class="nav-number">3.4.3.</span> <span class="nav-text">getTrackCount</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#getTrackFormat"><span class="nav-number">3.4.4.</span> <span class="nav-text">getTrackFormat</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#readSampleData"><span class="nav-number">3.4.5.</span> <span class="nav-text">readSampleData</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#getSampleTrackIndex"><span class="nav-number">3.4.6.</span> <span class="nav-text">getSampleTrackIndex</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#getSampleTime"><span class="nav-number">3.4.7.</span> <span class="nav-text">getSampleTime</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#getSmapleFlags"><span class="nav-number">3.4.8.</span> <span class="nav-text">getSmapleFlags</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#seekTo"><span class="nav-number">3.4.9.</span> <span class="nav-text">seekTo</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#advance"><span class="nav-number">3.4.10.</span> <span class="nav-text">advance</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#release"><span class="nav-number">3.4.11.</span> <span class="nav-text">release</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MediaMuxer-%E5%B0%81%E8%A3%85"><span class="nav-number">4.</span> <span class="nav-text">MediaMuxer 封装</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%94%AF%E6%8C%81%E7%9A%84%E6%A0%BC%E5%BC%8F-1"><span class="nav-number">4.1.</span> <span class="nav-text">支持的格式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E5%B0%81%E8%A3%85%E5%99%A8"><span class="nav-number">4.2.</span> <span class="nav-text">创建封装器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%87%8D%E8%A6%81%E6%96%B9%E6%B3%95%E8%AF%A6%E8%A7%A3-1"><span class="nav-number">4.3.</span> <span class="nav-text">重要方法详解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#addTrack"><span class="nav-number">4.3.1.</span> <span class="nav-text">addTrack</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#writeSampleData"><span class="nav-number">4.3.2.</span> <span class="nav-text">writeSampleData</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#start"><span class="nav-number">4.3.3.</span> <span class="nav-text">start</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#stop"><span class="nav-number">4.3.4.</span> <span class="nav-text">stop</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#release-1"><span class="nav-number">4.3.5.</span> <span class="nav-text">release</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MediaMetadataRetriever-%E8%8E%B7%E5%8F%96%E5%85%83%E4%BF%A1%E6%81%AF-%EF%BC%88%E6%89%A9%E5%B1%95%EF%BC%89"><span class="nav-number">5.</span> <span class="nav-text">MediaMetadataRetriever 获取元信息 （扩展）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%87%8D%E8%A6%81%E6%96%B9%E6%B3%95%E8%AF%A6%E8%A7%A3-2"><span class="nav-number">5.1.</span> <span class="nav-text">重要方法详解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#extractMetadata"><span class="nav-number">5.1.1.</span> <span class="nav-text">extractMetadata</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#getFrameAtTime"><span class="nav-number">5.1.2.</span> <span class="nav-text">getFrameAtTime</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="高振宇"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">高振宇</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">33</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/witgao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;witgao" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:witgao328@gmail.com" title="E-Mail → mailto:witgao328@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2020/04/12/av/Android%E7%A1%AC%E4%BB%B6%E8%A7%A3%E5%B0%81%E8%A3%85/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="高振宇">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Android硬件解封装 | 富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android硬件解封装
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-04-12 00:00:00" itemprop="dateCreated datePublished" datetime="2020-04-12T00:00:00+08:00">2020-04-12</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/" itemprop="url" rel="index"><span itemprop="name">音视频</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.9k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>11 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="硬件解封装"><a href="#硬件解封装" class="headerlink" title="硬件解封装"></a>硬件解封装</h1><p>Android平台针对音视频封装提供了<strong>MediaMuxer API</strong>，支持.mp4格式的封装；针对解封装提供了<strong>MediaExtractor API</strong>，支持.mp4等格式。</p>
+<h1 id="API架构"><a href="#API架构" class="headerlink" title="API架构"></a>API架构</h1><p>在 <strong>frameworks&#x2F;base&#x2F;media</strong> 文件夹中提供了所有音视频相关的Java层API，本文中讲述的解封装API都定义在该处。而具体的服务实现都在 <strong>frameworks&#x2F;av</strong> 文件夹中</p>
+<p><img src="/2020/04/12/av/Android%E7%A1%AC%E4%BB%B6%E8%A7%A3%E5%B0%81%E8%A3%85/android_muxer_demuxer.jpg"></p>
+<p>自7.0开始，MediaService被拆分成多个服务，每个服务都运行在各自的进程中。</p>
+<span id="more"></span>
+
+<h1 id="MediaExtractor-解封装"><a href="#MediaExtractor-解封装" class="headerlink" title="MediaExtractor 解封装"></a>MediaExtractor 解封装</h1><p>MediaExtractor类是官方提供的音视频解封装类。其官方使用Demo如下所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建解封装器 </span></span><br><span class="line"><span class="type">MediaExtractor</span> <span class="variable">extractor</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MediaExtractor</span>();</span><br><span class="line"><span class="comment">// 设置数据源</span></span><br><span class="line"> extractor.setDataSource(...);</span><br><span class="line"><span class="comment">// 遍历所有轨道</span></span><br><span class="line"> <span class="type">int</span> <span class="variable">numTracks</span> <span class="operator">=</span> extractor.getTrackCount();</span><br><span class="line"> <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; numTracks; ++i) &#123;</span><br><span class="line">   <span class="type">MediaFormat</span> <span class="variable">format</span> <span class="operator">=</span> extractor.getTrackFormat(i);</span><br><span class="line">   <span class="type">String</span> <span class="variable">mime</span> <span class="operator">=</span> format.getString(MediaFormat.KEY_MIME);</span><br><span class="line">   <span class="comment">// 根据轨道类型选择想要的轨道</span></span><br><span class="line">   <span class="keyword">if</span> (weAreInterestedInThisTrack) &#123;</span><br><span class="line">     extractor.selectTrack(i);</span><br><span class="line">   &#125;</span><br><span class="line"> &#125;</span><br><span class="line"> <span class="type">ByteBuffer</span> <span class="variable">inputBuffer</span> <span class="operator">=</span> ByteBuffer.allocate(...)</span><br><span class="line"> <span class="comment">// 读取选中轨道的样本数据</span></span><br><span class="line"> <span class="keyword">while</span> (extractor.readSampleData(inputBuffer, ...) &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">   <span class="type">int</span> <span class="variable">trackIndex</span> <span class="operator">=</span> extractor.getSampleTrackIndex();</span><br><span class="line">   <span class="type">long</span> <span class="variable">presentationTimeUs</span> <span class="operator">=</span> extractor.getSampleTime();</span><br><span class="line">   ...</span><br><span class="line">   <span class="comment">// 下一个样本</span></span><br><span class="line">   extractor.advance();</span><br><span class="line"> &#125;</span><br><span class="line"> extractor.release();</span><br><span class="line"> extractor = <span class="literal">null</span>;</span><br></pre></td></tr></table></figure>
+
+<h2 id="支持的格式"><a href="#支持的格式" class="headerlink" title="支持的格式"></a>支持的格式</h2><p><img src="/2020/04/12/av/Android%E7%A1%AC%E4%BB%B6%E8%A7%A3%E5%B0%81%E8%A3%85/media_extractor_support.png"></p>
+<h2 id="注册解封装器"><a href="#注册解封装器" class="headerlink" title="注册解封装器"></a>注册解封装器</h2><p>在<strong>MediaExtractorService</strong>被创建的时候，会注册所有的Extractor实现。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// libDirPath 有两个，一个是 /apex/com.android.media/lib/extractors/ ，另一个是/system/lib/extractors/ </span></span><br><span class="line"><span class="type">void</span> <span class="title function_">MediaExtractorFactory::RegisterExtractors</span><span class="params">(</span></span><br><span class="line"><span class="params">        <span class="type">const</span> <span class="type">char</span> *libDirPath, <span class="type">const</span> android_dlextinfo* dlextinfo,</span></span><br><span class="line"><span class="params">        <span class="built_in">std</span>::<span class="built_in">list</span>&lt;sp&lt;ExtractorPlugin&gt;&gt; &amp;pluginList)</span> &#123;</span><br><span class="line">    DIR *libDir = opendir(libDirPath);</span><br><span class="line">    <span class="keyword">if</span> (libDir) &#123;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> <span class="title">dirent</span>* <span class="title">libEntry</span>;</span></span><br><span class="line">        <span class="keyword">while</span> ((libEntry = readdir(libDir))) &#123;</span><br><span class="line">            <span class="keyword">if</span> (libEntry-&gt;d_name[<span class="number">0</span>] == <span class="string">&#x27;.&#x27;</span>) &#123;</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            String8 libPath = String8(libDirPath) + <span class="string">&quot;/&quot;</span> + libEntry-&gt;d_name;</span><br><span class="line">            <span class="keyword">if</span> (!libPath.contains(<span class="string">&quot;extractor.so&quot;</span>)) &#123;</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 加载 extractor.so</span></span><br><span class="line">            <span class="type">void</span> *libHandle = android_dlopen_ext(</span><br><span class="line">                    libPath.<span class="built_in">string</span>(),</span><br><span class="line">                    RTLD_NOW | RTLD_LOCAL, dlextinfo);</span><br><span class="line">         </span><br><span class="line">            <span class="comment">// 查找GETEXTRACTORDEF函数</span></span><br><span class="line">            GetExtractorDef getDef =</span><br><span class="line">                (GetExtractorDef) dlsym(libHandle, <span class="string">&quot;GETEXTRACTORDEF&quot;</span>);</span><br><span class="line">            <span class="comment">// 执行GETEXTRACTORDEF函数，获取到解封装器配置，创建一个Plugin，加入到list中</span></span><br><span class="line">            RegisterExtractor(</span><br><span class="line">                    new ExtractorPlugin(getDef(), libHandle, libPath), pluginList);</span><br><span class="line">        &#125;</span><br><span class="line">        closedir(libDir);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        ALOGE(<span class="string">&quot;couldn&#x27;t opendir(%s)&quot;</span>, libDirPath);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<!-- more -->
+
+<p>MPEG-4的GETEXTRACTORDEF函数，其中的 Sniff方法就是创建对象的构造器。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">ExtractorDef <span class="title function_">GETEXTRACTORDEF</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        EXTRACTORDEF_VERSION,</span><br><span class="line">        UUID(<span class="string">&quot;27575c67-4417-4c54-8d3d-8e626985a164&quot;</span>),</span><br><span class="line">        <span class="number">2</span>, <span class="comment">// version</span></span><br><span class="line">        <span class="string">&quot;MP4 Extractor&quot;</span>,</span><br><span class="line">        &#123; .v3 = &#123;Sniff, extensions&#125; &#125;,</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="创建解封装器"><a href="#创建解封装器" class="headerlink" title="创建解封装器"></a>创建解封装器</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">sp&lt;IMediaExtractor&gt; <span class="title function_">MediaExtractorFactory::CreateFromService</span><span class="params">(</span></span><br><span class="line"><span class="params">        <span class="type">const</span> sp&lt;DataSource&gt; &amp;source, <span class="type">const</span> <span class="type">char</span> *mime)</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 根据上面注册的Sniff函数，获取最合适的解封装器的CreateExtractor函数。</span></span><br><span class="line">    creator = sniff(source, &amp;confidence, &amp;meta, &amp;freeMeta, plugin, &amp;creatorVersion);</span><br><span class="line">    <span class="keyword">if</span> (!creator) &#123;</span><br><span class="line">        ALOGV(<span class="string">&quot;FAILED to autodetect media content.&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    MediaExtractor *ex = nullptr;</span><br><span class="line">    <span class="keyword">if</span> (creatorVersion == EXTRACTORDEF_VERSION_NDK_V1 ||</span><br><span class="line">            creatorVersion == EXTRACTORDEF_VERSION_NDK_V2) &#123;</span><br><span class="line">        <span class="comment">// 创建具体的解封装器实例</span></span><br><span class="line">        CMediaExtractor *ret = ((CreatorFunc)creator)(source-&gt;wrap(), meta);</span><br><span class="line">        <span class="keyword">if</span> (meta != nullptr &amp;&amp; freeMeta != nullptr) &#123;</span><br><span class="line">            freeMeta(meta);</span><br><span class="line">        &#125;</span><br><span class="line">        ex = ret != nullptr ? new MediaExtractorCUnwrapper(ret) : nullptr;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> CreateIMediaExtractorFromMediaExtractor(ex, source, plugin);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="选择最合适的解封装器实例"><a href="#选择最合适的解封装器实例" class="headerlink" title="选择最合适的解封装器实例"></a>选择最合适的解封装器实例</h3><p>选择具体格式的封装器是通过将DataSource依次给所有已经注册的解封装器的Sniff函数进行尝试，每次尝试都会有一个分数返回，保存在confidence中，最终会选择分数最大的做为最终的解封装器。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> *<span class="title function_">MediaExtractorFactory::sniff</span><span class="params">(</span></span><br><span class="line"><span class="params">        <span class="type">const</span> sp&lt;DataSource&gt; &amp;source, <span class="type">float</span> *confidence, <span class="type">void</span> **meta,</span></span><br><span class="line"><span class="params">        FreeMetaFunc *freeMeta, sp&lt;ExtractorPlugin&gt; &amp;plugin, <span class="type">uint32_t</span> *creatorVersion)</span> &#123;</span><br><span class="line">    <span class="comment">// 初始分数为0</span></span><br><span class="line">  	*confidence = <span class="number">0.0f</span>;</span><br><span class="line">    *meta = nullptr;</span><br><span class="line">    <span class="comment">// 所有注册的解封装器实例</span></span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">shared_ptr</span>&lt;<span class="built_in">std</span>::<span class="built_in">list</span>&lt;sp&lt;ExtractorPlugin&gt;&gt;&gt; plugins;</span><br><span class="line">    &#123;</span><br><span class="line">        Mutex::Autolock <span class="title function_">autoLock</span><span class="params">(gPluginMutex)</span>;</span><br><span class="line">        <span class="keyword">if</span> (!gPluginsRegistered) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        plugins = gPlugins;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 遍历</span></span><br><span class="line">    <span class="type">void</span> *bestCreator = <span class="literal">NULL</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">auto</span> it = plugins-&gt;begin(); it != plugins-&gt;end(); ++it) &#123;</span><br><span class="line">        ALOGV(<span class="string">&quot;sniffing %s&quot;</span>, (*it)-&gt;def.extractor_name);</span><br><span class="line">        <span class="type">float</span> newConfidence;</span><br><span class="line">        <span class="type">void</span> *newMeta = nullptr;</span><br><span class="line">        FreeMetaFunc newFreeMeta = nullptr;</span><br><span class="line">        <span class="comment">// 执行对应实例的Sniff函数</span></span><br><span class="line">        <span class="type">void</span> *curCreator = <span class="literal">NULL</span>;</span><br><span class="line">        <span class="keyword">if</span> ((*it)-&gt;def.def_version == EXTRACTORDEF_VERSION_NDK_V1) &#123;</span><br><span class="line">            curCreator = (<span class="type">void</span>*) (*it)-&gt;def.u.v2.sniff(</span><br><span class="line">                    source-&gt;wrap(), &amp;newConfidence, &amp;newMeta, &amp;newFreeMeta);</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> ((*it)-&gt;def.def_version == EXTRACTORDEF_VERSION_NDK_V2) &#123;</span><br><span class="line">            curCreator = (<span class="type">void</span>*) (*it)-&gt;def.u.v3.sniff(</span><br><span class="line">                    source-&gt;wrap(), &amp;newConfidence, &amp;newMeta, &amp;newFreeMeta);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 如果实例创建成功</span></span><br><span class="line">        <span class="keyword">if</span> (curCreator) &#123;</span><br><span class="line">            <span class="comment">// 则对比分数，分数大于上次的则将该实例作为最合适实例；</span></span><br><span class="line">            <span class="keyword">if</span> (newConfidence &gt; *confidence) &#123;</span><br><span class="line">                *confidence = newConfidence;</span><br><span class="line">                <span class="keyword">if</span> (*meta != nullptr &amp;&amp; *freeMeta != nullptr) &#123;</span><br><span class="line">                    (*freeMeta)(*meta);</span><br><span class="line">                &#125;</span><br><span class="line">                *meta = newMeta;</span><br><span class="line">                *freeMeta = newFreeMeta;</span><br><span class="line">                plugin = *it;</span><br><span class="line">                bestCreator = curCreator;</span><br><span class="line">                *creatorVersion = (*it)-&gt;def.def_version;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">// 小于则释放</span></span><br><span class="line">                <span class="keyword">if</span> (newMeta != nullptr &amp;&amp; newFreeMeta != nullptr) &#123;</span><br><span class="line">                    newFreeMeta(newMeta);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 返回分数最高的实例</span></span><br><span class="line">    <span class="keyword">return</span> bestCreator;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="WAV解封装器"><a href="#WAV解封装器" class="headerlink" title="WAV解封装器"></a>WAV解封装器</h3><p>下面就是WAV格式的解封装器的Sniff函数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> CreatorFunc <span class="title function_">Sniff</span><span class="params">(</span></span><br><span class="line"><span class="params">        CDataSource *source,</span></span><br><span class="line"><span class="params">        <span class="type">float</span> *confidence,</span></span><br><span class="line"><span class="params">        <span class="type">void</span> **,</span></span><br><span class="line"><span class="params">        FreeMetaFunc *)</span> &#123;</span><br><span class="line">    DataSourceHelper *helper = new DataSourceHelper(source);</span><br><span class="line">    <span class="type">char</span> header[<span class="number">12</span>];</span><br><span class="line">    <span class="keyword">if</span> (helper-&gt;readAt(<span class="number">0</span>, header, <span class="keyword">sizeof</span>(header)) &lt; (<span class="type">ssize_t</span>)<span class="keyword">sizeof</span>(header)) &#123;</span><br><span class="line">        delete helper;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">memcmp</span>(header, <span class="string">&quot;RIFF&quot;</span>, <span class="number">4</span>) || <span class="built_in">memcmp</span>(&amp;header[<span class="number">8</span>], <span class="string">&quot;WAVE&quot;</span>, <span class="number">4</span>)) &#123;</span><br><span class="line">        delete helper;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    WAVExtractor *extractor = new WAVExtractor(helper); <span class="comment">// extractor owns the helper</span></span><br><span class="line">    <span class="type">int</span> numTracks = extractor-&gt;countTracks();</span><br><span class="line">    delete extractor;</span><br><span class="line">    <span class="keyword">if</span> (numTracks == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    *confidence = <span class="number">0.3f</span>;</span><br><span class="line">    <span class="keyword">return</span> CreateExtractor;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="重要方法详解"><a href="#重要方法详解" class="headerlink" title="重要方法详解"></a>重要方法详解</h2><h3 id="setDataSource"><a href="#setDataSource" class="headerlink" title="setDataSource"></a>setDataSource</h3><p>​	方法很简单，就是设置数据源，对于数据源的协议目前只支持本地文件和HTTP、HTTPS。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line">sp&lt;DataSource&gt; <span class="title function_">DataSourceFactory::CreateFromURI</span><span class="params">(</span></span><br><span class="line"><span class="params">        <span class="type">const</span> sp&lt;MediaHTTPService&gt; &amp;httpService,</span></span><br><span class="line"><span class="params">        <span class="type">const</span> <span class="type">char</span> *uri,</span></span><br><span class="line"><span class="params">        <span class="type">const</span> KeyedVector&lt;String8, String8&gt; *headers,</span></span><br><span class="line"><span class="params">        String8 *contentType,</span></span><br><span class="line"><span class="params">        HTTPBase *httpSource)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (contentType != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        *contentType = <span class="string">&quot;&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    sp&lt;DataSource&gt; source;</span><br><span class="line">    <span class="keyword">if</span> (!strncasecmp(<span class="string">&quot;file://&quot;</span>, uri, <span class="number">7</span>)) &#123;</span><br><span class="line">        <span class="comment">// 本地文件</span></span><br><span class="line">        source = CreateFileSource(uri + <span class="number">7</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (!strncasecmp(<span class="string">&quot;http://&quot;</span>, uri, <span class="number">7</span>) || !strncasecmp(<span class="string">&quot;https://&quot;</span>, uri, <span class="number">8</span>)) &#123;</span><br><span class="line">      	<span class="comment">// HTTP HTTPS</span></span><br><span class="line">        sp&lt;HTTPBase&gt; mediaHTTP = httpSource;</span><br><span class="line">        <span class="keyword">if</span> (mediaHTTP == <span class="literal">NULL</span>) &#123;</span><br><span class="line">            mediaHTTP = static_cast&lt;HTTPBase *&gt;(CreateMediaHTTP(httpService).get());</span><br><span class="line">        &#125;</span><br><span class="line">        String8 cacheConfig;</span><br><span class="line">        <span class="type">bool</span> disconnectAtHighwatermark = <span class="literal">false</span>;</span><br><span class="line">        KeyedVector&lt;String8, String8&gt; nonCacheSpecificHeaders;</span><br><span class="line">        <span class="keyword">if</span> (headers != <span class="literal">NULL</span>) &#123;</span><br><span class="line">            nonCacheSpecificHeaders = *headers;</span><br><span class="line">            NuCachedSource2::RemoveCacheSpecificHeaders(</span><br><span class="line">                    &amp;nonCacheSpecificHeaders,</span><br><span class="line">                    &amp;cacheConfig,</span><br><span class="line">                    &amp;disconnectAtHighwatermark);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (mediaHTTP-&gt;connect(uri, &amp;nonCacheSpecificHeaders) != OK) &#123;</span><br><span class="line">            ALOGE(<span class="string">&quot;Failed to connect http source!&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (contentType != <span class="literal">NULL</span>) &#123;</span><br><span class="line">            *contentType = mediaHTTP-&gt;getMIMEType();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        source = NuCachedSource2::Create(</span><br><span class="line">                mediaHTTP,</span><br><span class="line">                cacheConfig.isEmpty() ? <span class="literal">NULL</span> : cacheConfig.<span class="built_in">string</span>(),</span><br><span class="line">                disconnectAtHighwatermark);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (!strncasecmp(<span class="string">&quot;data:&quot;</span>, uri, <span class="number">5</span>)) &#123;</span><br><span class="line">        source = DataURISource::Create(uri);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      	<span class="comment">// 如果scheme都不符合，则假设其是个本地文件</span></span><br><span class="line">        source = CreateFileSource(uri);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (source == <span class="literal">NULL</span> || source-&gt;initCheck() != OK) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> source;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="selectTrack、unselectTrack"><a href="#selectTrack、unselectTrack" class="headerlink" title="selectTrack、unselectTrack"></a>selectTrack、unselectTrack</h3><p>选中指定轨道和解除选中。一个媒体文件中会包含着多个轨道，比如音频轨道和视频轨道等，在MediaExtractor中对样本数据的操作都是基于指定的轨道来的，所以在操作样本数据之前，必须先选中一个轨道。</p>
+<p>当一个轨道被选中后，后续的<strong>getSamplexxx</strong>方法都是针对该轨道，如果想换一个轨道进行处理，则必须先解除当前轨道的选中，调用unselectTrack函数。</p>
+<p>对于如何选择想要的轨道，可以通过<strong>getTrackFormat</strong>方法来获取每一个轨道的详细信息，通过这些信息筛选出想要处理的轨道。</p>
+<h3 id="getTrackCount"><a href="#getTrackCount" class="headerlink" title="getTrackCount"></a>getTrackCount</h3><p>获取当前媒体文件中的轨道数量，通常用来遍历所有的轨道。</p>
+<h3 id="getTrackFormat"><a href="#getTrackFormat" class="headerlink" title="getTrackFormat"></a>getTrackFormat</h3><p>获取指定索引的轨道的详细信息，索引的值从0开始递增。轨道信息在不同Android版本上有不同的支持，在使用的时候需要注意。</p>
+<p><img src="/2020/04/12/av/Android%E7%A1%AC%E4%BB%B6%E8%A7%A3%E5%B0%81%E8%A3%85/media_extractor_format_key.png"></p>
+<blockquote>
+<p>这里有一点需要注意，就是在使用轨道的MediaFormat对象去创建解码器的时候，最好先将KEY_LEVEL的值设置为null（<code>MediaFormat.setString(KEY_LEVEL, null)</code>），因为这个值经常不准。</p>
+</blockquote>
+<h3 id="readSampleData"><a href="#readSampleData" class="headerlink" title="readSampleData"></a>readSampleData</h3><p>读取当前选中的轨道的一个样本数据，返回读取的size，这里要注意的是buffer的大小，需要足够大，否则无法一次读取完一个样本，通常可以使用<strong>MediaFormat.KEY_MAX_INPUT_SIZE</strong>来获取。</p>
+<p>返回-1则表示当前轨道已经没有可读取的样本数据了。</p>
+<h3 id="getSampleTrackIndex"><a href="#getSampleTrackIndex" class="headerlink" title="getSampleTrackIndex"></a>getSampleTrackIndex</h3><p>查询当前样本来源的轨道索引，也就是当前选中的轨道索引。如果当前轨道没有可读取的样本数据，会返回-1。</p>
+<h3 id="getSampleTime"><a href="#getSampleTime" class="headerlink" title="getSampleTime"></a>getSampleTime</h3><p>返回当前样本的PTS，微秒。</p>
+<h3 id="getSmapleFlags"><a href="#getSmapleFlags" class="headerlink" title="getSmapleFlags"></a>getSmapleFlags</h3><p>返回当前样本的标记，通过标记可以判断当前样本的一些特征。</p>
+<ul>
+<li>SAMPLE_FLAG_ENCRYPTED 样本数据被加密</li>
+<li>SAMPLE_FLAG_SYNC 样本为关键帧</li>
+</ul>
+<h3 id="seekTo"><a href="#seekTo" class="headerlink" title="seekTo"></a>seekTo</h3><p>根据指定模式跳转到指定时间，只能跳转到关键帧，所以最终时间可能会和指定时间有误差。模式有三种：</p>
+<ul>
+<li>SEEK_TO_CLOSEST_SYNC 在指定时间的前后查找最近关键帧</li>
+<li>SEEK_TO_NEXT_SYNC 在指定时间的后面查找最近关键帧</li>
+<li>SEEK_TO_PREVIOUS_SYNC 在指定时间的前面查找最近关键帧</li>
+</ul>
+<h3 id="advance"><a href="#advance" class="headerlink" title="advance"></a>advance</h3><p>移动到下一个样本，每次读取完样本数据后，都需要调用该方法，此时调用<strong>getSmaplexxx</strong>方法读取到的才是下一个样本的数据。</p>
+<p>如果当前轨道没有可读样本，则返回false。</p>
+<h3 id="release"><a href="#release" class="headerlink" title="release"></a>release</h3><p>释放资源</p>
+<h1 id="MediaMuxer-封装"><a href="#MediaMuxer-封装" class="headerlink" title="MediaMuxer 封装"></a>MediaMuxer 封装</h1><p>MediaMuxer类是官方提供的音视频封装类。其官方使用Demo如下所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建封装器，指定输出文件和封装格式。</span></span><br><span class="line"><span class="type">MediaMuxer</span> <span class="variable">muxer</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MediaMuxer</span>(<span class="string">&quot;temp.mp4&quot;</span>, OutputFormat.MUXER_OUTPUT_MPEG_4);</span><br><span class="line"><span class="comment">// 创建音频和视频轨道</span></span><br><span class="line"><span class="type">MediaFormat</span> <span class="variable">audioFormat</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MediaFormat</span>(...);</span><br><span class="line"><span class="type">MediaFormat</span> <span class="variable">videoFormat</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MediaFormat</span>(...);</span><br><span class="line"><span class="comment">// 将轨道添加到封装器中</span></span><br><span class="line"><span class="type">int</span> <span class="variable">audioTrackIndex</span> <span class="operator">=</span> muxer.addTrack(audioFormat);</span><br><span class="line"><span class="type">int</span> <span class="variable">videoTrackIndex</span> <span class="operator">=</span> muxer.addTrack(videoFormat);</span><br><span class="line"><span class="comment">// 创建一个buffer用来接收样本数据</span></span><br><span class="line"><span class="type">ByteBuffer</span> <span class="variable">inputBuffer</span> <span class="operator">=</span> ByteBuffer.allocate(bufferSize);</span><br><span class="line"><span class="type">boolean</span> <span class="variable">finished</span> <span class="operator">=</span> <span class="literal">false</span>;</span><br><span class="line"><span class="type">BufferInfo</span> <span class="variable">bufferInfo</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BufferInfo</span>();</span><br><span class="line"><span class="comment">// 启动封装器，启动后不可再更改</span></span><br><span class="line">muxer.start();</span><br><span class="line"><span class="keyword">while</span>(!finished) &#123;</span><br><span class="line">  <span class="comment">// 循环写入样本数据到指定轨道中</span></span><br><span class="line">  finished = getInputBuffer(inputBuffer, isAudioSample, bufferInfo);</span><br><span class="line">  <span class="keyword">if</span> (!finished) &#123;</span><br><span class="line">    <span class="type">int</span> <span class="variable">currentTrackIndex</span> <span class="operator">=</span> isAudioSample ? audioTrackIndex : videoTrackIndex;</span><br><span class="line">    muxer.writeSampleData(currentTrackIndex, inputBuffer, bufferInfo);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">// 停止封装器</span></span><br><span class="line">muxer.stop();</span><br><span class="line"><span class="comment">// 释放</span></span><br><span class="line">muxer.release();</span><br></pre></td></tr></table></figure>
+
+<h2 id="支持的格式-1"><a href="#支持的格式-1" class="headerlink" title="支持的格式"></a>支持的格式</h2><p><img src="/2020/04/12/av/Android%E7%A1%AC%E4%BB%B6%E8%A7%A3%E5%B0%81%E8%A3%85/media_muxer_support.png"></p>
+<h2 id="创建封装器"><a href="#创建封装器" class="headerlink" title="创建封装器"></a>创建封装器</h2><p>封装器的创建比较简单，根据指定的OutputFormat来创建对应格式的封装器。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">bool</span> <span class="title function_">isMp4Format</span><span class="params">(MediaMuxer::OutputFormat format)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> format == MediaMuxer::OUTPUT_FORMAT_MPEG_4 ||</span><br><span class="line">           format == MediaMuxer::OUTPUT_FORMAT_THREE_GPP ||</span><br><span class="line">           format == MediaMuxer::OUTPUT_FORMAT_HEIF;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">MediaMuxer::MediaMuxer(<span class="type">int</span> fd, OutputFormat format)</span><br><span class="line">    : mFormat(format),</span><br><span class="line">      mState(UNINITIALIZED) &#123;</span><br><span class="line">    <span class="comment">// 根据指定format创建对应的writer</span></span><br><span class="line">    <span class="keyword">if</span> (isMp4Format(format)) &#123;</span><br><span class="line">        mWriter = new MPEG4Writer(fd);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (format == OUTPUT_FORMAT_WEBM) &#123;</span><br><span class="line">        mWriter = new WebmWriter(fd);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (format == OUTPUT_FORMAT_OGG) &#123;</span><br><span class="line">        mWriter = new OggWriter(fd);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (mWriter != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        mFileMeta = new MetaData;</span><br><span class="line">        <span class="keyword">if</span> (format == OUTPUT_FORMAT_HEIF) &#123;</span><br><span class="line">            <span class="comment">// Note that the key uses recorder file types.</span></span><br><span class="line">            mFileMeta-&gt;setInt32(kKeyFileType, output_format::OUTPUT_FORMAT_HEIF);</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (format == OUTPUT_FORMAT_OGG) &#123;</span><br><span class="line">            mFileMeta-&gt;setInt32(kKeyFileType, output_format::OUTPUT_FORMAT_OGG);</span><br><span class="line">        &#125;</span><br><span class="line">        mState = INITIALIZED;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="重要方法详解-1"><a href="#重要方法详解-1" class="headerlink" title="重要方法详解"></a>重要方法详解</h2><h3 id="addTrack"><a href="#addTrack" class="headerlink" title="addTrack"></a>addTrack</h3><p>创建了封装器后，需要添加对应的轨道，轨道的信息通过MediaFormat来描述，也就是上面解封装器中通过<strong>getTrackFormat</strong>方法获取到的信息，通过这些信息添加一个轨道，添加成功返回轨道的索引，后续write数据的时候使用该索引即可。</p>
+<p>对于音频轨道，需要添加的是KEY_SAMPLE_RATE 采样率以及KEY_CHANNEL_COUT声道数，需要注意的是CSD的添加。</p>
+<p>对于视频轨道，处理必要的KEY_WIDTH和KEY_HEIGHT外，需要注意的有KEY_BIT_RATE码率和CSD的添加。</p>
+<blockquote>
+<p>关于CSD这里简单介绍下，也就是Codec-Specific Data，对于H.264来说，csd-0的数据为SPS序列参数集，csd-1的数据为PPS图像参数集，而对于AAC来说，csd-0的数据为ESDS。</p>
+</blockquote>
+<p>那么对于MediaFormat的key在不同版本中的支持情况与接封装器中的又不太一样，使用的时候需要注意参考下表。</p>
+<p><img src="/2020/04/12/av/Android%E7%A1%AC%E4%BB%B6%E8%A7%A3%E5%B0%81%E8%A3%85/media_muxer_format_key.png"></p>
+<h3 id="writeSampleData"><a href="#writeSampleData" class="headerlink" title="writeSampleData"></a>writeSampleData</h3><p>将编码后的样本数据写入到封装器中的指定轨道中，参数为轨道索引、数据buffer、bufferInfo。buffer和bufferInfo都是通过MediaCodec编码后产生的，需要注意的是bufferInfo的flag标记.</p>
+<ul>
+<li>BUFFER_FLAG_CODEC_CONFIG 表明buffer中包含CSD数据，而并非样本数据。</li>
+<li>BUFFER_FLAG_END_OF_STREAM 表明流结束。</li>
+<li>BUFFER_FLAG_KEY_FRAME 关键帧</li>
+<li>BUFFER_FLAG_SYNC_FRAME 关键帧，API21废弃</li>
+<li>BUFFER_FLAG_PARTIAL_FRAME 表明当前数据并非完整的一帧，API26添加</li>
+</ul>
+<blockquote>
+<p>这里需要注意的一点是，CSD数据是不能通过该方法来写入的，所以在调用该方法的时候需要判断bufferInfo的flag是否有BUFFER_FLAG_CODEC_CONFIG标记，没有BUFFER_FLAG_CODEC_CONFIG标记的数据才可以用该方法写入。CSD数据需要通过添加到轨道的MediaFormat中，跟随MediaFormt被addTrack到封装器中。</p>
+</blockquote>
+<h3 id="start"><a href="#start" class="headerlink" title="start"></a>start</h3><p>启动封装器，启动后无法再添加轨道。</p>
+<h3 id="stop"><a href="#stop" class="headerlink" title="stop"></a>stop</h3><p>停止封装器。</p>
+<h3 id="release-1"><a href="#release-1" class="headerlink" title="release"></a>release</h3><p>释放封装器。</p>
+<h1 id="MediaMetadataRetriever-获取元信息-（扩展）"><a href="#MediaMetadataRetriever-获取元信息-（扩展）" class="headerlink" title="MediaMetadataRetriever 获取元信息 （扩展）"></a>MediaMetadataRetriever 获取元信息 （扩展）</h1><p>MediaMetadataRetriever是用于获取媒体文件信息和指定帧数据的API。</p>
+<h2 id="重要方法详解-2"><a href="#重要方法详解-2" class="headerlink" title="重要方法详解"></a>重要方法详解</h2><h3 id="extractMetadata"><a href="#extractMetadata" class="headerlink" title="extractMetadata"></a>extractMetadata</h3><p>查询指定的媒体信息。常用的有以下几种KEY，需要注意返回的值很有可能为空。</p>
+<ul>
+<li>METADATA_KEY_BITRATE  如果可用，此键检索平均比特率（以比特&#x2F;秒为单位）。</li>
+<li>METADATA_KEY_CAPTURE_FRAMERATE  该键可检索原始捕获帧率（如果可用）</li>
+<li>METADATA_KEY_DATE  用于检索数据源创建或修改日期的元数据键。</li>
+<li>METADATA_KEY_HAS_AUDIO  如果此键存在，则媒体包含音频内容。</li>
+<li>METADATA_KEY_HAS_VIDEO  如果该键存在，则媒体包含视频内容。</li>
+<li>METADATA_KEY_LOCATION  该键检索位置信息（如果可用）。</li>
+<li>METADATA_KEY_MIMETYPE  用于检索数据源的MIME类型的元数据密钥。</li>
+<li>METADATA_KEY_TITLE  用于检索数据源标题的元数据键。</li>
+<li>METADATA_KEY_VIDEO_HEIGHT  如果媒体包含视频，则此键检索其高度。</li>
+<li>METADATA_KEY_VIDEO_ROTATION  如果可用，此键以度数检索视频旋转角度。</li>
+<li>METADATA_KEY_VIDEO_WIDTH  如果媒体包含视频，则此键检索其宽度。</li>
+</ul>
+<h3 id="getFrameAtTime"><a href="#getFrameAtTime" class="headerlink" title="getFrameAtTime"></a>getFrameAtTime</h3><p>根据指定模式，返回接近指定时间的关键帧数据，以bitmap格式返回。一般使用该方法获取封面图。</p>
+<ul>
+<li>OPTION_CLOSEST_SYNC 在指定时间的前后查找最近关键帧</li>
+<li>OPTION_NEXT_SYNC 在指定时间的后面查找最近关键帧</li>
+<li>OPTION_PREVIOUS_SYNC 在指定时间的前面查找最近关键帧</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>高振宇
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://witgao.com/2020/04/12/av/Android%E7%A1%AC%E4%BB%B6%E8%A7%A3%E5%B0%81%E8%A3%85/" title="Android硬件解封装">https://witgao.com/2020/04/12/av/Android硬件解封装/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/Android/" rel="tag"><i class="fa fa-tag"></i> Android</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/03/05/av/FFmpeg%E6%B7%B1%E5%85%A5%E4%B9%8Bavformat-open-input/" rel="prev" title="FFmpeg深入之avformat_open_input">
+                  <i class="fa fa-chevron-left"></i> FFmpeg深入之avformat_open_input
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/04/22/av/Android%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81/" rel="next" title="Android硬件编解码">
+                  Android硬件编解码 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">高振宇</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">75k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:33</span>
+  </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha256-Z1K5uhUaJXA7Ll0XrZ/0JhX4lAtZFpT6jkKrEDT0drU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"witgao.com","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.14.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="ffplay的整体结构是由5个线程和4个队列组成、运转的（不分析字幕）。 整体结构">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ffplay队列分析">
+<meta property="og:url" content="https://witgao.com/2020/08/02/av/ffplay%E9%98%9F%E5%88%97%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:description" content="ffplay的整体结构是由5个线程和4个队列组成、运转的（不分析字幕）。 整体结构">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://witgao.com/2020/08/02/av/ffplay%E9%98%9F%E5%88%97%E5%88%86%E6%9E%90/ffplay.png">
+<meta property="article:published_time" content="2020-08-01T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-01-31T03:27:03.472Z">
+<meta property="article:author" content="高振宇">
+<meta property="article:tag" content="FFmpeg">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://witgao.com/2020/08/02/av/ffplay%E9%98%9F%E5%88%97%E5%88%86%E6%9E%90/ffplay.png">
+
+
+<link rel="canonical" href="https://witgao.com/2020/08/02/av/ffplay%E9%98%9F%E5%88%97%E5%88%86%E6%9E%90/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://witgao.com/2020/08/02/av/ffplay%E9%98%9F%E5%88%97%E5%88%86%E6%9E%90/","path":"2020/08/02/av/ffplay队列分析/","title":"ffplay队列分析"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>ffplay队列分析 | 富贵山庄</title>
+  
+
+
+
+
+
+
+  <script async defer data-website-id="" src=""></script>
+
+  <script defer data-domain="" src=""></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">富贵山庄</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">恒者行远，思者常新</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%95%B4%E4%BD%93%E7%BB%93%E6%9E%84"><span class="nav-number">1.</span> <span class="nav-text">整体结构</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#5%E4%B8%AA%E7%BA%BF%E7%A8%8B"><span class="nav-number">1.1.</span> <span class="nav-text">5个线程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4%E4%B8%AA%E9%98%9F%E5%88%97"><span class="nav-number">1.2.</span> <span class="nav-text">4个队列</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#PacketQueue"><span class="nav-number">1.2.1.</span> <span class="nav-text">PacketQueue</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#packet-queue-init"><span class="nav-number">1.2.1.1.</span> <span class="nav-text">packet_queue_init</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#packet-queue-start"><span class="nav-number">1.2.1.2.</span> <span class="nav-text">packet_queue_start</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#packet-queue-destroy"><span class="nav-number">1.2.1.3.</span> <span class="nav-text">packet_queue_destroy</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#packet-queue-get"><span class="nav-number">1.2.1.4.</span> <span class="nav-text">packet_queue_get</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#packet-queue-put"><span class="nav-number">1.2.1.5.</span> <span class="nav-text">packet_queue_put</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FrameQueue"><span class="nav-number">1.2.2.</span> <span class="nav-text">FrameQueue</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#frame-queue-init"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">frame_queue_init</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#frame-queue-destory"><span class="nav-number">1.2.2.2.</span> <span class="nav-text">frame_queue_destory</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#frame-queue-peek-readable"><span class="nav-number">1.2.2.3.</span> <span class="nav-text">frame_queue_peek_readable</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#frame-queue-peek-writable"><span class="nav-number">1.2.2.4.</span> <span class="nav-text">frame_queue_peek_writable</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E4%BD%93"><span class="nav-number">1.3.</span> <span class="nav-text">结构体</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MyAVPacketList"><span class="nav-number">1.3.1.</span> <span class="nav-text">MyAVPacketList</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Frame"><span class="nav-number">1.3.2.</span> <span class="nav-text">Frame</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="高振宇"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">高振宇</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">33</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/witgao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;witgao" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:witgao328@gmail.com" title="E-Mail → mailto:witgao328@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2020/08/02/av/ffplay%E9%98%9F%E5%88%97%E5%88%86%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="高振宇">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="ffplay队列分析 | 富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ffplay队列分析
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-08-02 00:00:00" itemprop="dateCreated datePublished" datetime="2020-08-02T00:00:00+08:00">2020-08-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/" itemprop="url" rel="index"><span itemprop="name">音视频</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.8k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>10 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>ffplay的整体结构是由5个线程和4个队列组成、运转的（不分析字幕）。</p>
+<h1 id="整体结构"><a href="#整体结构" class="headerlink" title="整体结构"></a>整体结构</h1><p><img src="/2020/08/02/av/ffplay%E9%98%9F%E5%88%97%E5%88%86%E6%9E%90/ffplay.png" alt="音视频开发之ffplay队列分析"></p>
+<span id="more"></span>
+
+<h2 id="5个线程"><a href="#5个线程" class="headerlink" title="5个线程"></a>5个线程</h2><ul>
+<li>解复用线程 : read_thread，由主线程创建，负责媒体文件的解复用和读取，读取的数据根据流类型放入到对应的编码数据队列中。</li>
+<li>音频解码线程 : audio_thread，由read_thread创建，负责将编码数据队列中的数据解码，放入到原始数据队列中。</li>
+<li>视频解码线程 : video_thread，由read_thread创建，负责将编码数据队列中的数据解码，放入到原始数据队列中。</li>
+<li>音频渲染线程 : 由SDL创建，负责将音频原始数据队列中的数据发送给音频播放设备。</li>
+<li>视频渲染线程 : main线程，负责用视频原始数据队列中的数据不断的更新纹理内容，并刷新显示器进行显示。</li>
+</ul>
+<h2 id="4个队列"><a href="#4个队列" class="headerlink" title="4个队列"></a>4个队列</h2><ul>
+<li>FrameQueue pictq : 视频原始数据队列</li>
+<li>FrameQueue sampq : 音频原始数据队列</li>
+<li>PacketQueue audioq : 音频编码数据队列</li>
+<li>PacketQueue videoq : 视频编码数据队列</li>
+</ul>
+<h3 id="PacketQueue"><a href="#PacketQueue" class="headerlink" title="PacketQueue"></a>PacketQueue</h3><p>Packet队列是基于链表实现的普通队列，由于编码数据帧比较小，所以这是个无限队列。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">PacketQueue</span> &#123;</span></span><br><span class="line">  <span class="comment">// Packet队列采用的是链表结构</span></span><br><span class="line">  MyAVPacketList *first_pkt, *last_pkt;  <span class="comment">// 第一个节点和最后一个节点</span></span><br><span class="line">  <span class="type">int</span> nb_packets;                        <span class="comment">// 队列中节点个数</span></span><br><span class="line">  <span class="type">int</span> size;                              <span class="comment">// 队列中所有节点的字节总数</span></span><br><span class="line">  <span class="type">int64_t</span> duration;                      <span class="comment">// 队列中所有节点的总时长</span></span><br><span class="line">  <span class="type">int</span> abort_request;  <span class="comment">// 是否退出标记 1 退出，0 不退出</span></span><br><span class="line">  <span class="type">int</span> serial;         <span class="comment">// 序号</span></span><br><span class="line">  SDL_mutex *mutex;   <span class="comment">// 锁</span></span><br><span class="line">  SDL_cond *cond;     <span class="comment">// 互斥量</span></span><br><span class="line">&#125; PacketQueue;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="packet-queue-init"><a href="#packet-queue-init" class="headerlink" title="packet_queue_init"></a>packet_queue_init</h4><p>初始化队列</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">packet_queue_init</span><span class="params">(PacketQueue *q)</span> &#123;</span><br><span class="line">  <span class="comment">// 将编码数据队列初始化，清零</span></span><br><span class="line">  <span class="built_in">memset</span>(q, <span class="number">0</span>, <span class="keyword">sizeof</span>(PacketQueue));</span><br><span class="line">  <span class="comment">// 为队列创建锁</span></span><br><span class="line">  q-&gt;mutex = SDL_CreateMutex();</span><br><span class="line">  <span class="keyword">if</span> (!q-&gt;mutex) &#123;</span><br><span class="line">    av_log(<span class="literal">NULL</span>, AV_LOG_FATAL, <span class="string">&quot;SDL_CreateMutex(): %s\n&quot;</span>, SDL_GetError());</span><br><span class="line">    <span class="keyword">return</span> AVERROR(ENOMEM);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 为队列创建锁的互斥量</span></span><br><span class="line">  q-&gt;cond = SDL_CreateCond();</span><br><span class="line">  <span class="keyword">if</span> (!q-&gt;cond) &#123;</span><br><span class="line">    av_log(<span class="literal">NULL</span>, AV_LOG_FATAL, <span class="string">&quot;SDL_CreateCond(): %s\n&quot;</span>, SDL_GetError());</span><br><span class="line">    <span class="keyword">return</span> AVERROR(ENOMEM);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 队列设置为退出状态</span></span><br><span class="line">  q-&gt;abort_request = <span class="number">1</span>;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="packet-queue-start"><a href="#packet-queue-start" class="headerlink" title="packet_queue_start"></a>packet_queue_start</h4><p>启动队列，每次启动都会在队列中插入一个分割标记，并将队列序号+1</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">packet_queue_start</span><span class="params">(PacketQueue *q)</span> &#123;</span><br><span class="line">  <span class="comment">// 加锁</span></span><br><span class="line">  SDL_LockMutex(q-&gt;mutex);</span><br><span class="line">  <span class="comment">// 设置启动标记</span></span><br><span class="line">  q-&gt;abort_request = <span class="number">0</span>;</span><br><span class="line">  <span class="comment">// 队列中放入一个特殊的flush_pkt，用来做不连续的两段数据的分割标记</span></span><br><span class="line">  packet_queue_put_private(q, &amp;flush_pkt);</span><br><span class="line">  <span class="comment">// 解锁</span></span><br><span class="line">  SDL_UnlockMutex(q-&gt;mutex);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="packet-queue-destroy"><a href="#packet-queue-destroy" class="headerlink" title="packet_queue_destroy"></a>packet_queue_destroy</h4><p>销毁队列</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">packet_queue_flush</span><span class="params">(PacketQueue *q)</span> &#123;</span><br><span class="line">  MyAVPacketList *pkt, *pkt1;</span><br><span class="line">  <span class="comment">// 加锁</span></span><br><span class="line">  SDL_LockMutex(q-&gt;mutex);</span><br><span class="line">  <span class="comment">// 遍历整个链表，将每个节点的AVPacket对象进行销毁</span></span><br><span class="line">  <span class="keyword">for</span> (pkt = q-&gt;first_pkt; pkt; pkt = pkt1) &#123;</span><br><span class="line">    pkt1 = pkt-&gt;next;</span><br><span class="line">    av_packet_unref(&amp;pkt-&gt;pkt);</span><br><span class="line">    av_freep(&amp;pkt);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 将队列重置</span></span><br><span class="line">  q-&gt;last_pkt = <span class="literal">NULL</span>;</span><br><span class="line">  q-&gt;first_pkt = <span class="literal">NULL</span>;</span><br><span class="line">  q-&gt;nb_packets = <span class="number">0</span>;</span><br><span class="line">  q-&gt;size = <span class="number">0</span>;</span><br><span class="line">  q-&gt;duration = <span class="number">0</span>;</span><br><span class="line">  <span class="comment">// 解锁</span></span><br><span class="line">  SDL_UnlockMutex(q-&gt;mutex);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">packet_queue_destroy</span><span class="params">(PacketQueue *q)</span> &#123;</span><br><span class="line">  <span class="comment">// 销毁队列</span></span><br><span class="line">  packet_queue_flush(q);</span><br><span class="line">  <span class="comment">// 销毁锁</span></span><br><span class="line">  SDL_DestroyMutex(q-&gt;mutex);</span><br><span class="line">  SDL_DestroyCond(q-&gt;cond);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<!-- more -->
+
+<h4 id="packet-queue-get"><a href="#packet-queue-get" class="headerlink" title="packet_queue_get"></a>packet_queue_get</h4><p>从队列中取出头节点，block参数表明当队列为空时是否需要阻塞</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">packet_queue_get</span><span class="params">(PacketQueue *q, AVPacket *pkt, <span class="type">int</span> block,</span></span><br><span class="line"><span class="params">                            <span class="type">int</span> *serial)</span> &#123;</span><br><span class="line">  MyAVPacketList *pkt1;</span><br><span class="line">  <span class="type">int</span> ret;</span><br><span class="line">  <span class="comment">// 加锁</span></span><br><span class="line">  SDL_LockMutex(q-&gt;mutex);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">    <span class="comment">// 如果退出标记，则退出</span></span><br><span class="line">    <span class="keyword">if</span> (q-&gt;abort_request) &#123;</span><br><span class="line">      ret = <span class="number">-1</span>;</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 获取队列的头节点</span></span><br><span class="line">    pkt1 = q-&gt;first_pkt;</span><br><span class="line">    <span class="keyword">if</span> (pkt1) &#123;</span><br><span class="line">      <span class="comment">// 将头结点的下一个节点作为新的头结点</span></span><br><span class="line">      q-&gt;first_pkt = pkt1-&gt;next;</span><br><span class="line">      <span class="comment">// 如果新头结点为空，则说明当前队列空了，将尾节点也设为空</span></span><br><span class="line">      <span class="keyword">if</span> (!q-&gt;first_pkt) q-&gt;last_pkt = <span class="literal">NULL</span>;</span><br><span class="line">      <span class="comment">// 节点数量-1</span></span><br><span class="line">      q-&gt;nb_packets--;</span><br><span class="line">      <span class="comment">// 队列中总字节数减少</span></span><br><span class="line">      q-&gt;size -= pkt1-&gt;pkt.size + <span class="keyword">sizeof</span>(*pkt1);</span><br><span class="line">      <span class="comment">// 队列中总时长减少</span></span><br><span class="line">      q-&gt;duration -= pkt1-&gt;pkt.duration;</span><br><span class="line">      <span class="comment">// 获取节点中的AVPacket，赋值给参数中的pkt指针</span></span><br><span class="line">      *pkt = pkt1-&gt;pkt;</span><br><span class="line">      <span class="comment">// 将节点的序号赋值给参数中的serial指针</span></span><br><span class="line">      <span class="keyword">if</span> (serial) *serial = pkt1-&gt;serial;</span><br><span class="line">      <span class="comment">// 释放节点</span></span><br><span class="line">      av_free(pkt1);</span><br><span class="line">      ret = <span class="number">1</span>;</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (!block) &#123;</span><br><span class="line">      <span class="comment">// 如果头结点为空，而block为0，则不阻塞，直接返回</span></span><br><span class="line">      ret = <span class="number">0</span>;</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="comment">// 如果头结点为空，block为1，则wait等待</span></span><br><span class="line">      SDL_CondWait(q-&gt;cond, q-&gt;mutex);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 解锁</span></span><br><span class="line">  SDL_UnlockMutex(q-&gt;mutex);</span><br><span class="line">  <span class="keyword">return</span> ret;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="packet-queue-put"><a href="#packet-queue-put" class="headerlink" title="packet_queue_put"></a>packet_queue_put</h4><p>在队列尾部插入新节点</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">packet_queue_put_private</span><span class="params">(PacketQueue *q, AVPacket *pkt)</span> &#123;</span><br><span class="line">  <span class="comment">// 创建节点</span></span><br><span class="line">  MyAVPacketList *pkt1;</span><br><span class="line">  <span class="comment">// 如果退出，则返回</span></span><br><span class="line">  <span class="keyword">if</span> (q-&gt;abort_request) <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line"></span><br><span class="line">  pkt1 = av_malloc(<span class="keyword">sizeof</span>(MyAVPacketList));</span><br><span class="line">  <span class="keyword">if</span> (!pkt1) <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  <span class="comment">// 将AVPacket保存到节点中</span></span><br><span class="line">  pkt1-&gt;pkt = *pkt;</span><br><span class="line">  pkt1-&gt;next = <span class="literal">NULL</span>;</span><br><span class="line">  <span class="comment">// 如果加入的数据是flush_pkt标记，则序号+1</span></span><br><span class="line">  <span class="keyword">if</span> (pkt == &amp;flush_pkt) q-&gt;serial++;</span><br><span class="line">  pkt1-&gt;serial = q-&gt;serial;</span><br><span class="line">  <span class="comment">// 如果队列中尾节点为空，则将当前节点作为头结点，否则，将当前节点作为尾节点的下一个节点</span></span><br><span class="line">  <span class="keyword">if</span> (!q-&gt;last_pkt)</span><br><span class="line">    q-&gt;first_pkt = pkt1;</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">    q-&gt;last_pkt-&gt;next = pkt1;</span><br><span class="line">  <span class="comment">// 将当前节点作为队列新的尾节点</span></span><br><span class="line">  q-&gt;last_pkt = pkt1;</span><br><span class="line">  <span class="comment">// 节点数量+1</span></span><br><span class="line">  q-&gt;nb_packets++;</span><br><span class="line">  <span class="comment">// 队列中总字节数增加</span></span><br><span class="line">  q-&gt;size += pkt1-&gt;pkt.size + <span class="keyword">sizeof</span>(*pkt1);</span><br><span class="line">  <span class="comment">// 队列中总时长增加</span></span><br><span class="line">  q-&gt;duration += pkt1-&gt;pkt.duration;</span><br><span class="line">  <span class="comment">/* <span class="doctag">XXX:</span> should duplicate packet data in DV case */</span></span><br><span class="line">  <span class="comment">// 唤醒wait线程</span></span><br><span class="line">  SDL_CondSignal(q-&gt;cond);</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">packet_queue_put</span><span class="params">(PacketQueue *q, AVPacket *pkt)</span> &#123;</span><br><span class="line">  <span class="type">int</span> ret;</span><br><span class="line">  <span class="comment">// 加锁</span></span><br><span class="line">  SDL_LockMutex(q-&gt;mutex);</span><br><span class="line">  <span class="comment">// 入队列</span></span><br><span class="line">  ret = packet_queue_put_private(q, pkt);</span><br><span class="line">  <span class="comment">// 解锁</span></span><br><span class="line">  SDL_UnlockMutex(q-&gt;mutex);</span><br><span class="line">  <span class="comment">// 如果失败，则释放AVPacket</span></span><br><span class="line">  <span class="keyword">if</span> (pkt != &amp;flush_pkt &amp;&amp; ret &lt; <span class="number">0</span>) av_packet_unref(pkt);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> ret;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="FrameQueue"><a href="#FrameQueue" class="headerlink" title="FrameQueue"></a>FrameQueue</h3><p>Frame队列与Packet队列不同，因为Frame中存储的是原始数据，是非常庞大的，所以需要设置成有限队列，这里采用的是滚动数组的方式来实现，分别用读写两个索引来记录位置。</p>
+<p>由于将数组进行了读写分离，所以在线程加锁时有了优化，不再需要锁住整个函数，可以局部加锁。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">FrameQueue</span> &#123;</span></span><br><span class="line">  <span class="comment">// 使用滚动数组来实现的Frame队列</span></span><br><span class="line">  Frame <span class="built_in">queue</span></span><br><span class="line">      [FRAME_QUEUE_SIZE];  <span class="comment">// 数据帧数组，使用数组来实现的队列，默认大小为FRAME_QUEUE_SIZE</span></span><br><span class="line">  <span class="type">int</span> rindex;              <span class="comment">// 读索引</span></span><br><span class="line">  <span class="type">int</span> windex;              <span class="comment">// 写索引</span></span><br><span class="line">  <span class="type">int</span> size;                <span class="comment">// 当前写入的数据大小</span></span><br><span class="line">  <span class="type">int</span> max_size;  <span class="comment">// 外部设置的队列最大允许存储的大小，该值不超过FRAME_QUEUE_SIZE</span></span><br><span class="line">  <span class="type">int</span> keep_last;  <span class="comment">// 是否保留最后一个读数据，如果是1，则rindex_shown的值就为1。并且后面rindex所指向的位置实际上是上个次读的索引，而rindex+rindex_shown才是当前读的索引</span></span><br><span class="line">  <span class="type">int</span> rindex_shown;  <span class="comment">// 用来配合keep_last，如果keep_last为1，则再第一次next后，rindex_shown也会为1</span></span><br><span class="line">  SDL_mutex *mutex;  <span class="comment">// 队列锁</span></span><br><span class="line">  SDL_cond *cond;    <span class="comment">// 队列锁互斥量</span></span><br><span class="line">  PacketQueue *pktq;  <span class="comment">// 关联的Packet队列</span></span><br><span class="line">&#125; FrameQueue;</span><br></pre></td></tr></table></figure>
+
+<h4 id="frame-queue-init"><a href="#frame-queue-init" class="headerlink" title="frame_queue_init"></a>frame_queue_init</h4><p>初始化队列，并设置队列的最大大小，根据最大大小提前创建好每一个Frame对象。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">frame_queue_init</span><span class="params">(FrameQueue *f, PacketQueue *pktq, <span class="type">int</span> max_size,</span></span><br><span class="line"><span class="params">                            <span class="type">int</span> keep_last)</span> &#123;</span><br><span class="line">  <span class="type">int</span> i;</span><br><span class="line">  <span class="comment">// 初始化原始数据队列，清零</span></span><br><span class="line">  <span class="built_in">memset</span>(f, <span class="number">0</span>, <span class="keyword">sizeof</span>(FrameQueue));</span><br><span class="line">  <span class="comment">// 创建原始数据队列的锁</span></span><br><span class="line">  <span class="keyword">if</span> (!(f-&gt;mutex = SDL_CreateMutex())) &#123;</span><br><span class="line">    av_log(<span class="literal">NULL</span>, AV_LOG_FATAL, <span class="string">&quot;SDL_CreateMutex(): %s\n&quot;</span>, SDL_GetError());</span><br><span class="line">    <span class="keyword">return</span> AVERROR(ENOMEM);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 创建原始数据队列的互斥量</span></span><br><span class="line">  <span class="keyword">if</span> (!(f-&gt;cond = SDL_CreateCond())) &#123;</span><br><span class="line">    av_log(<span class="literal">NULL</span>, AV_LOG_FATAL, <span class="string">&quot;SDL_CreateCond(): %s\n&quot;</span>, SDL_GetError());</span><br><span class="line">    <span class="keyword">return</span> AVERROR(ENOMEM);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 关联原始数据队列和编码数据队列</span></span><br><span class="line">  f-&gt;pktq = pktq;</span><br><span class="line">  <span class="comment">// 设置原始数据队列的最大大小</span></span><br><span class="line">  f-&gt;max_size = FFMIN(max_size, FRAME_QUEUE_SIZE);</span><br><span class="line">  <span class="comment">// 是否保留最后一个读的数据</span></span><br><span class="line">  f-&gt;keep_last = !!keep_last;</span><br><span class="line">  <span class="comment">// 提前分配好所有的Frame</span></span><br><span class="line">  <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; f-&gt;max_size; i++)</span><br><span class="line">    <span class="keyword">if</span> (!(f-&gt;<span class="built_in">queue</span>[i].frame = av_frame_alloc())) <span class="keyword">return</span> AVERROR(ENOMEM);</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="frame-queue-destory"><a href="#frame-queue-destory" class="headerlink" title="frame_queue_destory"></a>frame_queue_destory</h4><p>销毁队列</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">frame_queue_destory</span><span class="params">(FrameQueue *f)</span> &#123;</span><br><span class="line">  <span class="type">int</span> i;</span><br><span class="line">  <span class="comment">// 释放所有的原始数据帧</span></span><br><span class="line">  <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; f-&gt;max_size; i++) &#123;</span><br><span class="line">    Frame *vp = &amp;f-&gt;<span class="built_in">queue</span>[i];</span><br><span class="line">    <span class="comment">// 主要是销毁AVFrame和AVSubtitle</span></span><br><span class="line">    frame_queue_unref_item(vp);</span><br><span class="line">    av_frame_free(&amp;vp-&gt;frame);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 销毁锁和互斥量</span></span><br><span class="line">  SDL_DestroyMutex(f-&gt;mutex);</span><br><span class="line">  SDL_DestroyCond(f-&gt;cond);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="frame-queue-peek-readable"><a href="#frame-queue-peek-readable" class="headerlink" title="frame_queue_peek_readable"></a>frame_queue_peek_readable</h4><p>读取这里也和Packet队列不同，首先通过frame_queue_peek_readable获取到读索引位置的节点，想要获取下一个节点，需要调用frame_queue_next将读索引移动到下一个位置。</p>
+<p>读取时如果当前队列为空，则进行阻塞等待。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 从队列中取出一个可读的帧</span></span><br><span class="line"><span class="comment"> * @param 队列</span></span><br><span class="line"><span class="comment"> * @return 队列中可读的帧</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="type">static</span> Frame *<span class="title function_">frame_queue_peek_readable</span><span class="params">(FrameQueue *f)</span> &#123;</span><br><span class="line">  <span class="comment">/* wait until we have a readable a new frame */</span></span><br><span class="line">  <span class="comment">// 同写入，size是读写线程都需要操作的，所以需要加锁</span></span><br><span class="line">  SDL_LockMutex(f-&gt;mutex);</span><br><span class="line">  <span class="comment">// 如果设置了keep_last，则在next后，rindex_shown为1，</span></span><br><span class="line">  <span class="comment">// rindex_shown为1其实就是标记rindex少走了一步，也等于size少减了1，所以这里计算size时需要减去1</span></span><br><span class="line">  <span class="comment">// 如果队列为空</span></span><br><span class="line">  <span class="keyword">while</span> (f-&gt;size - f-&gt;rindex_shown &lt;= <span class="number">0</span> &amp;&amp; !f-&gt;pktq-&gt;abort_request) &#123;</span><br><span class="line">    <span class="comment">// 等待写线程notify</span></span><br><span class="line">    SDL_CondWait(f-&gt;cond, f-&gt;mutex);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 队列解锁</span></span><br><span class="line">  SDL_UnlockMutex(f-&gt;mutex);</span><br><span class="line">  <span class="comment">// 如果关联的Packet队列退出，则返回null</span></span><br><span class="line">  <span class="keyword">if</span> (f-&gt;pktq-&gt;abort_request) <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">  <span class="comment">// rindex + rindex_shown</span></span><br><span class="line">  <span class="comment">// （当rindex_shown为1时，rindex少了一次+1，所以需要加上1）</span></span><br><span class="line">  <span class="keyword">return</span> &amp;f-&gt;<span class="built_in">queue</span>[(f-&gt;rindex + f-&gt;rindex_shown) % f-&gt;max_size];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>frame_queue_next中并没有对队列进行判空，所以调用该方法的时候需要先用frame_queue_nb_remaining判断一下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 通知队列数据已经读取，rindex位置的帧已经被外部使用</span></span><br><span class="line"><span class="comment"> * rindex需要向后移动，以便frame_queue_peek_readable获取后续的数据</span></span><br><span class="line"><span class="comment"> * @param f</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">frame_queue_next</span><span class="params">(FrameQueue *f)</span> &#123;</span><br><span class="line">  <span class="comment">// 如果当前队列设置了保留最后一帧，则rindex少走一步，size少减1</span></span><br><span class="line">  <span class="keyword">if</span> (f-&gt;keep_last &amp;&amp; !f-&gt;rindex_shown) &#123;</span><br><span class="line">    <span class="comment">// 标记rindex_shown来弥补这1步</span></span><br><span class="line">    f-&gt;rindex_shown = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 如果队列设置了keep_last，则这里的删除操作针对的都是上一帧，而不是当前帧</span></span><br><span class="line">  <span class="comment">// 删除rindex位置的帧数据，AVFrame和AVSubtitle</span></span><br><span class="line">  frame_queue_unref_item(&amp;f-&gt;<span class="built_in">queue</span>[f-&gt;rindex]);</span><br><span class="line">  <span class="comment">// rindex+1,向后移动一位，如果超出，则从头开始</span></span><br><span class="line">  <span class="keyword">if</span> (++f-&gt;rindex == f-&gt;max_size) f-&gt;rindex = <span class="number">0</span>;</span><br><span class="line">  <span class="comment">// 加锁</span></span><br><span class="line">  SDL_LockMutex(f-&gt;mutex);</span><br><span class="line">  <span class="comment">// size减1</span></span><br><span class="line">  f-&gt;size--;</span><br><span class="line">  <span class="comment">// 通知写线程有空位写入，唤醒wait</span></span><br><span class="line">  SDL_CondSignal(f-&gt;cond);</span><br><span class="line">  <span class="comment">// 解锁</span></span><br><span class="line">  SDL_UnlockMutex(f-&gt;mutex);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>获取当前队列中可读的节点数量</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">frame_queue_nb_remaining</span><span class="params">(FrameQueue *f)</span> &#123;</span><br><span class="line">  <span class="comment">// 返回当前队列中已有的帧数量</span></span><br><span class="line">  <span class="keyword">return</span> f-&gt;size - f-&gt;rindex_shown;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="frame-queue-peek-writable"><a href="#frame-queue-peek-writable" class="headerlink" title="frame_queue_peek_writable"></a>frame_queue_peek_writable</h4><p>写入的话和读取一样，先通过frame_queue_peek_writable获取当前写索引位置的节点，写入完毕后，调用frame_queue_push通知队列写入完毕，写索引向后移动一位。</p>
+<p>写入时如果当前队列已满，那么会进行阻塞等待。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 从队列中取出一个可写入的帧</span></span><br><span class="line"><span class="comment"> * @param 队列</span></span><br><span class="line"><span class="comment"> * @return 队列中可写入的帧</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="type">static</span> Frame *<span class="title function_">frame_queue_peek_writable</span><span class="params">(FrameQueue *f)</span> &#123;</span><br><span class="line">  <span class="comment">/* wait until we have space to put a new frame */</span></span><br><span class="line">  <span class="comment">// 队列加锁（因为读线程和写线程都会对队列的size进行修改，所以需要加锁）</span></span><br><span class="line">  SDL_LockMutex(f-&gt;mutex);</span><br><span class="line">  <span class="comment">// 如果队列已满，并且关联的Packet队列并没有退出(避免死循环)，则循环wait</span></span><br><span class="line">  <span class="keyword">while</span> (f-&gt;size &gt;= f-&gt;max_size &amp;&amp; !f-&gt;pktq-&gt;abort_request) &#123;</span><br><span class="line">    <span class="comment">// wait，等待notify</span></span><br><span class="line">    SDL_CondWait(f-&gt;cond, f-&gt;mutex);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 队列解锁</span></span><br><span class="line">  SDL_UnlockMutex(f-&gt;mutex);</span><br><span class="line">  <span class="comment">// 只有写线程才需要进行写入，才会改变windex的值，所以获取写入的帧操作并不需要加锁</span></span><br><span class="line">  <span class="comment">// 如果关联的Packet队列退出，则返回null</span></span><br><span class="line">  <span class="keyword">if</span> (f-&gt;pktq-&gt;abort_request) <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">  <span class="comment">// 返回windex位置的Frame供外部写入</span></span><br><span class="line">  <span class="keyword">return</span> &amp;f-&gt;<span class="built_in">queue</span>[f-&gt;windex];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 通知队列数据已经写入，windex位置的帧已经写入了数据</span></span><br><span class="line"><span class="comment"> * 数据写入的帧是通过frame_queue_peek_writable获取的</span></span><br><span class="line"><span class="comment"> * @param 队列</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">frame_queue_push</span><span class="params">(FrameQueue *f)</span> &#123;</span><br><span class="line">  <span class="comment">// 将windex+1，往后移一位，如果后面已经到底了，则从头开始（环状）</span></span><br><span class="line">  <span class="keyword">if</span> (++f-&gt;windex == f-&gt;max_size) f-&gt;windex = <span class="number">0</span>;</span><br><span class="line">  <span class="comment">// 同上，windex只有写线程操作，所以不需要加锁，但是下面的size的操作是读线程和写线程都需要操作的，所以需要加锁</span></span><br><span class="line">  <span class="comment">// 加锁</span></span><br><span class="line">  SDL_LockMutex(f-&gt;mutex);</span><br><span class="line">  <span class="comment">// 队列的size+1</span></span><br><span class="line">  f-&gt;size++;</span><br><span class="line">  <span class="comment">// notify通知读线程，唤醒wait</span></span><br><span class="line">  SDL_CondSignal(f-&gt;cond);</span><br><span class="line">  <span class="comment">// 释放锁</span></span><br><span class="line">  SDL_UnlockMutex(f-&gt;mutex);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="结构体"><a href="#结构体" class="headerlink" title="结构体"></a>结构体</h2><h3 id="MyAVPacketList"><a href="#MyAVPacketList" class="headerlink" title="MyAVPacketList"></a>MyAVPacketList</h3><p>Packet队列中的节点</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">MyAVPacketList</span> &#123;</span></span><br><span class="line">  AVPacket pkt;                 <span class="comment">// 编码数据</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">MyAVPacketList</span> *<span class="title">next</span>;</span>  <span class="comment">// 下一个节点</span></span><br><span class="line">  <span class="type">int</span> serial;                   <span class="comment">// 序号</span></span><br><span class="line">&#125; MyAVPacketList;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Frame"><a href="#Frame" class="headerlink" title="Frame"></a>Frame</h3><p>Frame队列中的节点</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">Frame</span> &#123;</span></span><br><span class="line">  <span class="comment">// 对数据帧的统一抽象，包含音频帧、视频帧、字幕帧</span></span><br><span class="line">  AVFrame *frame;  <span class="comment">// 音视频帧</span></span><br><span class="line">  AVSubtitle sub;  <span class="comment">// 字幕帧</span></span><br><span class="line">  <span class="type">int</span> serial; <span class="comment">// 序号</span></span><br><span class="line">  <span class="type">double</span> pts; <span class="comment">// pts</span></span><br><span class="line">  <span class="type">double</span> duration; <span class="comment">// 显示时长</span></span><br><span class="line">  <span class="type">int64_t</span> pos; <span class="comment">// 在流中的位置</span></span><br><span class="line">  <span class="type">int</span> width; <span class="comment">// 宽</span></span><br><span class="line">  <span class="type">int</span> height; <span class="comment">// 高</span></span><br><span class="line">  <span class="type">int</span> format; <span class="comment">// 格式</span></span><br><span class="line">  AVRational sar; <span class="comment">// 横纵比</span></span><br><span class="line">  <span class="type">int</span> uploaded; <span class="comment">// 是否上传到纹理上</span></span><br><span class="line">  <span class="type">int</span> flip_v; <span class="comment">// 是否需要翻转</span></span><br><span class="line">&#125; Frame;</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>高振宇
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://witgao.com/2020/08/02/av/ffplay%E9%98%9F%E5%88%97%E5%88%86%E6%9E%90/" title="ffplay队列分析">https://witgao.com/2020/08/02/av/ffplay队列分析/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/FFmpeg/" rel="tag"><i class="fa fa-tag"></i> FFmpeg</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/07/23/av/Android%E6%92%AD%E6%94%BE%E8%A7%86%E9%A2%91/" rel="prev" title="Android播放视频">
+                  <i class="fa fa-chevron-left"></i> Android播放视频
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/08/03/av/ffplay%E8%A7%A3%E5%A4%8D%E7%94%A8%E7%BA%BF%E7%A8%8B%E5%88%86%E6%9E%90/" rel="next" title="ffplay解复用线程分析">
+                  ffplay解复用线程分析 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">高振宇</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">75k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:33</span>
+  </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

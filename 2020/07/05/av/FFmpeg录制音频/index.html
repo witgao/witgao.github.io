@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha256-Z1K5uhUaJXA7Ll0XrZ/0JhX4lAtZFpT6jkKrEDT0drU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"witgao.com","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.14.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="音频录制流程FFmpeg对各大平台的音频输入和输出的API进行了统一的封装，将输入API封装成AVInputFormat，将输出API封装成AVOutputFormat，并且将音频采集设备封装成一个音频文件进行处理，所以我们在采集音频数据的时候，可以将音频设备当做一个无限大的音频文件，不断的从音频文件中读取数据。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="FFmpeg录制音频">
+<meta property="og:url" content="https://witgao.com/2020/07/05/av/FFmpeg%E5%BD%95%E5%88%B6%E9%9F%B3%E9%A2%91/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:description" content="音频录制流程FFmpeg对各大平台的音频输入和输出的API进行了统一的封装，将输入API封装成AVInputFormat，将输出API封装成AVOutputFormat，并且将音频采集设备封装成一个音频文件进行处理，所以我们在采集音频数据的时候，可以将音频设备当做一个无限大的音频文件，不断的从音频文件中读取数据。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://witgao.com/2020/07/05/av/FFmpeg%E5%BD%95%E5%88%B6%E9%9F%B3%E9%A2%91/ffmpeg_record_audio.png">
+<meta property="article:published_time" content="2020-07-04T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-01-31T05:06:35.349Z">
+<meta property="article:author" content="高振宇">
+<meta property="article:tag" content="FFmpeg">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://witgao.com/2020/07/05/av/FFmpeg%E5%BD%95%E5%88%B6%E9%9F%B3%E9%A2%91/ffmpeg_record_audio.png">
+
+
+<link rel="canonical" href="https://witgao.com/2020/07/05/av/FFmpeg%E5%BD%95%E5%88%B6%E9%9F%B3%E9%A2%91/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://witgao.com/2020/07/05/av/FFmpeg%E5%BD%95%E5%88%B6%E9%9F%B3%E9%A2%91/","path":"2020/07/05/av/FFmpeg录制音频/","title":"FFmpeg录制音频"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>FFmpeg录制音频 | 富贵山庄</title>
+  
+
+
+
+
+
+
+  <script async defer data-website-id="" src=""></script>
+
+  <script defer data-domain="" src=""></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">富贵山庄</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">恒者行远，思者常新</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%9F%B3%E9%A2%91%E5%BD%95%E5%88%B6%E6%B5%81%E7%A8%8B"><span class="nav-number">1.</span> <span class="nav-text">音频录制流程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%89%93%E5%BC%80%E9%9F%B3%E9%A2%91%E8%BE%93%E5%85%A5"><span class="nav-number">1.1.</span> <span class="nav-text">打开音频输入</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B3%A8%E5%86%8C%E9%9F%B3%E9%A2%91%E8%AE%BE%E5%A4%87"><span class="nav-number">1.1.1.</span> <span class="nav-text">注册音频设备</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E8%BE%93%E5%85%A5%E4%B8%8A%E4%B8%8B%E6%96%87"><span class="nav-number">1.1.2.</span> <span class="nav-text">创建输入上下文</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96%E8%AE%BE%E5%A4%87%E8%BE%93%E5%85%A5%E6%95%B0%E6%8D%AE%E6%A0%BC%E5%BC%8F"><span class="nav-number">1.1.3.</span> <span class="nav-text">获取设备输入数据格式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E8%A7%A3%E7%A0%81%E4%B8%8A%E4%B8%8B%E6%96%87"><span class="nav-number">1.1.4.</span> <span class="nav-text">创建解码上下文</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%89%93%E5%BC%80%E9%9F%B3%E9%A2%91%E8%BE%93%E5%87%BA"><span class="nav-number">1.2.</span> <span class="nav-text">打开音频输出</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E8%BE%93%E5%87%BA%E4%B8%8A%E4%B8%8B%E6%96%87"><span class="nav-number">1.2.1.</span> <span class="nav-text">创建输出上下文</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E6%8C%87%E5%AE%9A%E7%BC%96%E7%A0%81%E5%99%A8%E4%B8%8A%E4%B8%8B%E6%96%87"><span class="nav-number">1.2.2.</span> <span class="nav-text">创建指定编码器上下文</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E8%BE%93%E5%87%BA%E6%B5%81"><span class="nav-number">1.2.3.</span> <span class="nav-text">创建输出流</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E9%87%8D%E9%87%87%E6%A0%B7%E3%80%81FIFO%E9%98%9F%E5%88%97"><span class="nav-number">1.3.</span> <span class="nav-text">初始化重采样、FIFO队列</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8D%E9%87%87%E6%A0%B7%E4%B8%8A%E4%B8%8B%E6%96%87"><span class="nav-number">1.3.1.</span> <span class="nav-text">重采样上下文</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FIFO%E9%98%9F%E5%88%97"><span class="nav-number">1.3.2.</span> <span class="nav-text">FIFO队列</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BD%95%E5%88%B6"><span class="nav-number">1.4.</span> <span class="nav-text">录制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%BB%E5%8F%96%E6%95%B0%E6%8D%AE%E5%B9%B6%E8%A7%A3%E7%A0%81"><span class="nav-number">1.4.1.</span> <span class="nav-text">读取数据并解码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8D%E9%87%87%E6%A0%B7"><span class="nav-number">1.4.2.</span> <span class="nav-text">重采样</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%A5%E9%98%9F%E5%88%97"><span class="nav-number">1.4.3.</span> <span class="nav-text">入队列</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%BA%E9%98%9F%E5%88%97"><span class="nav-number">1.4.4.</span> <span class="nav-text">出队列</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E7%A0%81%E6%95%B0%E6%8D%AE%E5%B9%B6%E8%BE%93%E5%87%BA"><span class="nav-number">1.4.5.</span> <span class="nav-text">编码数据并输出</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%99%E5%85%A5%E5%88%B0%E8%BE%93%E5%87%BA"><span class="nav-number">1.4.6.</span> <span class="nav-text">写入到输出</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="高振宇"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">高振宇</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">33</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/witgao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;witgao" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:witgao328@gmail.com" title="E-Mail → mailto:witgao328@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2020/07/05/av/FFmpeg%E5%BD%95%E5%88%B6%E9%9F%B3%E9%A2%91/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="高振宇">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="FFmpeg录制音频 | 富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          FFmpeg录制音频
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-07-05 00:00:00" itemprop="dateCreated datePublished" datetime="2020-07-05T00:00:00+08:00">2020-07-05</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/" itemprop="url" rel="index"><span itemprop="name">音视频</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.9k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>11 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="音频录制流程"><a href="#音频录制流程" class="headerlink" title="音频录制流程"></a>音频录制流程</h1><p>FFmpeg对各大平台的音频输入和输出的API进行了统一的封装，将输入API封装成AVInputFormat，将输出API封装成AVOutputFormat，并且将音频采集设备封装成一个音频文件进行处理，所以我们在采集音频数据的时候，可以将音频设备当做一个无限大的音频文件，不断的从音频文件中读取数据。</p>
+<p><img src="/2020/07/05/av/FFmpeg%E5%BD%95%E5%88%B6%E9%9F%B3%E9%A2%91/ffmpeg_record_audio.png"></p>
+<span id="more"></span>
+
+<h2 id="打开音频输入"><a href="#打开音频输入" class="headerlink" title="打开音频输入"></a>打开音频输入</h2><h3 id="注册音频设备"><a href="#注册音频设备" class="headerlink" title="注册音频设备"></a>注册音频设备</h3><p>所有的输入和输出设备默认都是没有注册的，如果需要使用，需要手动调用下面的注册函数。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">avdevice_register_all();</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="创建输入上下文"><a href="#创建输入上下文" class="headerlink" title="创建输入上下文"></a>创建输入上下文</h3><p>FFmpeg将对音频文件的解封装和封装等操作都抽象到AVFormatContext中，所以音频文件的打开和输出都是要通道AVFormatContext来完成。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 设置音频设备API Mac上为avfoundation</span></span><br><span class="line">AVInputFormat* format = <span class="built_in">av_find_input_format</span>(<span class="string">&quot;avfoundation&quot;</span>);</span><br><span class="line"><span class="comment">// :0 为音频第一个设备，开启音频设备，FFmpeg中将音频设备封装为一个音频文件</span></span><br><span class="line"><span class="comment">// video:audio 如果视频设备为空，则写成 :音频设备</span></span><br><span class="line"><span class="comment">// 获取到输入上下文</span></span><br><span class="line"><span class="keyword">if</span> ((error = <span class="built_in">avformat_open_input</span>(&amp;fmt_ctx_in_, <span class="string">&quot;:0&quot;</span>, format, <span class="literal">nullptr</span>)) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;Could not open input device &quot;</span> &lt;&lt; <span class="built_in">av_err2str</span>(error)</span><br><span class="line">            &lt;&lt; std::endl;</span><br><span class="line">  fmt_ctx_in_ = <span class="literal">nullptr</span>;</span><br><span class="line">  <span class="keyword">return</span> error;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="获取设备输入数据格式"><a href="#获取设备输入数据格式" class="headerlink" title="获取设备输入数据格式"></a>获取设备输入数据格式</h3><p>FFmpeg将音频文件中的每一个轨道都封装成了AVStream对象，一个正常的音频文件一般都包含两个Stream，一个音频流和一个视频流。</p>
+<p>对于这里，音频设备只有一个输入流，AVStream中包含了输入音频数据的采样率、采样位数、声道数等音频相关信息</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 音频设备只有一个输入流</span></span><br><span class="line">stream_in_ = fmt_ctx_in_-&gt;streams[<span class="number">0</span>];</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="创建解码上下文"><a href="#创建解码上下文" class="headerlink" title="创建解码上下文"></a>创建解码上下文</h3><p>由于FFmpeg是将音频设备封装为音频文件来处理的，所以我们从输入流中读取的是AVPacket对象，其data数据是PCM原始音频数据，虽然不解码也可以直接将AVPacket中数据copy到AVFrame中，但最好通过解码转换为AVFrame。</p>
+<p>FFmpeg将对音频文件的编码和解码等操作都抽象到AVCodecContext中，所以音频文件的编码和解码都是要通过AVCodecContext来完成。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 获取音频输入流的编码格式，进行解码</span></span><br><span class="line">codec = <span class="built_in">avcodec_find_decoder</span>(stream_in_-&gt;codecpar-&gt;codec_id);</span><br><span class="line"><span class="keyword">if</span> (!codec) &#123;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;Could not find input codec&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">  <span class="keyword">return</span> AVERROR_EXIT;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 创建解码上下文</span></span><br><span class="line">codec_ctx_in_ = <span class="built_in">avcodec_alloc_context3</span>(codec);</span><br><span class="line"><span class="keyword">if</span> (!codec_ctx_in_) &#123;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;Could not allocate input codec context&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">  <span class="keyword">return</span> <span class="built_in">AVERROR</span>(ENOMEM);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 将输入流中的解码参数设置给解码上下文</span></span><br><span class="line"><span class="keyword">if</span> ((error = <span class="built_in">avcodec_parameters_to_context</span>(codec_ctx_in_,</span><br><span class="line">                                           stream_in_-&gt;codecpar)) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;Could not copy parameters to input codec&quot;</span> &lt;&lt; <span class="built_in">av_err2str</span>(error)</span><br><span class="line">            &lt;&lt; std::endl;</span><br><span class="line">  <span class="keyword">return</span> error;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 开启解码器</span></span><br><span class="line"><span class="keyword">if</span> ((error = <span class="built_in">avcodec_open2</span>(codec_ctx_in_, codec, <span class="literal">nullptr</span>)) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;Could not open input codec &quot;</span> &lt;&lt; <span class="built_in">av_err2str</span>(error)</span><br><span class="line">            &lt;&lt; std::endl;</span><br><span class="line">  <span class="keyword">return</span> error;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="打开音频输出"><a href="#打开音频输出" class="headerlink" title="打开音频输出"></a>打开音频输出</h2><h3 id="创建输出上下文"><a href="#创建输出上下文" class="headerlink" title="创建输出上下文"></a>创建输出上下文</h3><p>下面是创建了一个aac文件的输出上下文</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">const</span> <span class="type">char</span>* filename = <span class="string">&quot;/Users/gaozhenyu/Desktop/audio.aac&quot;</span>;</span><br><span class="line">AVOutputFormat* oformat = <span class="built_in">av_guess_format</span>(<span class="literal">nullptr</span>, filename, <span class="literal">nullptr</span>);</span><br><span class="line"><span class="comment">// 创建输出上下文</span></span><br><span class="line"><span class="keyword">if</span> ((error = <span class="built_in">avformat_alloc_output_context2</span>(&amp;fmt_ctx_out_, oformat, <span class="literal">nullptr</span>,</span><br><span class="line">                                            filename)) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;Could not allocate output format context&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">  <span class="keyword">return</span> error;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 开启输出IO</span></span><br><span class="line"><span class="keyword">if</span> ((error = <span class="built_in">avio_open</span>(&amp;(fmt_ctx_out_-&gt;pb), filename, AVIO_FLAG_WRITE)) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;Could not open output file&quot;</span> &lt;&lt; <span class="built_in">av_err2str</span>(error) &lt;&lt; std::endl;</span><br><span class="line">  <span class="keyword">return</span> error;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="创建指定编码器上下文"><a href="#创建指定编码器上下文" class="headerlink" title="创建指定编码器上下文"></a>创建指定编码器上下文</h3><p>使用libfdk_aac编码器来进行编码，并设置音频编码的相关参数</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 找到libfdk_aac编码器</span></span><br><span class="line">codec = <span class="built_in">avcodec_find_encoder_by_name</span>(<span class="string">&quot;libfdk_aac&quot;</span>);</span><br><span class="line"><span class="keyword">if</span> (!codec) &#123;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;Could not find libfdk_aac encoder&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">  <span class="keyword">return</span> AVERROR_EXIT;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 创建输出编码上下文</span></span><br><span class="line">codec_ctx_out_ = <span class="built_in">avcodec_alloc_context3</span>(codec);</span><br><span class="line"><span class="keyword">if</span> (!stream_out_) &#123;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;Could not allocate output codec context&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">  <span class="keyword">return</span> <span class="built_in">AVERROR</span>(ENOMEM);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 设置输出编码参数</span></span><br><span class="line">codec_ctx_out_-&gt;sample_fmt = AV_SAMPLE_FMT_S16;</span><br><span class="line">codec_ctx_out_-&gt;sample_rate = <span class="number">48000</span>;</span><br><span class="line">codec_ctx_out_-&gt;channel_layout = AV_CH_LAYOUT_STEREO;</span><br><span class="line">codec_ctx_out_-&gt;channels = <span class="number">2</span>;</span><br><span class="line">codec_ctx_out_-&gt;bit_rate = <span class="number">128000</span>;</span><br><span class="line"><span class="comment">//  codec_ctx_out_-&gt;profile = FF_PROFILE_AAC_LD;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 开启编码器</span></span><br><span class="line"><span class="keyword">if</span> ((error = <span class="built_in">avcodec_open2</span>(codec_ctx_out_, codec, <span class="literal">nullptr</span>)) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;Could not open output codec &quot;</span> &lt;&lt; <span class="built_in">av_err2str</span>(error)</span><br><span class="line">            &lt;&lt; std::endl;</span><br><span class="line">  <span class="keyword">return</span> error;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="创建输出流"><a href="#创建输出流" class="headerlink" title="创建输出流"></a>创建输出流</h3><p>上面说过，音频文件中每一个轨道都被封装成一个AVStream，那么想要向输出一个音频文件，除了上面创建了AVFormatContext外，还需要对每一个轨道创建一个AVStream，并添加到对应的输出AVFormatContext上。</p>
+<p>这里我们需要输出的轨道只有一个音频轨道，所以创建一个流就可以。创建完流后还需要将上面设置的音频编码相关参数设置给流。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建指定编码器的输出音频流，添加到输出上下文中</span></span><br><span class="line">stream_out_ = <span class="built_in">avformat_new_stream</span>(fmt_ctx_out_, codec);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 将编码上下文中的参数设置给输出流</span></span><br><span class="line"><span class="keyword">if</span> ((error = <span class="built_in">avcodec_parameters_from_context</span>(stream_out_-&gt;codecpar,</span><br><span class="line">                                             codec_ctx_out_)) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;Could not initialize output stream parameters &quot;</span></span><br><span class="line">            &lt;&lt; <span class="built_in">av_err2str</span>(error) &lt;&lt; std::endl;</span><br><span class="line">  <span class="keyword">return</span> error;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="初始化重采样、FIFO队列"><a href="#初始化重采样、FIFO队列" class="headerlink" title="初始化重采样、FIFO队列"></a>初始化重采样、FIFO队列</h2><h3 id="重采样上下文"><a href="#重采样上下文" class="headerlink" title="重采样上下文"></a>重采样上下文</h3><p>FFmpeg将对音频的重采样操作抽象到SwrContext中，根据输入的音频数据格式和重采样后的音频数据格式来创建一个SwrContext。</p>
+<p>实际上决定音频数据格式的就是三要素：采样率、声道数、采样位数</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建重采样上下文，设置重采样输入输出参数</span></span><br><span class="line">swr_ctx_ = <span class="built_in">swr_alloc_set_opts</span>(</span><br><span class="line">    <span class="literal">nullptr</span>, <span class="built_in">av_get_default_channel_layout</span>(codec_ctx_out_-&gt;channels),</span><br><span class="line">    codec_ctx_out_-&gt;sample_fmt, codec_ctx_out_-&gt;sample_rate,</span><br><span class="line">    <span class="built_in">av_get_default_channel_layout</span>(codec_ctx_in_-&gt;channels),</span><br><span class="line">    codec_ctx_in_-&gt;sample_fmt, codec_ctx_in_-&gt;sample_rate, <span class="number">0</span>, <span class="literal">nullptr</span>);</span><br><span class="line"><span class="keyword">if</span> (!swr_ctx_) &#123;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;Could not allocate swr context&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">  <span class="keyword">return</span> AVERROR_EXIT;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 初始化重采样上下文</span></span><br><span class="line"><span class="keyword">if</span> ((error = <span class="built_in">swr_init</span>(swr_ctx_)) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;Could not open swr context&quot;</span> &lt;&lt; <span class="built_in">av_err2str</span>(error) &lt;&lt; std::endl;</span><br><span class="line">  <span class="built_in">swr_free</span>(&amp;swr_ctx_);</span><br><span class="line">  <span class="keyword">return</span> error;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="FIFO队列"><a href="#FIFO队列" class="headerlink" title="FIFO队列"></a>FIFO队列</h3><p>音频数据和视频数据在对一帧数据的定义上不太一样，对于视频来说一帧就是一张图像，每次从设备上采集来的都是一帧数据，而对于音频来说，都是散列的采样点，多少个采样点作为一帧需要看具体使用的编码器的要求。所以从设备上采集来的数据数量并不一定满足编码器需要的采样数量。</p>
+<p>所以FFmpeg提供了AVAudioFifo队列来完成对数据的缓存。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建音频FIFO队列，用来作为缓冲区，音频编码器需要一定的帧数才可以进行编码</span></span><br><span class="line"><span class="comment">// 所以将读取的音频帧存放在FIFO队列中，当大于音频编码器需要的帧数时，才进行编码</span></span><br><span class="line">fifo_ = <span class="built_in">av_audio_fifo_alloc</span>(codec_ctx_out_-&gt;sample_fmt,</span><br><span class="line">                            codec_ctx_out_-&gt;channels, <span class="number">1</span>);</span><br><span class="line"><span class="keyword">if</span> (!fifo_) &#123;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;Could not allocate FIFO&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">  <span class="keyword">return</span> AVERROR_EXIT;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="录制"><a href="#录制" class="headerlink" title="录制"></a>录制</h2><p>对于AVFormatContext来进行音频数据的输出，需要调用三个write函数，avformat_write_header、av_write_frame、av_write_trailer。</p>
+<p>整体流程就是不断的从音频设备中读取数据，解码后进行重采样，将重采样结果放入到FIFO队列中，当FIFO中数据足够时，则从FIFO中取出数据进行编码，编码后写入到输出文件中。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">if</span> (<span class="built_in">avformat_write_header</span>(fmt_ctx_out_, <span class="literal">nullptr</span>) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">   std::cout &lt;&lt; <span class="string">&quot;Could not write output file header&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">   <span class="keyword">goto</span> cleanup;</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> (request_abort_) &#123;</span><br><span class="line">   <span class="type">int</span> finished = <span class="number">0</span>;</span><br><span class="line">   <span class="comment">// 一个音频帧中每个通道的样本数。</span></span><br><span class="line">   <span class="comment">// 编码：由libavcodec在avcodec_open2（）中设置。</span></span><br><span class="line">   <span class="comment">//      除最后一个帧外，每个提交的帧必须在每个通道中完全包含frame_size样本。</span></span><br><span class="line">   <span class="comment">// 解码：可能由某些解码器设置以指示恒定的帧大小</span></span><br><span class="line">   <span class="type">const</span> <span class="type">int</span> frame_size_out = codec_ctx_out_-&gt;frame_size;</span><br><span class="line">   <span class="comment">// 如果FIFO队列中音频样本数不足编码器需要的样本数，则循环读取数据，直到FIFO中数据满足需要的样本量</span></span><br><span class="line">   <span class="keyword">while</span> (<span class="built_in">av_audio_fifo_size</span>(fifo_) &lt; frame_size_out) &#123;</span><br><span class="line">     <span class="comment">// 读取音频样本加入到FIFO队列中</span></span><br><span class="line">     <span class="keyword">if</span> (<span class="built_in">ReadAndStore</span>(&amp;finished) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">       <span class="comment">// 数据读取失败，则直接退出</span></span><br><span class="line">       <span class="keyword">goto</span> cleanup;</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="comment">// 如果输入数据读取完了，则最后一帧的样本数可以小于指定的样本数</span></span><br><span class="line">     <span class="keyword">if</span> (finished) &#123;</span><br><span class="line">       <span class="comment">// 跳出</span></span><br><span class="line">       <span class="keyword">break</span>;</span><br><span class="line">     &#125;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="comment">// 如果FIFO队列中音频样本数大于编码器需要的 或者</span></span><br><span class="line">   <span class="comment">// 输入数据读取完但是FIFO中还有未处理的数据</span></span><br><span class="line">   <span class="comment">// 则循环不断处理，直到FIFO中数据不足一帧 或者 数据全部处理完成 才退出</span></span><br><span class="line">   <span class="keyword">while</span> (<span class="built_in">av_audio_fifo_size</span>(fifo_) &gt;= frame_size_out ||</span><br><span class="line">          (finished &amp;&amp; <span class="built_in">av_audio_fifo_size</span>(fifo_) &gt; <span class="number">0</span>)) &#123;</span><br><span class="line">     <span class="comment">// 从FIFO中取出数据进行编码并写入到输出文件中</span></span><br><span class="line">     <span class="keyword">if</span> (<span class="built_in">EncodeAndWrite</span>() &lt; <span class="number">0</span>) &#123;</span><br><span class="line">       <span class="comment">// 编码或写入失败，则直接退出</span></span><br><span class="line">       <span class="keyword">goto</span> cleanup;</span><br><span class="line">     &#125;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="comment">// 输入数据读取完，但是编码器中可能还有最后几帧数据还在编码，所以需要重新从编码器中读取</span></span><br><span class="line">   <span class="keyword">if</span> (finished) &#123;</span><br><span class="line">     <span class="type">int</span> data_written;</span><br><span class="line">     <span class="keyword">do</span> &#123;</span><br><span class="line">       data_written = <span class="number">0</span>;</span><br><span class="line">       <span class="comment">// 传入空的数据，进行编码，如果编码器中有数据，则继续</span></span><br><span class="line">       <span class="keyword">if</span> (<span class="built_in">EncodeAudioFrame</span>(<span class="literal">nullptr</span>, &amp;data_written) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">         <span class="keyword">goto</span> cleanup;</span><br><span class="line">       &#125;</span><br><span class="line">     &#125; <span class="keyword">while</span> (data_written);</span><br><span class="line">     <span class="keyword">break</span>;</span><br><span class="line">   &#125;</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">if</span> (<span class="built_in">av_write_trailer</span>(fmt_ctx_out_) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">   std::cout &lt;&lt; <span class="string">&quot;Could not write output file trailer&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">   <span class="keyword">goto</span> cleanup;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="读取数据并解码"><a href="#读取数据并解码" class="headerlink" title="读取数据并解码"></a>读取数据并解码</h3><p>读取数据非常简单，创建一个AVPacket对象，通过av_read_frame就可以读取一帧数据</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建AVPacket，用来从音频设备中接收一帧数据</span></span><br><span class="line"><span class="built_in">av_init_packet</span>(&amp;pkt);</span><br><span class="line"><span class="comment">// 从音频设备中读取一帧数据到AVPacket中</span></span><br><span class="line"><span class="built_in">av_read_frame</span>(fmt_ctx_in_, &amp;pkt);</span><br></pre></td></tr></table></figure>
+
+
+
+<p>通过avcodec_send_packet、avcodec_receive_frame来进行解码，avcodec_send_packet负责将一个AVPacket送给解码器，avcodec_receive_frame负责从解码器中取出一个已经解码好的AVFrame，如果返回AVERROR(EAGAIN)表明当前没有已经解码好的数据，返回AVERROR_EOF表明已经全部解码完成，返回大于0则表明获取解码数据成功。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"> <span class="comment">// 发送到解码器中进行解码</span></span><br><span class="line"> <span class="keyword">if</span> ((error = <span class="built_in">avcodec_send_packet</span>(codec_ctx_in_, &amp;pkt)) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">   <span class="keyword">goto</span> cleanup;</span><br><span class="line"> &#125;  </span><br><span class="line"><span class="comment">// 从解码器中获取一帧解码后的数据，存到AVFrame中</span></span><br><span class="line"> error = <span class="built_in">avcodec_receive_frame</span>(codec_ctx_in_, frame);</span><br><span class="line"> <span class="keyword">if</span> (error == <span class="built_in">AVERROR</span>(EAGAIN)) &#123;</span><br><span class="line">   <span class="comment">// 没有获取到数据</span></span><br><span class="line">   error = <span class="number">0</span>;</span><br><span class="line">   <span class="keyword">goto</span> cleanup;</span><br><span class="line"> &#125; <span class="keyword">else</span> <span class="keyword">if</span> (error == AVERROR_EOF) &#123;</span><br><span class="line">   <span class="comment">// 解码器中数据已经全部解码完成</span></span><br><span class="line">   error = <span class="number">0</span>;</span><br><span class="line">   *finished = <span class="number">1</span>;</span><br><span class="line"> &#125; <span class="keyword">else</span> <span class="keyword">if</span> (error &lt; <span class="number">0</span>) &#123;</span><br><span class="line">   <span class="comment">// 解码错误</span></span><br><span class="line">   <span class="keyword">goto</span> cleanup;</span><br><span class="line"> &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">   <span class="comment">// 数据成功解码到AVFrame中</span></span><br><span class="line">   *data_present = <span class="number">1</span>;</span><br><span class="line">   error = <span class="number">0</span>;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="重采样"><a href="#重采样" class="headerlink" title="重采样"></a>重采样</h3><p>创建缓冲区，用来存放重采样后的数据</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> ((error = <span class="built_in">av_samples_alloc_array_and_samples</span>(</span><br><span class="line">         data, <span class="literal">nullptr</span>, codec_ctx_out_-&gt;channels, nb_samples,</span><br><span class="line">         codec_ctx_out_-&gt;sample_fmt, <span class="number">0</span>)) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">  <span class="built_in">av_freep</span>(*data[<span class="number">0</span>]);</span><br><span class="line">  <span class="built_in">free</span>(*data);</span><br><span class="line">  <span class="keyword">return</span> error;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>将AVFrame中的数据重采样到上面创建的缓冲区中</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> ((error = <span class="built_in">swr_convert</span>(swr_ctx_, dst, nb_samples, src, nb_samples)) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> error;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="入队列"><a href="#入队列" class="headerlink" title="入队列"></a>入队列</h3><p>将重采样后的数据放入到缓冲队列中</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 重新分配FIFO队列的大小，新的大小=已有的大小加上当前音频帧的样本量</span></span><br><span class="line"><span class="keyword">if</span> ((error = <span class="built_in">av_audio_fifo_realloc</span>(</span><br><span class="line">         fifo_, <span class="built_in">av_audio_fifo_size</span>(fifo_) + input_frame-&gt;nb_samples)) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">  <span class="keyword">goto</span> cleanup;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 将重采样数据写入到FIFO中，如果写入的样本量小于当前帧的样本量，则表明写入有错误</span></span><br><span class="line"><span class="keyword">if</span> (<span class="built_in">av_audio_fifo_write</span>(fifo_, (<span class="type">void</span>**)converted_input_samples,</span><br><span class="line">                        input_frame-&gt;nb_samples) &lt;</span><br><span class="line">    input_frame-&gt;nb_samples) &#123;</span><br><span class="line">  error = AVERROR_EXIT;</span><br><span class="line">  <span class="keyword">goto</span> cleanup;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="出队列"><a href="#出队列" class="headerlink" title="出队列"></a>出队列</h3><p>当队列中采样数据量满足编码器需要的大小后，从队列中取出需要的采样数据。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">AVFrame* frame = <span class="built_in">av_frame_alloc</span>();</span><br><span class="line"><span class="comment">// 用来接收FIFO中数据</span></span><br><span class="line"><span class="comment">// 将AVFrame的样本量，设置为当前会读取的样本量</span></span><br><span class="line">frame-&gt;nb_samples = frame_size;</span><br><span class="line"><span class="comment">// 设置AVFrame的参数</span></span><br><span class="line">frame-&gt;channel_layout = codec_ctx_out_-&gt;channel_layout;</span><br><span class="line">frame-&gt;format = codec_ctx_out_-&gt;sample_fmt;</span><br><span class="line">frame-&gt;sample_rate = codec_ctx_out_-&gt;sample_rate;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 初始化AVFrame中的数据缓冲区</span></span><br><span class="line"><span class="keyword">if</span> ((error = <span class="built_in">av_frame_get_buffer</span>(frame, <span class="number">0</span>)) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">  <span class="built_in">av_frame_free</span>(&amp;frame);</span><br><span class="line">  <span class="keyword">goto</span> cleanup;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 从FIFO中读取数据到AVFrame的缓冲区中，如果读取的样本数小于预定的样本数，则说明读取出错</span></span><br><span class="line"><span class="keyword">if</span> (<span class="built_in">av_audio_fifo_read</span>(fifo_, <span class="built_in">reinterpret_cast</span>&lt;<span class="type">void</span>**&gt;(frame-&gt;data),</span><br><span class="line">                       frame_size) &lt; frame_size) &#123;</span><br><span class="line">  error = AVERROR_EXIT;</span><br><span class="line">  <span class="keyword">goto</span> cleanup;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="编码数据并输出"><a href="#编码数据并输出" class="headerlink" title="编码数据并输出"></a>编码数据并输出</h3><p>通过avcodec_send_frame、avcodec_receive_packet来进行编码。avcodec_send_frame负责将一个AVFrame帧发送给编码器，avcodec_receive_packet负责从编码器中取出一帧已经编码好的数据。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">AVPacket pkt;</span><br><span class="line"><span class="comment">// 创建AVPacket，接收编码后的数据</span></span><br><span class="line"><span class="built_in">av_init_packet</span>(&amp;pkt);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 如果待编码数据不为空，则累计计算当前帧的pts</span></span><br><span class="line"><span class="keyword">if</span> (frame) &#123;</span><br><span class="line">  frame-&gt;pts = pts;</span><br><span class="line">  <span class="comment">// 这里用样本量的个数来计算pts</span></span><br><span class="line">  <span class="comment">// 假设第一帧的样本量为1024，则第一帧的pts=1024，第二帧的样本量也是1024，则第二帧的pts=2048</span></span><br><span class="line">  pts += frame-&gt;nb_samples;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 发送AVFrame到编码器中进行编码</span></span><br><span class="line"><span class="keyword">if</span> ((error = <span class="built_in">avcodec_send_frame</span>(codec_ctx_out_, frame)) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">  <span class="comment">// 发送失败</span></span><br><span class="line">  <span class="keyword">goto</span> cleanup;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 接收编码后的数据到AVPacket中</span></span><br><span class="line">error = <span class="built_in">avcodec_receive_packet</span>(codec_ctx_out_, &amp;pkt);</span><br><span class="line"><span class="keyword">if</span> (error == <span class="built_in">AVERROR</span>(EAGAIN)) &#123;</span><br><span class="line">  <span class="comment">// 没有获取到编码后数据</span></span><br><span class="line">  error = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">goto</span> cleanup;</span><br><span class="line">&#125; <span class="keyword">else</span> <span class="keyword">if</span> (error == AVERROR_EOF) &#123;</span><br><span class="line">  <span class="comment">// 编码器中所有数据编码完成</span></span><br><span class="line">  error = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">goto</span> cleanup;</span><br><span class="line">&#125; <span class="keyword">else</span> <span class="keyword">if</span> (error &lt; <span class="number">0</span>) &#123;</span><br><span class="line">  <span class="comment">// 编码出错</span></span><br><span class="line">  <span class="keyword">goto</span> cleanup;</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">  <span class="comment">// 成功获取编码后数据到AVPacket中</span></span><br><span class="line">  error = <span class="number">0</span>;</span><br><span class="line">  *data_written = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="写入到输出"><a href="#写入到输出" class="headerlink" title="写入到输出"></a>写入到输出</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 如果获取数据，则写入到输出上下文中</span></span><br><span class="line"><span class="keyword">if</span> (*data_written &amp;&amp; (error = <span class="built_in">av_write_frame</span>(fmt_ctx_out_, &amp;pkt)) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">  <span class="comment">// 写入失败</span></span><br><span class="line">  <span class="keyword">goto</span> cleanup;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>高振宇
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://witgao.com/2020/07/05/av/FFmpeg%E5%BD%95%E5%88%B6%E9%9F%B3%E9%A2%91/" title="FFmpeg录制音频">https://witgao.com/2020/07/05/av/FFmpeg录制音频/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/FFmpeg/" rel="tag"><i class="fa fa-tag"></i> FFmpeg</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/05/28/av/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8JNI/" rel="prev" title="如何使用JNI">
+                  <i class="fa fa-chevron-left"></i> 如何使用JNI
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/07/14/av/FFmpeg%E5%BD%95%E5%88%B6%E8%A7%86%E9%A2%91/" rel="next" title="FFmpeg录制视频">
+                  FFmpeg录制视频 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">高振宇</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">75k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:33</span>
+  </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

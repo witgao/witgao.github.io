@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha256-Z1K5uhUaJXA7Ll0XrZ/0JhX4lAtZFpT6jkKrEDT0drU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"witgao.com","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.14.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="std::vector数据结构__vector_basevector的基类，定义了vector的数据结构，在vector内部是使用对象数组来实现的，end - begin表示size，end_cap - begin表示capacity。 12345678class __vector_base    : protected __vector_base_common&lt;true&gt;&amp;#123;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="libc++源码分析之std::vector">
+<meta property="og:url" content="https://witgao.com/2022/02/02/c++/libc++%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8Bvector/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:description" content="std::vector数据结构__vector_basevector的基类，定义了vector的数据结构，在vector内部是使用对象数组来实现的，end - begin表示size，end_cap - begin表示capacity。 12345678class __vector_base    : protected __vector_base_common&lt;true&gt;&amp;#123;">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-02-01T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-01-30T14:13:56.040Z">
+<meta property="article:author" content="高振宇">
+<meta property="article:tag" content="libc++">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://witgao.com/2022/02/02/c++/libc++%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8Bvector/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://witgao.com/2022/02/02/c++/libc++%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8Bvector/","path":"2022/02/02/c++/libc++源码分析之vector/","title":"libc++源码分析之std::vector"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>libc++源码分析之std::vector | 富贵山庄</title>
+  
+
+
+
+
+
+
+  <script async defer data-website-id="" src=""></script>
+
+  <script defer data-domain="" src=""></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">富贵山庄</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">恒者行远，思者常新</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#std-vector"><span class="nav-number">1.</span> <span class="nav-text">std::vector</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-number">1.1.</span> <span class="nav-text">数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#vector-base"><span class="nav-number">1.1.1.</span> <span class="nav-text">__vector_base</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%87%BD%E6%95%B0"><span class="nav-number">1.2.</span> <span class="nav-text">函数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0"><span class="nav-number">1.2.1.</span> <span class="nav-text">构造函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%90%E6%9E%84%E5%87%BD%E6%95%B0"><span class="nav-number">1.2.2.</span> <span class="nav-text">析构函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#vallocate"><span class="nav-number">1.2.3.</span> <span class="nav-text">__vallocate</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#construct-at-end"><span class="nav-number">1.2.4.</span> <span class="nav-text">__construct_at_end</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#clear"><span class="nav-number">1.2.5.</span> <span class="nav-text">clear</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#operator-x3D"><span class="nav-number">1.2.6.</span> <span class="nav-text">operator&#x3D;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#assign"><span class="nav-number">1.2.7.</span> <span class="nav-text">assign</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#emplace-back"><span class="nav-number">1.2.8.</span> <span class="nav-text">emplace_back</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#emplace"><span class="nav-number">1.2.9.</span> <span class="nav-text">emplace</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#size"><span class="nav-number">1.2.10.</span> <span class="nav-text">size</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#capacity"><span class="nav-number">1.2.11.</span> <span class="nav-text">capacity</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#empty"><span class="nav-number">1.2.12.</span> <span class="nav-text">empty</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#reserve"><span class="nav-number">1.2.13.</span> <span class="nav-text">reserve</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#shrink-to-fit"><span class="nav-number">1.2.14.</span> <span class="nav-text">shrink_to_fit</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#operator"><span class="nav-number">1.2.15.</span> <span class="nav-text">operator[]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#at"><span class="nav-number">1.2.16.</span> <span class="nav-text">at</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#push-back"><span class="nav-number">1.2.17.</span> <span class="nav-text">push_back</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#insert"><span class="nav-number">1.2.18.</span> <span class="nav-text">insert</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#erase"><span class="nav-number">1.2.19.</span> <span class="nav-text">erase</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#resize"><span class="nav-number">1.2.20.</span> <span class="nav-text">resize</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#swap"><span class="nav-number">1.2.21.</span> <span class="nav-text">swap</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#std-vector-lt-bool-gt"><span class="nav-number">2.</span> <span class="nav-text">std::vector&lt;bool&gt;</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-1"><span class="nav-number">2.1.</span> <span class="nav-text">数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#vector-lt-bool-gt"><span class="nav-number">2.1.1.</span> <span class="nav-text">vector&lt;bool&gt;</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%87%BD%E6%95%B0-1"><span class="nav-number">2.2.</span> <span class="nav-text">函数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#operator-1"><span class="nav-number">2.2.1.</span> <span class="nav-text">operator[]</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="高振宇"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">高振宇</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">33</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/witgao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;witgao" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:witgao328@gmail.com" title="E-Mail → mailto:witgao328@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2022/02/02/c++/libc++%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8Bvector/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="高振宇">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="libc++源码分析之std::vector | 富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          libc++源码分析之std::vector
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-02-02 00:00:00" itemprop="dateCreated datePublished" datetime="2022-02-02T00:00:00+08:00">2022-02-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/C/" itemprop="url" rel="index"><span itemprop="name">C++</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.9k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>11 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="std-vector"><a href="#std-vector" class="headerlink" title="std::vector"></a>std::vector</h1><h2 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h2><h3 id="vector-base"><a href="#vector-base" class="headerlink" title="__vector_base"></a>__vector_base</h3><p>vector的基类，定义了vector的数据结构，在vector内部是使用对象数组来实现的，end - begin表示size，end_cap - begin表示capacity。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">__vector_base</span></span><br><span class="line">    : <span class="keyword">protected</span> __vector_base_common&lt;<span class="literal">true</span>&gt;</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    pointer                                         __begin_; <span class="comment">// 数组第一个对象的首地址</span></span><br><span class="line">    pointer                                         __end_; <span class="comment">// 数组下一个待存储的对象的首地址</span></span><br><span class="line">    __compressed_pair&lt;pointer, allocator_type&gt; __end_cap_; <span class="comment">// 数组内存尾指针</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<h2 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h2><h3 id="构造函数"><a href="#构造函数" class="headerlink" title="构造函数"></a>构造函数</h3><p><strong>vector(initializer_list<value_type> __il)</strong></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">_Tp</span>, <span class="keyword">class</span> <span class="title class_">_Allocator</span>&gt;</span><br><span class="line"><span class="keyword">inline</span> _LIBCPP_INLINE_VISIBILITY</span><br><span class="line">vector&lt;_Tp, _Allocator&gt;::<span class="built_in">vector</span>(initializer_list&lt;value_type&gt; __il)</span><br><span class="line">&#123;</span><br><span class="line"><span class="meta">#<span class="keyword">if</span> _LIBCPP_DEBUG_LEVEL == 2</span></span><br><span class="line">    __get_db()-&gt;__insert_c(<span class="keyword">this</span>);</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">    <span class="keyword">if</span> (__il.<span class="built_in">size</span>() &gt; <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        __vallocate(__il.<span class="built_in">size</span>()); <span class="comment">// 分配内存</span></span><br><span class="line">        __construct_at_end(__il.<span class="built_in">begin</span>(), __il.<span class="built_in">end</span>(), __il.<span class="built_in">size</span>()); <span class="comment">// 拷贝数据</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>vector(size_type __n, const value_type&amp; __x)</strong></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">_Tp</span>, <span class="keyword">class</span> <span class="title class_">_Allocator</span>&gt;</span><br><span class="line">vector&lt;_Tp, _Allocator&gt;::<span class="built_in">vector</span>(size_type __n, <span class="type">const</span> value_type&amp; __x)</span><br><span class="line">&#123;</span><br><span class="line"><span class="meta">#<span class="keyword">if</span> _LIBCPP_DEBUG_LEVEL == 2</span></span><br><span class="line">    __get_db()-&gt;__insert_c(<span class="keyword">this</span>);</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">    <span class="keyword">if</span> (__n &gt; <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        __vallocate(__n); <span class="comment">// 分配内存</span></span><br><span class="line">        __construct_at_end(__n, __x); <span class="comment">// 拷贝数据</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>vector(const vector&amp; __x)</strong><br>拷贝构造会拷贝整个对象数组</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">_Tp</span>, <span class="keyword">class</span> <span class="title class_">_Allocator</span>&gt;</span><br><span class="line">vector&lt;_Tp, _Allocator&gt;::<span class="built_in">vector</span>(<span class="type">const</span> vector&amp; __x)</span><br><span class="line">    : __base(__alloc_traits::<span class="built_in">select_on_container_copy_construction</span>(__x.__alloc()))</span><br><span class="line">&#123;</span><br><span class="line"><span class="meta">#<span class="keyword">if</span> _LIBCPP_DEBUG_LEVEL == 2</span></span><br><span class="line">    __get_db()-&gt;__insert_c(<span class="keyword">this</span>);</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">    size_type __n = __x.<span class="built_in">size</span>();</span><br><span class="line">    <span class="keyword">if</span> (__n &gt; <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        __vallocate(__n); <span class="comment">// 分配内存</span></span><br><span class="line">        __construct_at_end(__x.__begin_, __x.__end_, __n); <span class="comment">// 拷贝数据</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>vector(vector&amp;&amp; __x)</strong><br>移动构造只是简单的拷贝对象数组的地址</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">_Tp</span>, <span class="keyword">class</span> <span class="title class_">_Allocator</span>&gt;</span><br><span class="line"><span class="keyword">inline</span> _LIBCPP_INLINE_VISIBILITY</span><br><span class="line">vector&lt;_Tp, _Allocator&gt;::<span class="built_in">vector</span>(vector&amp;&amp; __x)</span><br><span class="line"><span class="meta">#<span class="keyword">if</span> _LIBCPP_STD_VER &gt; 14</span></span><br><span class="line">        _NOEXCEPT</span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line">        _NOEXCEPT_(is_nothrow_move_constructible&lt;allocator_type&gt;::value)</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">    : __base(_VSTD::<span class="built_in">move</span>(__x.__alloc()))</span><br><span class="line">&#123;</span><br><span class="line"><span class="meta">#<span class="keyword">if</span> _LIBCPP_DEBUG_LEVEL == 2</span></span><br><span class="line">    __get_db()-&gt;__insert_c(<span class="keyword">this</span>);</span><br><span class="line">    __get_db()-&gt;<span class="built_in">swap</span>(<span class="keyword">this</span>, &amp;__x);</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">    <span class="keyword">this</span>-&gt;__begin_ = __x.__begin_; <span class="comment">// 拷贝数组地址</span></span><br><span class="line">    <span class="keyword">this</span>-&gt;__end_ = __x.__end_;</span><br><span class="line">    <span class="keyword">this</span>-&gt;__end_cap() = __x.__end_cap();</span><br><span class="line">    __x.__begin_ = __x.__end_ = __x.__end_cap() = <span class="literal">nullptr</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="析构函数"><a href="#析构函数" class="headerlink" title="析构函数"></a>析构函数</h3><p><strong>~vector()</strong></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">    _LIBCPP_INLINE_VISIBILITY</span><br><span class="line">    ~<span class="built_in">vector</span>()</span><br><span class="line">    &#123;</span><br><span class="line">        __annotate_delete();</span><br><span class="line"><span class="meta">#<span class="keyword">if</span> _LIBCPP_DEBUG_LEVEL == 2</span></span><br><span class="line">        __get_db()-&gt;__erase_c(<span class="keyword">this</span>);</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>~__vector_base()</strong><br>在基类的析构中，会对数据进行释放</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">_Tp</span>, <span class="keyword">class</span> <span class="title class_">_Allocator</span>&gt;</span><br><span class="line">__vector_base&lt;_Tp, _Allocator&gt;::~__vector_base()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (__begin_ != <span class="literal">nullptr</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">clear</span>(); <span class="comment">// 修改end指针，将size设置0，如果数组中存储的是对象，则调用对象的析构函数，如果是指针则跳过</span></span><br><span class="line">        __alloc_traits::<span class="built_in">deallocate</span>(__alloc(), __begin_, <span class="built_in">capacity</span>()); <span class="comment">// 释放分配的数组内存</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="vallocate"><a href="#vallocate" class="headerlink" title="__vallocate"></a>__vallocate</h3><p>分配指针大小的Tp数组</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">_Tp</span>, <span class="keyword">class</span> <span class="title class_">_Allocator</span>&gt;</span><br><span class="line"><span class="type">void</span></span><br><span class="line">vector&lt;_Tp, _Allocator&gt;::__vallocate(size_type __n)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (__n &gt; <span class="built_in">max_size</span>())</span><br><span class="line">        <span class="keyword">this</span>-&gt;__throw_length_error();</span><br><span class="line">    <span class="keyword">this</span>-&gt;__begin_ = <span class="keyword">this</span>-&gt;__end_ = __alloc_traits::<span class="built_in">allocate</span>(<span class="keyword">this</span>-&gt;__alloc(), __n); <span class="comment">// 分配Tp数组，将首地址保存到__begin，默认为空，所以__end也指向首地址</span></span><br><span class="line">    <span class="keyword">this</span>-&gt;__end_cap() = <span class="keyword">this</span>-&gt;__begin_ + __n; <span class="comment">// 保存分配的内存的尾指针</span></span><br><span class="line">    __annotate_new(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="construct-at-end"><a href="#construct-at-end" class="headerlink" title="__construct_at_end"></a>__construct_at_end</h3><p><strong>__construct_at_end(_ForwardIterator __first, _ForwardIterator __last, size_type __n)</strong></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">_Tp</span>, <span class="keyword">class</span> <span class="title class_">_Allocator</span>&gt;</span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">_ForwardIterator</span>&gt;</span><br><span class="line"><span class="keyword">typename</span> enable_if</span><br><span class="line">&lt;</span><br><span class="line">    __is_cpp17_forward_iterator&lt;_ForwardIterator&gt;::value,</span><br><span class="line">    <span class="type">void</span></span><br><span class="line">&gt;::type</span><br><span class="line">vector&lt;_Tp, _Allocator&gt;::__construct_at_end(_ForwardIterator __first, _ForwardIterator __last, size_type __n)</span><br><span class="line">&#123;</span><br><span class="line">    _ConstructTransaction __tx(*<span class="keyword">this</span>, __n);</span><br><span class="line">    _VSTD::__construct_range_forward(<span class="keyword">this</span>-&gt;__alloc(), __first, __last, __tx.__pos_); <span class="comment">// 遍历填充，tx.pos为__end_指针，从end位置开始插入</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">_Alloc</span>, <span class="keyword">class</span> <span class="title class_">_Iter</span>, <span class="keyword">class</span> <span class="title class_">_Ptr</span>&gt;</span><br><span class="line">_LIBCPP_INLINE_VISIBILITY</span><br><span class="line"><span class="type">void</span> __construct_range_forward(_Alloc&amp; __a, _Iter __begin1, _Iter __end1, _Ptr&amp; __begin2) &#123;</span><br><span class="line">    <span class="keyword">typedef</span> allocator_traits&lt;_Alloc&gt; _Traits;</span><br><span class="line">    <span class="keyword">for</span> (; __begin1 != __end1; ++__begin1, (<span class="type">void</span>) ++__begin2) &#123; </span><br><span class="line">        _Traits::<span class="built_in">construct</span>(__a, _VSTD::__to_address(__begin2), *__begin1); <span class="comment">// 循环拷贝数据</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>__construct_at_end(size_type __n, const_reference __x)</strong></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">_Tp</span>, <span class="keyword">class</span> <span class="title class_">_Allocator</span>&gt;</span><br><span class="line"><span class="keyword">inline</span></span><br><span class="line"><span class="type">void</span></span><br><span class="line">vector&lt;_Tp, _Allocator&gt;::__construct_at_end(size_type __n, const_reference __x)</span><br><span class="line">&#123;</span><br><span class="line">    _ConstructTransaction __tx(*<span class="keyword">this</span>, __n);</span><br><span class="line">    const_pointer __new_end = __tx.__new_end_;</span><br><span class="line">    <span class="keyword">for</span> (pointer __pos = __tx.__pos_; __pos != __new_end; ++__pos, __tx.__pos_ = __pos) &#123;</span><br><span class="line">        __alloc_traits::<span class="built_in">construct</span>(<span class="keyword">this</span>-&gt;__alloc(), _VSTD::__to_address(__pos), __x); <span class="comment">// 循环拷贝数据</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="clear"><a href="#clear" class="headerlink" title="clear"></a>clear</h3><p>clear函数会修改end指针，将size设置为0，如果数组中存储的是对象，则调用对象的析构函数，如果是指针则跳过，并不会影响capacity，也不会释放内存。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">_LIBCPP_INLINE_VISIBILITY</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">clear</span><span class="params">()</span> _NOEXCEPT</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    size_type __old_size = <span class="built_in">size</span>();</span><br><span class="line">    __base::<span class="built_in">clear</span>(); <span class="comment">// 主要逻辑都在基类函数中</span></span><br><span class="line">    __annotate_shrink(__old_size);</span><br><span class="line">    __invalidate_all_iterators();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">_LIBCPP_INLINE_VISIBILITY</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">clear</span><span class="params">()</span> _NOEXCEPT </span>&#123;</span><br><span class="line">    __destruct_at_end(__begin_); </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">_Tp</span>, <span class="keyword">class</span> <span class="title class_">_Allocator</span>&gt;</span><br><span class="line"><span class="keyword">inline</span> _LIBCPP_INLINE_VISIBILITY</span><br><span class="line"><span class="type">void</span></span><br><span class="line">__vector_base&lt;_Tp, _Allocator&gt;::__destruct_at_end(pointer __new_last) _NOEXCEPT</span><br><span class="line">&#123;</span><br><span class="line">    pointer __soon_to_be_end = __end_;</span><br><span class="line">    <span class="keyword">while</span> (__new_last != __soon_to_be_end)</span><br><span class="line">        __alloc_traits::<span class="built_in">destroy</span>(__alloc(), _VSTD::__to_address(--__soon_to_be_end)); <span class="comment">// 遍历已经存储的对象，如果该对象不是指针，则会调用对象的析构函数</span></span><br><span class="line">    __end_ = __new_last; <span class="comment">// 更新end，指向begin，size为0</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="operator-x3D"><a href="#operator-x3D" class="headerlink" title="operator&#x3D;"></a>operator&#x3D;</h3><p><strong>operator&#x3D;(vector&amp;&amp; __x)</strong> </p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">_Tp</span>, <span class="keyword">class</span> <span class="title class_">_Allocator</span>&gt;</span><br><span class="line"><span class="keyword">inline</span> _LIBCPP_INLINE_VISIBILITY</span><br><span class="line">vector&lt;_Tp, _Allocator&gt;&amp;</span><br><span class="line">vector&lt;_Tp, _Allocator&gt;::<span class="keyword">operator</span>=(vector&amp;&amp; __x)</span><br><span class="line">    _NOEXCEPT_((__noexcept_move_assign_container&lt;_Allocator, __alloc_traits&gt;::value))</span><br><span class="line">&#123;</span><br><span class="line">    __move_assign(__x, <span class="built_in">integral_constant</span>&lt;<span class="type">bool</span>,</span><br><span class="line">          __alloc_traits::propagate_on_container_move_assignment::value&gt;()); <span class="comment">// 销毁当前数组，拷贝x中数组的指针到当前对象，并将x中的数组置为空</span></span><br><span class="line">    <span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>operator&#x3D;(const vector&amp; __x)</strong></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">_Tp</span>, <span class="keyword">class</span> <span class="title class_">_Allocator</span>&gt;</span><br><span class="line"><span class="keyword">inline</span> _LIBCPP_INLINE_VISIBILITY</span><br><span class="line">vector&lt;_Tp, _Allocator&gt;&amp;</span><br><span class="line">vector&lt;_Tp, _Allocator&gt;::<span class="keyword">operator</span>=(<span class="type">const</span> vector&amp; __x)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span> != &amp;__x)</span><br><span class="line">    &#123;</span><br><span class="line">        __base::__copy_assign_alloc(__x);</span><br><span class="line">        <span class="built_in">assign</span>(__x.__begin_, __x.__end_); <span class="comment">// 替换数据</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> *<span class="keyword">this</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="assign"><a href="#assign" class="headerlink" title="assign"></a>assign</h3><p>清除当前数据，再将first到last的数据拷贝过来，不足会自动扩容</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">_Tp</span>, <span class="keyword">class</span> <span class="title class_">_Allocator</span>&gt;</span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">_InputIterator</span>&gt;</span><br><span class="line"><span class="keyword">typename</span> enable_if</span><br><span class="line">&lt;</span><br><span class="line">     __is_cpp17_input_iterator  &lt;_InputIterator&gt;::value &amp;&amp;</span><br><span class="line">    !__is_cpp17_forward_iterator&lt;_InputIterator&gt;::value &amp;&amp;</span><br><span class="line">    is_constructible&lt;</span><br><span class="line">       _Tp,</span><br><span class="line">       <span class="keyword">typename</span> iterator_traits&lt;_InputIterator&gt;::reference&gt;::value,</span><br><span class="line">    <span class="type">void</span></span><br><span class="line">&gt;::type</span><br><span class="line">vector&lt;_Tp, _Allocator&gt;::<span class="built_in">assign</span>(_InputIterator __first, _InputIterator __last)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">clear</span>(); <span class="comment">// 清空当前数组，重置end指向begin</span></span><br><span class="line">    <span class="keyword">for</span> (; __first != __last; ++__first)</span><br><span class="line">        __emplace_back(*__first); <span class="comment">// 拷贝插入到end位置</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="emplace-back"><a href="#emplace-back" class="headerlink" title="emplace_back"></a>emplace_back</h3><p>根据参数构造对象，并插入到end位置</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">_Tp</span>, <span class="keyword">class</span> <span class="title class_">_Allocator</span>&gt;</span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span>... _Args&gt;</span><br><span class="line"><span class="keyword">inline</span></span><br><span class="line"><span class="meta">#<span class="keyword">if</span> _LIBCPP_STD_VER &gt; 14</span></span><br><span class="line"><span class="keyword">typename</span> vector&lt;_Tp, _Allocator&gt;::reference</span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">vector&lt;_Tp, _Allocator&gt;::<span class="built_in">emplace_back</span>(_Args&amp;&amp;... __args)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span>-&gt;__end_ &lt; <span class="keyword">this</span>-&gt;__end_cap()) </span><br><span class="line">    &#123;</span><br><span class="line">        __construct_one_at_end(_VSTD::forward&lt;_Args&gt;(__args)...); <span class="comment">// 如果不需要扩容，则直接拷贝到end位置，end++</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        __emplace_back_slow_path(_VSTD::forward&lt;_Args&gt;(__args)...); <span class="comment">// 需要扩容</span></span><br><span class="line"><span class="meta">#<span class="keyword">if</span> _LIBCPP_STD_VER &gt; 14</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>-&gt;<span class="built_in">back</span>();</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>扩容前size为4，capacity为4<br>    . . . .<br>split_buffer会分配一段内存，capacity为8，并将end指向下标为4的位置<br>    。。。。。。。。<br>construct后，在end位置构造新对象<br>    。。。。. 。。。<br>swap_out_circular_buffer会先将当前数组中的对象拷贝到split_buffer的数组中，然后再把当前数组与split_buffer中的数组进行交换<br>    . . . . . 。。。<br>这样当前vector中保存的就是扩容后的新数组，在split_buffer中保存的就是旧数组，函数结束，split_buffer析构函数中会对旧数组进行销毁    </p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">_Tp</span>, <span class="keyword">class</span> <span class="title class_">_Allocator</span>&gt;</span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span>... _Args&gt;</span><br><span class="line"><span class="type">void</span></span><br><span class="line">vector&lt;_Tp, _Allocator&gt;::__emplace_back_slow_path(_Args&amp;&amp;... __args)</span><br><span class="line">&#123;</span><br><span class="line">    allocator_type&amp; __a = <span class="keyword">this</span>-&gt;__alloc();</span><br><span class="line">    <span class="comment">//2倍扩容，capacity = 2 * capacity</span></span><br><span class="line">    __split_buffer&lt;value_type, allocator_type&amp;&gt; __v(__recommend(<span class="built_in">size</span>() + <span class="number">1</span>), <span class="built_in">size</span>(), __a); <span class="comment">// 重新分配数组内存，从第size()位置开始存储</span></span><br><span class="line"><span class="comment">//    __v.emplace_back(_VSTD::forward&lt;_Args&gt;(__args)...);</span></span><br><span class="line">    __alloc_traits::<span class="built_in">construct</span>(__a, _VSTD::__to_address(__v.__end_), _VSTD::forward&lt;_Args&gt;(__args)...); <span class="comment">// 将当前对象构造到size()位置</span></span><br><span class="line">    __v.__end_++; <span class="comment">// end指向size()+1</span></span><br><span class="line">    __swap_out_circular_buffer(__v); <span class="comment">// 将[0,size-1]的数据拷贝到split_buffer中，并将交换数组</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="emplace"><a href="#emplace" class="headerlink" title="emplace"></a>emplace</h3><p>根据参数构造对象，并插入到指定位置</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">_Tp</span>, <span class="keyword">class</span> <span class="title class_">_Allocator</span>&gt;</span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span>... _Args&gt;</span><br><span class="line"><span class="keyword">typename</span> vector&lt;_Tp, _Allocator&gt;::iterator</span><br><span class="line">vector&lt;_Tp, _Allocator&gt;::<span class="built_in">emplace</span>(const_iterator __position, _Args&amp;&amp;... __args)</span><br><span class="line">&#123;</span><br><span class="line"><span class="meta">#<span class="keyword">if</span> _LIBCPP_DEBUG_LEVEL == 2</span></span><br><span class="line">    _LIBCPP_ASSERT(__get_const_db()-&gt;__find_c_from_i(&amp;__position) == <span class="keyword">this</span>,</span><br><span class="line">        <span class="string">&quot;vector::emplace(iterator, x) called with an iterator not&quot;</span></span><br><span class="line">        <span class="string">&quot; referring to this vector&quot;</span>);</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">    pointer __p = <span class="keyword">this</span>-&gt;__begin_ + (__position - <span class="built_in">begin</span>());</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span>-&gt;__end_ &lt; <span class="keyword">this</span>-&gt;__end_cap())</span><br><span class="line">    &#123;  <span class="comment">// 无需扩容</span></span><br><span class="line">        <span class="keyword">if</span> (__p == <span class="keyword">this</span>-&gt;__end_)</span><br><span class="line">        &#123; <span class="comment">// 插入到尾部</span></span><br><span class="line">            __construct_one_at_end(_VSTD::forward&lt;_Args&gt;(__args)...);  <span class="comment">// 插入到end</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">        &#123;   <span class="comment">// 插入到中间</span></span><br><span class="line">            __temp_value&lt;value_type, _Allocator&gt; __tmp(<span class="keyword">this</span>-&gt;__alloc(), _VSTD::forward&lt;_Args&gt;(__args)...); <span class="comment">// 构造对象</span></span><br><span class="line">            __move_range(__p, <span class="keyword">this</span>-&gt;__end_, __p + <span class="number">1</span>);  <span class="comment">// 将position后面的元素后移一位</span></span><br><span class="line">            *__p = _VSTD::<span class="built_in">move</span>(__tmp.<span class="built_in">get</span>()); <span class="comment">// 将构造的对象放入到position位置</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        allocator_type&amp; __a = <span class="keyword">this</span>-&gt;__alloc();</span><br><span class="line">        __split_buffer&lt;value_type, allocator_type&amp;&gt; __v(__recommend(<span class="built_in">size</span>() + <span class="number">1</span>), __p - <span class="keyword">this</span>-&gt;__begin_, __a); <span class="comment">// 扩容，end位置指向position</span></span><br><span class="line">        __v.<span class="built_in">emplace_back</span>(_VSTD::forward&lt;_Args&gt;(__args)...); <span class="comment">// 向end位置插入对象</span></span><br><span class="line">        __p = __swap_out_circular_buffer(__v, __p); <span class="comment">// 拷贝数据，交换数组</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> __make_iter(__p);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="size"><a href="#size" class="headerlink" title="size"></a>size</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">_LIBCPP_INLINE_VISIBILITY</span></span><br><span class="line"><span class="function">size_type <span class="title">size</span><span class="params">()</span> <span class="type">const</span> _NOEXCEPT </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">static_cast</span>&lt;size_type&gt;(<span class="keyword">this</span>-&gt;__end_ - <span class="keyword">this</span>-&gt;__begin_);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="capacity"><a href="#capacity" class="headerlink" title="capacity"></a>capacity</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">_LIBCPP_INLINE_VISIBILITY</span></span><br><span class="line"><span class="function">size_type <span class="title">capacity</span><span class="params">()</span> <span class="type">const</span> _NOEXCEPT </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">static_cast</span>&lt;size_type&gt;(__end_cap() - __begin_);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="empty"><a href="#empty" class="headerlink" title="empty"></a>empty</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">bool</span> <span class="title">empty</span><span class="params">()</span> <span class="type">const</span> _NOEXCEPT </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>-&gt;__begin_ == <span class="keyword">this</span>-&gt;__end_;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="reserve"><a href="#reserve" class="headerlink" title="reserve"></a>reserve</h3><p>设置分配内存大小，设置的是cap大小，size不会变。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">_Tp</span>, <span class="keyword">class</span> <span class="title class_">_Allocator</span>&gt;</span><br><span class="line"><span class="type">void</span></span><br><span class="line">vector&lt;_Tp, _Allocator&gt;::<span class="built_in">reserve</span>(size_type __n)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (__n &gt; <span class="built_in">capacity</span>())</span><br><span class="line">    &#123;</span><br><span class="line">        allocator_type&amp; __a = <span class="keyword">this</span>-&gt;__alloc();</span><br><span class="line">        __split_buffer&lt;value_type, allocator_type&amp;&gt; __v(__n, <span class="built_in">size</span>(), __a); <span class="comment">// 扩容</span></span><br><span class="line">        __swap_out_circular_buffer(__v); <span class="comment">// 拷贝数据，并交换数组指针，__split_buffer析构时销毁旧数组</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="shrink-to-fit"><a href="#shrink-to-fit" class="headerlink" title="shrink_to_fit"></a>shrink_to_fit</h3><p>将capacity缩小为size大小</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">_Tp</span>, <span class="keyword">class</span> <span class="title class_">_Allocator</span>&gt;</span><br><span class="line"><span class="type">void</span></span><br><span class="line">vector&lt;_Tp, _Allocator&gt;::<span class="built_in">shrink_to_fit</span>() _NOEXCEPT</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">capacity</span>() &gt; <span class="built_in">size</span>())</span><br><span class="line">    &#123;</span><br><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _LIBCPP_NO_EXCEPTIONS</span></span><br><span class="line">        <span class="keyword">try</span></span><br><span class="line">        &#123;</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span> <span class="comment">// _LIBCPP_NO_EXCEPTIONS</span></span></span><br><span class="line">            allocator_type&amp; __a = <span class="keyword">this</span>-&gt;__alloc();</span><br><span class="line">            __split_buffer&lt;value_type, allocator_type&amp;&gt; __v(<span class="built_in">size</span>(), <span class="built_in">size</span>(), __a);</span><br><span class="line">            __swap_out_circular_buffer(__v);</span><br><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _LIBCPP_NO_EXCEPTIONS</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">catch</span> (...)</span><br><span class="line">        &#123;</span><br><span class="line">        &#125;</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span> <span class="comment">// _LIBCPP_NO_EXCEPTIONS</span></span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="operator"><a href="#operator" class="headerlink" title="operator[]"></a>operator[]</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">_Tp</span>, <span class="keyword">class</span> <span class="title class_">_Allocator</span>&gt;</span><br><span class="line"><span class="keyword">inline</span> _LIBCPP_INLINE_VISIBILITY</span><br><span class="line"><span class="keyword">typename</span> vector&lt;_Tp, _Allocator&gt;::reference</span><br><span class="line">vector&lt;_Tp, _Allocator&gt;::<span class="keyword">operator</span>[](size_type __n) _NOEXCEPT</span><br><span class="line">&#123;</span><br><span class="line">    _LIBCPP_ASSERT(__n &lt; <span class="built_in">size</span>(), <span class="string">&quot;vector[] index out of bounds&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>-&gt;__begin_[__n];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="at"><a href="#at" class="headerlink" title="at"></a>at</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">_Tp</span>, <span class="keyword">class</span> <span class="title class_">_Allocator</span>&gt;</span><br><span class="line"><span class="keyword">typename</span> vector&lt;_Tp, _Allocator&gt;::reference</span><br><span class="line">vector&lt;_Tp, _Allocator&gt;::<span class="built_in">at</span>(size_type __n)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (__n &gt;= <span class="built_in">size</span>())</span><br><span class="line">        <span class="keyword">this</span>-&gt;__throw_out_of_range();</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>-&gt;__begin_[__n];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="push-back"><a href="#push-back" class="headerlink" title="push_back"></a>push_back</h3><p>将对象插入到end位置，和emplace_back逻辑一致，只是一个接收的对象，一个接收的构造对象的参数</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">_Tp</span>, <span class="keyword">class</span> <span class="title class_">_Allocator</span>&gt;</span><br><span class="line"><span class="keyword">inline</span> _LIBCPP_INLINE_VISIBILITY</span><br><span class="line"><span class="type">void</span></span><br><span class="line">vector&lt;_Tp, _Allocator&gt;::<span class="built_in">push_back</span>(const_reference __x)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span>-&gt;__end_ != <span class="keyword">this</span>-&gt;__end_cap())</span><br><span class="line">    &#123;</span><br><span class="line">        __construct_one_at_end(__x); <span class="comment">// 直接插入到end</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        __push_back_slow_path(__x); <span class="comment">// 扩容</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>逻辑和__emplace_back_slow_path一致</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">_Tp</span>, <span class="keyword">class</span> <span class="title class_">_Allocator</span>&gt;</span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">_Up</span>&gt;</span><br><span class="line"><span class="type">void</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _LIBCPP_CXX03_LANG</span></span><br><span class="line">vector&lt;_Tp, _Allocator&gt;::__push_back_slow_path(_Up&amp;&amp; __x)</span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line">vector&lt;_Tp, _Allocator&gt;::__push_back_slow_path(_Up&amp; __x)</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">&#123;</span><br><span class="line">    allocator_type&amp; __a = <span class="keyword">this</span>-&gt;__alloc();</span><br><span class="line">    __split_buffer&lt;value_type, allocator_type&amp;&gt; __v(__recommend(<span class="built_in">size</span>() + <span class="number">1</span>), <span class="built_in">size</span>(), __a); <span class="comment">// 扩容</span></span><br><span class="line">    <span class="comment">// __v.push_back(_VSTD::forward&lt;_Up&gt;(__x));</span></span><br><span class="line">    __alloc_traits::<span class="built_in">construct</span>(__a, _VSTD::__to_address(__v.__end_), _VSTD::forward&lt;_Up&gt;(__x)); <span class="comment">// 构造对象到end位置</span></span><br><span class="line">    __v.__end_++; <span class="comment">// end++</span></span><br><span class="line">    __swap_out_circular_buffer(__v); <span class="comment">// 交换数组</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="insert"><a href="#insert" class="headerlink" title="insert"></a>insert</h3><p>插入对象到指定位置，和emplace逻辑一致，只是一个接收的对象，一个接收的构造对象的参数</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">_Tp</span>, <span class="keyword">class</span> <span class="title class_">_Allocator</span>&gt;</span><br><span class="line"><span class="keyword">typename</span> vector&lt;_Tp, _Allocator&gt;::iterator</span><br><span class="line">vector&lt;_Tp, _Allocator&gt;::<span class="built_in">insert</span>(const_iterator __position, const_reference __x)</span><br><span class="line">&#123;</span><br><span class="line"><span class="meta">#<span class="keyword">if</span> _LIBCPP_DEBUG_LEVEL == 2</span></span><br><span class="line">    _LIBCPP_ASSERT(__get_const_db()-&gt;__find_c_from_i(&amp;__position) == <span class="keyword">this</span>,</span><br><span class="line">        <span class="string">&quot;vector::insert(iterator, x) called with an iterator not&quot;</span></span><br><span class="line">        <span class="string">&quot; referring to this vector&quot;</span>);</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">    pointer __p = <span class="keyword">this</span>-&gt;__begin_ + (__position - <span class="built_in">begin</span>());</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span>-&gt;__end_ &lt; <span class="keyword">this</span>-&gt;__end_cap())</span><br><span class="line">    &#123; <span class="comment">// 无需扩容</span></span><br><span class="line">        <span class="keyword">if</span> (__p == <span class="keyword">this</span>-&gt;__end_)</span><br><span class="line">        &#123; <span class="comment">// 插入到尾部</span></span><br><span class="line">            __construct_one_at_end(__x); <span class="comment">// 插入到end</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">        &#123; <span class="comment">// 插入到中间</span></span><br><span class="line">            __move_range(__p, <span class="keyword">this</span>-&gt;__end_, __p + <span class="number">1</span>); <span class="comment">// 将position后面的元素后移一位</span></span><br><span class="line">            const_pointer __xr = pointer_traits&lt;const_pointer&gt;::<span class="built_in">pointer_to</span>(__x);</span><br><span class="line">            <span class="keyword">if</span> (__p &lt;= __xr &amp;&amp; __xr &lt; <span class="keyword">this</span>-&gt;__end_)</span><br><span class="line">                ++__xr;</span><br><span class="line">            *__p = *__xr; <span class="comment">// 将构造的对象放入到position位置</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        allocator_type&amp; __a = <span class="keyword">this</span>-&gt;__alloc();</span><br><span class="line">        __split_buffer&lt;value_type, allocator_type&amp;&gt; __v(__recommend(<span class="built_in">size</span>() + <span class="number">1</span>), __p - <span class="keyword">this</span>-&gt;__begin_, __a); <span class="comment">// 扩容，end位置指向position</span></span><br><span class="line">        __v.<span class="built_in">push_back</span>(__x); <span class="comment">// 向end位置插入对象</span></span><br><span class="line">        __p = __swap_out_circular_buffer(__v, __p); <span class="comment">// 拷贝数据，交换数组</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> __make_iter(__p);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="erase"><a href="#erase" class="headerlink" title="erase"></a>erase</h3><p>删除指定位置的对象，需要注意的是<strong>erase所触发的析构函数并不是删除的那个对象的析构函数，而是最后一个元素的析构函数</strong>。<br>假设vector中有元素1 2 3 4，此时删除2这个元素，那么首先erase会进行move操作，变成1 3 4 4，对于整个数组来说，最后一位的4明显应该为空且应该被销毁的，并且对于删除操作来说，一次删除只应该调用一次析构，所以此处选择调用最后一个4的析构，而并不是删除的2的析构。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">_Tp</span>, <span class="keyword">class</span> <span class="title class_">_Allocator</span>&gt;</span><br><span class="line"><span class="keyword">inline</span> _LIBCPP_INLINE_VISIBILITY</span><br><span class="line"><span class="keyword">typename</span> vector&lt;_Tp, _Allocator&gt;::iterator</span><br><span class="line">vector&lt;_Tp, _Allocator&gt;::<span class="built_in">erase</span>(const_iterator __position)</span><br><span class="line">&#123;</span><br><span class="line"><span class="meta">#<span class="keyword">if</span> _LIBCPP_DEBUG_LEVEL == 2</span></span><br><span class="line">    _LIBCPP_ASSERT(__get_const_db()-&gt;__find_c_from_i(&amp;__position) == <span class="keyword">this</span>,</span><br><span class="line">        <span class="string">&quot;vector::erase(iterator) called with an iterator not&quot;</span></span><br><span class="line">        <span class="string">&quot; referring to this vector&quot;</span>);</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">    _LIBCPP_ASSERT(__position != <span class="built_in">end</span>(),</span><br><span class="line">        <span class="string">&quot;vector::erase(iterator) called with a non-dereferenceable iterator&quot;</span>);</span><br><span class="line">    difference_type __ps = __position - <span class="built_in">cbegin</span>();</span><br><span class="line">    pointer __p = <span class="keyword">this</span>-&gt;__begin_ + __ps; <span class="comment">// 计算position</span></span><br><span class="line">    <span class="keyword">this</span>-&gt;__destruct_at_end(_VSTD::<span class="built_in">move</span>(__p + <span class="number">1</span>, <span class="keyword">this</span>-&gt;__end_, __p)); <span class="comment">// 通过std::move将[position+1, end-1]位置的元素移动到[position, end-2]位置，并调用end-1位置对象的析构函数</span></span><br><span class="line">    <span class="keyword">this</span>-&gt;__invalidate_iterators_past(__p<span class="number">-1</span>);</span><br><span class="line">    iterator __r = __make_iter(__p);</span><br><span class="line">    <span class="keyword">return</span> __r;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="resize"><a href="#resize" class="headerlink" title="resize"></a>resize</h3><p>设置添加的元素长度，设置的是size长度。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">_Tp</span>, <span class="keyword">class</span> <span class="title class_">_Allocator</span>&gt;</span><br><span class="line"><span class="type">void</span></span><br><span class="line">vector&lt;_Tp, _Allocator&gt;::<span class="built_in">resize</span>(size_type __sz)</span><br><span class="line">&#123;</span><br><span class="line">    size_type __cs = <span class="built_in">size</span>();</span><br><span class="line">    <span class="keyword">if</span> (__cs &lt; __sz)</span><br><span class="line">        <span class="keyword">this</span>-&gt;__append(__sz - __cs); <span class="comment">// 如果当前size不足，则填充（通过无参构造构造出对象）</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (__cs &gt; __sz)</span><br><span class="line">        <span class="keyword">this</span>-&gt;__destruct_at_end(<span class="keyword">this</span>-&gt;__begin_ + __sz); <span class="comment">// 如果当前size超出，重新调整end位置，并调用超出部分的析构函数</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="swap"><a href="#swap" class="headerlink" title="swap"></a>swap</h3><p>交换两个vector中的数组</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">_Tp</span>, <span class="keyword">class</span> <span class="title class_">_Allocator</span>&gt;</span><br><span class="line"><span class="type">void</span></span><br><span class="line">vector&lt;_Tp, _Allocator&gt;::<span class="built_in">swap</span>(vector&amp; __x)</span><br><span class="line"><span class="meta">#<span class="keyword">if</span> _LIBCPP_STD_VER &gt;= 14</span></span><br><span class="line">    _NOEXCEPT</span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line">    _NOEXCEPT_(!__alloc_traits::propagate_on_container_swap::value ||</span><br><span class="line">                __is_nothrow_swappable&lt;allocator_type&gt;::value)</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">&#123;</span><br><span class="line">    _LIBCPP_ASSERT(__alloc_traits::propagate_on_container_swap::value ||</span><br><span class="line">                   <span class="keyword">this</span>-&gt;__alloc() == __x.__alloc(),</span><br><span class="line">                   <span class="string">&quot;vector::swap: Either propagate_on_container_swap must be true&quot;</span></span><br><span class="line">                   <span class="string">&quot; or the allocators must compare equal&quot;</span>);</span><br><span class="line">    _VSTD::<span class="built_in">swap</span>(<span class="keyword">this</span>-&gt;__begin_, __x.__begin_);</span><br><span class="line">    _VSTD::<span class="built_in">swap</span>(<span class="keyword">this</span>-&gt;__end_, __x.__end_);</span><br><span class="line">    _VSTD::<span class="built_in">swap</span>(<span class="keyword">this</span>-&gt;__end_cap(), __x.__end_cap());</span><br><span class="line">    _VSTD::__swap_allocator(<span class="keyword">this</span>-&gt;__alloc(), __x.__alloc(),</span><br><span class="line">        <span class="built_in">integral_constant</span>&lt;<span class="type">bool</span>,__alloc_traits::propagate_on_container_swap::value&gt;());</span><br><span class="line"><span class="meta">#<span class="keyword">if</span> _LIBCPP_DEBUG_LEVEL == 2</span></span><br><span class="line">    __get_db()-&gt;<span class="built_in">swap</span>(<span class="keyword">this</span>, &amp;__x);</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="std-vector-lt-bool-gt"><a href="#std-vector-lt-bool-gt" class="headerlink" title="std::vector&lt;bool&gt;"></a>std::vector&lt;bool&gt;</h1><p>vector&lt;bool&gt;是vector对bool的特化，但是特殊的是，vector&lt;bool&gt;为了节省内存，其内部存储的并不是bool，因为一个bool占用了一个字节，而对于bool来说只有true和false，一位就可以表示，所以在vector&lt;bool&gt;中是按照位来存储的，而通过operator[]和at获取到的也并不是对应的bool值，而是其内部的一个bit_reference类。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> __bit_reference&lt;vector&gt;                  reference;</span><br></pre></td></tr></table></figure>
+
+<h2 id="数据结构-1"><a href="#数据结构-1" class="headerlink" title="数据结构"></a>数据结构</h2><h3 id="vector-lt-bool-gt"><a href="#vector-lt-bool-gt" class="headerlink" title="vector&lt;bool&gt;"></a>vector&lt;bool&gt;</h3><p>vector&lt;bool&gt;并没有继承vector_base基类，所以其数据结构是自己定义的，里面维护了一个size_t类型的数组，数组的每个元素有32位，可以存储32个值。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">_Allocator</span>&gt;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">_LIBCPP_TEMPLATE_VIS</span> vector&lt;<span class="type">bool</span>, _Allocator&gt;</span><br><span class="line">    : <span class="keyword">private</span> __vector_base_common&lt;<span class="literal">true</span>&gt;</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    __storage_pointer                                      __begin_; <span class="comment">// size_t指针，32位，可以存储32个元素</span></span><br><span class="line">    size_type                                              __size_;  <span class="comment">// 存储元素的个数</span></span><br><span class="line">    __compressed_pair&lt;size_type, __storage_allocator&gt; __cap_alloc_;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="函数-1"><a href="#函数-1" class="headerlink" title="函数"></a>函数</h2><h3 id="operator-1"><a href="#operator-1" class="headerlink" title="operator[]"></a>operator[]</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">_LIBCPP_INLINE_VISIBILITY reference <span class="keyword">operator</span>[](size_type __n) &#123;</span><br><span class="line">    <span class="keyword">return</span> __make_ref(__n);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>每个元素都可以存储32个值，所以对于pos需要对__bits_per_word进行转换，当pos为40时，需要查找的数组的第2个元素也就是begin+1位置，而对应的位就是第8位。reference接收两个参数，一个是对应的元素，一个是对应的位。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">reference __make_ref(size_type __pos) _NOEXCEPT &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">reference</span>(__begin_ + __pos / __bits_per_word, __storage_type(<span class="number">1</span>) &lt;&lt; __pos % __bits_per_word); <span class="comment">// 将外部位置转换为bit位置</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>高振宇
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://witgao.com/2022/02/02/c++/libc++%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8Bvector/" title="libc++源码分析之std::vector">https://witgao.com/2022/02/02/c++/libc++源码分析之vector/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/libc/" rel="tag"><i class="fa fa-tag"></i> libc++</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/02/01/c++/libc++%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8Bcompressed_pair/" rel="prev" title="libc++源码分析之std::__compressed_pair">
+                  <i class="fa fa-chevron-left"></i> libc++源码分析之std::__compressed_pair
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/02/03/c++/libc++%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8Ballocator/" rel="next" title="libc++源码分析之std::allocator">
+                  libc++源码分析之std::allocator <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">高振宇</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">75k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:33</span>
+  </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha256-Z1K5uhUaJXA7Ll0XrZ/0JhX4lAtZFpT6jkKrEDT0drU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"witgao.com","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.14.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="示例：new&#x2F;delete 一个对象代码12345int main(int argc, char** argv) &amp;#123;  std::string* str &#x3D; new std::string();  delete str;  return 0;&amp;#125;  汇编12345678910111213141516171819202122232425262728    0x108852">
+<meta property="og:type" content="article">
+<meta property="og:title" content="libc++源码分析之new和delete">
+<meta property="og:url" content="https://witgao.com/2021/07/07/c++/libc++%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8Bnew%E5%92%8Cdelete/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:description" content="示例：new&#x2F;delete 一个对象代码12345int main(int argc, char** argv) &amp;#123;  std::string* str &#x3D; new std::string();  delete str;  return 0;&amp;#125;  汇编12345678910111213141516171819202122232425262728    0x108852">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-07-06T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-01-30T14:14:28.076Z">
+<meta property="article:author" content="高振宇">
+<meta property="article:tag" content="libc++">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://witgao.com/2021/07/07/c++/libc++%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8Bnew%E5%92%8Cdelete/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://witgao.com/2021/07/07/c++/libc++%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8Bnew%E5%92%8Cdelete/","path":"2021/07/07/c++/libc++源码分析之new和delete/","title":"libc++源码分析之new和delete"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>libc++源码分析之new和delete | 富贵山庄</title>
+  
+
+
+
+
+
+
+  <script async defer data-website-id="" src=""></script>
+
+  <script defer data-domain="" src=""></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">富贵山庄</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">恒者行远，思者常新</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B%EF%BC%9Anew-x2F-delete-%E4%B8%80%E4%B8%AA%E5%AF%B9%E8%B1%A1"><span class="nav-number">1.</span> <span class="nav-text">示例：new&#x2F;delete 一个对象</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81"><span class="nav-number">1.1.</span> <span class="nav-text">代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B1%87%E7%BC%96"><span class="nav-number">1.2.</span> <span class="nav-text">汇编</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E8%AE%BA"><span class="nav-number">1.3.</span> <span class="nav-text">结论</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#operator-new"><span class="nav-number">2.</span> <span class="nav-text">operator new</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#STL%E5%AE%9E%E7%8E%B0"><span class="nav-number">2.1.</span> <span class="nav-text">STL实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E5%AF%B9%E9%BD%90"><span class="nav-number">2.1.1.</span> <span class="nav-text">内存对齐</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%AE%9E%E7%8E%B0"><span class="nav-number">2.2.</span> <span class="nav-text">自定义实现</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#operator-new-1"><span class="nav-number">3.</span> <span class="nav-text">operator new[]</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%95%BF%E5%BA%A6%E4%BF%A1%E6%81%AF%E5%AD%98%E5%82%A8"><span class="nav-number">3.1.</span> <span class="nav-text">长度信息存储</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#STL%E5%AE%9E%E7%8E%B0-1"><span class="nav-number">3.2.</span> <span class="nav-text">STL实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%AE%9E%E7%8E%B0-1"><span class="nav-number">3.3.</span> <span class="nav-text">自定义实现</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#operator-delete"><span class="nav-number">4.</span> <span class="nav-text">operator delete</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#STL%E5%AE%9E%E7%8E%B0-2"><span class="nav-number">4.1.</span> <span class="nav-text">STL实现</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#operator-delete-1"><span class="nav-number">5.</span> <span class="nav-text">operator delete[]</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#STL%E5%AE%9E%E7%8E%B0-3"><span class="nav-number">5.1.</span> <span class="nav-text">STL实现</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="高振宇"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">高振宇</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">33</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/witgao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;witgao" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:witgao328@gmail.com" title="E-Mail → mailto:witgao328@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2021/07/07/c++/libc++%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8Bnew%E5%92%8Cdelete/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="高振宇">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="libc++源码分析之new和delete | 富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          libc++源码分析之new和delete
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-07-07 00:00:00" itemprop="dateCreated datePublished" datetime="2021-07-07T00:00:00+08:00">2021-07-07</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/C/" itemprop="url" rel="index"><span itemprop="name">C++</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.5k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>9 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="示例：new-x2F-delete-一个对象"><a href="#示例：new-x2F-delete-一个对象" class="headerlink" title="示例：new&#x2F;delete 一个对象"></a>示例：new&#x2F;delete 一个对象</h1><h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span>** argv)</span> </span>&#123;</span><br><span class="line">  std::string* str = <span class="keyword">new</span> std::<span class="built_in">string</span>();</span><br><span class="line">  <span class="keyword">delete</span> str;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="汇编"><a href="#汇编" class="headerlink" title="汇编"></a>汇编</h2><figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">    <span class="number">0x108852450</span> &lt;+<span class="number">0</span>&gt;:   pushq  %rbp</span><br><span class="line">    <span class="number">0x108852451</span> &lt;+<span class="number">1</span>&gt;:   <span class="keyword">movq</span>   %rsp, %rbp</span><br><span class="line">    <span class="number">0x108852454</span> &lt;+<span class="number">4</span>&gt;:   subq   <span class="number">$0</span>x30, %rsp</span><br><span class="line">    <span class="number">0x108852458</span> &lt;+<span class="number">8</span>&gt;:   movl   <span class="number">$0</span>x0, -<span class="number">0x4</span>(%rbp)</span><br><span class="line">    <span class="number">0x10885245f</span> &lt;+<span class="number">15</span>&gt;:  movl   %edi, -<span class="number">0x8</span>(%rbp)</span><br><span class="line">    <span class="number">0x108852462</span> &lt;+<span class="number">18</span>&gt;:  <span class="keyword">movq</span>   %rsi, -<span class="number">0x10</span>(%rbp)</span><br><span class="line">    <span class="number">0x108852466</span> &lt;+<span class="number">22</span>&gt;:  movl   <span class="number">$0</span>x18, %edi</span><br><span class="line">    <span class="number">0x10885246b</span> &lt;+<span class="number">27</span>&gt;:  callq  <span class="number">0x1088c26c6</span>               <span class="comment">; symbol stub for: operator new(unsigned long)</span></span><br><span class="line">    <span class="number">0x108852470</span> &lt;+<span class="number">32</span>&gt;:  <span class="keyword">movq</span>   %rax, %rdi</span><br><span class="line">    <span class="number">0x108852473</span> &lt;+<span class="number">35</span>&gt;:  <span class="keyword">movq</span>   %rax, -<span class="number">0x20</span>(%rbp)</span><br><span class="line">    <span class="number">0x108852477</span> &lt;+<span class="number">39</span>&gt;:  callq  <span class="number">0x1088524c0</span>               <span class="comment">; std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;::basic_string at string:1725</span></span><br><span class="line">    <span class="number">0x10885247c</span> &lt;+<span class="number">44</span>&gt;:  <span class="keyword">movq</span>   -<span class="number">0x20</span>(%rbp), %rax</span><br><span class="line">    <span class="number">0x108852480</span> &lt;+<span class="number">48</span>&gt;:  <span class="keyword">movq</span>   %rax, -<span class="number">0x18</span>(%rbp)</span><br><span class="line">    <span class="number">0x108852484</span> &lt;+<span class="number">52</span>&gt;:  <span class="keyword">movq</span>   -<span class="number">0x18</span>(%rbp), %rcx</span><br><span class="line">    <span class="number">0x108852488</span> &lt;+<span class="number">56</span>&gt;:  cmpq   <span class="number">$0</span>x0, %rcx</span><br><span class="line">    <span class="number">0x10885248c</span> &lt;+<span class="number">60</span>&gt;:  <span class="keyword">movq</span>   %rcx, -<span class="number">0x28</span>(%rbp)</span><br><span class="line">    <span class="number">0x108852490</span> &lt;+<span class="number">64</span>&gt;:  <span class="keyword">je</span>     <span class="number">0x1088524ab</span>               <span class="comment">; &lt;+91&gt; at main.cpp</span></span><br><span class="line">    <span class="number">0x108852496</span> &lt;+<span class="number">70</span>&gt;:  <span class="keyword">movq</span>   -<span class="number">0x28</span>(%rbp), %rdi</span><br><span class="line">    <span class="number">0x10885249a</span> &lt;+<span class="number">74</span>&gt;:  callq  <span class="number">0x1088c240e</span>               <span class="comment">; symbol stub for: std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;::~basic_string()</span></span><br><span class="line">    <span class="number">0x10885249f</span> &lt;+<span class="number">79</span>&gt;:  <span class="keyword">movq</span>   -<span class="number">0x28</span>(%rbp), %rax</span><br><span class="line">    <span class="number">0x1088524a3</span> &lt;+<span class="number">83</span>&gt;:  <span class="keyword">movq</span>   %rax, %rdi</span><br><span class="line">    <span class="number">0x1088524a6</span> &lt;+<span class="number">86</span>&gt;:  callq  <span class="number">0x1088c26b4</span>               <span class="comment">; symbol stub for: operator delete(void*)</span></span><br><span class="line">    <span class="number">0x1088524ab</span> &lt;+<span class="number">91</span>&gt;:  xorl   %eax, %eax</span><br><span class="line">-&gt;  <span class="number">0x1088524ad</span> &lt;+<span class="number">93</span>&gt;:  addq   <span class="number">$0</span>x30, %rsp</span><br><span class="line">    <span class="number">0x1088524b1</span> &lt;+<span class="number">97</span>&gt;:  popq   %rbp</span><br><span class="line">    <span class="number">0x1088524b2</span> &lt;+<span class="number">98</span>&gt;:  retq   </span><br><span class="line">    <span class="number">0x1088524b3</span> &lt;+<span class="number">99</span>&gt;:  nopw   %cs:(%rax,%rax)</span><br><span class="line">    <span class="number">0x1088524bd</span> &lt;+<span class="number">109</span>&gt;: nopl   (%rax)</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><p><em>new</em>关键字会触发三个步骤：</p>
+<ol>
+<li>调用函数operator new分配内存</li>
+<li>调用对象的构造函数</li>
+<li>返回对象的纯右值指针</li>
+</ol>
+<p><em>delete</em>关键字会触发两个步骤</p>
+<ol>
+<li>调用对象的析构函数</li>
+<li>调用函数operator delete释放内存</li>
+</ol>
+<h1 id="operator-new"><a href="#operator-new" class="headerlink" title="operator new"></a>operator new</h1><p>operator new函数负责实现内存的分配，分为全局实现和对象实现，可以通过重写该函数来自定义内存的分配。</p>
+<h2 id="STL实现"><a href="#STL实现" class="headerlink" title="STL实现"></a>STL实现</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span>* <span class="keyword">operator</span> <span class="title">new</span><span class="params">(std::<span class="type">size_t</span> size)</span></span>;                                   <span class="comment">// replaceable, nodiscard in C++20</span></span><br><span class="line"><span class="function"><span class="type">void</span>* <span class="keyword">operator</span> <span class="title">new</span><span class="params">(std::<span class="type">size_t</span> size, std::<span class="type">align_val_t</span> alignment)</span></span>;       <span class="comment">// replaceable, C++17, nodiscard in C++20</span></span><br><span class="line"><span class="function"><span class="type">void</span>* <span class="keyword">operator</span> <span class="title">new</span><span class="params">(std::<span class="type">size_t</span> size, <span class="type">const</span> std::<span class="type">nothrow_t</span>&amp;)</span> <span class="keyword">noexcept</span></span>;   <span class="comment">// replaceable, nodiscard in C++20</span></span><br><span class="line"><span class="function"><span class="type">void</span>* <span class="keyword">operator</span> <span class="title">new</span><span class="params">(std::<span class="type">size_t</span> size, std::<span class="type">align_val_t</span> alignment,</span></span></span><br><span class="line"><span class="params"><span class="function">                   <span class="type">const</span> std::<span class="type">nothrow_t</span>&amp;)</span> <span class="keyword">noexcept</span></span>;                     <span class="comment">// replaceable, C++17, nodiscard in C++20</span></span><br><span class="line"><span class="function"><span class="type">void</span>* <span class="keyword">operator</span> <span class="title">new</span>  <span class="params">(std::<span class="type">size_t</span> size, <span class="type">void</span>* ptr)</span> <span class="keyword">noexcept</span></span>;             <span class="comment">// nodiscard in C++20</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>operator new(std::size_t size)</strong><br>最常用的实现，其中的size就是要分配的内存大小，如果size是0也就是空类，那么会默认分配1个字节的内存。默认分配内存是通过malloc来实现的，如果分配失败则会调用get_new_handler函数，然后再次尝试分配内存，所以可以通过注册get_new_handler函数当内存不足时进行内存释放。在默认的实现中，如果开启了exception，则分配失败会抛出std::bad_alloc异常，否则会返回nullptr。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> *<span class="keyword">operator</span> <span class="title">new</span><span class="params">(std::<span class="type">size_t</span> size)</span> _THROW_BAD_ALLOC</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (size == <span class="number">0</span>)</span><br><span class="line">        size = <span class="number">1</span>;</span><br><span class="line">    <span class="type">void</span>* p;</span><br><span class="line">    <span class="keyword">while</span> ((p = ::<span class="built_in">malloc</span>(size)) == <span class="literal">nullptr</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// If malloc fails and there is a new_handler,</span></span><br><span class="line">        <span class="comment">// call it to try free up memory.</span></span><br><span class="line">        std::new_handler nh = std::<span class="built_in">get_new_handler</span>();</span><br><span class="line">        <span class="keyword">if</span> (nh)</span><br><span class="line">            <span class="built_in">nh</span>();</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _LIBCPP_NO_EXCEPTIONS</span></span><br><span class="line">            <span class="keyword">throw</span> std::<span class="built_in">bad_alloc</span>();</span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> p;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>operator new(std::size_t size, const std::nothrow_t&amp;) noexcept</strong><br>该重载是针对不想使用异常的情况，在该实现内部会自己捕捉异常，失败会直接返回nullptr。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span>* <span class="keyword">operator</span> <span class="title">new</span><span class="params">(<span class="type">size_t</span> size, <span class="type">const</span> std::<span class="type">nothrow_t</span>&amp;)</span> <span class="keyword">noexcept</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">void</span>* p = <span class="literal">nullptr</span>;</span><br><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _LIBCPP_NO_EXCEPTIONS</span></span><br><span class="line">    <span class="keyword">try</span></span><br><span class="line">    &#123;</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span> <span class="comment">// _LIBCPP_NO_EXCEPTIONS</span></span></span><br><span class="line">        p = ::<span class="keyword">operator</span> <span class="built_in">new</span>(size);</span><br><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _LIBCPP_NO_EXCEPTIONS</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">catch</span> (...)</span><br><span class="line">    &#123;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span> <span class="comment">// _LIBCPP_NO_EXCEPTIONS</span></span></span><br><span class="line">    <span class="keyword">return</span> p;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p><em><em>operator new(std::size_t size, void</em> ptr) noexcept</em>*<br>该重载就是placement new，多了一个指针参数，在该实现中不会分配内存，而是使用现有已分配内存，可以看出实现就是简单的返回参数指针。使用placement new可以方便的控制内存的分配，在STL内部大量的使用了该方法。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">inline</span> <span class="type">void</span>* <span class="keyword">operator</span> <span class="title">new</span>  <span class="params">(std::<span class="type">size_t</span>, <span class="type">void</span>* __p)</span> _NOEXCEPT </span>&#123;<span class="keyword">return</span> __p;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在下面的示例中通过malloc自己分配了内存，然后通过placement new调用了A的构造函数。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">A* a = <span class="built_in">static_cast</span>&lt;A*&gt;(<span class="built_in">malloc</span>(<span class="built_in">sizeof</span>(A)));</span><br><span class="line">a = <span class="built_in">new</span> (a) <span class="built_in">A</span>();</span><br></pre></td></tr></table></figure>
+
+
+<p><strong>operator new(std::size_t size, std::align_val_t alignment)</strong><br>该重载是C++17添加的新函数，align_val_t参数可以强制内存对齐。*<strong>STDCPP_DEFAULT_NEW_ALIGNMENT</strong>*是默认的内存对齐值，也就是new的地址是该值的倍数。 通过align_val_t参数可以指定new的内存对齐。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> *<span class="keyword">operator</span> <span class="title">new</span><span class="params">(std::<span class="type">size_t</span> size, std::<span class="type">align_val_t</span> alignment)</span> _THROW_BAD_ALLOC</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (size == <span class="number">0</span>)</span><br><span class="line">        size = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">static_cast</span>&lt;<span class="type">size_t</span>&gt;(alignment) &lt; <span class="built_in">sizeof</span>(<span class="type">void</span>*))</span><br><span class="line">      alignment = std::<span class="built_in">align_val_t</span>(<span class="built_in">sizeof</span>(<span class="type">void</span>*));</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Try allocating memory. If allocation fails and there is a new_handler,</span></span><br><span class="line">    <span class="comment">// call it to try free up memory, and try again until it succeeds, or until</span></span><br><span class="line">    <span class="comment">// the new_handler decides to terminate.</span></span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    <span class="comment">// If allocation fails and there is no new_handler, we throw bad_alloc</span></span><br><span class="line">    <span class="comment">// (or return nullptr if exceptions are disabled).</span></span><br><span class="line">    <span class="type">void</span>* p;</span><br><span class="line">    <span class="keyword">while</span> ((p = std::__libcpp_aligned_alloc(<span class="built_in">static_cast</span>&lt;std::<span class="type">size_t</span>&gt;(alignment), size)) == <span class="literal">nullptr</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        std::new_handler nh = std::<span class="built_in">get_new_handler</span>();</span><br><span class="line">        <span class="keyword">if</span> (nh)</span><br><span class="line">            <span class="built_in">nh</span>();</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _LIBCPP_NO_EXCEPTIONS</span></span><br><span class="line">            <span class="keyword">throw</span> std::<span class="built_in">bad_alloc</span>();</span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> p;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>下面的示例中将aligned_int对象的内存对齐指定为128，则分配的地址一定是128的倍数。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span>* aligned_int = <span class="built_in">new</span> (std::<span class="built_in">align_val_t</span>(<span class="number">128</span>)) <span class="type">int</span>;</span><br><span class="line"><span class="type">bool</span> b = <span class="built_in">intptr_t</span>(aligned_int) % <span class="number">128</span> == <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+<p><strong>operator new(std::size_t size, std::align_val_t alignment, const std::nothrow_t&amp;) noexcept</strong><br>该重载是上面的无异常版本，内部会捕捉异常。</p>
+<h3 id="内存对齐"><a href="#内存对齐" class="headerlink" title="内存对齐"></a>内存对齐</h3><p>C++11后，可以通过alignas关键字来改变对齐值，通过alignof来查询对齐值。</p>
+<p>默认情况下，struct按照内部最大类型来进行对齐，在Align结构体中，最大类型是int，所以其对齐值为4。char占1个字节，后面补上3个0字节，int占4个字节，所以sizeeof为8。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">Align</span> &#123;</span><br><span class="line">  <span class="type">char</span> a;</span><br><span class="line">  <span class="type">int</span> b;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="type">size_t</span> align2 = <span class="built_in">alignof</span>(align); <span class="comment">// 4</span></span><br><span class="line"><span class="type">size_t</span> size2 = <span class="built_in">sizeof</span>(align); <span class="comment">// 8</span></span><br><span class="line"><span class="comment">// a000 bbbb </span></span><br></pre></td></tr></table></figure>
+
+<p>通过alignas设置结构体的对齐值位16，char占1个字节，后面补上3个0字节，int占4个字节，后面补上8个0字节，所以sizeof为16。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">alignas</span>(<span class="number">16</span>)  Align &#123;</span><br><span class="line">  <span class="type">char</span> a;</span><br><span class="line">  <span class="type">int</span> b;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="type">size_t</span> align2 = <span class="built_in">alignof</span>(align); <span class="comment">// 16</span></span><br><span class="line"><span class="type">size_t</span> size2 = <span class="built_in">sizeof</span>(align); <span class="comment">// 16</span></span><br><span class="line"><span class="comment">// a000 bbbb 0000 0000</span></span><br></pre></td></tr></table></figure>
+
+<p>通过alignas设置结构体内部int的对齐值为8，则结构体最大对齐值为8，char占1个字节，后面补上7个0字节，int占4个字节，后面补上4个0字节，所以sizeof为16。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">Align</span> &#123;</span><br><span class="line">  <span class="type">char</span> a;</span><br><span class="line">  <span class="built_in">alignas</span>(<span class="number">8</span>) <span class="type">int</span> b;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="type">size_t</span> align2 = <span class="built_in">alignof</span>(align); <span class="comment">// 8</span></span><br><span class="line"><span class="type">size_t</span> size2 = <span class="built_in">sizeof</span>(align); <span class="comment">// 16</span></span><br><span class="line"><span class="comment">// c000 0000 bbbb 0000</span></span><br></pre></td></tr></table></figure>
+
+<p>通过alignas设置结构体内部char的对齐值为8，则结构体最大对齐值为8，char占1一个字节，后面有7个字节的空位，int占4个字节，完全够用，则int直接在这次对齐内分配，不需要重新再起一行，所以sizeof为8。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">Align</span> &#123;</span><br><span class="line">  <span class="built_in">alignas</span>(<span class="number">8</span>) <span class="type">char</span> a;</span><br><span class="line">  <span class="type">int</span> b;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="type">size_t</span> align2 = <span class="built_in">alignof</span>(align); <span class="comment">// 8</span></span><br><span class="line"><span class="type">size_t</span> size2 = <span class="built_in">sizeof</span>(align); <span class="comment">// 8</span></span><br><span class="line"><span class="comment">// c000 bbbb</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="自定义实现"><a href="#自定义实现" class="headerlink" title="自定义实现"></a>自定义实现</h2><p>operator new函数时可以自定义的，分为全局自定义和对象自定义，全局自定义的operator new会导致所有的对象的new都应用该自定义函数。而对象自定义只会影响到该对象创建。当两种实现都自定义时，对象自定义优先。</p>
+<p>全局自定义</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span>* <span class="keyword">operator</span> <span class="title">new</span><span class="params">(<span class="type">size_t</span> size)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="type">void</span>* pVoid = <span class="built_in">malloc</span>(size);</span><br><span class="line">  <span class="keyword">return</span> pVoid;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对象自定义</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">A</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">A</span>() &#123; std::cout &lt;&lt; <span class="string">&quot;constructor&quot;</span> &lt;&lt; std::endl; &#125;</span><br><span class="line"></span><br><span class="line">  ~<span class="built_in">A</span>() &#123; std::cout &lt;&lt; <span class="string">&quot;destructor&quot;</span> &lt;&lt; std::endl; &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span>* <span class="keyword">operator</span> <span class="title">new</span><span class="params">(<span class="type">size_t</span> size)</span> </span>&#123;</span><br><span class="line">     <span class="keyword">return</span> ::<span class="keyword">operator</span> <span class="built_in">new</span>(size);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="operator-new-1"><a href="#operator-new-1" class="headerlink" title="operator new[]"></a>operator new[]</h1><p>operator new[]函数负责实现数组内存的分配，同样也分为全局实现和对象实现，可以通过重写该函数来自定义内存的分配。</p>
+<h2 id="长度信息存储"><a href="#长度信息存储" class="headerlink" title="长度信息存储"></a>长度信息存储</h2><p>当创建的对象定义了析构函数时，为了在delete[] 时能够循环的调用每一个对象的析构函数，那么在new[]分配内存时会多分配一段内存，在这段内存中存储当前数据的长度信息，所以当new[]一个带析构函数的对象数组时，operator new[]的size参数会比整个数组长度要大，并且我们得到的数组指针并不是返回的void*地址，而是一个去掉前面一段的偏移地址。</p>
+<p>在下面的实例中，当Align定义了析构函数时，size的值是11，当Align没有定义析构时，size的值是3。所以在这里用来存储数组长度的区域为8个字节，malloc分配的地址是0x7f8e40504b40，返回给a的地址是偏移8个字节后的0x7f8e40504b48。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span>* <span class="keyword">operator</span> <span class="keyword">new</span>[](<span class="type">size_t</span> size) &#123;</span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;call global new[] size: &quot;</span> &lt;&lt; size &lt;&lt; std::endl;</span><br><span class="line">  <span class="type">void</span>* pVoid = <span class="built_in">malloc</span>(size); <span class="comment">// 0x7f8e40504b40</span></span><br><span class="line">  <span class="keyword">return</span> pVoid;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Align</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">    ~<span class="built_in">Align</span>() &#123; std::cout &lt;&lt; <span class="string">&quot;destructor&quot;</span> &lt;&lt; std::endl; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span>** argv)</span> </span>&#123;</span><br><span class="line">  Align* a = <span class="keyword">new</span> Align[<span class="number">3</span>]; <span class="comment">// 0x7f8e40504b48</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="STL实现-1"><a href="#STL实现-1" class="headerlink" title="STL实现"></a>STL实现</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span>* <span class="keyword">operator</span> <span class="keyword">new</span>[](std::<span class="type">size_t</span> size);                                 <span class="comment">// replaceable, nodiscard in C++20</span></span><br><span class="line"><span class="type">void</span>* <span class="keyword">operator</span> <span class="keyword">new</span>[](std::<span class="type">size_t</span> size,</span><br><span class="line">                     std::<span class="type">align_val_t</span> alignment) <span class="keyword">noexcept</span>;              <span class="comment">// replaceable, C++17, nodiscard in C++20</span></span><br><span class="line"><span class="type">void</span>* <span class="keyword">operator</span> <span class="keyword">new</span>[](std::<span class="type">size_t</span> size, <span class="type">const</span> std::<span class="type">nothrow_t</span>&amp;) <span class="keyword">noexcept</span>; <span class="comment">// replaceable, nodiscard in C++20</span></span><br><span class="line"><span class="type">void</span>* <span class="keyword">operator</span> <span class="keyword">new</span>[](std::<span class="type">size_t</span> size, std::<span class="type">align_val_t</span> alignment,</span><br><span class="line">                     <span class="type">const</span> std::<span class="type">nothrow_t</span>&amp;) <span class="keyword">noexcept</span>;                   <span class="comment">// replaceable, C++17, nodiscard in C++20</span></span><br><span class="line"><span class="type">void</span>* <span class="keyword">operator</span> <span class="keyword">new</span>[](std::<span class="type">size_t</span> size, <span class="type">void</span>* ptr) <span class="keyword">noexcept</span>;             <span class="comment">// nodiscard in C++20</span></span><br></pre></td></tr></table></figure>
+
+<p>operator new[]的实现默认都是直接调用operator new来分配，这里就不展开了。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span>* <span class="keyword">operator</span> <span class="keyword">new</span>[](<span class="type">size_t</span> size) _THROW_BAD_ALLOC</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> ::<span class="keyword">operator</span> <span class="built_in">new</span>(size);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="自定义实现-1"><a href="#自定义实现-1" class="headerlink" title="自定义实现"></a>自定义实现</h2><p>全局自定义</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span>* <span class="keyword">operator</span> <span class="keyword">new</span>[](<span class="type">size_t</span> size) &#123;</span><br><span class="line">  <span class="type">void</span>* pVoid = <span class="built_in">malloc</span>(size);</span><br><span class="line">  <span class="keyword">return</span> pVoid;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对象自定义</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">A</span> &#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">A</span>() &#123; std::cout &lt;&lt; <span class="string">&quot;constructor&quot;</span> &lt;&lt; std::endl; &#125;</span><br><span class="line"></span><br><span class="line">  ~<span class="built_in">A</span>() &#123; std::cout &lt;&lt; <span class="string">&quot;destructor&quot;</span> &lt;&lt; std::endl; &#125;</span><br><span class="line"></span><br><span class="line">	<span class="type">void</span>* <span class="keyword">operator</span> <span class="keyword">new</span>[](<span class="type">size_t</span> size) &#123;</span><br><span class="line">  	<span class="keyword">return</span> ::<span class="keyword">operator</span> <span class="keyword">new</span>[](size);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="operator-delete"><a href="#operator-delete" class="headerlink" title="operator delete"></a>operator delete</h1><p>operator delete函数负责实现内存的释放，分为全局实现和对象实现，可以通过重写该函数来自定义内存的分配。operator delete需要和operator new配套实现，调用什么参数的operator new，内部在失败释放的时候就会调用什么参数的operator delete。</p>
+<h2 id="STL实现-2"><a href="#STL实现-2" class="headerlink" title="STL实现"></a>STL实现</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span>  <span class="keyword">operator</span> <span class="title">delete</span><span class="params">(<span class="type">void</span>* ptr)</span> <span class="keyword">noexcept</span></span>;                              <span class="comment">// replaceable</span></span><br><span class="line"><span class="function"><span class="type">void</span>  <span class="keyword">operator</span> <span class="title">delete</span><span class="params">(<span class="type">void</span>* ptr, std::<span class="type">size_t</span> size)</span> <span class="keyword">noexcept</span></span>;            <span class="comment">// replaceable, C++14</span></span><br><span class="line"><span class="function"><span class="type">void</span>  <span class="keyword">operator</span> <span class="title">delete</span><span class="params">(<span class="type">void</span>* ptr, std::<span class="type">align_val_t</span> alignment)</span> <span class="keyword">noexcept</span></span>;  <span class="comment">// replaceable, C++17</span></span><br><span class="line"><span class="function"><span class="type">void</span>  <span class="keyword">operator</span> <span class="title">delete</span><span class="params">(<span class="type">void</span>* ptr, std::<span class="type">size_t</span> size,</span></span></span><br><span class="line"><span class="params"><span class="function">                      std::<span class="type">align_val_t</span> alignment)</span> <span class="keyword">noexcept</span></span>;             <span class="comment">// replaceable, C++17</span></span><br><span class="line"><span class="function"><span class="type">void</span>  <span class="keyword">operator</span> <span class="title">delete</span><span class="params">(<span class="type">void</span>* ptr, <span class="type">const</span> std::<span class="type">nothrow_t</span>&amp;)</span> <span class="keyword">noexcept</span></span>;       <span class="comment">// replaceable</span></span><br><span class="line"><span class="function"><span class="type">void</span>  <span class="keyword">operator</span> <span class="title">delete</span><span class="params">(<span class="type">void</span>* ptr, std:<span class="type">align_val_t</span> alignment,</span></span></span><br><span class="line"><span class="params"><span class="function">                      <span class="type">const</span> std::<span class="type">nothrow_t</span>&amp;)</span> <span class="keyword">noexcept</span></span>;                  <span class="comment">// replaceable, C++17</span></span><br><span class="line"><span class="function"><span class="type">void</span>  <span class="keyword">operator</span> <span class="title">delete</span>  <span class="params">(<span class="type">void</span>* ptr, <span class="type">void</span>*)</span> <span class="keyword">noexcept</span></span>;</span><br></pre></td></tr></table></figure>
+
+
+<p><em><em>operator delete(void</em> ptr) noexcept</em>*<br>operator delete函数默认的实现是调用free来进行内存的释放，之所以free能够正确的释放，是因为在malloc得到的地址其实是一个handler，在内部都有一个私有簿记（book keeping）区域来记录每个handler对应的内存区域是多大。所以malloc和free必须要配套使用，这样才能正确的释放内存。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="keyword">operator</span> <span class="title">delete</span><span class="params">(<span class="type">void</span>* ptr)</span> <span class="keyword">noexcept</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    ::<span class="built_in">free</span>(ptr);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><em><em>operator delete(void</em> ptr, const std::nothrow_t&amp;) noexcept</em>*</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="keyword">operator</span> <span class="title">delete</span><span class="params">(<span class="type">void</span>* ptr, <span class="type">const</span> std::<span class="type">nothrow_t</span>&amp;)</span> <span class="keyword">noexcept</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    ::<span class="function"><span class="keyword">operator</span> <span class="title">delete</span><span class="params">(ptr)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><em><em>operator delete(void</em> ptr, void</em>) noexcept**</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">inline</span> <span class="type">void</span>  <span class="keyword">operator</span> <span class="title">delete</span>  <span class="params">(<span class="type">void</span>*, <span class="type">void</span>*)</span> _NOEXCEPT </span>&#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="operator-delete-1"><a href="#operator-delete-1" class="headerlink" title="operator delete[]"></a>operator delete[]</h1><p>operator delete[]函数负责实现数组内存的释放，同样也分为全局实现和对象实现，可以通过重写该函数来自定义内存的分配。delete[]和new[]一样，对于拥有析构函数对象的数组，其前面会有一段内存用来存储数组长度，但是传递到operator delete[]函数上时，是去掉偏移值的地址。</p>
+<h2 id="STL实现-3"><a href="#STL实现-3" class="headerlink" title="STL实现"></a>STL实现</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span>  <span class="keyword">operator</span> <span class="keyword">delete</span>[](<span class="type">void</span>* ptr) <span class="keyword">noexcept</span>;                            <span class="comment">// replaceable</span></span><br><span class="line"><span class="type">void</span>  <span class="keyword">operator</span> <span class="keyword">delete</span>[](<span class="type">void</span>* ptr, std::<span class="type">size_t</span> size) <span class="keyword">noexcept</span>;          <span class="comment">// replaceable, C++14</span></span><br><span class="line"><span class="type">void</span>  <span class="keyword">operator</span> <span class="keyword">delete</span>[](<span class="type">void</span>* ptr,</span><br><span class="line">                        std::<span class="type">align_val_t</span> alignment) <span class="keyword">noexcept</span>;           <span class="comment">// replaceable, C++17</span></span><br><span class="line"><span class="type">void</span>  <span class="keyword">operator</span> <span class="keyword">delete</span>[](<span class="type">void</span>* ptr, std::<span class="type">size_t</span> size,</span><br><span class="line">                        std::<span class="type">align_val_t</span> alignment) <span class="keyword">noexcept</span>;           <span class="comment">// replaceable, C++17</span></span><br><span class="line"><span class="type">void</span>  <span class="keyword">operator</span> <span class="keyword">delete</span>[](<span class="type">void</span>* ptr, <span class="type">const</span> std::<span class="type">nothrow_t</span>&amp;) <span class="keyword">noexcept</span>;     <span class="comment">// replaceable</span></span><br><span class="line"><span class="type">void</span>  <span class="keyword">operator</span> <span class="keyword">delete</span>[](<span class="type">void</span>* ptr, std::<span class="type">align_val_t</span> alignment,</span><br><span class="line">                        <span class="type">const</span> std::<span class="type">nothrow_t</span>&amp;) <span class="keyword">noexcept</span>;                <span class="comment">// replaceable, C++17</span></span><br><span class="line"><span class="type">void</span>  <span class="keyword">operator</span> <span class="keyword">delete</span>[](<span class="type">void</span>* ptr, <span class="type">void</span>*) <span class="keyword">noexcept</span>;</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>高振宇
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://witgao.com/2021/07/07/c++/libc++%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8Bnew%E5%92%8Cdelete/" title="libc++源码分析之new和delete">https://witgao.com/2021/07/07/c++/libc++源码分析之new和delete/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/libc/" rel="tag"><i class="fa fa-tag"></i> libc++</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/08/05/av/ffplay%E6%B8%B2%E6%9F%93%E7%BA%BF%E7%A8%8B%E5%88%86%E6%9E%90/" rel="prev" title="ffplay渲染线程分析">
+                  <i class="fa fa-chevron-left"></i> ffplay渲染线程分析
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/07/11/c++/libc++%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8Bunique_ptr/" rel="next" title="libc++源码分析之std::unique_ptr">
+                  libc++源码分析之std::unique_ptr <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">高振宇</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">75k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:33</span>
+  </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

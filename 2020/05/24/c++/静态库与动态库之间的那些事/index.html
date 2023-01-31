@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha256-Z1K5uhUaJXA7Ll0XrZ/0JhX4lAtZFpT6jkKrEDT0drU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"witgao.com","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.14.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="什么是库库是一种可执行代码的二进制形式，可以被操作系统载入到内存中执行，库根据链接不同分为静态库和动态库。 可执行文件生成的过程为:  c -&gt; 预编译 -&gt; 编译器 -&gt; 汇编代码 -&gt; 汇编器 -&gt; 目标代码 -&gt; 链接器 -&gt; 可执行代码   预编译：处理宏定义、删除注释、添加行号 编译器：词法分析、语法分析、语义分析、代码优化 汇编器：翻译成二进制">
+<meta property="og:type" content="article">
+<meta property="og:title" content="静态库与动态库之间的那些事">
+<meta property="og:url" content="https://witgao.com/2020/05/24/c++/%E9%9D%99%E6%80%81%E5%BA%93%E4%B8%8E%E5%8A%A8%E6%80%81%E5%BA%93%E4%B9%8B%E9%97%B4%E7%9A%84%E9%82%A3%E4%BA%9B%E4%BA%8B/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:description" content="什么是库库是一种可执行代码的二进制形式，可以被操作系统载入到内存中执行，库根据链接不同分为静态库和动态库。 可执行文件生成的过程为:  c -&gt; 预编译 -&gt; 编译器 -&gt; 汇编代码 -&gt; 汇编器 -&gt; 目标代码 -&gt; 链接器 -&gt; 可执行代码   预编译：处理宏定义、删除注释、添加行号 编译器：词法分析、语法分析、语义分析、代码优化 汇编器：翻译成二进制">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-05-23T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-01-31T03:13:22.027Z">
+<meta property="article:author" content="高振宇">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://witgao.com/2020/05/24/c++/%E9%9D%99%E6%80%81%E5%BA%93%E4%B8%8E%E5%8A%A8%E6%80%81%E5%BA%93%E4%B9%8B%E9%97%B4%E7%9A%84%E9%82%A3%E4%BA%9B%E4%BA%8B/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://witgao.com/2020/05/24/c++/%E9%9D%99%E6%80%81%E5%BA%93%E4%B8%8E%E5%8A%A8%E6%80%81%E5%BA%93%E4%B9%8B%E9%97%B4%E7%9A%84%E9%82%A3%E4%BA%9B%E4%BA%8B/","path":"2020/05/24/c++/静态库与动态库之间的那些事/","title":"静态库与动态库之间的那些事"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>静态库与动态库之间的那些事 | 富贵山庄</title>
+  
+
+
+
+
+
+
+  <script async defer data-website-id="" src=""></script>
+
+  <script defer data-domain="" src=""></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">富贵山庄</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">恒者行远，思者常新</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%BA%93"><span class="nav-number">1.</span> <span class="nav-text">什么是库</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%93%BE%E6%8E%A5"><span class="nav-number">1.1.</span> <span class="nav-text">链接</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E5%BA%93"><span class="nav-number">1.2.</span> <span class="nav-text">静态库</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E9%93%BE%E6%8E%A5"><span class="nav-number">1.2.1.</span> <span class="nav-text">静态链接</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E5%BA%93"><span class="nav-number">1.3.</span> <span class="nav-text">动态库</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5"><span class="nav-number">1.3.1.</span> <span class="nav-text">动态链接</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E8%A3%85%E8%BD%BD"><span class="nav-number">1.3.2.</span> <span class="nav-text">静态装载</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E8%A3%85%E8%BD%BD"><span class="nav-number">1.3.3.</span> <span class="nav-text">动态装载</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B7%E4%BD%93%E5%9C%BA%E6%99%AF%E5%88%86%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">具体场景分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E5%BA%93%E5%BC%95%E7%94%A8%E9%9D%99%E6%80%81%E5%BA%93"><span class="nav-number">2.1.</span> <span class="nav-text">静态库引用静态库</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E5%BA%93%E5%BC%95%E7%94%A8%E5%8A%A8%E6%80%81%E5%BA%93"><span class="nav-number">2.2.</span> <span class="nav-text">静态库引用动态库</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E5%BA%93%E5%BC%95%E7%94%A8%E9%9D%99%E6%80%81%E5%BA%93"><span class="nav-number">2.3.</span> <span class="nav-text">动态库引用静态库</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E5%BA%93%E5%BC%95%E7%94%A8%E5%8A%A8%E6%80%81%E5%BA%93"><span class="nav-number">2.4.</span> <span class="nav-text">动态库引用动态库</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="高振宇"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">高振宇</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">33</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/witgao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;witgao" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:witgao328@gmail.com" title="E-Mail → mailto:witgao328@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2020/05/24/c++/%E9%9D%99%E6%80%81%E5%BA%93%E4%B8%8E%E5%8A%A8%E6%80%81%E5%BA%93%E4%B9%8B%E9%97%B4%E7%9A%84%E9%82%A3%E4%BA%9B%E4%BA%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="高振宇">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="静态库与动态库之间的那些事 | 富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          静态库与动态库之间的那些事
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-05-24 00:00:00" itemprop="dateCreated datePublished" datetime="2020-05-24T00:00:00+08:00">2020-05-24</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/C/" itemprop="url" rel="index"><span itemprop="name">C++</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.6k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>6 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h3 id="什么是库"><a href="#什么是库" class="headerlink" title="什么是库"></a>什么是库</h3><p>库是一种可执行代码的二进制形式，可以被操作系统载入到内存中执行，库根据链接不同分为静态库和动态库。</p>
+<p>可执行文件生成的过程为:</p>
+<blockquote>
+<p>c -&gt; 预编译 -&gt; 编译器 -&gt; 汇编代码 -&gt; 汇编器 -&gt; 目标代码 -&gt; 链接器 -&gt; 可执行代码</p>
+</blockquote>
+<ul>
+<li>预编译：处理宏定义、删除注释、添加行号</li>
+<li>编译器：词法分析、语法分析、语义分析、代码优化</li>
+<li>汇编器：翻译成二进制</li>
+<li>链接器：合并符号表、符号解析、分配地址、重定位符号表</li>
+</ul>
+<span id="more"></span>
+
+<h4 id="链接"><a href="#链接" class="headerlink" title="链接"></a>链接</h4><p>将多个独立的模块（目标文件、静态库、动态库）链接在一起，建立全局符号表，然后再根据全局符号表修正所有的重定向表。重定向表中保留了当前目标文件中那些未知跳转地址的符号。</p>
+<p>在编译a.o目标文件时，如果a库里面引用了其它库的符号，则在a.o的重定位表中该符号是没有对应的地址的，如果强行将a.o链接成可执行文件会出错。 此时就需要链接，假设b.o里面正好有该符号的实现，则将a.o和b.o链接，建立全局符号表，然后修正a.o中的符号对应的地址。</p>
+<h4 id="静态库"><a href="#静态库" class="headerlink" title="静态库"></a>静态库</h4><p>静态库被链接到可执行程序中采用的是静态链接。</p>
+<h5 id="静态链接"><a href="#静态链接" class="headerlink" title="静态链接"></a>静态链接</h5><p>可执行程序在编译的时候，会将所有被链接的静态库中所有使用到的目标文件都拷贝到可执行文件中，并进行链接，重新修正所有的重定向表。</p>
+<h4 id="动态库"><a href="#动态库" class="headerlink" title="动态库"></a>动态库</h4><p>动态库被链接到可执行程序中采用的是动态链接。</p>
+<h5 id="动态链接"><a href="#动态链接" class="headerlink" title="动态链接"></a>动态链接</h5><p>动态链接在编译的时候并不会将链接对象的内容拷贝到当前库中，仅仅在其中加入了所调用函数的描述信息用来重定位。直到链接对象被装载到内存中时，才会发生真正的链接，此时才会修正所有的重定向表，将目标文件中的未知符号地址修正。</p>
+<h5 id="静态装载"><a href="#静态装载" class="headerlink" title="静态装载"></a>静态装载</h5><p>静态加载的方式通过在编译的时候加上 -l 来指定当前库所依赖的动态库，当可执行程序启动的时候，会自动将-l 依赖的动态库全部加载到内存中，此时加载进来的动态库会进行链接操作。</p>
+<h5 id="动态装载"><a href="#动态装载" class="headerlink" title="动态装载"></a>动态装载</h5><p>想要动态加载的动态库，在编译时需要加上 -shared -fPIC来生成与位置无关的代码，生成的代码中使用的都是相对地址。加载使用dlopen函数以指定模式打开指定的动态库，通过dlopen来调用能够确保多个进程调用时内存中只存在一份。</p>
+<p>动态加载就是在程序执行的时候，需要用到动态库的函数时，再加载该动态库。</p>
+<p><strong>JNI就是通过动态加载来实现的</strong></p>
+<h3 id="具体场景分析"><a href="#具体场景分析" class="headerlink" title="具体场景分析"></a>具体场景分析</h3><h4 id="静态库引用静态库"><a href="#静态库引用静态库" class="headerlink" title="静态库引用静态库"></a>静态库引用静态库</h4><p>假设有A、B、C、D四个静态库，其中A引用了C，B引用了D，可执行程序依赖了A、B。</p>
+<ul>
+<li>当A、B编译的时候，需要依赖C、D</li>
+<li>当可执行程序编译的时候，需要依赖A、B、C、D</li>
+<li>可执行程序编译完成后，会将A、B、C、D中所有使用到的目标文件copy到可执行文件中</li>
+</ul>
+<p>所以如果当A、B、C、D中有重名的函数符号时，会被覆盖，第一个被链接的库中的重名函数会成效，而其他库中的会被丢弃。（因为在重定向表中一个符号只会有一个跳转地址）</p>
+<h4 id="静态库引用动态库"><a href="#静态库引用动态库" class="headerlink" title="静态库引用动态库"></a>静态库引用动态库</h4><p>假设有A、B两个静态库，C、D两个动态库，其中A引用了C，B引用了D，可执行程序依赖了A、B。</p>
+<ul>
+<li>当A、B编译的时候，需要依赖C、D</li>
+<li>当可执行程序编译的时候，需要依赖A、B (因为A、B在编译的时候已经记录了引用的C、D库信息)</li>
+<li>可执行程序编译完成后，会将A、B所有使用到的目标文件copy到可执行文件中</li>
+<li>当可执行程序运行的时候，会将C、D库加载到内存中，并链接</li>
+</ul>
+<p>所以如果当A、B、C、D中有重名的函数符号时，会被覆盖，第一个被链接的库中的重名函数会生效，而其他库中的会被丢弃。（因为在重定向表中一个符号只会有一个跳转地址）</p>
+<h4 id="动态库引用静态库"><a href="#动态库引用静态库" class="headerlink" title="动态库引用静态库"></a>动态库引用静态库</h4><p>假设有A、B两个动态库，C、D两个静态库，其中A引用了C，B引用了D，可执行程序依赖了A、B。</p>
+<ul>
+<li>当A、B编译的时候，需要依赖C、D，此时C、D静态库会被触发链接，将库内被A、B引用的目标文件copy到A、B库中，并修正重定向表。</li>
+<li>当可执行程序编译的时候，需要依赖A、B（因为C、D已经包含到了A、B中）</li>
+<li>当可执行程序运行的时候，会将A、B库加载到内存中，并链接</li>
+</ul>
+<p>所以如果A、B中有重名函数符号时，依旧是先链接的先生效，但是如果C、D中有重名函数时，由于在A、B中已经修正了重名名表，所以不会发生冲突。</p>
+<h4 id="动态库引用动态库"><a href="#动态库引用动态库" class="headerlink" title="动态库引用动态库"></a>动态库引用动态库</h4><p>假设有A、B两个动态库，C、D两个动态库，其中A引用了C，B引用了D，可执行程序依赖了A、B。</p>
+<ul>
+<li>当A、B编译的时候，需要依赖C、D</li>
+<li>当可执行程序编译的时候，需要依赖A、B</li>
+<li>当可执行程序运行的时候，会将A、B、C、D库加载到内存中，并链接</li>
+</ul>
+<p>动态库的重名覆盖是根据链接的顺序决定的，第一个被链接的库中的重名函数会生效。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>高振宇
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://witgao.com/2020/05/24/c++/%E9%9D%99%E6%80%81%E5%BA%93%E4%B8%8E%E5%8A%A8%E6%80%81%E5%BA%93%E4%B9%8B%E9%97%B4%E7%9A%84%E9%82%A3%E4%BA%9B%E4%BA%8B/" title="静态库与动态库之间的那些事">https://witgao.com/2020/05/24/c++/静态库与动态库之间的那些事/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/04/22/av/Android%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81/" rel="prev" title="Android硬件编解码">
+                  <i class="fa fa-chevron-left"></i> Android硬件编解码
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/05/24/c++/%E7%BC%BA%E7%9C%81%E5%A4%8D%E5%88%B6/" rel="next" title="Guaranteed copy elision 缺省复制">
+                  Guaranteed copy elision 缺省复制 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">高振宇</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">75k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:33</span>
+  </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

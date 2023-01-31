@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha256-Z1K5uhUaJXA7Ll0XrZ/0JhX4lAtZFpT6jkKrEDT0drU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"witgao.com","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.14.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="通俗来讲，OpenGL是一个图形库，提供了一系列操作图形图像的API。因为OpenGL只是一个规范，具体的实现一般是由显卡提供。类似的图形库还有Windows平台的DirectX。 图形渲染管线图形渲染管线也叫做渲染流水线，指的是将输入的原始图形数据经过渲染管线处理，输出一帧想要的图像的过程。 在OpenGL中，任何事物都在3D空间中，而屏幕和窗口却是2D像素数组，所以图形渲染管线主要是在将输入的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OpenGL-入门篇">
+<meta property="og:url" content="https://witgao.com/2022/08/05/cg/OpenGL-%E5%85%A5%E9%97%A8%E7%AF%87/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:description" content="通俗来讲，OpenGL是一个图形库，提供了一系列操作图形图像的API。因为OpenGL只是一个规范，具体的实现一般是由显卡提供。类似的图形库还有Windows平台的DirectX。 图形渲染管线图形渲染管线也叫做渲染流水线，指的是将输入的原始图形数据经过渲染管线处理，输出一帧想要的图像的过程。 在OpenGL中，任何事物都在3D空间中，而屏幕和窗口却是2D像素数组，所以图形渲染管线主要是在将输入的">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://witgao.com/2022/08/05/cg/OpenGL-%E5%85%A5%E9%97%A8%E7%AF%87/opengl-pipeline.png">
+<meta property="og:image" content="https://witgao.com/2022/08/05/cg/OpenGL-%E5%85%A5%E9%97%A8%E7%AF%87/opengl-ndc.png">
+<meta property="og:image" content="https://witgao.com/2022/08/05/cg/OpenGL-%E5%85%A5%E9%97%A8%E7%AF%87/webgl_perspective_projection.png">
+<meta property="og:image" content="https://witgao.com/2022/08/05/cg/OpenGL-%E5%85%A5%E9%97%A8%E7%AF%87/webgl_orthogonal_projection.png">
+<meta property="article:published_time" content="2022-08-04T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-01-31T05:02:57.952Z">
+<meta property="article:author" content="高振宇">
+<meta property="article:tag" content="OpenGL">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://witgao.com/2022/08/05/cg/OpenGL-%E5%85%A5%E9%97%A8%E7%AF%87/opengl-pipeline.png">
+
+
+<link rel="canonical" href="https://witgao.com/2022/08/05/cg/OpenGL-%E5%85%A5%E9%97%A8%E7%AF%87/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://witgao.com/2022/08/05/cg/OpenGL-%E5%85%A5%E9%97%A8%E7%AF%87/","path":"2022/08/05/cg/OpenGL-入门篇/","title":"OpenGL-入门篇"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>OpenGL-入门篇 | 富贵山庄</title>
+  
+
+
+
+
+
+
+  <script async defer data-website-id="" src=""></script>
+
+  <script defer data-domain="" src=""></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">富贵山庄</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">恒者行远，思者常新</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9B%BE%E5%BD%A2%E6%B8%B2%E6%9F%93%E7%AE%A1%E7%BA%BF"><span class="nav-number">1.</span> <span class="nav-text">图形渲染管线</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A1%B6%E7%82%B9%E7%9D%80%E8%89%B2%E5%99%A8%EF%BC%88Vertex-Shader"><span class="nav-number">1.1.</span> <span class="nav-text">顶点着色器（Vertex Shader)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%87%E5%87%86%E5%8C%96%E8%AE%BE%E5%A4%87%E5%9D%90%E6%A0%87%EF%BC%88Normalized-Device-Coordinates%EF%BC%89"><span class="nav-number">1.1.1.</span> <span class="nav-text">标准化设备坐标（Normalized Device Coordinates）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VBO%EF%BC%88Vertex-Buffer-Objects"><span class="nav-number">1.1.2.</span> <span class="nav-text">VBO（Vertex Buffer Objects)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%93%BE%E6%8E%A5%E9%A1%B6%E7%82%B9%E5%B1%9E%E6%80%A7"><span class="nav-number">1.1.3.</span> <span class="nav-text">链接顶点属性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VAO%EF%BC%88Vertex-Array-Object%EF%BC%89"><span class="nav-number">1.1.4.</span> <span class="nav-text">VAO（Vertex Array Object）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#EBO%EF%BC%88Element-Buffer-Object%EF%BC%89"><span class="nav-number">1.1.5.</span> <span class="nav-text">EBO（Element Buffer Object）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%BE%E5%85%83%E8%A3%85%E9%85%8D%EF%BC%88Primitive-Assembly%EF%BC%89"><span class="nav-number">1.2.</span> <span class="nav-text">图元装配（Primitive Assembly）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%87%A0%E4%BD%95%E7%9D%80%E8%89%B2%E5%99%A8%EF%BC%88Geometry-Shader%EF%BC%89"><span class="nav-number">1.3.</span> <span class="nav-text">几何着色器（Geometry Shader）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%89%E6%A0%85%E5%8C%96%EF%BC%88Rasterization%EF%BC%89"><span class="nav-number">1.4.</span> <span class="nav-text">光栅化（Rasterization）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%89%87%E6%AE%B5%E7%9D%80%E8%89%B2%E5%99%A8%EF%BC%88Fragment-Shader%EF%BC%89"><span class="nav-number">1.5.</span> <span class="nav-text">片段着色器（Fragment Shader）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E4%B8%8E%E6%B7%B7%E5%90%88%EF%BC%88Tests-And-Blending%EF%BC%89"><span class="nav-number">1.6.</span> <span class="nav-text">测试与混合（Tests And Blending）</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="高振宇"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">高振宇</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">33</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/witgao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;witgao" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:witgao328@gmail.com" title="E-Mail → mailto:witgao328@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2022/08/05/cg/OpenGL-%E5%85%A5%E9%97%A8%E7%AF%87/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="高振宇">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="OpenGL-入门篇 | 富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          OpenGL-入门篇
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-08-05 00:00:00" itemprop="dateCreated datePublished" datetime="2022-08-05T00:00:00+08:00">2022-08-05</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%9B%BE%E5%BD%A2%E5%9B%BE%E5%83%8F/" itemprop="url" rel="index"><span itemprop="name">图形图像</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.2k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>8 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>通俗来讲，OpenGL是一个图形库，提供了一系列操作图形图像的API。因为OpenGL只是一个规范，具体的实现一般是由显卡提供。类似的图形库还有Windows平台的DirectX。</p>
+<h1 id="图形渲染管线"><a href="#图形渲染管线" class="headerlink" title="图形渲染管线"></a>图形渲染管线</h1><p>图形渲染管线也叫做渲染流水线，指的是将输入的原始图形数据经过渲染管线处理，输出一帧想要的图像的过程。</p>
+<p>在OpenGL中，任何事物都在3D空间中，而屏幕和窗口却是2D像素数组，所以图形渲染管线主要是在将输入的3D坐标转换成2D坐标，再将2D坐标转换成实际有颜色的像素。(将输入的3D坐标画在3D坐标系中，然后根据视锥范围截取一个2D平面，将截取的平面转换为平面坐标显示)</p>
+<blockquote>
+<p>2D坐标精确的表示一个点在2D空间的位置；而像素是这个点的近似值，像素的显示受到屏幕分辨率的限制</p>
+</blockquote>
+<span id="more"></span>
+
+<p>着色器是运行在GPU上的小程序，这些小程序在图形渲染管线的某个特定部分运行，着色器是一个非常独立的程序，是一种把输入转化为输出的程序，着色器与着色器之间无法通信。蓝色部分代表是可以自定义的着色器。<br><img src="/2022/08/05/cg/OpenGL-%E5%85%A5%E9%97%A8%E7%AF%87/opengl-pipeline.png" alt="OpenGL渲染管线"></p>
+<h2 id="顶点着色器（Vertex-Shader"><a href="#顶点着色器（Vertex-Shader" class="headerlink" title="顶点着色器（Vertex Shader)"></a>顶点着色器（Vertex Shader)</h2><p>图形渲染管线的第一部分是顶点着色器，着色器可以看成是一个纯函数，输入的所有顶点，都会依次执行该函数，在该函数中对输入的顶点进行处理，然后输出新的顶点位置。</p>
+<h3 id="标准化设备坐标（Normalized-Device-Coordinates）"><a href="#标准化设备坐标（Normalized-Device-Coordinates）" class="headerlink" title="标准化设备坐标（Normalized Device Coordinates）"></a>标准化设备坐标（Normalized Device Coordinates）</h3><p>OpenGL不是简单的把所有的3D坐标变换成屏幕上的2D像素，仅当3D坐标在3个轴上-1.0到1.0的范围内时才处理它，所有在这个范围内的坐标叫做标准化设备坐标，在范围内的坐标最终显示在屏幕上。经过顶点着色器处理后，顶点坐标就应该是标准化设备坐标了。</p>
+<p><img src="/2022/08/05/cg/OpenGL-%E5%85%A5%E9%97%A8%E7%AF%87/opengl-ndc.png" alt="NDC"><br>(0,0)是坐标的中心，y轴正方向向上，x轴正方向向右。</p>
+<h3 id="VBO（Vertex-Buffer-Objects"><a href="#VBO（Vertex-Buffer-Objects" class="headerlink" title="VBO（Vertex Buffer Objects)"></a>VBO（Vertex Buffer Objects)</h3><p>将顶点数据作为输入发送给顶点着色器后，它会在GPU上创建一块内存用于存储顶点数据。使用顶点缓冲对象可以用来管理这块内存，用缓冲对象可以一次性的发送大量数据到GPU上，CPU到GPU的传输比较慢，所以尽量一次性发送尽可能多的数据。</p>
+<p>使用glGenBuffers函数生成一个缓冲对象</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">unsigned</span> <span class="type">int</span> VBO;</span><br><span class="line">glGenBuffers(<span class="number">1</span>, &amp;VBO);</span><br></pre></td></tr></table></figure>
+
+<p>OpenGL有很多缓冲对象类型，顶点缓冲对象的类型是GL_ARRAY_BUFFER，OpenGL允许同时绑定多个缓冲，但是缓存类型不能相同，使用glBindBuffer将创建的缓存对象绑定到GL_ARRAY_BUFFER上。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">glBindBuffer(GL_ARRAY_BUFFER, VBO);  </span><br></pre></td></tr></table></figure>
+
+<p>绑定之后，任何针对GL_ARRAY_BUFFER的缓存配置都会作用到绑定的缓冲对象上，使用glBufferData函数可以将顶点数据复制到缓对象管理的内存中。如果缓冲中的数据会频繁变化，需要使用GL_DYNAMIC_DRAW，这样GPU会把数据放在能够高速写入的内存部分。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// GL_STATIC_DRAW: 数据不会或几乎不会改变</span></span><br><span class="line"><span class="comment">// GL_DYNAMIC_DRAW: 数据会被改变很多</span></span><br><span class="line"><span class="comment">// GL_STREAM_DRAW: 数据每次绘制都会改变</span></span><br><span class="line">glBufferData(GL_ARRAY_BUFFER, <span class="keyword">sizeof</span>(vertices), vertices, GL_STATIC_DRAW);</span><br></pre></td></tr></table></figure>
+
+<h3 id="链接顶点属性"><a href="#链接顶点属性" class="headerlink" title="链接顶点属性"></a>链接顶点属性</h3><p>通过VBO上传了顶点数据，编写了顶点着色器后，需要将顶点数据链接到着色器中的in属性上，通过glVertexAttribPointer将当前绑定到GL_ARRAY_BUFFER类型上的VBO中的数据链接到对应位置的顶点in属性上。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 0: in属性location</span></span><br><span class="line"><span class="comment">// 3: vec3</span></span><br><span class="line"><span class="comment">// 浮点型</span></span><br><span class="line"><span class="comment">// 将顶点数据标准化</span></span><br><span class="line"><span class="comment">// 步长，两个顶点数据的间隔字节数量</span></span><br><span class="line"><span class="comment">// 数据偏移</span></span><br><span class="line"><span class="built_in">glVertexAttribPointer</span>(<span class="number">0</span>, <span class="number">3</span>, GL_FLOAT, GL_FALSE, <span class="number">3</span> * <span class="built_in">sizeof</span>(<span class="type">float</span>), (<span class="type">void</span>*)<span class="number">0</span>);</span><br><span class="line"><span class="built_in">glEnableVertexAttribArray</span>(<span class="number">0</span>);<span class="comment">// 默认是禁用</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="VAO（Vertex-Array-Object）"><a href="#VAO（Vertex-Array-Object）" class="headerlink" title="VAO（Vertex Array Object）"></a>VAO（Vertex Array Object）</h3><p>如果有多个顶点属性需要配置，可以使用顶点数组对象，顶点数组对象可以像顶点缓冲对象那边被绑定，可以将多个顶点属性的配置都绑定到VAO上，这样只需要配置一次，切glVertexAttribPointer换不同的属性配置时只需要绑定不同的VAO即可。</p>
+<p>创建VAO</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">unsigned</span> <span class="type">int</span> VAO;</span><br><span class="line">glGenVertexArrays(<span class="number">1</span>, &amp;VAO);</span><br></pre></td></tr></table></figure>
+
+<p>绑定VAO，当绑定VAO后，后面调用glVertexAttribPointer对顶点属性进行的配置都会自动存储到VAO中。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">glBindVertexArray(VAO);</span><br></pre></td></tr></table></figure>
+
+<h3 id="EBO（Element-Buffer-Object）"><a href="#EBO（Element-Buffer-Object）" class="headerlink" title="EBO（Element Buffer Object）"></a>EBO（Element Buffer Object）</h3><p>元素缓冲对象也叫索引缓冲对象。EBO是一个缓冲区，和VBO一样，存储OpenGL用来决定要绘制哪些顶点的索引，索引定义了顶点的组合方式，顶点可以重复使用。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">float</span> vertices[] = &#123;</span><br><span class="line">    <span class="number">0.5f</span>, <span class="number">0.5f</span>, <span class="number">0.0f</span>,   <span class="comment">// 右上角</span></span><br><span class="line">    <span class="number">0.5f</span>, <span class="number">-0.5f</span>, <span class="number">0.0f</span>,  <span class="comment">// 右下角</span></span><br><span class="line">    <span class="number">-0.5f</span>, <span class="number">-0.5f</span>, <span class="number">0.0f</span>, <span class="comment">// 左下角</span></span><br><span class="line">    <span class="number">-0.5f</span>, <span class="number">0.5f</span>, <span class="number">0.0f</span>   <span class="comment">// 左上角</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="type">unsigned</span> <span class="type">int</span> indices[] = &#123;</span><br><span class="line">    <span class="comment">// 注意索引从0开始! </span></span><br><span class="line">    <span class="comment">// 此例的索引(0,1,2,3)就是顶点数组vertices的下标，</span></span><br><span class="line">    <span class="comment">// 这样可以由下标代表顶点组合成矩形</span></span><br><span class="line"></span><br><span class="line">    <span class="number">0</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="comment">// 第一个三角形</span></span><br><span class="line">    <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>  <span class="comment">// 第二个三角形</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>创建EBO</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">unsigned</span> <span class="type">int</span> EBO;</span><br><span class="line">glGenBuffers(<span class="number">1</span>, &amp;EBO);</span><br></pre></td></tr></table></figure>
+
+<p>EBO的类型是GL_ELEMENT_ARRAY_BUFFER，使用glBindBuffer将创建的缓存对象绑定到GL_ELEMENT_ARRAY_BUFFER上。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);  </span><br></pre></td></tr></table></figure>
+
+<p>绑定之后，任何针对GL_ELEMENT_ARRAY_BUFFER的缓存配置都会作用到绑定的缓冲对象上，使用glBufferData函数可以将索引数据复制到缓对象管理的内存中。如果缓冲中的数据会频繁变化，需要使用GL_DYNAMIC_DRAW，这样GPU会把数据放在能够高速写入的内存部分。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">glBufferData(GL_ELEMENT_ARRAY_BUFFER, <span class="keyword">sizeof</span>(indices), indices, GL_STATIC_DRAW);</span><br></pre></td></tr></table></figure>
+
+<p>使用EBO后，需要用glDrawElements替换glDrawArrays。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);</span><br><span class="line">glDrawElements(GL_TRIANGLES, <span class="number">6</span>, GL_UNSIGNED_INT, <span class="number">0</span>);</span><br></pre></td></tr></table></figure>
+
+<p>EBO也可以绑定到VAO中，只需绑定一次，后续只绑定VAO即可。</p>
+<h2 id="图元装配（Primitive-Assembly）"><a href="#图元装配（Primitive-Assembly）" class="headerlink" title="图元装配（Primitive Assembly）"></a>图元装配（Primitive Assembly）</h2><p>所谓图元就是几何形状，OpenGL支持的图元有三种：点、线、三角形。而图元装配就是根据定义的图元类型将顶点着色器输出的顶点渲染成单独的图元，然后会图元进行裁剪、透视分割、视口变换。</p>
+<p>裁剪：图元根据视锥体进行裁剪。根据视锥体的六个平面进行裁剪，超出视锥体之外的图元都将被裁剪抛弃（并不会真正裁剪，只是标记，x、y、z的绝对值大于1则表示不在视锥体内，会被裁剪）。裁剪后得到的坐标体系为(x，y，z，w)，其中w用来在透视分割是处理远近效果。</p>
+<p><img src="/2022/08/05/cg/OpenGL-%E5%85%A5%E9%97%A8%E7%AF%87/webgl_perspective_projection.png" alt="透视投影-视锥体"></p>
+<p><img src="/2022/08/05/cg/OpenGL-%E5%85%A5%E9%97%A8%E7%AF%87/webgl_orthogonal_projection.png" alt="正交投影-视锥体"></p>
+<p>透视分割：将裁剪后的坐标转换为规范化设备坐标。在该转换中会使用w坐标来进行处理，正交投影中w为1，而透视投影中w会根据远近值来生成，越远值越大。透视分割就是讲x、y、z坐标分别除以w，得到新的x、y、z坐标，由于坐标值都是小于w的，所以最终得到的值都是位于[-1，1]之间，这也就是所谓的规范化设备坐标。而对于透视投影来说，w的值越远越大，所以转换后，越远的坐标，转换后值越小，就会形成近大远小的效果。</p>
+<p>视口变换：将设备坐标转换为窗口坐标，每个坐标都关联屏幕上的一个点。</p>
+<h2 id="几何着色器（Geometry-Shader）"><a href="#几何着色器（Geometry-Shader）" class="headerlink" title="几何着色器（Geometry Shader）"></a>几何着色器（Geometry Shader）</h2><p>几何着色器把图元装配的输出的一系列顶点的集合作为输入，通过产生新顶点构造出新的图元来生成其它形状。</p>
+<h2 id="光栅化（Rasterization）"><a href="#光栅化（Rasterization）" class="headerlink" title="光栅化（Rasterization）"></a>光栅化（Rasterization）</h2><p>光栅化接收几何着色器的输出作为输入，把图元映射为最终屏幕上相应的像素，生成对应的片段，每个片段代表着一个指定的像素位置，这些片段就是片段着色器中使用的片段，在片段着色器运行之前会执行裁切，裁切会丢弃超出视图以外的所有像素，用来提升执行效率。</p>
+<blockquote>
+<blockquote>
+<p>片段包含渲染一个像素所需的所有数据</p>
+</blockquote>
+</blockquote>
+<h2 id="片段着色器（Fragment-Shader）"><a href="#片段着色器（Fragment-Shader）" class="headerlink" title="片段着色器（Fragment Shader）"></a>片段着色器（Fragment Shader）</h2><p>片段着色器的主要目的是计算每个像素应该输出什么颜色，在片段着色器中可以接收到顶点着色器输出的变量。</p>
+<h2 id="测试与混合（Tests-And-Blending）"><a href="#测试与混合（Tests-And-Blending）" class="headerlink" title="测试与混合（Tests And Blending）"></a>测试与混合（Tests And Blending）</h2><p>检测片段对应的深度值，用来判断这个像素是其它物体的前面还是后面，决定是否丢弃，这个阶段也会检查alpha值，并对物体进行混合。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>高振宇
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://witgao.com/2022/08/05/cg/OpenGL-%E5%85%A5%E9%97%A8%E7%AF%87/" title="OpenGL-入门篇">https://witgao.com/2022/08/05/cg/OpenGL-入门篇/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/OpenGL/" rel="tag"><i class="fa fa-tag"></i> OpenGL</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/08/05/cg/OpenGL-%E7%9D%80%E8%89%B2%E5%99%A8/" rel="prev" title="OpenGL-着色器">
+                  <i class="fa fa-chevron-left"></i> OpenGL-着色器
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/11/24/c++/c++%E7%B1%BB%E5%9E%8B%E6%8E%A8%E6%96%AD/" rel="next" title="c++类型推断">
+                  c++类型推断 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">高振宇</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">75k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:33</span>
+  </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
