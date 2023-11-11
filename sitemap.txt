@@ -1,5 +1,11 @@
+https://witgao.com/2023/08/20/av/Web%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81-WebCodec/
+https://witgao.com/2022/07/14/av/iOS%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81-VideoToolbox/
+https://witgao.com/2022/07/14/av/Android%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81-MediaCodec(C-Api)/
+https://witgao.com/2020/04/22/av/Android%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81-MediaCodec(Java-Api)/
+https://witgao.com/2023/03/16/c++/std::declval%E7%9A%84%E4%BD%9C%E7%94%A8%E5%92%8C%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/
+https://witgao.com/2023/02/10/c++/%E4%BB%80%E4%B9%88%E6%98%AF%20SFINAE/
+https://witgao.com/2023/01/24/c++/c++%E5%B8%B8%E9%87%8F/
 https://witgao.com/2022/08/10/cg/OpenGL-%E9%A1%B6%E7%82%B9%E7%9D%80%E8%89%B2%E5%99%A8/
-https://witgao.com/2023/02/17/c++/c++%E5%B8%B8%E9%87%8F/
 https://witgao.com/2022/08/12/cg/OpenGL-%E7%89%87%E6%AE%B5%E7%9D%80%E8%89%B2%E5%99%A8/
 https://witgao.com/2022/08/06/cg/GLSL-%E5%85%A5%E9%97%A8/
 https://witgao.com/2022/08/06/cg/EGL-%E5%85%A5%E9%97%A8/
@@ -9,7 +15,6 @@ https://witgao.com/categories/index.html
 https://witgao.com/2019/10/15/av/Android%E5%9B%BE%E5%BD%A2%E6%9E%B6%E6%9E%84%E6%80%BB%E8%A7%88/
 https://witgao.com/2022/11/24/c++/c++%E7%B1%BB%E5%9E%8B%E6%8E%A8%E6%96%AD/
 https://witgao.com/2020/04/12/av/Android%E7%A1%AC%E4%BB%B6%E8%A7%A3%E5%B0%81%E8%A3%85/
-https://witgao.com/2020/04/22/av/Android%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81/
 https://witgao.com/2020/07/05/av/FFmpeg%E5%BD%95%E5%88%B6%E9%9F%B3%E9%A2%91/
 https://witgao.com/2020/07/14/av/FFmpeg%E5%BD%95%E5%88%B6%E8%A7%86%E9%A2%91/
 https://witgao.com/2022/01/30/c++/libc++%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8Bstring/
@@ -43,6 +48,8 @@ https://witgao.com/tags/x265/
 https://witgao.com/tags/EGL/
 https://witgao.com/tags/OpenGL/
 https://witgao.com/tags/GLSL/
+https://witgao.com/tags/iOS/
+https://witgao.com/tags/Web/
 https://witgao.com/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/
 https://witgao.com/categories/C/
 https://witgao.com/categories/%E5%9B%BE%E5%BD%A2%E5%9B%BE%E5%83%8F/

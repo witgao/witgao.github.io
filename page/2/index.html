@@ -151,7 +151,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">34</span>
+          <span class="site-state-item-count">39</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -162,7 +162,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-count">9</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -187,6 +187,512 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2022/07/14/av/Android%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81-MediaCodec(C-Api)/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="高振宇">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2022/07/14/av/Android%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81-MediaCodec(C-Api)/" class="post-title-link" itemprop="url">Android硬件编解码-MediaCodec(C-Api)</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-07-14 00:00:00" itemprop="dateCreated datePublished" datetime="2022-07-14T00:00:00+08:00">2022-07-14</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/" itemprop="url" rel="index"><span itemprop="name">音视频</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.8k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>7 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>在 Android 平台上，MediaCodec 提供了一套 C API（通常通过 NDK 使用）来进行视频和音频的编解码。这个 API 允许开发者直接在 C&#x2F;C++ 层面操作编解码器，而不是通过 Java 层的 MediaCodec 类。使用 C API 可以更好地控制性能，特别是在需要处理高效率、低延迟的多媒体应用时。</p>
+<h1 id="MediaCodec-编解码流程"><a href="#MediaCodec-编解码流程" class="headerlink" title="MediaCodec 编解码流程"></a>MediaCodec 编解码流程</h1><h2 id="解码"><a href="#解码" class="headerlink" title="解码"></a>解码</h2><h3 id="创建解码器"><a href="#创建解码器" class="headerlink" title="创建解码器"></a>创建解码器</h3><p>使用 <code>AMediaCodec_createDecoderByType</code> 创建解码器实例。</p>
+<h4 id="获取解码器名称"><a href="#获取解码器名称" class="headerlink" title="获取解码器名称"></a>获取解码器名称</h4><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">std::string mime_type;</span><br><span class="line"><span class="keyword">switch</span> (src) &#123;</span><br><span class="line">  <span class="keyword">case</span> CodecType::CODEC_TYPE_H264:</span><br><span class="line">    mime_type = <span class="string">&quot;video/avc&quot;</span>;</span><br><span class="line">    <span class="keyword">break</span>;</span><br><span class="line">  <span class="keyword">case</span> CodecType::CODEC_TYPE_H265:</span><br><span class="line">    mime_type = <span class="string">&quot;video/hevc&quot;</span>;</span><br><span class="line">    <span class="keyword">break</span>;</span><br><span class="line">  <span class="keyword">default</span>:</span><br><span class="line">    <span class="keyword">break</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">return</span> mime_type;</span><br></pre></td></tr></table></figure>
+
+<h4 id="设置解码格式参数"><a href="#设置解码格式参数" class="headerlink" title="设置解码格式参数"></a>设置解码格式参数</h4><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">AMediaFormat* <span class="title">MediaCodecDecoderImpl::CreateMediaFormat</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="type">const</span> VideoInfo&amp; video_info, <span class="type">const</span> ExtraData&amp; extra_data)</span> </span>&#123;</span><br><span class="line">  std::string mime_type = <span class="built_in">CodecTypeConvert</span>&lt;CodecType, std::string&gt;(video_info.codec_type);</span><br><span class="line"></span><br><span class="line">  AMediaFormat* format = <span class="built_in">AMediaFormat_new</span>();</span><br><span class="line">  <span class="comment">// 设置宽高，解码名称</span></span><br><span class="line">  <span class="built_in">AMediaFormat_setInt32</span>(format, AMEDIAFORMAT_KEY_WIDTH, video_info.width);</span><br><span class="line">  <span class="built_in">AMediaFormat_setInt32</span>(format, AMEDIAFORMAT_KEY_HEIGHT, video_info.height);</span><br><span class="line">  <span class="built_in">AMediaFormat_setString</span>(format, AMEDIAFORMAT_KEY_MIME, mime_type.<span class="built_in">c_str</span>());</span><br><span class="line">  <span class="comment">// 设置输出的颜色格式</span></span><br><span class="line">  <span class="built_in">AMediaFormat_setInt32</span>(format, AMEDIAFORMAT_KEY_COLOR_FORMAT, pix_fmt);</span><br><span class="line">  <span class="comment">// 通过csd-0 csd-1 csd-2来设置vps sps pps数据</span></span><br><span class="line">  <span class="keyword">switch</span> (video_info.codec_type) &#123;</span><br><span class="line">    <span class="keyword">case</span> CodecType::CODEC_TYPE_H264: &#123;</span><br><span class="line">      <span class="keyword">auto</span>* avc_ps_ = <span class="keyword">new</span> avc::<span class="built_in">ParamSets</span>();</span><br><span class="line">      himawari::avc::<span class="built_in">ParseExtraDataToParamSet</span>(extra_data, *avc_ps_);</span><br><span class="line">      <span class="keyword">if</span> (avc_ps_-&gt;sps_list.<span class="built_in">empty</span>() || avc_ps_-&gt;pps_list.<span class="built_in">empty</span>()) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nullptr</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="built_in">AMediaFormat_setBuffer</span>(format, <span class="string">&quot;csd-0&quot;</span>, avc_ps_-&gt;sps_list[<span class="number">0</span>].data,</span><br><span class="line">                             avc_ps_-&gt;sps_list[<span class="number">0</span>].data_size);</span><br><span class="line">      <span class="built_in">AMediaFormat_setBuffer</span>(format, <span class="string">&quot;csd-1&quot;</span>, avc_ps_-&gt;pps_list[<span class="number">0</span>].data,</span><br><span class="line">                             avc_ps_-&gt;pps_list[<span class="number">0</span>].data_size);</span><br><span class="line">      <span class="keyword">delete</span> avc_ps_;</span><br><span class="line">    &#125; <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> CodecType::CODEC_TYPE_H265: &#123;</span><br><span class="line">      <span class="keyword">auto</span>* hevc_ps = <span class="keyword">new</span> hevc::<span class="built_in">ParamSets</span>();</span><br><span class="line">      himawari::hevc::<span class="built_in">ParseExtraDataToParamSet</span>(extra_data, *hevc_ps);</span><br><span class="line">      <span class="keyword">if</span> (hevc_ps-&gt;vps_list.<span class="built_in">empty</span>() || hevc_ps-&gt;sps_list.<span class="built_in">empty</span>() ||</span><br><span class="line">          hevc_ps-&gt;pps_list.<span class="built_in">empty</span>()) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nullptr</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="built_in">AMediaFormat_setBuffer</span>(format, <span class="string">&quot;csd-0&quot;</span>, hevc_ps-&gt;vps_list[<span class="number">0</span>].data,</span><br><span class="line">                             hevc_ps-&gt;vps_list[<span class="number">0</span>].data_size);</span><br><span class="line">      <span class="built_in">AMediaFormat_setBuffer</span>(format, <span class="string">&quot;csd-1&quot;</span>, hevc_ps-&gt;sps_list[<span class="number">0</span>].data,</span><br><span class="line">                             hevc_ps-&gt;sps_list[<span class="number">0</span>].data_size);</span><br><span class="line">      <span class="built_in">AMediaFormat_setBuffer</span>(format, <span class="string">&quot;csd-2&quot;</span>, hevc_ps-&gt;pps_list[<span class="number">0</span>].data,</span><br><span class="line">                             hevc_ps-&gt;pps_list[<span class="number">0</span>].data_size);</span><br><span class="line">      <span class="keyword">delete</span> hevc_ps;</span><br><span class="line">    &#125; <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">nullptr</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> format;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/07/14/av/Android%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81-MediaCodec(C-Api)/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2022/07/14/av/iOS%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81-VideoToolbox/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="高振宇">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2022/07/14/av/iOS%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81-VideoToolbox/" class="post-title-link" itemprop="url">iOS硬件编解码-VideoToolbox</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-07-14 00:00:00" itemprop="dateCreated datePublished" datetime="2022-07-14T00:00:00+08:00">2022-07-14</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/" itemprop="url" rel="index"><span itemprop="name">音视频</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.7k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>10 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>在 iOS 平台上，VideoToolbox 是 Apple 提供的一个强大的框架，用于执行硬件加速的视频编解码。它支持广泛的视频编码格式，包括但不限于 H.264 和 HEVC。使用 VideoToolbox 可以提高编解码的性能，同时降低 CPU 使用率。</p>
+<h1 id="VideoToolbox-编解码流程"><a href="#VideoToolbox-编解码流程" class="headerlink" title="VideoToolbox 编解码流程"></a>VideoToolbox 编解码流程</h1><h2 id="解码"><a href="#解码" class="headerlink" title="解码"></a>解码</h2><h3 id="创建解码器"><a href="#创建解码器" class="headerlink" title="创建解码器"></a>创建解码器</h3><h4 id="设置视频描述信息"><a href="#设置视频描述信息" class="headerlink" title="设置视频描述信息"></a>设置视频描述信息</h4><p>将vps sps pps信息读取出来设置到CMVideoFormatDescriptionRef中</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">CMVideoFormatDescriptionRef <span class="title">VideoToolBoxDecoderImpl::CreateVideoFormatDesc</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="type">const</span> VideoInfo &amp;video_info, <span class="type">const</span> ExtraData &amp;extra_data)</span> </span>&#123;</span><br><span class="line">  OSStatus status;</span><br><span class="line">  CMFormatDescriptionRef format_desc;</span><br><span class="line">  <span class="keyword">switch</span> (video_info.codec_type) &#123;</span><br><span class="line">    <span class="keyword">case</span> CodecType::CODEC_TYPE_H264: &#123;</span><br><span class="line">      <span class="keyword">auto</span> *avc_ps_ = <span class="keyword">new</span> avc::<span class="built_in">ParamSets</span>();</span><br><span class="line">      ...</span><br><span class="line">      <span class="comment">// 准备好sps pps数据</span></span><br><span class="line">      <span class="type">const</span> <span class="type">uint8_t</span> *<span class="type">const</span> parameterSetPointers[] = &#123;avc_ps_-&gt;sps_list[<span class="number">0</span>].data,</span><br><span class="line">                                                     avc_ps_-&gt;pps_list[<span class="number">0</span>].data&#125;;</span><br><span class="line">      <span class="type">const</span> <span class="type">size_t</span> parameterSetSizes[] = &#123;</span><br><span class="line">          (<span class="type">size_t</span>)avc_ps_-&gt;sps_list[<span class="number">0</span>].data_size,</span><br><span class="line">          (<span class="type">size_t</span>)avc_ps_-&gt;pps_list[<span class="number">0</span>].data_size&#125;;</span><br><span class="line">      status = <span class="built_in">CMVideoFormatDescriptionCreateFromH264ParameterSets</span>(</span><br><span class="line">          kCFAllocatorDefault, <span class="number">2</span>, parameterSetPointers, parameterSetSizes, <span class="number">4</span>,</span><br><span class="line">          &amp;format_desc);</span><br><span class="line">      <span class="keyword">delete</span> avc_ps_;</span><br><span class="line">    &#125; <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> CodecType::CODEC_TYPE_H265: &#123;</span><br><span class="line">      <span class="keyword">auto</span> *hevc_ps = <span class="keyword">new</span> hevc::<span class="built_in">ParamSets</span>();</span><br><span class="line">      ...</span><br><span class="line">      <span class="comment">// 准备好vps sps pps数据</span></span><br><span class="line">      <span class="keyword">if</span> (hevc_ps-&gt;vps_list.<span class="built_in">empty</span>() || hevc_ps-&gt;sps_list.<span class="built_in">empty</span>() ||</span><br><span class="line">          hevc_ps-&gt;pps_list.<span class="built_in">empty</span>()) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nullptr</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="type">const</span> <span class="type">uint8_t</span> *<span class="type">const</span> parameterSetPointers[] = &#123;hevc_ps-&gt;vps_list[<span class="number">0</span>].data,</span><br><span class="line">                                                     hevc_ps-&gt;sps_list[<span class="number">0</span>].data,</span><br><span class="line">                                                     hevc_ps-&gt;pps_list[<span class="number">0</span>].data&#125;;</span><br><span class="line">      <span class="type">const</span> <span class="type">size_t</span> parameterSetSizes[] = &#123;</span><br><span class="line">          (<span class="type">size_t</span>)hevc_ps-&gt;vps_list[<span class="number">0</span>].data_size,</span><br><span class="line">          (<span class="type">size_t</span>)hevc_ps-&gt;sps_list[<span class="number">0</span>].data_size,</span><br><span class="line">          (<span class="type">size_t</span>)hevc_ps-&gt;pps_list[<span class="number">0</span>].data_size&#125;;</span><br><span class="line">      status = <span class="built_in">CMVideoFormatDescriptionCreateFromHEVCParameterSets</span>(</span><br><span class="line">          kCFAllocatorDefault, <span class="number">3</span>, parameterSetPointers, parameterSetSizes, <span class="number">4</span>,</span><br><span class="line">          nil, &amp;format_desc);</span><br><span class="line">      <span class="keyword">delete</span> hevc_ps;</span><br><span class="line">    &#125; <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">nullptr</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (status) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nullptr</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> format_desc;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/07/14/av/iOS%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81-VideoToolbox/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2022/03/02/av/x265%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8B%E5%B8%A7%E7%B1%BB%E5%9E%8B%E5%86%B3%E7%AD%96/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="高振宇">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2022/03/02/av/x265%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8B%E5%B8%A7%E7%B1%BB%E5%9E%8B%E5%86%B3%E7%AD%96/" class="post-title-link" itemprop="url">x265源码分析之帧类型决策</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-03-02 00:00:00" itemprop="dateCreated datePublished" datetime="2022-03-02T00:00:00+08:00">2022-03-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/" itemprop="url" rel="index"><span itemprop="name">音视频</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>4.5k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>16 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="Lookahead"><a href="#Lookahead" class="headerlink" title="Lookahead"></a>Lookahead</h1><p>Lookahead是预处理模块，负责对输入的待编码图像进行下采样、复杂度预计算、帧类型决策等编码前期处理。</p>
+<p>在Lookahead中维护了两个队列，外部输入的待编码图像按照输入的顺序放入到m_inputQueue队列中等待预处理，当m_inputQueue中数量超过指定阈值时，就会开始预处理，预处理完毕的就会根据DTS顺序放入到m_outputQueue中等待取出编码。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Lookahead</span> : <span class="keyword">public</span> JobProvider</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// 输入队列，PTS顺序</span></span><br><span class="line">    PicList       m_inputQueue;      <span class="comment">// input pictures in order received</span></span><br><span class="line">    <span class="comment">// 输出队列，DTS顺序</span></span><br><span class="line">    PicList       m_outputQueue;     <span class="comment">// pictures to be encoded, in encode order</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/03/02/av/x265%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8B%E5%B8%A7%E7%B1%BB%E5%9E%8B%E5%86%B3%E7%AD%96/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2022/02/03/c++/libc++%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8Ballocator/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="高振宇">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2022/02/03/c++/libc++%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8Ballocator/" class="post-title-link" itemprop="url">libc++源码分析之std::allocator</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-02-03 00:00:00" itemprop="dateCreated datePublished" datetime="2022-02-03T00:00:00+08:00">2022-02-03</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/C/" itemprop="url" rel="index"><span itemprop="name">C++</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>377</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="std-allocator"><a href="#std-allocator" class="headerlink" title="std::allocator"></a>std::allocator</h1><p>默认的内存分配器，负责内存的分配和销毁</p>
+<h2 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h2><h3 id="allocate"><a href="#allocate" class="headerlink" title="allocate"></a>allocate</h3><p>分配内存</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">_LIBCPP_NODISCARD_AFTER_CXX17 _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_AFTER_CXX17</span></span><br><span class="line"><span class="function"><span class="type">const</span> _Tp* <span class="title">allocate</span><span class="params">(<span class="type">size_t</span> __n)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (__n &gt; allocator_traits&lt;allocator&gt;::<span class="built_in">max_size</span>(*<span class="keyword">this</span>))</span><br><span class="line">        __throw_length_error(<span class="string">&quot;allocator&lt;const T&gt;::allocate(size_t n)&quot;</span></span><br><span class="line">                             <span class="string">&quot; &#x27;n&#x27; exceeds maximum supported size&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (__libcpp_is_constant_evaluated()) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">static_cast</span>&lt;<span class="type">const</span> _Tp*&gt;(::<span class="keyword">operator</span> <span class="built_in">new</span>(__n * <span class="built_in">sizeof</span>(_Tp)));</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">static_cast</span>&lt;<span class="type">const</span> _Tp*&gt;(_VSTD::__libcpp_allocate(__n * <span class="built_in">sizeof</span>(_Tp), _LIBCPP_ALIGNOF(_Tp)));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/02/03/c++/libc++%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8Ballocator/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2022/02/02/c++/libc++%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8Bvector/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="高振宇">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2022/02/02/c++/libc++%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8Bvector/" class="post-title-link" itemprop="url">libc++源码分析之std::vector</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-02-02 00:00:00" itemprop="dateCreated datePublished" datetime="2022-02-02T00:00:00+08:00">2022-02-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/C/" itemprop="url" rel="index"><span itemprop="name">C++</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.9k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>11 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="std-vector"><a href="#std-vector" class="headerlink" title="std::vector"></a>std::vector</h1><h2 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h2><h3 id="vector-base"><a href="#vector-base" class="headerlink" title="__vector_base"></a>__vector_base</h3><p>vector的基类，定义了vector的数据结构，在vector内部是使用对象数组来实现的，end - begin表示size，end_cap - begin表示capacity。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">__vector_base</span></span><br><span class="line">    : <span class="keyword">protected</span> __vector_base_common&lt;<span class="literal">true</span>&gt;</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    pointer                                         __begin_; <span class="comment">// 数组第一个对象的首地址</span></span><br><span class="line">    pointer                                         __end_; <span class="comment">// 数组下一个待存储的对象的首地址</span></span><br><span class="line">    __compressed_pair&lt;pointer, allocator_type&gt; __end_cap_; <span class="comment">// 数组内存尾指针</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/02/02/c++/libc++%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8Bvector/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -692,507 +1198,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://witgao.com/2021/07/07/c++/libc++%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8Bnew%E5%92%8Cdelete/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="高振宇">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="富贵山庄">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 富贵山庄">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/07/07/c++/libc++%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8Bnew%E5%92%8Cdelete/" class="post-title-link" itemprop="url">libc++源码分析之new和delete</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-07-07 00:00:00" itemprop="dateCreated datePublished" datetime="2021-07-07T00:00:00+08:00">2021-07-07</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/C/" itemprop="url" rel="index"><span itemprop="name">C++</span></a>
-        </span>
-    </span>
-
-  
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>2.5k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>9 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="示例：new-x2F-delete-一个对象"><a href="#示例：new-x2F-delete-一个对象" class="headerlink" title="示例：new&#x2F;delete 一个对象"></a>示例：new&#x2F;delete 一个对象</h1><h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span>** argv)</span> </span>&#123;</span><br><span class="line">  std::string* str = <span class="keyword">new</span> std::<span class="built_in">string</span>();</span><br><span class="line">  <span class="keyword">delete</span> str;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="汇编"><a href="#汇编" class="headerlink" title="汇编"></a>汇编</h2><figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">    <span class="number">0x108852450</span> &lt;+<span class="number">0</span>&gt;:   pushq  %rbp</span><br><span class="line">    <span class="number">0x108852451</span> &lt;+<span class="number">1</span>&gt;:   <span class="keyword">movq</span>   %rsp, %rbp</span><br><span class="line">    <span class="number">0x108852454</span> &lt;+<span class="number">4</span>&gt;:   subq   <span class="number">$0</span>x30, %rsp</span><br><span class="line">    <span class="number">0x108852458</span> &lt;+<span class="number">8</span>&gt;:   movl   <span class="number">$0</span>x0, -<span class="number">0x4</span>(%rbp)</span><br><span class="line">    <span class="number">0x10885245f</span> &lt;+<span class="number">15</span>&gt;:  movl   %edi, -<span class="number">0x8</span>(%rbp)</span><br><span class="line">    <span class="number">0x108852462</span> &lt;+<span class="number">18</span>&gt;:  <span class="keyword">movq</span>   %rsi, -<span class="number">0x10</span>(%rbp)</span><br><span class="line">    <span class="number">0x108852466</span> &lt;+<span class="number">22</span>&gt;:  movl   <span class="number">$0</span>x18, %edi</span><br><span class="line">    <span class="number">0x10885246b</span> &lt;+<span class="number">27</span>&gt;:  callq  <span class="number">0x1088c26c6</span>               <span class="comment">; symbol stub for: operator new(unsigned long)</span></span><br><span class="line">    <span class="number">0x108852470</span> &lt;+<span class="number">32</span>&gt;:  <span class="keyword">movq</span>   %rax, %rdi</span><br><span class="line">    <span class="number">0x108852473</span> &lt;+<span class="number">35</span>&gt;:  <span class="keyword">movq</span>   %rax, -<span class="number">0x20</span>(%rbp)</span><br><span class="line">    <span class="number">0x108852477</span> &lt;+<span class="number">39</span>&gt;:  callq  <span class="number">0x1088524c0</span>               <span class="comment">; std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;::basic_string at string:1725</span></span><br><span class="line">    <span class="number">0x10885247c</span> &lt;+<span class="number">44</span>&gt;:  <span class="keyword">movq</span>   -<span class="number">0x20</span>(%rbp), %rax</span><br><span class="line">    <span class="number">0x108852480</span> &lt;+<span class="number">48</span>&gt;:  <span class="keyword">movq</span>   %rax, -<span class="number">0x18</span>(%rbp)</span><br><span class="line">    <span class="number">0x108852484</span> &lt;+<span class="number">52</span>&gt;:  <span class="keyword">movq</span>   -<span class="number">0x18</span>(%rbp), %rcx</span><br><span class="line">    <span class="number">0x108852488</span> &lt;+<span class="number">56</span>&gt;:  cmpq   <span class="number">$0</span>x0, %rcx</span><br><span class="line">    <span class="number">0x10885248c</span> &lt;+<span class="number">60</span>&gt;:  <span class="keyword">movq</span>   %rcx, -<span class="number">0x28</span>(%rbp)</span><br><span class="line">    <span class="number">0x108852490</span> &lt;+<span class="number">64</span>&gt;:  <span class="keyword">je</span>     <span class="number">0x1088524ab</span>               <span class="comment">; &lt;+91&gt; at main.cpp</span></span><br><span class="line">    <span class="number">0x108852496</span> &lt;+<span class="number">70</span>&gt;:  <span class="keyword">movq</span>   -<span class="number">0x28</span>(%rbp), %rdi</span><br><span class="line">    <span class="number">0x10885249a</span> &lt;+<span class="number">74</span>&gt;:  callq  <span class="number">0x1088c240e</span>               <span class="comment">; symbol stub for: std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;::~basic_string()</span></span><br><span class="line">    <span class="number">0x10885249f</span> &lt;+<span class="number">79</span>&gt;:  <span class="keyword">movq</span>   -<span class="number">0x28</span>(%rbp), %rax</span><br><span class="line">    <span class="number">0x1088524a3</span> &lt;+<span class="number">83</span>&gt;:  <span class="keyword">movq</span>   %rax, %rdi</span><br><span class="line">    <span class="number">0x1088524a6</span> &lt;+<span class="number">86</span>&gt;:  callq  <span class="number">0x1088c26b4</span>               <span class="comment">; symbol stub for: operator delete(void*)</span></span><br><span class="line">    <span class="number">0x1088524ab</span> &lt;+<span class="number">91</span>&gt;:  xorl   %eax, %eax</span><br><span class="line">-&gt;  <span class="number">0x1088524ad</span> &lt;+<span class="number">93</span>&gt;:  addq   <span class="number">$0</span>x30, %rsp</span><br><span class="line">    <span class="number">0x1088524b1</span> &lt;+<span class="number">97</span>&gt;:  popq   %rbp</span><br><span class="line">    <span class="number">0x1088524b2</span> &lt;+<span class="number">98</span>&gt;:  retq   </span><br><span class="line">    <span class="number">0x1088524b3</span> &lt;+<span class="number">99</span>&gt;:  nopw   %cs:(%rax,%rax)</span><br><span class="line">    <span class="number">0x1088524bd</span> &lt;+<span class="number">109</span>&gt;: nopl   (%rax)</span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/07/07/c++/libc++%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8Bnew%E5%92%8Cdelete/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://witgao.com/2020/08/05/av/ffplay%E6%B8%B2%E6%9F%93%E7%BA%BF%E7%A8%8B%E5%88%86%E6%9E%90/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="高振宇">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="富贵山庄">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 富贵山庄">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2020/08/05/av/ffplay%E6%B8%B2%E6%9F%93%E7%BA%BF%E7%A8%8B%E5%88%86%E6%9E%90/" class="post-title-link" itemprop="url">ffplay渲染线程分析</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-08-05 00:00:00" itemprop="dateCreated datePublished" datetime="2020-08-05T00:00:00+08:00">2020-08-05</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/" itemprop="url" rel="index"><span itemprop="name">音视频</span></a>
-        </span>
-    </span>
-
-  
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>3k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>11 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="视频渲染线程"><a href="#视频渲染线程" class="headerlink" title="视频渲染线程"></a>视频渲染线程</h1><p>视频渲染线程实际就是main线程。</p>
-<h2 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h2><h3 id="初始化SDL"><a href="#初始化SDL" class="headerlink" title="初始化SDL"></a>初始化SDL</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// SDL初始化</span></span><br><span class="line">flags = SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER;</span><br><span class="line"><span class="keyword">if</span> (SDL_Init(flags)) &#123;</span><br><span class="line">  av_log(<span class="literal">NULL</span>, AV_LOG_FATAL, <span class="string">&quot;Could not initialize SDL - %s\n&quot;</span>,</span><br><span class="line">         SDL_GetError());</span><br><span class="line">  av_log(<span class="literal">NULL</span>, AV_LOG_FATAL, <span class="string">&quot;(Did you set the DISPLAY variable?)\n&quot;</span>);</span><br><span class="line">  <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/08/05/av/ffplay%E6%B8%B2%E6%9F%93%E7%BA%BF%E7%A8%8B%E5%88%86%E6%9E%90/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://witgao.com/2020/08/04/av/ffplay%E8%A7%A3%E7%A0%81%E7%BA%BF%E7%A8%8B%E5%88%86%E6%9E%90/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="高振宇">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="富贵山庄">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 富贵山庄">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2020/08/04/av/ffplay%E8%A7%A3%E7%A0%81%E7%BA%BF%E7%A8%8B%E5%88%86%E6%9E%90/" class="post-title-link" itemprop="url">ffplay解码线程分析</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-08-04 00:00:00" itemprop="dateCreated datePublished" datetime="2020-08-04T00:00:00+08:00">2020-08-04</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/" itemprop="url" rel="index"><span itemprop="name">音视频</span></a>
-        </span>
-    </span>
-
-  
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.5k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>5 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="视频解码线程"><a href="#视频解码线程" class="headerlink" title="视频解码线程"></a>视频解码线程</h1><h2 id="轮询"><a href="#轮询" class="headerlink" title="轮询"></a>轮询</h2><p>不断从Packet队列中取出一帧数据进行解码，然后将解码数据放入到Frame队列中。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (;;) &#123;</span><br><span class="line">  <span class="comment">// 获取一帧解码数据</span></span><br><span class="line">  ret = get_video_frame(is, frame);</span><br><span class="line">  <span class="keyword">if</span> (ret &lt; <span class="number">0</span>) <span class="keyword">goto</span> the_end;</span><br><span class="line">  <span class="keyword">if</span> (!ret) <span class="keyword">continue</span>;</span><br><span class="line">  ...</span><br><span class="line">      </span><br><span class="line">    <span class="comment">// 根据帧率计算每帧的显示时长</span></span><br><span class="line">    duration = (frame_rate.num &amp;&amp; frame_rate.den</span><br><span class="line">                    ? av_q2d((AVRational)&#123;frame_rate.den, frame_rate.num&#125;)</span><br><span class="line">                    : <span class="number">0</span>);</span><br><span class="line">    <span class="comment">// 将帧的PTS转换为秒</span></span><br><span class="line">    pts = (frame-&gt;pts == AV_NOPTS_VALUE) ? NAN : frame-&gt;pts * av_q2d(tb);</span><br><span class="line">    <span class="comment">// 将解码后的帧数据放入到视频原始数据队列中</span></span><br><span class="line">    ret = queue_picture(is, frame, pts, duration, frame-&gt;pkt_pos,</span><br><span class="line">                        is-&gt;viddec.pkt_serial);</span><br><span class="line">    av_frame_unref(frame);</span><br><span class="line">  ...</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (ret &lt; <span class="number">0</span>) <span class="keyword">goto</span> the_end;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/08/04/av/ffplay%E8%A7%A3%E7%A0%81%E7%BA%BF%E7%A8%8B%E5%88%86%E6%9E%90/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://witgao.com/2020/08/03/av/ffplay%E8%A7%A3%E5%A4%8D%E7%94%A8%E7%BA%BF%E7%A8%8B%E5%88%86%E6%9E%90/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="高振宇">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="富贵山庄">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 富贵山庄">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2020/08/03/av/ffplay%E8%A7%A3%E5%A4%8D%E7%94%A8%E7%BA%BF%E7%A8%8B%E5%88%86%E6%9E%90/" class="post-title-link" itemprop="url">ffplay解复用线程分析</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-08-03 00:00:00" itemprop="dateCreated datePublished" datetime="2020-08-03T00:00:00+08:00">2020-08-03</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/" itemprop="url" rel="index"><span itemprop="name">音视频</span></a>
-        </span>
-    </span>
-
-  
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.9k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>7 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>由主线程创建，负责媒体文件的解复用和读取，读取的数据根据流类型放入到对应的编码数据队列中</p>
-<h1 id="查询流信息"><a href="#查询流信息" class="headerlink" title="查询流信息"></a>查询流信息</h1><h2 id="创建解复用上下文"><a href="#创建解复用上下文" class="headerlink" title="创建解复用上下文"></a>创建解复用上下文</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">// 创建解复用上下文</span></span><br><span class="line">ic = avformat_alloc_context();</span><br><span class="line"><span class="keyword">if</span> (!ic) &#123;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 设置中断回调</span></span><br><span class="line">ic-&gt;interrupt_callback.callback = decode_interrupt_cb;</span><br><span class="line"><span class="comment">// 回调函数的参数</span></span><br><span class="line">ic-&gt;interrupt_callback.opaque = is;</span><br><span class="line">...</span><br><span class="line"><span class="comment">// 打开输入</span></span><br><span class="line">err = avformat_open_input(&amp;ic, is-&gt;filename, is-&gt;iformat, &amp;format_opts);</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">is-&gt;ic = ic;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (genpts) ic-&gt;flags |= AVFMT_FLAG_GENPTS;</span><br><span class="line"></span><br><span class="line">av_format_inject_global_side_data(ic);</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (find_stream_info) &#123;</span><br><span class="line">  AVDictionary **opts = setup_find_stream_info_opts(ic, codec_opts);</span><br><span class="line">  <span class="type">int</span> orig_nb_streams = ic-&gt;nb_streams;</span><br><span class="line">  <span class="comment">// 读取文件头，获取文件的流详细信息</span></span><br><span class="line">  err = avformat_find_stream_info(ic, opts);</span><br><span class="line"></span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/08/03/av/ffplay%E8%A7%A3%E5%A4%8D%E7%94%A8%E7%BA%BF%E7%A8%8B%E5%88%86%E6%9E%90/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://witgao.com/2020/08/02/av/ffplay%E9%98%9F%E5%88%97%E5%88%86%E6%9E%90/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="高振宇">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="富贵山庄">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 富贵山庄">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2020/08/02/av/ffplay%E9%98%9F%E5%88%97%E5%88%86%E6%9E%90/" class="post-title-link" itemprop="url">ffplay队列分析</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-08-02 00:00:00" itemprop="dateCreated datePublished" datetime="2020-08-02T00:00:00+08:00">2020-08-02</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/" itemprop="url" rel="index"><span itemprop="name">音视频</span></a>
-        </span>
-    </span>
-
-  
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>2.8k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>10 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>ffplay的整体结构是由5个线程和4个队列组成、运转的（不分析字幕）。</p>
-<h1 id="整体结构"><a href="#整体结构" class="headerlink" title="整体结构"></a>整体结构</h1><p><img src="/2020/08/02/av/ffplay%E9%98%9F%E5%88%97%E5%88%86%E6%9E%90/ffplay.png" alt="音视频开发之ffplay队列分析"></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/08/02/av/ffplay%E9%98%9F%E5%88%97%E5%88%86%E6%9E%90/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" title="上一页" aria-label="上一页" href="/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" title="下一页" aria-label="下一页" href="/page/3/"><i class="fa fa-angle-right"></i></a>
   </nav>
@@ -1217,13 +1222,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">69k</span>
+    <span title="站点总字数">76k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">4:12</span>
+    <span title="站点阅读时长">4:37</span>
   </span>
 </div>
 

@@ -151,7 +151,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">34</span>
+          <span class="site-state-item-count">39</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -162,7 +162,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-count">9</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -196,7 +196,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://witgao.com/2020/04/22/av/Android%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81/">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2020/07/05/av/FFmpeg%E5%BD%95%E5%88%B6%E9%9F%B3%E9%A2%91/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.png">
@@ -214,7 +214,518 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2020/04/22/av/Android%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81/" class="post-title-link" itemprop="url">Android硬件编解码</a>
+          <a href="/2020/07/05/av/FFmpeg%E5%BD%95%E5%88%B6%E9%9F%B3%E9%A2%91/" class="post-title-link" itemprop="url">FFmpeg录制音频</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-07-05 00:00:00" itemprop="dateCreated datePublished" datetime="2020-07-05T00:00:00+08:00">2020-07-05</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/" itemprop="url" rel="index"><span itemprop="name">音视频</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.9k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>11 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="音频录制流程"><a href="#音频录制流程" class="headerlink" title="音频录制流程"></a>音频录制流程</h1><p>FFmpeg对各大平台的音频输入和输出的API进行了统一的封装，将输入API封装成AVInputFormat，将输出API封装成AVOutputFormat，并且将音频采集设备封装成一个音频文件进行处理，所以我们在采集音频数据的时候，可以将音频设备当做一个无限大的音频文件，不断的从音频文件中读取数据。</p>
+<p><img src="/2020/07/05/av/FFmpeg%E5%BD%95%E5%88%B6%E9%9F%B3%E9%A2%91/ffmpeg_record_audio.png"></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/07/05/av/FFmpeg%E5%BD%95%E5%88%B6%E9%9F%B3%E9%A2%91/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2020/05/28/av/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8JNI/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="高振宇">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2020/05/28/av/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8JNI/" class="post-title-link" itemprop="url">如何使用JNI</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-05-28 00:00:00" itemprop="dateCreated datePublished" datetime="2020-05-28T00:00:00+08:00">2020-05-28</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/" itemprop="url" rel="index"><span itemprop="name">音视频</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>4 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="JNI"><a href="#JNI" class="headerlink" title="JNI"></a>JNI</h1><p>JNI是Java与C&#x2F;C++连接的桥梁，是通过动态库的动态装载机制来实现的。（在前面将静态库和动态库的时候，讲过动态库的动态装载）<br>对于动态装载涉及到两个核心的函数：</p>
+<ul>
+<li>dlopen(): 打开一个动态库，并创建一个引用该动态库的句柄</li>
+<li>dlsym(): 根据动态库的句柄以及函数符号，返回该符号对应函数的地址，从而可以执行该函数</li>
+</ul>
+<p>在Java中一般通过System类的loadLibrary函数来加载一个动态库，该函数底层就是通过调用dlopen函数来实现的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">System.loadLibrary(libraryName);</span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/05/28/av/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8JNI/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2020/05/24/c++/%E5%BA%9F%E5%BC%83iterator/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="高振宇">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2020/05/24/c++/%E5%BA%9F%E5%BC%83iterator/" class="post-title-link" itemprop="url">废弃std::iterator</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-05-24 00:00:00" itemprop="dateCreated datePublished" datetime="2020-05-24T00:00:00+08:00">2020-05-24</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/C/" itemprop="url" rel="index"><span itemprop="name">C++</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>207</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p><img src="/2020/05/24/c++/%E5%BA%9F%E5%BC%83iterator/git-change.png" alt="git-change"></p>
+<p>在C++14之前，所有的Iterator都是继承自std::iterator类，在这个类中定义了五个type </p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">class</span> <span class="title class_">Category</span>, <span class="keyword">class</span> <span class="title class_">T</span>, <span class="keyword">class</span> <span class="title class_">Distance</span> = <span class="type">ptrdiff_t</span>, </span><br><span class="line">         <span class="keyword">class</span> Pointer = T*, <span class="keyword">class</span> Reference = T&amp;&gt; </span><br><span class="line"><span class="keyword">struct</span> iterator </span><br><span class="line">&#123; </span><br><span class="line">    <span class="keyword">typedef</span> T         value_type; </span><br><span class="line">    <span class="keyword">typedef</span> Distance  difference_type; </span><br><span class="line">    <span class="keyword">typedef</span> Pointer   pointer; </span><br><span class="line">    <span class="keyword">typedef</span> Reference reference; </span><br><span class="line">    <span class="keyword">typedef</span> Category  iterator_category; </span><br><span class="line">&#125;; </span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/05/24/c++/%E5%BA%9F%E5%BC%83iterator/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2020/05/24/c++/%E7%BC%BA%E7%9C%81%E5%A4%8D%E5%88%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="高振宇">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2020/05/24/c++/%E7%BC%BA%E7%9C%81%E5%A4%8D%E5%88%B6/" class="post-title-link" itemprop="url">Guaranteed copy elision 缺省复制</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-05-24 00:00:00" itemprop="dateCreated datePublished" datetime="2020-05-24T00:00:00+08:00">2020-05-24</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/C/" itemprop="url" rel="index"><span itemprop="name">C++</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>137</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>在c++17上，通过对value category修改，glvalue提供要被初始化的对象的地址，prvalue提供initializer。 </p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span> </span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">A</span> &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">  <span class="built_in">A</span>() = <span class="keyword">default</span>; </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="built_in">A</span>(A &amp;&amp;prev) = <span class="keyword">delete</span>; </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="comment">//  A(A &amp;&amp;prev) &#123; std::cout &lt;&lt; &quot;Print1&quot;; &#125; </span></span><br><span class="line">&#125;; </span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123; </span><br><span class="line">  A a = <span class="built_in">A</span>(); </span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;aaa&quot;</span>; </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+
+<p>所以上面的代码，在c++17之前是编译不过的，A a &#x3D; A() 这里调用了move构造，虽然编译器会优化掉，不会真正调用，但是move构造必须留着，不能删除。 </p>
+<p>但是在c++17后，是直接在value category层级，就保证了不会调用move构造。 </p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2020/05/24/c++/%E9%9D%99%E6%80%81%E5%BA%93%E4%B8%8E%E5%8A%A8%E6%80%81%E5%BA%93%E4%B9%8B%E9%97%B4%E7%9A%84%E9%82%A3%E4%BA%9B%E4%BA%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="高振宇">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2020/05/24/c++/%E9%9D%99%E6%80%81%E5%BA%93%E4%B8%8E%E5%8A%A8%E6%80%81%E5%BA%93%E4%B9%8B%E9%97%B4%E7%9A%84%E9%82%A3%E4%BA%9B%E4%BA%8B/" class="post-title-link" itemprop="url">静态库与动态库之间的那些事</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-05-24 00:00:00" itemprop="dateCreated datePublished" datetime="2020-05-24T00:00:00+08:00">2020-05-24</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/C/" itemprop="url" rel="index"><span itemprop="name">C++</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.6k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>6 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h3 id="什么是库"><a href="#什么是库" class="headerlink" title="什么是库"></a>什么是库</h3><p>库是一种可执行代码的二进制形式，可以被操作系统载入到内存中执行，库根据链接不同分为静态库和动态库。</p>
+<p>可执行文件生成的过程为:</p>
+<blockquote>
+<p>c -&gt; 预编译 -&gt; 编译器 -&gt; 汇编代码 -&gt; 汇编器 -&gt; 目标代码 -&gt; 链接器 -&gt; 可执行代码</p>
+</blockquote>
+<ul>
+<li>预编译：处理宏定义、删除注释、添加行号</li>
+<li>编译器：词法分析、语法分析、语义分析、代码优化</li>
+<li>汇编器：翻译成二进制</li>
+<li>链接器：合并符号表、符号解析、分配地址、重定位符号表</li>
+</ul>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/05/24/c++/%E9%9D%99%E6%80%81%E5%BA%93%E4%B8%8E%E5%8A%A8%E6%80%81%E5%BA%93%E4%B9%8B%E9%97%B4%E7%9A%84%E9%82%A3%E4%BA%9B%E4%BA%8B/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2020/04/22/av/Android%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81-MediaCodec(Java-Api)/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="高振宇">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2020/04/22/av/Android%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81-MediaCodec(Java-Api)/" class="post-title-link" itemprop="url">Android硬件编解码-MediaCodec(Java-Api)</a>
         </h2>
 
         <div class="post-meta-container">
@@ -262,10 +773,10 @@
     
     <div class="post-body" itemprop="articleBody">
           <h1 id="MediaCodec介绍"><a href="#MediaCodec介绍" class="headerlink" title="MediaCodec介绍"></a>MediaCodec介绍</h1><p>MediaCodec是Android平台上用来访问编码器和解码器的组件。</p>
-<h2 id="工作流程"><a href="#工作流程" class="headerlink" title="工作流程"></a>工作流程</h2><p><img src="/2020/04/22/av/Android%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81/mediacodec-processes.png" alt="mediacodec-processes"></p>
+<h2 id="工作流程"><a href="#工作流程" class="headerlink" title="工作流程"></a>工作流程</h2><p><img src="/mediacodec-processes.png" alt="mediacodec-processes"></p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2020/04/22/av/Android%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81/#more" rel="contents">
+              <a class="btn" href="/2020/04/22/av/Android%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81-MediaCodec(Java-Api)/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -619,13 +1130,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">69k</span>
+    <span title="站点总字数">76k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">4:12</span>
+    <span title="站点阅读时长">4:37</span>
   </span>
 </div>
 

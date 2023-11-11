@@ -151,7 +151,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">34</span>
+          <span class="site-state-item-count">39</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -162,7 +162,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-count">9</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -196,7 +196,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://witgao.com/2023/02/17/c++/c++%E5%B8%B8%E9%87%8F/">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2023/08/20/av/Web%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81-WebCodec/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.png">
@@ -214,7 +214,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2023/02/17/c++/c++%E5%B8%B8%E9%87%8F/" class="post-title-link" itemprop="url">未命名</a>
+          <a href="/2023/08/20/av/Web%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81-WebCodec/" class="post-title-link" itemprop="url">Web硬件编解码-WebCodec</a>
         </h2>
 
         <div class="post-meta-container">
@@ -225,7 +225,336 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2023-02-17 14:09:14" itemprop="dateCreated datePublished" datetime="2023-02-17T14:09:14+08:00">2023-02-17</time>
+      <time title="创建时间：2023-08-20 00:00:00" itemprop="dateCreated datePublished" datetime="2023-08-20T00:00:00+08:00">2023-08-20</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/" itemprop="url" rel="index"><span itemprop="name">音视频</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>864</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>3 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>WebCodec 是一个较新的 Web API，它为网页应用提供了接近硬件级的编解码能力。使用 WebCodec，开发者可以在浏览器中直接对音频和视频数据进行高效编解码，这对于实现复杂的媒体应用（如实时视频通信、视频编辑和游戏流）非常有用。</p>
+<h1 id="WebCodec-编解码流程"><a href="#WebCodec-编解码流程" class="headerlink" title="WebCodec 编解码流程"></a>WebCodec 编解码流程</h1><h2 id="解码"><a href="#解码" class="headerlink" title="解码"></a>解码</h2><h3 id="创建解码器"><a href="#创建解码器" class="headerlink" title="创建解码器"></a>创建解码器</h3><h4 id="设置解码器名称"><a href="#设置解码器名称" class="headerlink" title="设置解码器名称"></a>设置解码器名称</h4><p>WebCodec设置上参数与其它平台不同的一点，在于其名称字段比较繁琐</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line">   <span class="keyword">if</span> (VideoType == H264)</span><br><span class="line">   &#123;</span><br><span class="line">    ...</span><br><span class="line">       std::stringstream stream;</span><br><span class="line">       stream &lt;&lt; <span class="string">&quot;avc1.&quot;</span>;</span><br><span class="line">       stream &lt;&lt; <span class="built_in">decimalToHex</span>(profile_idc);</span><br><span class="line">       stream &lt;&lt; <span class="built_in">decimalToHex</span>(constraint_set_flags);</span><br><span class="line">       stream &lt;&lt; <span class="built_in">decimalToHex</span>(level_idc);</span><br><span class="line">       codecName = stream.<span class="built_in">str</span>();</span><br><span class="line">       <span class="comment">// codecName = &quot;avc1.640020&quot;;</span></span><br><span class="line">   &#125;<span class="keyword">else</span> <span class="keyword">if</span>(VideoType == H265)</span><br><span class="line">&#123;</span><br><span class="line">       std::stringstream stream;</span><br><span class="line">       stream &lt;&lt; <span class="string">&quot;hev1.&quot;</span>;</span><br><span class="line">	<span class="keyword">switch</span> (general_profile_space) &#123;</span><br><span class="line">       <span class="keyword">case</span> <span class="number">0</span>:</span><br><span class="line">           <span class="keyword">break</span>;</span><br><span class="line">       <span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">           stream &lt;&lt; <span class="string">&#x27;A&#x27;</span>;</span><br><span class="line">           <span class="keyword">break</span>;</span><br><span class="line">       <span class="keyword">case</span> <span class="number">2</span>:</span><br><span class="line">           stream &lt;&lt; <span class="string">&#x27;B&#x27;</span>;</span><br><span class="line">           <span class="keyword">break</span>;</span><br><span class="line">       <span class="keyword">case</span> <span class="number">3</span>:</span><br><span class="line">           stream &lt;&lt; <span class="string">&#x27;C&#x27;</span>;</span><br><span class="line">           <span class="keyword">break</span>;</span><br><span class="line">       &#125;</span><br><span class="line">       stream &lt;&lt; general_profile_idc;</span><br><span class="line">       stream &lt;&lt; <span class="string">&#x27;.&#x27;</span>;</span><br><span class="line">       </span><br><span class="line">	MUInt32 val = (MUInt32)general_profile_compatibility_flag;</span><br><span class="line">       <span class="type">int</span> reversed = <span class="number">0</span>;</span><br><span class="line">       <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">32</span>; i++)</span><br><span class="line">       &#123;</span><br><span class="line">           reversed |= val &amp; <span class="number">1</span>;</span><br><span class="line">           <span class="keyword">if</span> (i == <span class="number">31</span>)</span><br><span class="line">               <span class="keyword">break</span>;</span><br><span class="line">           reversed &lt;&lt;= <span class="number">1</span>;</span><br><span class="line">           val &gt;&gt;= <span class="number">1</span>;</span><br><span class="line">       &#125;</span><br><span class="line">       stream &lt;&lt; <span class="built_in">decimalToHex</span>(reversed, <span class="number">0</span>);</span><br><span class="line">       stream &lt;&lt; <span class="string">&#x27;.&#x27;</span>;</span><br><span class="line">       <span class="keyword">if</span> (general_tier_flag == <span class="number">0</span>)</span><br><span class="line">       &#123;</span><br><span class="line">           stream &lt;&lt; <span class="string">&#x27;L&#x27;</span>;</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">else</span></span><br><span class="line">       &#123;</span><br><span class="line">           stream &lt;&lt; <span class="string">&#x27;H&#x27;</span>;</span><br><span class="line">       &#125;</span><br><span class="line">       stream &lt;&lt; general_level_idc;</span><br><span class="line">       MBool hasByte = <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">       std::string constraint_string = <span class="string">&quot;&quot;</span>;</span><br><span class="line">       <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">5</span>; i &gt;= <span class="number">0</span>; i--)</span><br><span class="line">       &#123;</span><br><span class="line">           <span class="type">int</span> val = <span class="number">0</span>;</span><br><span class="line">           <span class="keyword">if</span> (general_constraint_indicator_flags[i] != <span class="string">&#x27;\0&#x27;</span>)</span><br><span class="line">           &#123;</span><br><span class="line">               val = general_constraint_indicator_flags[i];</span><br><span class="line">		&#125;</span><br><span class="line">           <span class="keyword">if</span> (val != <span class="number">0</span> || hasByte)</span><br><span class="line">           &#123;</span><br><span class="line">               constraint_string = <span class="string">&quot;.&quot;</span> + <span class="built_in">decimalToHex</span>(val, <span class="number">0</span>) + constraint_string;</span><br><span class="line">               hasByte = <span class="literal">true</span>;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">       stream &lt;&lt; constraint_string;</span><br><span class="line">       codecName = stream.<span class="built_in">str</span>();</span><br><span class="line">       <span class="comment">// codecName = &quot;hev1.1.6.L120.90&quot;;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2023/08/20/av/Web%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81-WebCodec/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2023/03/16/c++/std::declval%E7%9A%84%E4%BD%9C%E7%94%A8%E5%92%8C%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="高振宇">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/03/16/c++/std::declval%E7%9A%84%E4%BD%9C%E7%94%A8%E5%92%8C%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/" class="post-title-link" itemprop="url">std::declval 的作用</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-03-16 00:00:00" itemprop="dateCreated datePublished" datetime="2023-03-16T00:00:00+08:00">2023-03-16</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/C/" itemprop="url" rel="index"><span itemprop="name">C++</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>779</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>3 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h3 id="std-declval-的作用"><a href="#std-declval-的作用" class="headerlink" title="std::declval 的作用"></a><code>std::declval</code> 的作用</h3><p><code>std::declval</code> 是 C++ 标准库中的一个工具，用于在不创建对象的情况下获得一个类型的引用。其主要作用是在编译时期在表达式中使用一个类型的实例而不实际构造对象。这在模板元编程和 SFINAE 中尤其有用，因为它允许我们在编译时对类型的潜在成员进行推断和检查。</p>
+<p><code>std::declval</code> 在 <code>&lt;utility&gt;</code> 头文件中定义，并且仅在 unevaluated context（未求值上下文，例如 sizeof 和 decltype 中）是合法的，这意味着它不能用于在运行时创建对象。</p>
+<h3 id="std-declval-的使用场景"><a href="#std-declval-的使用场景" class="headerlink" title="std::declval 的使用场景"></a><code>std::declval</code> 的使用场景</h3><h4 id="1-类型推导"><a href="#1-类型推导" class="headerlink" title="1. 类型推导"></a>1. 类型推导</h4><p>最常见的场景是在使用 <code>decltype</code> 来推导表达式的类型时，尤其是当你需要推导一个类的成员函数的返回类型，但又不想或不能创建这个类的实例。</p>
+<p>例如，下面的代码展示了如何使用 <code>std::declval</code> 来推导成员函数的返回类型：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;utility&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">MyClass</span> &#123;</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">myFunction</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> <span class="number">42</span>; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 不需要创建 MyClass 的实例</span></span><br><span class="line"><span class="keyword">decltype</span>(std::<span class="built_in">declval</span>&lt;MyClass&gt;().<span class="built_in">myFunction</span>()) myVar;</span><br></pre></td></tr></table></figure>
+
+<p>在这里，<code>decltype</code> 用来确定 <code>myFunction</code> 的返回类型，而 <code>std::declval&lt;MyClass&gt;()</code> “假装” 有一个 <code>MyClass</code> 的对象来允许我们调用成员函数。</p>
+<h4 id="2-SFINAE-和类型萃取"><a href="#2-SFINAE-和类型萃取" class="headerlink" title="2. SFINAE 和类型萃取"></a>2. SFINAE 和类型萃取</h4><p>在 SFINAE（替换失败并非错误）或写类型萃取（trait）时，<code>std::declval</code> 能够确保在没有默认构造函数的情况下依然能进行操作。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;type_traits&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;utility&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">MyClass</span> &#123;</span><br><span class="line">    <span class="keyword">using</span> value_type = <span class="type">int</span>;</span><br><span class="line">    <span class="function">value_type <span class="title">myFunction</span><span class="params">()</span> <span class="type">const</span> </span>&#123; <span class="keyword">return</span> <span class="number">42</span>; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 一个用于萃取成员函数返回类型的类型萃取</span></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">ReturnType</span> &#123;</span><br><span class="line">    <span class="keyword">using</span> type = <span class="keyword">decltype</span>(std::<span class="built_in">declval</span>&lt;T&gt;().<span class="built_in">myFunction</span>());</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="built_in">static_assert</span>(std::is_same&lt;ReturnType&lt;MyClass&gt;::type, <span class="type">int</span>&gt;::value, <span class="string">&quot;Type must be int&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>在这个例子中，即使 <code>MyClass</code> 没有默认构造函数，我们也能用 <code>std::declval</code> 来进行编译时检查。</p>
+<h4 id="3-重载决策"><a href="#3-重载决策" class="headerlink" title="3. 重载决策"></a>3. 重载决策</h4><p>在某些复杂的重载决策场景中，你可能希望根据类型是否支持某个操作来选择不同的函数重载。<code>std::declval</code> 可以在不创建对象的情况下 “假设” 该对象的存在，以便进行这样的检查。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;type_traits&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;utility&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">A</span> &#123;&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">B</span> &#123;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">print</span><span class="params">()</span> <span class="type">const</span> </span>&#123; std::cout &lt;&lt; <span class="string">&quot;B::print&quot;</span> &lt;&lt; std::endl; &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">typename</span> std::enable_if&lt;std::is_member_function_pointer&lt;<span class="keyword">decltype</span>(&amp;T::print)&gt;::value&gt;::<span class="function">type</span></span><br><span class="line"><span class="function"><span class="title">testPrint</span><span class="params">(T&amp;&amp; t)</span> </span>&#123;</span><br><span class="line">    t.<span class="built_in">print</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">testPrint</span><span class="params">(T&amp;&amp;)</span> </span>&#123;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;No print function&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    A a;</span><br><span class="line">    B b;</span><br><span class="line">    <span class="built_in">testPrint</span>(a);  <span class="comment">// 输出 &quot;No print function&quot;</span></span><br><span class="line">    <span class="built_in">testPrint</span>(b);  <span class="comment">// 输出 &quot;B::print&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里 <code>std::declval</code> 在编译时帮助确定 <code>T</code> 类型是否有一个名为 <code>print</code> 的成员函数。</p>
+<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p><code>std::declval</code> 是模板编程中一个极为有用的工具，它能够让程序员在不实例化对象的情况下引用任意类型，特别是在仅仅需要类型信息而不需要对象的场合。它通常与 <code>decltype</code> 结合使用，以便在编译时对表达式类型进行操作和推导。由于 <code>std::declval</code> 仅在未求值上下文中有效，因此它</p>
+<p>主要用于模板元编程和编译时类型推导，而不是在实际运行时代码中创建对象。</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2023/02/10/c++/%E4%BB%80%E4%B9%88%E6%98%AF%20SFINAE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="高振宇">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/02/10/c++/%E4%BB%80%E4%B9%88%E6%98%AF%20SFINAE/" class="post-title-link" itemprop="url">什么是 SFINAE?</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-02-10 00:00:00" itemprop="dateCreated datePublished" datetime="2023-02-10T00:00:00+08:00">2023-02-10</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/C/" itemprop="url" rel="index"><span itemprop="name">C++</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>865</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>3 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h3 id="什么是-SFINAE"><a href="#什么是-SFINAE" class="headerlink" title="什么是 SFINAE?"></a>什么是 SFINAE?</h3><p>SFINAE 是 “Substitution Failure Is Not An Error” 的缩写。这是 C++ 模板元编程中的一个重要概念，它允许在模板类型推导过程中，如果某个替换失败，这个失败不会立即导致编译错误。而是使得编译器简单地放弃这次替换，并尝试其他重载或模板特化。</p>
+<h3 id="SFINAE-的用途"><a href="#SFINAE-的用途" class="headerlink" title="SFINAE 的用途"></a>SFINAE 的用途</h3><p>SFINAE 最常见的用途包括：</p>
+<ul>
+<li><strong>编写类型特征</strong>：检查类型是否具有某个成员函数、成员类型或操作符。</li>
+<li><strong>函数模板重载决策</strong>：在多个函数模板重载之间选择最适合的一个。</li>
+<li><strong>类模板特化</strong>：在多个类模板特化之间选择最适合的一个。</li>
+</ul>
+<h3 id="如何使用-SFINAE"><a href="#如何使用-SFINAE" class="headerlink" title="如何使用 SFINAE"></a>如何使用 SFINAE</h3><p>在 C++11 及其之后的版本中，SFINAE 最常见的实现方式是使用 <code>decltype</code>、<code>std::enable_if</code> 和类型特征（如 <code>std::is_integral</code> 等）。下面是一些使用 SFINAE 的例子：</p>
+<h4 id="例子-1：使用-std-enable-if-禁用某些函数重载"><a href="#例子-1：使用-std-enable-if-禁用某些函数重载" class="headerlink" title="例子 1：使用 std::enable_if 禁用某些函数重载"></a>例子 1：使用 <code>std::enable_if</code> 禁用某些函数重载</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;type_traits&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">typename</span> std::enable_if&lt;std::is_integral&lt;T&gt;::value, T&gt;::<span class="function">type</span></span><br><span class="line"><span class="function"><span class="title">foo</span><span class="params">(T t)</span> </span>&#123;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;Integral version: &quot;</span> &lt;&lt; t &lt;&lt; std::endl;</span><br><span class="line">    <span class="keyword">return</span> t;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">typename</span> std::enable_if&lt;std::is_floating_point&lt;T&gt;::value, T&gt;::<span class="function">type</span></span><br><span class="line"><span class="function"><span class="title">foo</span><span class="params">(T t)</span> </span>&#123;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;Floating point version: &quot;</span> &lt;&lt; t &lt;&lt; std::endl;</span><br><span class="line">    <span class="keyword">return</span> t;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="built_in">foo</span>(<span class="number">10</span>);    <span class="comment">// Calls the integral version</span></span><br><span class="line">    <span class="built_in">foo</span>(<span class="number">3.14</span>);  <span class="comment">// Calls the floating point version</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在这个例子中，<code>foo</code> 函数模板有两个重载。通过 <code>std::enable_if</code>，我们能够让编译器在模板类型是整型时选择第一个重载，在模板类型是浮点型时选择第二个重载。</p>
+<h4 id="例子-2：检查类型是否有成员函数"><a href="#例子-2：检查类型是否有成员函数" class="headerlink" title="例子 2：检查类型是否有成员函数"></a>例子 2：检查类型是否有成员函数</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;type_traits&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span>, <span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">has_serialize</span> &#123;</span><br><span class="line">    </span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> C, <span class="keyword">typename</span> Ret, <span class="keyword">typename</span>... Args&gt;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">has_serialize</span>&lt;C, <span class="built_in">Ret</span>(Args...)&gt; &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="comment">// 如果C类型中，包含serialize函数，并且参数符合Args...，则匹配这条规则</span></span><br><span class="line">    <span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span></span><br><span class="line"><span class="function">    <span class="type">static</span> <span class="keyword">constexpr</span> <span class="keyword">auto</span> <span class="title">check</span><span class="params">(T*)</span></span></span><br><span class="line"><span class="function">        -&gt; <span class="keyword">typename</span> std::is_same&lt;</span></span><br><span class="line"><span class="function">            <span class="title">decltype</span><span class="params">(std::declval&lt;T&gt;().serialize(std::declval&lt;Args&gt;()...))</span>,</span></span><br><span class="line"><span class="function">            Ret    </span></span><br><span class="line"><span class="function">        &gt;::type</span>; <span class="comment">// 当返回类型为auto时，在参数后通过-&gt;来指定返回类型</span></span><br><span class="line">        </span><br><span class="line">    <span class="comment">// 否则匹配这条规则</span></span><br><span class="line">    <span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span>&gt;</span></span><br><span class="line"><span class="function">    <span class="type">static</span> <span class="keyword">constexpr</span> std::false_type <span class="title">check</span><span class="params">(...)</span></span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 得到C类型check后的结果类型，false_type or true_type</span></span><br><span class="line">    <span class="function"><span class="keyword">typedef</span> <span class="title">decltype</span><span class="params">(check&lt;C&gt;(<span class="number">0</span>))</span> type</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="type">static</span> <span class="keyword">constexpr</span> <span class="type">bool</span> value = type::value;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">MyType</span> &#123;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">serialize</span><span class="params">(<span class="type">int</span>)</span> </span>&#123;&#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    std::cout &lt;&lt; has_serialize&lt;MyType, <span class="built_in">void</span>(<span class="type">int</span>)&gt;::value &lt;&lt; std::endl; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在这个例子中，我们使用模板特化和 <code>decltype</code> 来检查 <code>MyType</code> 是否有一个接受 <code>int</code> 参数的 <code>serialize</code> 成员函数，<code>decltype</code>检测函数返回类型时，函数只需声明即可，无需实现。</p>
+<h3 id="C-17-中的-SFINAE-友好的特性"><a href="#C-17-中的-SFINAE-友好的特性" class="headerlink" title="C++17 中的 SFINAE 友好的特性"></a>C++17 中的 SFINAE 友好的特性</h3><p>C++17 引入了 <code>if constexpr</code> 和 <code>auto</code> 类型推导的新特性，让 SFINAE 使用起来更为方便。</p>
+<h4 id="例子-3：使用-if-constexpr"><a href="#例子-3：使用-if-constexpr" class="headerlink" title="例子 3：使用 if constexpr"></a>例子 3：使用 <code>if constexpr</code></h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span></span><br><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">foo</span><span class="params">(T t)</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">if</span> <span class="title">constexpr</span> <span class="params">(std::is_integral_v&lt;T&gt;)</span> </span>&#123;</span><br><span class="line">        std::cout &lt;&lt; <span class="string">&quot;Integral version: &quot;</span> &lt;&lt; t &lt;&lt; std::endl;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> <span class="built_in">constexpr</span> (std::is_floating_point_v&lt;T&gt;) &#123;</span><br><span class="line">        std::cout &lt;&lt; <span class="string">&quot;Floating point version: &quot;</span> &lt;&lt; t &lt;&lt; std::endl;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">static_assert</span>(<span class="literal">false</span>, <span class="string">&quot;Unsupported type&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个例子演示了如何在函数模板内部使用 &#96;</p>
+<p>if constexpr&#96; 来在编译时选择执行路径，这样可以在不生成错误的情况下根据类型条件编译代码。</p>
+<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>SFINAE 是 C++ 模板编程中一项强大的技术，可以用来在编译时根据类型特性来选择不同的代码路径。虽然 SFINAE 可以使代码变得非常灵活，但它也可能使得代码难以阅读和维护。随着 C++ 标准的发展，引入了更简洁的特性如 <code>if constexpr</code> 和概念（C++20 中的 concepts），它们可以使得之前需要 SFINAE 来实现的功能变得更简单和直观。</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2023/01/24/c++/c++%E5%B8%B8%E9%87%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="高振宇">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/01/24/c++/c++%E5%B8%B8%E9%87%8F/" class="post-title-link" itemprop="url">c++常量</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-01-24 00:00:00" itemprop="dateCreated datePublished" datetime="2023-01-24T00:00:00+08:00">2023-01-24</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/C/" itemprop="url" rel="index"><span itemprop="name">C++</span></a>
+        </span>
     </span>
 
   
@@ -266,80 +595,14 @@
 
 <h4 id="指针常量"><a href="#指针常量" class="headerlink" title="指针常量"></a>指针常量</h4><p>指针本身是一个常量。</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> i = <span class="number">1</span>;</span><br><span class="line"><span class="type">int</span> <span class="type">const</span>* cpi = &amp;i;</span><br></pre></td></tr></table></figure>
-
-<h3 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h3><h4 id="常量左值引用"><a href="#常量左值引用" class="headerlink" title="常量左值引用"></a>常量左值引用</h4><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> i = <span class="number">1</span>;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> ci = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">const</span> <span class="type">int</span>&amp; cir = i;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span>&amp; cir2 = ci;</span><br><span class="line"><span class="type">int</span>&amp; cr = <span class="number">1</span>; <span class="comment">// error</span></span><br><span class="line"><span class="type">const</span> <span class="type">int</span>&amp; cir3 = <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
-
-<h4 id="常量右值引用"><a href="#常量右值引用" class="headerlink" title="常量右值引用"></a>常量右值引用</h4><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> i = <span class="number">1</span>; </span><br><span class="line"><span class="type">const</span> <span class="type">int</span>&amp;&amp; cri = i; <span class="comment">// error</span></span><br><span class="line"><span class="type">const</span> <span class="type">int</span>&amp;&amp; cri2 = <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
-
-<h2 id="修饰函数"><a href="#修饰函数" class="headerlink" title="修饰函数"></a>修饰函数</h2><p>const修饰的成员函数不能修改当前对象的属性</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">A</span> &#123;</span><br><span class="line">    <span class="type">int</span> val = <span class="number">1</span>;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">canNotModify</span><span class="params">()</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">        val = <span class="number">13</span>;  <span class="comment">// error</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-
-<h3 id="物理常量和逻辑常量"><a href="#物理常量和逻辑常量" class="headerlink" title="物理常量和逻辑常量"></a>物理常量和逻辑常量</h3><ul>
-<li>物理常量，也叫比特位常量，当前对象的每一个比特都不能被修改，这也是c++对于const的实现。</li>
-<li>逻辑常量，有些时候，一个const函数依旧希望能修改某些比特位，但是其从逻辑上讲依旧是const的。</li>
-</ul>
-<h3 id="mutable"><a href="#mutable" class="headerlink" title="mutable"></a>mutable</h3><p>mutable用来打破物理常量的限制，实现逻辑常量。</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ThreadSafeCounter</span> &#123;</span><br><span class="line">  <span class="keyword">mutable</span> std::mutex m; </span><br><span class="line">  <span class="type">int</span> counter = <span class="number">0</span>;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="type">int</span> <span class="title">get</span><span class="params">()</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">    <span class="function">std::lock_guard&lt;std::mutex&gt; <span class="title">lk</span><span class="params">(m)</span></span>;</span><br><span class="line">    <span class="keyword">return</span> counter;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">inc</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="function">std::lock_guard&lt;std::mutex&gt; <span class="title">lk</span><span class="params">(m)</span></span>;</span><br><span class="line">    ++counter;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    std::vector&lt;std::thread&gt; vec;</span><br><span class="line">    ThreadSafeCounter counter;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">20</span>; ++i)&#123;</span><br><span class="line">        vec.<span class="built_in">emplace_back</span>([&amp;counter] &#123;</span><br><span class="line">            counter.<span class="built_in">inc</span>();</span><br><span class="line">            std::cout &lt;&lt; <span class="string">&quot;counter: &quot;</span> &lt;&lt; counter.<span class="built_in">get</span>() &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">            counter.<span class="built_in">inc</span>();</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="const-cast"><a href="#const-cast" class="headerlink" title="const_cast"></a>const_cast</h1><p>const_cast可以添加或删除const&#x2F;volatile修饰符到一个变量上。</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">func</span><span class="params">(<span class="type">int</span>* )</span></span>&#123; &#125;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">funcConst</span><span class="params">(<span class="type">const</span> <span class="type">int</span>*)</span></span>&#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">const</span> <span class="type">int</span> myInt&#123;<span class="number">1988</span>&#125;;</span><br><span class="line">    <span class="built_in">func</span>(&amp;myInt); <span class="comment">// error</span></span><br><span class="line">    <span class="type">int</span>* myIntPtr = <span class="built_in">const_cast</span>&lt;<span class="type">int</span>*&gt;(&amp;myInt);</span><br><span class="line">    <span class="built_in">func</span>(myIntPtr);</span><br><span class="line">    </span><br><span class="line">    <span class="type">const</span> <span class="type">int</span>* myConstIntPtr = <span class="built_in">const_cast</span>&lt;<span class="type">const</span> <span class="type">int</span>*&gt;(myIntPtr);</span><br><span class="line">    <span class="built_in">funcConst</span>(myConstIntPtr);</span><br><span class="line">    <span class="built_in">funcConst</span>(myIntPtr);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123; </span><br><span class="line">    <span class="type">const</span> <span class="type">int</span> ca = <span class="number">10</span>;</span><br><span class="line">    <span class="type">const</span> <span class="type">int</span>* pca = &amp;ca;</span><br><span class="line">    <span class="type">int</span>* pa2 = <span class="built_in">const_cast</span>&lt;<span class="type">int</span>*&gt;(pca);</span><br><span class="line">    *pa2 = <span class="number">12</span>; <span class="comment">// undefined behavior</span></span><br><span class="line">    std::cout &lt;&lt; *pa2 &lt;&lt;  <span class="string">&quot;  &quot;</span> &lt;&lt; pa2 &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">    std::cout &lt;&lt; *pca &lt;&lt;  <span class="string">&quot;  &quot;</span> &lt;&lt; pca &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">    std::cout &lt;&lt; ca &lt;&lt;  <span class="string">&quot;  &quot;</span> &lt;&lt; &amp;ca &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<blockquote>
-<blockquote>
-<p>通过const_cast删除常量修饰从而修改常量的行为是未定义的！！</p>
-</blockquote>
-</blockquote>
-<h1 id="constexpr"><a href="#constexpr" class="headerlink" title="constexpr"></a>constexpr</h1><h2 id="修饰变量-1"><a href="#修饰变量-1" class="headerlink" title="修饰变量"></a>修饰变量</h2><ul>
-<li><p>constexpr是隐式const</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123; </span><br><span class="line">    <span class="type">const</span> <span class="type">int</span> a = <span class="number">1</span>;</span><br><span class="line">	<span class="keyword">constexpr</span> <span class="type">int</span> b = <span class="number">2</span>;</span><br><span class="line">  	a = <span class="number">3</span>; <span class="comment">// error</span></span><br><span class="line">  	b = <span class="number">3</span>; <span class="comment">// error</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>constexpr变量只能接收常量表达式（在编译时可以确定值），与const不同</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123; </span><br><span class="line">    <span class="type">int</span> c = <span class="number">1</span>;</span><br><span class="line">	<span class="type">const</span> <span class="type">int</span> a = c;</span><br><span class="line">    <span class="keyword">constexpr</span> <span class="type">int</span> b = c; <span class="comment">// error </span></span><br><span class="line">	<span class="keyword">constexpr</span> <span class="type">int</span> b2 = a; <span class="comment">// error</span></span><br><span class="line"></span><br><span class="line">    <span class="type">const</span> <span class="type">int</span> a2 = <span class="number">2</span>;</span><br><span class="line">    <span class="keyword">constexpr</span> <span class="type">int</span> b3 = a2;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
-</ul>
-<h2 id="修饰函数-1"><a href="#修饰函数-1" class="headerlink" title="修饰函数"></a>修饰函数</h2><ul>
-<li>constexpr修饰的函数，可以是编译时，也可能是运行时</li>
-<li>constexpr函数中不能使用static、thread_local</li>
-<li>所有依赖必须都是编译时，函数才会是编译时(允许常量表达式初始化的变量)</li>
-<li>被constexpr接收时，函数必须是编译时</li>
-<li>如果是编译时运行，是纯函数<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">constexpr</span> <span class="type">int</span> <span class="title">add</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// static int c = 10; // error </span></span><br><span class="line">    <span class="keyword">return</span> a + b;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 不同的编译器实现不同，可能是编译时也可能是运行时</span></span><br><span class="line">    <span class="type">int</span> i = <span class="built_in">add</span>(<span class="number">1</span>, <span class="number">3</span>);</span><br><span class="line">    <span class="keyword">constexpr</span> <span class="type">int</span> b = <span class="built_in">add</span>(<span class="number">1</span>, <span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">    <span class="type">int</span> v = <span class="number">3</span>;</span><br><span class="line">    <span class="type">int</span> c = <span class="built_in">add</span>(v, <span class="number">3</span>);</span><br><span class="line">    <span class="comment">//constexpr int a = add(v, 3); // error </span></span><br><span class="line">    <span class="keyword">constexpr</span> <span class="type">int</span> e = <span class="built_in">add</span>(b, <span class="number">2</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
-</ul>
-<h3 id="类函数"><a href="#类函数" class="headerlink" title="类函数"></a>类函数</h3><ul>
-<li>至少有一个constexpr修饰的构造函数</li>
-<li>类中可以定义constexpr函数和非constexpr函数</li>
-<li>constexpr修饰的类对象只能调用constexpr修饰的成员函数<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">MyDouble</span> &#123;</span><br><span class="line">    <span class="type">double</span> myVal;</span><br><span class="line">    <span class="function"><span class="keyword">constexpr</span> <span class="title">MyDouble</span><span class="params">(<span class="type">double</span> v)</span> : myVal(v) &#123;</span>&#125;</span><br><span class="line">    <span class="function"><span class="keyword">constexpr</span> <span class="type">double</span> <span class="title">getVal</span><span class="params">()</span> </span>&#123;<span class="keyword">return</span> myVal;&#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></li>
-</ul>
-<h3 id="C-20"><a href="#C-20" class="headerlink" title="C++20"></a>C++20</h3><p>从C++20开始，支持在constexpr函数中使用stl（编译时分配的内存必须在编译时释放）</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">constexpr</span> <span class="type">int</span> <span class="title">maxElement</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    std::vector myVec = &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">4</span>, <span class="number">3</span>&#125;;</span><br><span class="line">    std::<span class="built_in">sort</span>(myVec.<span class="built_in">begin</span>(), myVec.<span class="built_in">end</span>());</span><br><span class="line">    <span class="keyword">return</span> myVec.<span class="built_in">back</span>();</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constexpr</span> <span class="type">int</span> maxValue = <span class="built_in">maxElement</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">constexpr</span> <span class="type">int</span> maxValue2 = [] &#123;</span><br><span class="line">        std::vector myVec = &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">4</span>, <span class="number">3</span>&#125;;</span><br><span class="line">        std::<span class="built_in">sort</span>(myVec.<span class="built_in">begin</span>(), myVec.<span class="built_in">end</span>()) ;</span><br><span class="line">        <span class="keyword">return</span> myVec.<span class="built_in">back</span>();</span><br><span class="line">    &#125;(); </span><br><span class="line">    </span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;maxValue: &quot;</span> &lt;&lt; maxValue &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line"></span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;maxValue2: &quot;</span> &lt;&lt; maxValue2 &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<h1 id="consteval-c-20"><a href="#consteval-c-20" class="headerlink" title="consteval (c++20)"></a>consteval (c++20)</h1><p>consteval只能修饰函数，被consteval修饰的函数必须是编译时运行的，调用consteval函数返回的一定是编译时常量。</p>
-<ul>
-<li>不能应用在析构函数上</li>
-<li>其它和constexpr一样</li>
-</ul>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">consteval</span> <span class="type">int</span> <span class="title">add</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> a + b;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">constexpr</span> <span class="type">int</span> <span class="title">add2</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> a + b;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constexpr</span> <span class="type">int</span> r = <span class="built_in">add</span>(<span class="number">1</span>, <span class="number">2</span>);</span><br><span class="line">    <span class="keyword">constexpr</span> <span class="type">int</span> r2 = <span class="built_in">add2</span>(<span class="number">1</span>, <span class="number">2</span>);</span><br><span class="line">    <span class="type">int</span> r3 = <span class="built_in">add</span>(<span class="number">1</span>, <span class="number">2</span>);</span><br><span class="line">    <span class="type">int</span> r4 = <span class="built_in">add2</span>(<span class="number">1</span>, <span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">    <span class="type">int</span> x = <span class="number">100</span>;</span><br><span class="line">    <span class="comment">// int r5 = add(x, 2); // error</span></span><br><span class="line">    <span class="type">int</span> r6 = <span class="built_in">add2</span>(x, <span class="number">2</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">sqrRunTime</span><span class="params">(<span class="type">int</span> n)</span> </span>&#123; <span class="keyword">return</span> n * n; &#125;;</span><br><span class="line"><span class="function"><span class="keyword">consteval</span> <span class="type">int</span> <span class="title">sqrCompileTime</span><span class="params">(<span class="type">int</span> n)</span> </span>&#123; <span class="keyword">return</span> n * n; &#125;</span><br><span class="line"><span class="function"><span class="keyword">constexpr</span> <span class="type">int</span> <span class="title">sqrRunOrCompileTime</span><span class="params">(<span class="type">int</span> n)</span> </span>&#123; <span class="keyword">return</span> n * n; &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constexpr</span> <span class="type">int</span> prod1 = <span class="built_in">sqrRunTime</span>(<span class="number">100</span>);</span><br><span class="line">    <span class="keyword">constexpr</span> <span class="type">int</span> prod2 = <span class="built_in">sqrCompileTime</span>(<span class="number">100</span>);</span><br><span class="line">    <span class="keyword">constexpr</span> <span class="type">int</span> prod3 = <span class="built_in">sqrRunOrCompileTime</span>(<span class="number">100</span>);</span><br><span class="line"></span><br><span class="line">    <span class="type">int</span> x = <span class="number">100</span>;</span><br><span class="line">    <span class="type">int</span> prd4 = <span class="built_in">sqrRunTime</span>(x);</span><br><span class="line">    <span class="type">int</span> prod5 = <span class="built_in">sqrCompileTime</span>(x);</span><br><span class="line">    <span class="type">int</span> prod6 = <span class="built_in">sqrRunOrCompileTime</span>(x);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="constinit-c-20"><a href="#constinit-c-20" class="headerlink" title="constinit (c++20)"></a>constinit (c++20)</h1><p>constinit与const没有关系，constinit修饰的变量并不是常量，是可以被修改的。constinit保证变量一定是静态初始化的。</p>
-<h2 id="static"><a href="#static" class="headerlink" title="static"></a>static</h2><p>静态变量分为全局静态变量、局部静态变量、类中静态成员变量。<br>按照初始化的类型分为静态初始化（static initialization）和动态初始化(dynamic initialization)。</p>
-<h3 id="静态初始化"><a href="#静态初始化" class="headerlink" title="静态初始化"></a>静态初始化</h3><p>指的是用常量来对静态变量进行初始化，包括zero initialization和const initialization；对于静态初始化的变量，是在程序编译时完成的初始化。</p>
-<h3 id="动态初始化"><a href="#动态初始化" class="headerlink" title="动态初始化"></a>动态初始化</h3><p>指的是需要调用函数才能完成的初始化，或者是复杂类型的初始化等，对于这种全局静态变量、类的静态成员变量，是在main()函数执行前，加载时调用相应的代码进行初始化的。而对于局部静态变量，是在函数执行至此初始化语句时才开始执行的初始化。</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">consteval</span> <span class="type">int</span> <span class="title">sqr</span><span class="params">(<span class="type">int</span> n)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> n * n;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">constexpr</span> <span class="type">int</span> <span class="title">sqr2</span><span class="params">(<span class="type">int</span> n )</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> n * n;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> sg1 = <span class="built_in">sqr</span>(<span class="number">100</span>);</span><br><span class="line"><span class="type">static</span> <span class="type">int</span> sg2 = <span class="built_in">sqr2</span>(<span class="number">10</span>);</span><br><span class="line"><span class="type">static</span> <span class="type">int</span> sg3 = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">constinit</span> <span class="type">int</span> g1 = <span class="built_in">sqr</span>(<span class="number">100</span>);</span><br><span class="line"><span class="keyword">constinit</span> <span class="type">int</span> g2 = <span class="built_in">sqr2</span>(<span class="number">100</span>);</span><br><span class="line"><span class="keyword">constinit</span> <span class="type">int</span> g3 = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="Static-Initialization-Order-Fiasco"><a href="#Static-Initialization-Order-Fiasco" class="headerlink" title="Static Initialization Order Fiasco"></a>Static Initialization Order Fiasco</h3><p>static变量如果是动态初始化，那么编译单元之间的static变量初始化的顺序是不确定的。</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">square</span><span class="params">(<span class="type">int</span> n)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> n * n;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="type">int</span> staticA = <span class="built_in">square</span>(<span class="number">5</span>);</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">extern</span> <span class="type">int</span> staticA;</span><br><span class="line"><span class="type">static</span> <span class="type">int</span> staticB = staticA; <span class="comment">// 使用局部静态变量解决</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span> <span class="params">()</span> </span>&#123;</span><br><span class="line">    std::cout &lt;&lt; staticB;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>使用constinit来解决static初始化顺序的问题</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">constexpr</span> <span class="type">int</span> <span class="title">quad</span><span class="params">(<span class="type">int</span> n)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> n * n;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">constinit</span> <span class="type">int</span> staticA = <span class="built_in">quad</span>(<span class="number">5</span>);</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">extern</span> <span class="keyword">constinit</span> <span class="type">int</span> staticA;</span><br><span class="line"><span class="keyword">constinit</span> <span class="type">int</span> staticB = staticA;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    std::cout &lt;&lt; staticB;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="std-is-constant-evaluated-c-20"><a href="#std-is-constant-evaluated-c-20" class="headerlink" title="std::is_constant_evaluated (c++20)"></a>std::is_constant_evaluated (c++20)</h1><p>判断函数是编译期执行还是运行时执行</p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2023/01/24/c++/c++%E5%B8%B8%E9%87%8F/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -973,308 +1236,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://witgao.com/2022/03/02/av/x265%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8B%E5%B8%A7%E7%B1%BB%E5%9E%8B%E5%86%B3%E7%AD%96/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="高振宇">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="富贵山庄">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 富贵山庄">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2022/03/02/av/x265%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8B%E5%B8%A7%E7%B1%BB%E5%9E%8B%E5%86%B3%E7%AD%96/" class="post-title-link" itemprop="url">x265源码分析之帧类型决策</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2022-03-02 00:00:00" itemprop="dateCreated datePublished" datetime="2022-03-02T00:00:00+08:00">2022-03-02</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/" itemprop="url" rel="index"><span itemprop="name">音视频</span></a>
-        </span>
-    </span>
-
-  
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>4.5k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>16 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="Lookahead"><a href="#Lookahead" class="headerlink" title="Lookahead"></a>Lookahead</h1><p>Lookahead是预处理模块，负责对输入的待编码图像进行下采样、复杂度预计算、帧类型决策等编码前期处理。</p>
-<p>在Lookahead中维护了两个队列，外部输入的待编码图像按照输入的顺序放入到m_inputQueue队列中等待预处理，当m_inputQueue中数量超过指定阈值时，就会开始预处理，预处理完毕的就会根据DTS顺序放入到m_outputQueue中等待取出编码。</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Lookahead</span> : <span class="keyword">public</span> JobProvider</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// 输入队列，PTS顺序</span></span><br><span class="line">    PicList       m_inputQueue;      <span class="comment">// input pictures in order received</span></span><br><span class="line">    <span class="comment">// 输出队列，DTS顺序</span></span><br><span class="line">    PicList       m_outputQueue;     <span class="comment">// pictures to be encoded, in encode order</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/03/02/av/x265%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8B%E5%B8%A7%E7%B1%BB%E5%9E%8B%E5%86%B3%E7%AD%96/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://witgao.com/2022/02/03/c++/libc++%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8Ballocator/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="高振宇">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="富贵山庄">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 富贵山庄">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2022/02/03/c++/libc++%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8Ballocator/" class="post-title-link" itemprop="url">libc++源码分析之std::allocator</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2022-02-03 00:00:00" itemprop="dateCreated datePublished" datetime="2022-02-03T00:00:00+08:00">2022-02-03</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/C/" itemprop="url" rel="index"><span itemprop="name">C++</span></a>
-        </span>
-    </span>
-
-  
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>377</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="std-allocator"><a href="#std-allocator" class="headerlink" title="std::allocator"></a>std::allocator</h1><p>默认的内存分配器，负责内存的分配和销毁</p>
-<h2 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h2><h3 id="allocate"><a href="#allocate" class="headerlink" title="allocate"></a>allocate</h3><p>分配内存</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">_LIBCPP_NODISCARD_AFTER_CXX17 _LIBCPP_INLINE_VISIBILITY _LIBCPP_CONSTEXPR_AFTER_CXX17</span></span><br><span class="line"><span class="function"><span class="type">const</span> _Tp* <span class="title">allocate</span><span class="params">(<span class="type">size_t</span> __n)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (__n &gt; allocator_traits&lt;allocator&gt;::<span class="built_in">max_size</span>(*<span class="keyword">this</span>))</span><br><span class="line">        __throw_length_error(<span class="string">&quot;allocator&lt;const T&gt;::allocate(size_t n)&quot;</span></span><br><span class="line">                             <span class="string">&quot; &#x27;n&#x27; exceeds maximum supported size&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (__libcpp_is_constant_evaluated()) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">static_cast</span>&lt;<span class="type">const</span> _Tp*&gt;(::<span class="keyword">operator</span> <span class="built_in">new</span>(__n * <span class="built_in">sizeof</span>(_Tp)));</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">static_cast</span>&lt;<span class="type">const</span> _Tp*&gt;(_VSTD::__libcpp_allocate(__n * <span class="built_in">sizeof</span>(_Tp), _LIBCPP_ALIGNOF(_Tp)));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/02/03/c++/libc++%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8Ballocator/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://witgao.com/2022/02/02/c++/libc++%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8Bvector/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="高振宇">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="富贵山庄">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 富贵山庄">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2022/02/02/c++/libc++%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8Bvector/" class="post-title-link" itemprop="url">libc++源码分析之std::vector</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2022-02-02 00:00:00" itemprop="dateCreated datePublished" datetime="2022-02-02T00:00:00+08:00">2022-02-02</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/C/" itemprop="url" rel="index"><span itemprop="name">C++</span></a>
-        </span>
-    </span>
-
-  
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>2.9k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>11 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="std-vector"><a href="#std-vector" class="headerlink" title="std::vector"></a>std::vector</h1><h2 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h2><h3 id="vector-base"><a href="#vector-base" class="headerlink" title="__vector_base"></a>__vector_base</h3><p>vector的基类，定义了vector的数据结构，在vector内部是使用对象数组来实现的，end - begin表示size，end_cap - begin表示capacity。</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">__vector_base</span></span><br><span class="line">    : <span class="keyword">protected</span> __vector_base_common&lt;<span class="literal">true</span>&gt;</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    pointer                                         __begin_; <span class="comment">// 数组第一个对象的首地址</span></span><br><span class="line">    pointer                                         __end_; <span class="comment">// 数组下一个待存储的对象的首地址</span></span><br><span class="line">    __compressed_pair&lt;pointer, allocator_type&gt; __end_cap_; <span class="comment">// 数组内存尾指针</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/02/02/c++/libc++%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8Bvector/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" title="下一页" aria-label="下一页" href="/page/2/"><i class="fa fa-angle-right"></i></a>
   </nav>
@@ -1299,13 +1260,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">69k</span>
+    <span title="站点总字数">76k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">4:12</span>
+    <span title="站点阅读时长">4:37</span>
   </span>
 </div>
 

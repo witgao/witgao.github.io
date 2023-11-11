@@ -151,7 +151,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">34</span>
+          <span class="site-state-item-count">39</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -162,7 +162,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-count">9</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -187,6 +187,507 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2021/07/07/c++/libc++%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8Bnew%E5%92%8Cdelete/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="高振宇">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2021/07/07/c++/libc++%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8Bnew%E5%92%8Cdelete/" class="post-title-link" itemprop="url">libc++源码分析之new和delete</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-07-07 00:00:00" itemprop="dateCreated datePublished" datetime="2021-07-07T00:00:00+08:00">2021-07-07</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/C/" itemprop="url" rel="index"><span itemprop="name">C++</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.5k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>9 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="示例：new-x2F-delete-一个对象"><a href="#示例：new-x2F-delete-一个对象" class="headerlink" title="示例：new&#x2F;delete 一个对象"></a>示例：new&#x2F;delete 一个对象</h1><h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span>** argv)</span> </span>&#123;</span><br><span class="line">  std::string* str = <span class="keyword">new</span> std::<span class="built_in">string</span>();</span><br><span class="line">  <span class="keyword">delete</span> str;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="汇编"><a href="#汇编" class="headerlink" title="汇编"></a>汇编</h2><figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">    <span class="number">0x108852450</span> &lt;+<span class="number">0</span>&gt;:   pushq  %rbp</span><br><span class="line">    <span class="number">0x108852451</span> &lt;+<span class="number">1</span>&gt;:   <span class="keyword">movq</span>   %rsp, %rbp</span><br><span class="line">    <span class="number">0x108852454</span> &lt;+<span class="number">4</span>&gt;:   subq   <span class="number">$0</span>x30, %rsp</span><br><span class="line">    <span class="number">0x108852458</span> &lt;+<span class="number">8</span>&gt;:   movl   <span class="number">$0</span>x0, -<span class="number">0x4</span>(%rbp)</span><br><span class="line">    <span class="number">0x10885245f</span> &lt;+<span class="number">15</span>&gt;:  movl   %edi, -<span class="number">0x8</span>(%rbp)</span><br><span class="line">    <span class="number">0x108852462</span> &lt;+<span class="number">18</span>&gt;:  <span class="keyword">movq</span>   %rsi, -<span class="number">0x10</span>(%rbp)</span><br><span class="line">    <span class="number">0x108852466</span> &lt;+<span class="number">22</span>&gt;:  movl   <span class="number">$0</span>x18, %edi</span><br><span class="line">    <span class="number">0x10885246b</span> &lt;+<span class="number">27</span>&gt;:  callq  <span class="number">0x1088c26c6</span>               <span class="comment">; symbol stub for: operator new(unsigned long)</span></span><br><span class="line">    <span class="number">0x108852470</span> &lt;+<span class="number">32</span>&gt;:  <span class="keyword">movq</span>   %rax, %rdi</span><br><span class="line">    <span class="number">0x108852473</span> &lt;+<span class="number">35</span>&gt;:  <span class="keyword">movq</span>   %rax, -<span class="number">0x20</span>(%rbp)</span><br><span class="line">    <span class="number">0x108852477</span> &lt;+<span class="number">39</span>&gt;:  callq  <span class="number">0x1088524c0</span>               <span class="comment">; std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;::basic_string at string:1725</span></span><br><span class="line">    <span class="number">0x10885247c</span> &lt;+<span class="number">44</span>&gt;:  <span class="keyword">movq</span>   -<span class="number">0x20</span>(%rbp), %rax</span><br><span class="line">    <span class="number">0x108852480</span> &lt;+<span class="number">48</span>&gt;:  <span class="keyword">movq</span>   %rax, -<span class="number">0x18</span>(%rbp)</span><br><span class="line">    <span class="number">0x108852484</span> &lt;+<span class="number">52</span>&gt;:  <span class="keyword">movq</span>   -<span class="number">0x18</span>(%rbp), %rcx</span><br><span class="line">    <span class="number">0x108852488</span> &lt;+<span class="number">56</span>&gt;:  cmpq   <span class="number">$0</span>x0, %rcx</span><br><span class="line">    <span class="number">0x10885248c</span> &lt;+<span class="number">60</span>&gt;:  <span class="keyword">movq</span>   %rcx, -<span class="number">0x28</span>(%rbp)</span><br><span class="line">    <span class="number">0x108852490</span> &lt;+<span class="number">64</span>&gt;:  <span class="keyword">je</span>     <span class="number">0x1088524ab</span>               <span class="comment">; &lt;+91&gt; at main.cpp</span></span><br><span class="line">    <span class="number">0x108852496</span> &lt;+<span class="number">70</span>&gt;:  <span class="keyword">movq</span>   -<span class="number">0x28</span>(%rbp), %rdi</span><br><span class="line">    <span class="number">0x10885249a</span> &lt;+<span class="number">74</span>&gt;:  callq  <span class="number">0x1088c240e</span>               <span class="comment">; symbol stub for: std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;::~basic_string()</span></span><br><span class="line">    <span class="number">0x10885249f</span> &lt;+<span class="number">79</span>&gt;:  <span class="keyword">movq</span>   -<span class="number">0x28</span>(%rbp), %rax</span><br><span class="line">    <span class="number">0x1088524a3</span> &lt;+<span class="number">83</span>&gt;:  <span class="keyword">movq</span>   %rax, %rdi</span><br><span class="line">    <span class="number">0x1088524a6</span> &lt;+<span class="number">86</span>&gt;:  callq  <span class="number">0x1088c26b4</span>               <span class="comment">; symbol stub for: operator delete(void*)</span></span><br><span class="line">    <span class="number">0x1088524ab</span> &lt;+<span class="number">91</span>&gt;:  xorl   %eax, %eax</span><br><span class="line">-&gt;  <span class="number">0x1088524ad</span> &lt;+<span class="number">93</span>&gt;:  addq   <span class="number">$0</span>x30, %rsp</span><br><span class="line">    <span class="number">0x1088524b1</span> &lt;+<span class="number">97</span>&gt;:  popq   %rbp</span><br><span class="line">    <span class="number">0x1088524b2</span> &lt;+<span class="number">98</span>&gt;:  retq   </span><br><span class="line">    <span class="number">0x1088524b3</span> &lt;+<span class="number">99</span>&gt;:  nopw   %cs:(%rax,%rax)</span><br><span class="line">    <span class="number">0x1088524bd</span> &lt;+<span class="number">109</span>&gt;: nopl   (%rax)</span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/07/07/c++/libc++%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8Bnew%E5%92%8Cdelete/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2020/08/05/av/ffplay%E6%B8%B2%E6%9F%93%E7%BA%BF%E7%A8%8B%E5%88%86%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="高振宇">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2020/08/05/av/ffplay%E6%B8%B2%E6%9F%93%E7%BA%BF%E7%A8%8B%E5%88%86%E6%9E%90/" class="post-title-link" itemprop="url">ffplay渲染线程分析</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-08-05 00:00:00" itemprop="dateCreated datePublished" datetime="2020-08-05T00:00:00+08:00">2020-08-05</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/" itemprop="url" rel="index"><span itemprop="name">音视频</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>11 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="视频渲染线程"><a href="#视频渲染线程" class="headerlink" title="视频渲染线程"></a>视频渲染线程</h1><p>视频渲染线程实际就是main线程。</p>
+<h2 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h2><h3 id="初始化SDL"><a href="#初始化SDL" class="headerlink" title="初始化SDL"></a>初始化SDL</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// SDL初始化</span></span><br><span class="line">flags = SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER;</span><br><span class="line"><span class="keyword">if</span> (SDL_Init(flags)) &#123;</span><br><span class="line">  av_log(<span class="literal">NULL</span>, AV_LOG_FATAL, <span class="string">&quot;Could not initialize SDL - %s\n&quot;</span>,</span><br><span class="line">         SDL_GetError());</span><br><span class="line">  av_log(<span class="literal">NULL</span>, AV_LOG_FATAL, <span class="string">&quot;(Did you set the DISPLAY variable?)\n&quot;</span>);</span><br><span class="line">  <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/08/05/av/ffplay%E6%B8%B2%E6%9F%93%E7%BA%BF%E7%A8%8B%E5%88%86%E6%9E%90/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2020/08/04/av/ffplay%E8%A7%A3%E7%A0%81%E7%BA%BF%E7%A8%8B%E5%88%86%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="高振宇">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2020/08/04/av/ffplay%E8%A7%A3%E7%A0%81%E7%BA%BF%E7%A8%8B%E5%88%86%E6%9E%90/" class="post-title-link" itemprop="url">ffplay解码线程分析</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-08-04 00:00:00" itemprop="dateCreated datePublished" datetime="2020-08-04T00:00:00+08:00">2020-08-04</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/" itemprop="url" rel="index"><span itemprop="name">音视频</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.5k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>5 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="视频解码线程"><a href="#视频解码线程" class="headerlink" title="视频解码线程"></a>视频解码线程</h1><h2 id="轮询"><a href="#轮询" class="headerlink" title="轮询"></a>轮询</h2><p>不断从Packet队列中取出一帧数据进行解码，然后将解码数据放入到Frame队列中。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (;;) &#123;</span><br><span class="line">  <span class="comment">// 获取一帧解码数据</span></span><br><span class="line">  ret = get_video_frame(is, frame);</span><br><span class="line">  <span class="keyword">if</span> (ret &lt; <span class="number">0</span>) <span class="keyword">goto</span> the_end;</span><br><span class="line">  <span class="keyword">if</span> (!ret) <span class="keyword">continue</span>;</span><br><span class="line">  ...</span><br><span class="line">      </span><br><span class="line">    <span class="comment">// 根据帧率计算每帧的显示时长</span></span><br><span class="line">    duration = (frame_rate.num &amp;&amp; frame_rate.den</span><br><span class="line">                    ? av_q2d((AVRational)&#123;frame_rate.den, frame_rate.num&#125;)</span><br><span class="line">                    : <span class="number">0</span>);</span><br><span class="line">    <span class="comment">// 将帧的PTS转换为秒</span></span><br><span class="line">    pts = (frame-&gt;pts == AV_NOPTS_VALUE) ? NAN : frame-&gt;pts * av_q2d(tb);</span><br><span class="line">    <span class="comment">// 将解码后的帧数据放入到视频原始数据队列中</span></span><br><span class="line">    ret = queue_picture(is, frame, pts, duration, frame-&gt;pkt_pos,</span><br><span class="line">                        is-&gt;viddec.pkt_serial);</span><br><span class="line">    av_frame_unref(frame);</span><br><span class="line">  ...</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (ret &lt; <span class="number">0</span>) <span class="keyword">goto</span> the_end;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/08/04/av/ffplay%E8%A7%A3%E7%A0%81%E7%BA%BF%E7%A8%8B%E5%88%86%E6%9E%90/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2020/08/03/av/ffplay%E8%A7%A3%E5%A4%8D%E7%94%A8%E7%BA%BF%E7%A8%8B%E5%88%86%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="高振宇">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2020/08/03/av/ffplay%E8%A7%A3%E5%A4%8D%E7%94%A8%E7%BA%BF%E7%A8%8B%E5%88%86%E6%9E%90/" class="post-title-link" itemprop="url">ffplay解复用线程分析</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-08-03 00:00:00" itemprop="dateCreated datePublished" datetime="2020-08-03T00:00:00+08:00">2020-08-03</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/" itemprop="url" rel="index"><span itemprop="name">音视频</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.9k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>7 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>由主线程创建，负责媒体文件的解复用和读取，读取的数据根据流类型放入到对应的编码数据队列中</p>
+<h1 id="查询流信息"><a href="#查询流信息" class="headerlink" title="查询流信息"></a>查询流信息</h1><h2 id="创建解复用上下文"><a href="#创建解复用上下文" class="headerlink" title="创建解复用上下文"></a>创建解复用上下文</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">// 创建解复用上下文</span></span><br><span class="line">ic = avformat_alloc_context();</span><br><span class="line"><span class="keyword">if</span> (!ic) &#123;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 设置中断回调</span></span><br><span class="line">ic-&gt;interrupt_callback.callback = decode_interrupt_cb;</span><br><span class="line"><span class="comment">// 回调函数的参数</span></span><br><span class="line">ic-&gt;interrupt_callback.opaque = is;</span><br><span class="line">...</span><br><span class="line"><span class="comment">// 打开输入</span></span><br><span class="line">err = avformat_open_input(&amp;ic, is-&gt;filename, is-&gt;iformat, &amp;format_opts);</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">is-&gt;ic = ic;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (genpts) ic-&gt;flags |= AVFMT_FLAG_GENPTS;</span><br><span class="line"></span><br><span class="line">av_format_inject_global_side_data(ic);</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (find_stream_info) &#123;</span><br><span class="line">  AVDictionary **opts = setup_find_stream_info_opts(ic, codec_opts);</span><br><span class="line">  <span class="type">int</span> orig_nb_streams = ic-&gt;nb_streams;</span><br><span class="line">  <span class="comment">// 读取文件头，获取文件的流详细信息</span></span><br><span class="line">  err = avformat_find_stream_info(ic, opts);</span><br><span class="line"></span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/08/03/av/ffplay%E8%A7%A3%E5%A4%8D%E7%94%A8%E7%BA%BF%E7%A8%8B%E5%88%86%E6%9E%90/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2020/08/02/av/ffplay%E9%98%9F%E5%88%97%E5%88%86%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="高振宇">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2020/08/02/av/ffplay%E9%98%9F%E5%88%97%E5%88%86%E6%9E%90/" class="post-title-link" itemprop="url">ffplay队列分析</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-08-02 00:00:00" itemprop="dateCreated datePublished" datetime="2020-08-02T00:00:00+08:00">2020-08-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/" itemprop="url" rel="index"><span itemprop="name">音视频</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.8k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>10 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>ffplay的整体结构是由5个线程和4个队列组成、运转的（不分析字幕）。</p>
+<h1 id="整体结构"><a href="#整体结构" class="headerlink" title="整体结构"></a>整体结构</h1><p><img src="/2020/08/02/av/ffplay%E9%98%9F%E5%88%97%E5%88%86%E6%9E%90/ffplay.png" alt="音视频开发之ffplay队列分析"></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/08/02/av/ffplay%E9%98%9F%E5%88%97%E5%88%86%E6%9E%90/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -695,517 +1196,6 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://witgao.com/2020/07/05/av/FFmpeg%E5%BD%95%E5%88%B6%E9%9F%B3%E9%A2%91/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="高振宇">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="富贵山庄">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 富贵山庄">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2020/07/05/av/FFmpeg%E5%BD%95%E5%88%B6%E9%9F%B3%E9%A2%91/" class="post-title-link" itemprop="url">FFmpeg录制音频</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-07-05 00:00:00" itemprop="dateCreated datePublished" datetime="2020-07-05T00:00:00+08:00">2020-07-05</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/" itemprop="url" rel="index"><span itemprop="name">音视频</span></a>
-        </span>
-    </span>
-
-  
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>2.9k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>11 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="音频录制流程"><a href="#音频录制流程" class="headerlink" title="音频录制流程"></a>音频录制流程</h1><p>FFmpeg对各大平台的音频输入和输出的API进行了统一的封装，将输入API封装成AVInputFormat，将输出API封装成AVOutputFormat，并且将音频采集设备封装成一个音频文件进行处理，所以我们在采集音频数据的时候，可以将音频设备当做一个无限大的音频文件，不断的从音频文件中读取数据。</p>
-<p><img src="/2020/07/05/av/FFmpeg%E5%BD%95%E5%88%B6%E9%9F%B3%E9%A2%91/ffmpeg_record_audio.png"></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/07/05/av/FFmpeg%E5%BD%95%E5%88%B6%E9%9F%B3%E9%A2%91/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://witgao.com/2020/05/28/av/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8JNI/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="高振宇">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="富贵山庄">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 富贵山庄">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2020/05/28/av/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8JNI/" class="post-title-link" itemprop="url">如何使用JNI</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-05-28 00:00:00" itemprop="dateCreated datePublished" datetime="2020-05-28T00:00:00+08:00">2020-05-28</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/" itemprop="url" rel="index"><span itemprop="name">音视频</span></a>
-        </span>
-    </span>
-
-  
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.1k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>4 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="JNI"><a href="#JNI" class="headerlink" title="JNI"></a>JNI</h1><p>JNI是Java与C&#x2F;C++连接的桥梁，是通过动态库的动态装载机制来实现的。（在前面将静态库和动态库的时候，讲过动态库的动态装载）<br>对于动态装载涉及到两个核心的函数：</p>
-<ul>
-<li>dlopen(): 打开一个动态库，并创建一个引用该动态库的句柄</li>
-<li>dlsym(): 根据动态库的句柄以及函数符号，返回该符号对应函数的地址，从而可以执行该函数</li>
-</ul>
-<p>在Java中一般通过System类的loadLibrary函数来加载一个动态库，该函数底层就是通过调用dlopen函数来实现的。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">System.loadLibrary(libraryName);</span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/05/28/av/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8JNI/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://witgao.com/2020/05/24/c++/%E5%BA%9F%E5%BC%83iterator/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="高振宇">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="富贵山庄">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 富贵山庄">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2020/05/24/c++/%E5%BA%9F%E5%BC%83iterator/" class="post-title-link" itemprop="url">废弃std::iterator</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-05-24 00:00:00" itemprop="dateCreated datePublished" datetime="2020-05-24T00:00:00+08:00">2020-05-24</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/C/" itemprop="url" rel="index"><span itemprop="name">C++</span></a>
-        </span>
-    </span>
-
-  
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>207</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p><img src="/2020/05/24/c++/%E5%BA%9F%E5%BC%83iterator/git-change.png" alt="git-change"></p>
-<p>在C++14之前，所有的Iterator都是继承自std::iterator类，在这个类中定义了五个type </p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">class</span> <span class="title class_">Category</span>, <span class="keyword">class</span> <span class="title class_">T</span>, <span class="keyword">class</span> <span class="title class_">Distance</span> = <span class="type">ptrdiff_t</span>, </span><br><span class="line">         <span class="keyword">class</span> Pointer = T*, <span class="keyword">class</span> Reference = T&amp;&gt; </span><br><span class="line"><span class="keyword">struct</span> iterator </span><br><span class="line">&#123; </span><br><span class="line">    <span class="keyword">typedef</span> T         value_type; </span><br><span class="line">    <span class="keyword">typedef</span> Distance  difference_type; </span><br><span class="line">    <span class="keyword">typedef</span> Pointer   pointer; </span><br><span class="line">    <span class="keyword">typedef</span> Reference reference; </span><br><span class="line">    <span class="keyword">typedef</span> Category  iterator_category; </span><br><span class="line">&#125;; </span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/05/24/c++/%E5%BA%9F%E5%BC%83iterator/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://witgao.com/2020/05/24/c++/%E7%BC%BA%E7%9C%81%E5%A4%8D%E5%88%B6/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="高振宇">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="富贵山庄">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 富贵山庄">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2020/05/24/c++/%E7%BC%BA%E7%9C%81%E5%A4%8D%E5%88%B6/" class="post-title-link" itemprop="url">Guaranteed copy elision 缺省复制</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-05-24 00:00:00" itemprop="dateCreated datePublished" datetime="2020-05-24T00:00:00+08:00">2020-05-24</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/C/" itemprop="url" rel="index"><span itemprop="name">C++</span></a>
-        </span>
-    </span>
-
-  
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>137</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>在c++17上，通过对value category修改，glvalue提供要被初始化的对象的地址，prvalue提供initializer。 </p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span> </span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">A</span> &#123; </span><br><span class="line"><span class="keyword">public</span>: </span><br><span class="line">  <span class="built_in">A</span>() = <span class="keyword">default</span>; </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="built_in">A</span>(A &amp;&amp;prev) = <span class="keyword">delete</span>; </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="comment">//  A(A &amp;&amp;prev) &#123; std::cout &lt;&lt; &quot;Print1&quot;; &#125; </span></span><br><span class="line">&#125;; </span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123; </span><br><span class="line">  A a = <span class="built_in">A</span>(); </span><br><span class="line">  std::cout &lt;&lt; <span class="string">&quot;aaa&quot;</span>; </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
-
-<p>所以上面的代码，在c++17之前是编译不过的，A a &#x3D; A() 这里调用了move构造，虽然编译器会优化掉，不会真正调用，但是move构造必须留着，不能删除。 </p>
-<p>但是在c++17后，是直接在value category层级，就保证了不会调用move构造。 </p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://witgao.com/2020/05/24/c++/%E9%9D%99%E6%80%81%E5%BA%93%E4%B8%8E%E5%8A%A8%E6%80%81%E5%BA%93%E4%B9%8B%E9%97%B4%E7%9A%84%E9%82%A3%E4%BA%9B%E4%BA%8B/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="高振宇">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="富贵山庄">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 富贵山庄">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2020/05/24/c++/%E9%9D%99%E6%80%81%E5%BA%93%E4%B8%8E%E5%8A%A8%E6%80%81%E5%BA%93%E4%B9%8B%E9%97%B4%E7%9A%84%E9%82%A3%E4%BA%9B%E4%BA%8B/" class="post-title-link" itemprop="url">静态库与动态库之间的那些事</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-05-24 00:00:00" itemprop="dateCreated datePublished" datetime="2020-05-24T00:00:00+08:00">2020-05-24</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/C/" itemprop="url" rel="index"><span itemprop="name">C++</span></a>
-        </span>
-    </span>
-
-  
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.6k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>6 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h3 id="什么是库"><a href="#什么是库" class="headerlink" title="什么是库"></a>什么是库</h3><p>库是一种可执行代码的二进制形式，可以被操作系统载入到内存中执行，库根据链接不同分为静态库和动态库。</p>
-<p>可执行文件生成的过程为:</p>
-<blockquote>
-<p>c -&gt; 预编译 -&gt; 编译器 -&gt; 汇编代码 -&gt; 汇编器 -&gt; 目标代码 -&gt; 链接器 -&gt; 可执行代码</p>
-</blockquote>
-<ul>
-<li>预编译：处理宏定义、删除注释、添加行号</li>
-<li>编译器：词法分析、语法分析、语义分析、代码优化</li>
-<li>汇编器：翻译成二进制</li>
-<li>链接器：合并符号表、符号解析、分配地址、重定位符号表</li>
-</ul>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/05/24/c++/%E9%9D%99%E6%80%81%E5%BA%93%E4%B8%8E%E5%8A%A8%E6%80%81%E5%BA%93%E4%B9%8B%E9%97%B4%E7%9A%84%E9%82%A3%E4%BA%9B%E4%BA%8B/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" title="上一页" aria-label="上一页" href="/page/2/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" title="下一页" aria-label="下一页" href="/page/4/"><i class="fa fa-angle-right"></i></a>
   </nav>
@@ -1230,13 +1220,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">69k</span>
+    <span title="站点总字数">76k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">4:12</span>
+    <span title="站点阅读时长">4:37</span>
   </span>
 </div>
 

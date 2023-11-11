@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha256-Z1K5uhUaJXA7Ll0XrZ/0JhX4lAtZFpT6jkKrEDT0drU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"witgao.com","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.14.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="WebCodec 是一个较新的 Web API，它为网页应用提供了接近硬件级的编解码能力。使用 WebCodec，开发者可以在浏览器中直接对音频和视频数据进行高效编解码，这对于实现复杂的媒体应用（如实时视频通信、视频编辑和游戏流）非常有用。 WebCodec 编解码流程解码创建解码器设置解码器名称WebCodec设置上参数与其它平台不同的一点，在于其名称字段比较繁琐 123456789101112">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Web硬件编解码-WebCodec">
+<meta property="og:url" content="https://witgao.com/2023/08/20/av/Web%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81-WebCodec/index.html">
+<meta property="og:site_name" content="富贵山庄">
+<meta property="og:description" content="WebCodec 是一个较新的 Web API，它为网页应用提供了接近硬件级的编解码能力。使用 WebCodec，开发者可以在浏览器中直接对音频和视频数据进行高效编解码，这对于实现复杂的媒体应用（如实时视频通信、视频编辑和游戏流）非常有用。 WebCodec 编解码流程解码创建解码器设置解码器名称WebCodec设置上参数与其它平台不同的一点，在于其名称字段比较繁琐 123456789101112">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-08-19T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-11-11T11:04:46.658Z">
+<meta property="article:author" content="高振宇">
+<meta property="article:tag" content="Web">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://witgao.com/2023/08/20/av/Web%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81-WebCodec/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://witgao.com/2023/08/20/av/Web%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81-WebCodec/","path":"2023/08/20/av/Web硬件编解码-WebCodec/","title":"Web硬件编解码-WebCodec"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Web硬件编解码-WebCodec | 富贵山庄</title>
+  
+
+
+
+
+
+
+  <script async defer data-website-id="" src=""></script>
+
+  <script defer data-domain="" src=""></script>
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">富贵山庄</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">恒者行远，思者常新</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#WebCodec-%E7%BC%96%E8%A7%A3%E7%A0%81%E6%B5%81%E7%A8%8B"><span class="nav-number">1.</span> <span class="nav-text">WebCodec 编解码流程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E7%A0%81"><span class="nav-number">1.1.</span> <span class="nav-text">解码</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E8%A7%A3%E7%A0%81%E5%99%A8"><span class="nav-number">1.1.1.</span> <span class="nav-text">创建解码器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE%E8%A7%A3%E7%A0%81%E5%99%A8%E5%90%8D%E7%A7%B0"><span class="nav-number">1.1.1.1.</span> <span class="nav-text">设置解码器名称</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E8%A7%A3%E7%A0%81%E5%99%A8%E5%AE%9E%E4%BE%8B"><span class="nav-number">1.1.1.2.</span> <span class="nav-text">创建解码器实例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E8%A7%A3%E7%A0%81%E5%99%A8"><span class="nav-number">1.1.1.3.</span> <span class="nav-text">配置解码器</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%84%E7%90%86%E6%95%B0%E6%8D%AE"><span class="nav-number">1.1.2.</span> <span class="nav-text">处理数据</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BE%93%E5%85%A5%E8%A7%A3%E7%A0%81%E6%95%B0%E6%8D%AE"><span class="nav-number">1.1.2.1.</span> <span class="nav-text">输入解码数据</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A4%84%E7%90%86%E8%BE%93%E5%87%BA%E8%A7%A3%E7%A0%81"><span class="nav-number">1.1.2.2.</span> <span class="nav-text">处理输出解码</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8A%E6%94%BE%E8%B5%84%E6%BA%90"><span class="nav-number">1.1.3.</span> <span class="nav-text">释放资源</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E7%A0%81"><span class="nav-number">1.2.</span> <span class="nav-text">编码</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E7%BC%96%E7%A0%81%E5%99%A8"><span class="nav-number">1.2.1.</span> <span class="nav-text">创建编码器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE%E8%A7%A3%E7%A0%81%E5%99%A8%E5%90%8D%E7%A7%B0-1"><span class="nav-number">1.2.1.1.</span> <span class="nav-text">设置解码器名称</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E7%BC%96%E7%A0%81%E5%99%A8%E5%AE%9E%E4%BE%8B"><span class="nav-number">1.2.1.2.</span> <span class="nav-text">创建编码器实例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E8%A7%A3%E7%A0%81%E5%99%A8-1"><span class="nav-number">1.2.1.3.</span> <span class="nav-text">配置解码器</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%84%E7%90%86%E6%95%B0%E6%8D%AE-1"><span class="nav-number">1.2.2.</span> <span class="nav-text">处理数据</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BE%93%E5%85%A5%E7%BC%96%E7%A0%81%E6%95%B0%E6%8D%AE"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">输入编码数据</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A4%84%E7%90%86%E8%BE%93%E5%87%BA%E8%A7%A3%E7%A0%81-1"><span class="nav-number">1.2.2.2.</span> <span class="nav-text">处理输出解码</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8A%E6%94%BE%E8%B5%84%E6%BA%90-1"><span class="nav-number">1.2.3.</span> <span class="nav-text">释放资源</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="高振宇"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">高振宇</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">39</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/witgao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;witgao" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:witgao328@gmail.com" title="E-Mail → mailto:witgao328@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2023/08/20/av/Web%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81-WebCodec/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="高振宇">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Web硬件编解码-WebCodec | 富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Web硬件编解码-WebCodec
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-08-20 00:00:00" itemprop="dateCreated datePublished" datetime="2023-08-20T00:00:00+08:00">2023-08-20</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/" itemprop="url" rel="index"><span itemprop="name">音视频</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>864</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>3 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>WebCodec 是一个较新的 Web API，它为网页应用提供了接近硬件级的编解码能力。使用 WebCodec，开发者可以在浏览器中直接对音频和视频数据进行高效编解码，这对于实现复杂的媒体应用（如实时视频通信、视频编辑和游戏流）非常有用。</p>
+<h1 id="WebCodec-编解码流程"><a href="#WebCodec-编解码流程" class="headerlink" title="WebCodec 编解码流程"></a>WebCodec 编解码流程</h1><h2 id="解码"><a href="#解码" class="headerlink" title="解码"></a>解码</h2><h3 id="创建解码器"><a href="#创建解码器" class="headerlink" title="创建解码器"></a>创建解码器</h3><h4 id="设置解码器名称"><a href="#设置解码器名称" class="headerlink" title="设置解码器名称"></a>设置解码器名称</h4><p>WebCodec设置上参数与其它平台不同的一点，在于其名称字段比较繁琐</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line">   <span class="keyword">if</span> (VideoType == H264)</span><br><span class="line">   &#123;</span><br><span class="line">    ...</span><br><span class="line">       std::stringstream stream;</span><br><span class="line">       stream &lt;&lt; <span class="string">&quot;avc1.&quot;</span>;</span><br><span class="line">       stream &lt;&lt; <span class="built_in">decimalToHex</span>(profile_idc);</span><br><span class="line">       stream &lt;&lt; <span class="built_in">decimalToHex</span>(constraint_set_flags);</span><br><span class="line">       stream &lt;&lt; <span class="built_in">decimalToHex</span>(level_idc);</span><br><span class="line">       codecName = stream.<span class="built_in">str</span>();</span><br><span class="line">       <span class="comment">// codecName = &quot;avc1.640020&quot;;</span></span><br><span class="line">   &#125;<span class="keyword">else</span> <span class="keyword">if</span>(VideoType == H265)</span><br><span class="line">&#123;</span><br><span class="line">       std::stringstream stream;</span><br><span class="line">       stream &lt;&lt; <span class="string">&quot;hev1.&quot;</span>;</span><br><span class="line">	<span class="keyword">switch</span> (general_profile_space) &#123;</span><br><span class="line">       <span class="keyword">case</span> <span class="number">0</span>:</span><br><span class="line">           <span class="keyword">break</span>;</span><br><span class="line">       <span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">           stream &lt;&lt; <span class="string">&#x27;A&#x27;</span>;</span><br><span class="line">           <span class="keyword">break</span>;</span><br><span class="line">       <span class="keyword">case</span> <span class="number">2</span>:</span><br><span class="line">           stream &lt;&lt; <span class="string">&#x27;B&#x27;</span>;</span><br><span class="line">           <span class="keyword">break</span>;</span><br><span class="line">       <span class="keyword">case</span> <span class="number">3</span>:</span><br><span class="line">           stream &lt;&lt; <span class="string">&#x27;C&#x27;</span>;</span><br><span class="line">           <span class="keyword">break</span>;</span><br><span class="line">       &#125;</span><br><span class="line">       stream &lt;&lt; general_profile_idc;</span><br><span class="line">       stream &lt;&lt; <span class="string">&#x27;.&#x27;</span>;</span><br><span class="line">       </span><br><span class="line">	MUInt32 val = (MUInt32)general_profile_compatibility_flag;</span><br><span class="line">       <span class="type">int</span> reversed = <span class="number">0</span>;</span><br><span class="line">       <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">32</span>; i++)</span><br><span class="line">       &#123;</span><br><span class="line">           reversed |= val &amp; <span class="number">1</span>;</span><br><span class="line">           <span class="keyword">if</span> (i == <span class="number">31</span>)</span><br><span class="line">               <span class="keyword">break</span>;</span><br><span class="line">           reversed &lt;&lt;= <span class="number">1</span>;</span><br><span class="line">           val &gt;&gt;= <span class="number">1</span>;</span><br><span class="line">       &#125;</span><br><span class="line">       stream &lt;&lt; <span class="built_in">decimalToHex</span>(reversed, <span class="number">0</span>);</span><br><span class="line">       stream &lt;&lt; <span class="string">&#x27;.&#x27;</span>;</span><br><span class="line">       <span class="keyword">if</span> (general_tier_flag == <span class="number">0</span>)</span><br><span class="line">       &#123;</span><br><span class="line">           stream &lt;&lt; <span class="string">&#x27;L&#x27;</span>;</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">else</span></span><br><span class="line">       &#123;</span><br><span class="line">           stream &lt;&lt; <span class="string">&#x27;H&#x27;</span>;</span><br><span class="line">       &#125;</span><br><span class="line">       stream &lt;&lt; general_level_idc;</span><br><span class="line">       MBool hasByte = <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">       std::string constraint_string = <span class="string">&quot;&quot;</span>;</span><br><span class="line">       <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">5</span>; i &gt;= <span class="number">0</span>; i--)</span><br><span class="line">       &#123;</span><br><span class="line">           <span class="type">int</span> val = <span class="number">0</span>;</span><br><span class="line">           <span class="keyword">if</span> (general_constraint_indicator_flags[i] != <span class="string">&#x27;\0&#x27;</span>)</span><br><span class="line">           &#123;</span><br><span class="line">               val = general_constraint_indicator_flags[i];</span><br><span class="line">		&#125;</span><br><span class="line">           <span class="keyword">if</span> (val != <span class="number">0</span> || hasByte)</span><br><span class="line">           &#123;</span><br><span class="line">               constraint_string = <span class="string">&quot;.&quot;</span> + <span class="built_in">decimalToHex</span>(val, <span class="number">0</span>) + constraint_string;</span><br><span class="line">               hasByte = <span class="literal">true</span>;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">       stream &lt;&lt; constraint_string;</span><br><span class="line">       codecName = stream.<span class="built_in">str</span>();</span><br><span class="line">       <span class="comment">// codecName = &quot;hev1.1.6.L120.90&quot;;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<h4 id="创建解码器实例"><a href="#创建解码器实例" class="headerlink" title="创建解码器实例"></a>创建解码器实例</h4><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> decoder = <span class="keyword">new</span> <span class="title class_">VideoDecoder</span>(&#123;</span><br><span class="line">  <span class="title function_">output</span>(<span class="params">frame</span>) &#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// 解码成功回调</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="title function_">error</span>(<span class="params">e</span>) &#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// 解码失败回调</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="配置解码器"><a href="#配置解码器" class="headerlink" title="配置解码器"></a>配置解码器</h4><p>WebCodec支持Annex-B格式和avc格式的码流，如果设置了description，则表示传入的是avc格式的码流，如果不传，则表示传入的是Annex-B格式的码流</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> config = &#123;</span><br><span class="line">       <span class="attr">codec</span>: codecName,</span><br><span class="line">       <span class="attr">codedHeight</span>: height,</span><br><span class="line">       <span class="attr">codedWidth</span>: width,</span><br><span class="line">       <span class="attr">description</span>: description,</span><br><span class="line">       <span class="attr">hardwareAcceleration</span>: <span class="string">&quot;prefer-hardware&quot;</span></span><br><span class="line">        &#125;;</span><br><span class="line">decoder.<span class="title function_">configure</span>(config);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="处理数据"><a href="#处理数据" class="headerlink" title="处理数据"></a>处理数据</h3><h4 id="输入解码数据"><a href="#输入解码数据" class="headerlink" title="输入解码数据"></a>输入解码数据</h4><p>使用 <code>decode</code> 方法将压缩的视频数据（通常是 <code>EncodedVideoChunk</code>）送入解码器。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> chunk = <span class="keyword">new</span> <span class="title class_">EncodedVideoChunk</span>(&#123;</span><br><span class="line">  <span class="attr">type</span>: is_sync ? <span class="string">&quot;key&quot;</span> : <span class="string">&quot;delta&quot;</span>,</span><br><span class="line">  <span class="attr">timestamp</span>: timestamp,</span><br><span class="line">  <span class="attr">duration</span>: duration,</span><br><span class="line">  <span class="attr">data</span>: data</span><br><span class="line">&#125;);</span><br><span class="line">decoder.<span class="title function_">decode</span>(chunk);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="处理输出解码"><a href="#处理输出解码" class="headerlink" title="处理输出解码"></a>处理输出解码</h4><p>VideoFrame包含了解码后的一帧数据，可以通过copyTo函数将输入拷贝到cpu中（比较耗时），也可以直接通过texImage2D直接绑定到纹理上。VideoFrame是一个Transferable objects，可以通过postMessage发送到其它Worker中使用。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">output</span>(<span class="params">frame</span>) &#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="comment">// 绑定纹理</span></span><br><span class="line">  gl.<span class="title function_">texImage2D</span>(gl.<span class="property">TEXTURE_2D</span>, <span class="number">0</span>, gl.<span class="property">RGBA</span>, gl.<span class="property">RGBA</span>, gl.<span class="property">UNSIGNED_BYTE</span>, frame);</span><br><span class="line">  <span class="comment">// 下载数据</span></span><br><span class="line">  frame.<span class="title function_">copyTo</span>(buffer);</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="释放资源"><a href="#释放资源" class="headerlink" title="释放资源"></a>释放资源</h3><p>解码完成后，调用 <code>close</code> 或 <code>flush</code> 释放解码器资源。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">await</span> decoder.<span class="title function_">flush</span>();</span><br><span class="line">decoder.<span class="title function_">close</span>();</span><br></pre></td></tr></table></figure>
+
+<h2 id="编码"><a href="#编码" class="headerlink" title="编码"></a>编码</h2><h3 id="创建编码器"><a href="#创建编码器" class="headerlink" title="创建编码器"></a>创建编码器</h3><h4 id="设置解码器名称-1"><a href="#设置解码器名称-1" class="headerlink" title="设置解码器名称"></a>设置解码器名称</h4><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (VideoType == H264)</span><br><span class="line">&#123;</span><br><span class="line">    stream &lt;&lt; <span class="string">&quot;avc1.&quot;</span>;</span><br><span class="line">	<span class="keyword">switch</span> (Profile)</span><br><span class="line">	&#123;</span><br><span class="line">	    <span class="keyword">case</span> H264_PROFILE_BASELINE:</span><br><span class="line">	    &#123;</span><br><span class="line">	        stream &lt;&lt; <span class="string">&quot;4200&quot;</span>;</span><br><span class="line">	    &#125;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> H264_PROFILE_MAIN:</span><br><span class="line">		&#123;</span><br><span class="line">		    stream &lt;&lt; <span class="string">&quot;4d00&quot;</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> H264_PROFILE_HIGH:</span><br><span class="line">		&#123;</span><br><span class="line">		    stream &lt;&lt; <span class="string">&quot;6400&quot;</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">default</span>:</span><br><span class="line">		&#123;</span><br><span class="line">		    stream &lt;&lt; <span class="string">&quot;4200&quot;</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">switch</span> (Level)</span><br><span class="line">	&#123;</span><br><span class="line">	    <span class="keyword">case</span> H264_LEVEL_30:</span><br><span class="line">	    &#123;</span><br><span class="line">	        stream &lt;&lt; <span class="string">&quot;1e&quot;</span>;</span><br><span class="line">	    &#125;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> H264_LEVEL_31:</span><br><span class="line">		&#123;</span><br><span class="line">		    stream &lt;&lt; <span class="string">&quot;1f&quot;</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> H264_LEVEL_40:</span><br><span class="line">		&#123;</span><br><span class="line">		    stream &lt;&lt; <span class="string">&quot;28&quot;</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> H264_LEVEL_41:</span><br><span class="line">		&#123;</span><br><span class="line">		    stream &lt;&lt; <span class="string">&quot;29&quot;</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> H264_LEVEL_50:</span><br><span class="line">		&#123;</span><br><span class="line">               stream &lt;&lt; <span class="string">&quot;32&quot;</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> H264_LEVEL_51:</span><br><span class="line">		&#123;</span><br><span class="line">               stream &lt;&lt; <span class="string">&quot;33&quot;</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">default</span>:</span><br><span class="line">		&#123;</span><br><span class="line">		    stream &lt;&lt; <span class="string">&quot;1e&quot;</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">else</span> <span class="keyword">if</span> (VideoType == H265)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">switch</span> (Profile)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">case</span> HEVC_PROFILE_MAIN:</span><br><span class="line">        &#123;</span><br><span class="line">            stream &lt;&lt; <span class="string">&quot;hev1.1.6.L93.B0&quot;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> HEVC_PROFILE_MAIN10:</span><br><span class="line">		&#123;</span><br><span class="line">		    stream &lt;&lt; <span class="string">&quot;hev1.2.4.L120.B0&quot;</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">default</span>:</span><br><span class="line">		&#123;</span><br><span class="line">		    stream &lt;&lt; <span class="string">&quot;hev1.1.6.L93.B0&quot;</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="创建编码器实例"><a href="#创建编码器实例" class="headerlink" title="创建编码器实例"></a>创建编码器实例</h4><p>使用 <code>VideoEncoder</code> 类创建一个视频编码器实例。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> encoder = <span class="keyword">new</span> <span class="title class_">VideoEncoder</span>(&#123;</span><br><span class="line">  <span class="title function_">output</span>(<span class="params">chunk, metadata</span>) &#123;</span><br><span class="line"></span><br><span class="line">  &#125;,</span><br><span class="line"></span><br><span class="line">  <span class="title function_">error</span>(<span class="params">e</span>) &#123;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="配置解码器-1"><a href="#配置解码器-1" class="headerlink" title="配置解码器"></a>配置解码器</h4><p>WebCodec支持Annex-B格式和avc格式的码流，可以在config中指定</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> config = &#123;</span><br><span class="line">      <span class="attr">bitrateMode</span>: bitPref,</span><br><span class="line">      <span class="attr">codec</span>: codec,</span><br><span class="line">      <span class="attr">width</span>: width,</span><br><span class="line">      <span class="attr">height</span>: height,</span><br><span class="line">      <span class="attr">hardwareAcceleration</span>: hw,</span><br><span class="line">      <span class="attr">bitrate</span>: bitrate, </span><br><span class="line">      <span class="attr">framerate</span>: frameRate,</span><br><span class="line">      <span class="attr">keyInterval</span>: keyInterval,</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">switch</span>(codec_type)&#123;</span><br><span class="line">      <span class="keyword">case</span> <span class="string">&quot;H264&quot;</span>:</span><br><span class="line">        config.<span class="property">avc</span> = &#123; <span class="attr">format</span>: <span class="string">&quot;annexb&quot;</span> &#125;;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      <span class="keyword">case</span> <span class="string">&quot;H265&quot;</span>:</span><br><span class="line">        config.<span class="property">hevc</span> = &#123; <span class="attr">format</span>: <span class="string">&quot;annexb&quot;</span> &#125;;</span><br><span class="line">        <span class="keyword">break</span>; </span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">  encoder.<span class="title function_">configure</span>(config);</span><br></pre></td></tr></table></figure>
+
+<h3 id="处理数据-1"><a href="#处理数据-1" class="headerlink" title="处理数据"></a>处理数据</h3><h4 id="输入编码数据"><a href="#输入编码数据" class="headerlink" title="输入编码数据"></a>输入编码数据</h4><p>通过 <code>encode</code> 方法将 <code>VideoFrame</code> 对象送入编码器进行编码。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">const</span> init = &#123;</span><br><span class="line">  <span class="attr">timestamp</span>: timestamp,</span><br><span class="line">  <span class="attr">duration</span>: duration,</span><br><span class="line">  <span class="attr">codedWidth</span>: frameWidth,</span><br><span class="line">  <span class="attr">codedHeight</span>: frameHeight,</span><br><span class="line">  <span class="attr">format</span>: <span class="string">&quot;I420&quot;</span>,</span><br><span class="line">&#125;;</span><br><span class="line">  <span class="keyword">let</span> videoFrame = <span class="keyword">new</span> <span class="title class_">VideoFrame</span>(dst, init);</span><br><span class="line">  encoder.<span class="title function_">encode</span>(videoFrame,&#123;<span class="attr">keyFrame</span>:key_flag&#125;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="处理输出解码-1"><a href="#处理输出解码-1" class="headerlink" title="处理输出解码"></a>处理输出解码</h4><p>通过copyTo可以拷贝编码结果到一个buffer中，调用muxer的write将其写入到文件中</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">output</span>(<span class="params">chunk, metadata</span>) &#123;</span><br><span class="line">  <span class="comment">// metadata 包含sps pps数据</span></span><br><span class="line">  <span class="comment">// chunk 编码结果</span></span><br><span class="line">  chunk.<span class="title function_">copyTo</span>(buffer)</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
+
+<h3 id="释放资源-1"><a href="#释放资源-1" class="headerlink" title="释放资源"></a>释放资源</h3><p>编码完成后，调用 <code>close</code> 或 <code>flush</code> 释放编码器资源。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">await</span> encoder.<span class="title function_">flush</span>();</span><br><span class="line">encoder.<span class="title function_">close</span>();</span><br></pre></td></tr></table></figure>
+
+
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>高振宇
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://witgao.com/2023/08/20/av/Web%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81-WebCodec/" title="Web硬件编解码-WebCodec">https://witgao.com/2023/08/20/av/Web硬件编解码-WebCodec/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/Web/" rel="tag"><i class="fa fa-tag"></i> Web</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2023/03/16/c++/std::declval%E7%9A%84%E4%BD%9C%E7%94%A8%E5%92%8C%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/" rel="prev" title="std::declval 的作用">
+                  <i class="fa fa-chevron-left"></i> std::declval 的作用
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">高振宇</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">76k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:37</span>
+  </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
