@@ -151,7 +151,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">33</span>
+          <span class="site-state-item-count">34</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -162,7 +162,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-count">7</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -196,7 +196,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://witgao.com/2020/03/05/av/FFmpeg%E6%B7%B1%E5%85%A5%E4%B9%8Bavformat-open-input/">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2020/04/22/av/Android%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.png">
@@ -214,7 +214,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2020/03/05/av/FFmpeg%E6%B7%B1%E5%85%A5%E4%B9%8Bavformat-open-input/" class="post-title-link" itemprop="url">FFmpeg深入之avformat_open_input</a>
+          <a href="/2020/04/22/av/Android%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81/" class="post-title-link" itemprop="url">Android硬件编解码</a>
         </h2>
 
         <div class="post-meta-container">
@@ -225,7 +225,7 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2020-03-05 00:00:00" itemprop="dateCreated datePublished" datetime="2020-03-05T00:00:00+08:00">2020-03-05</time>
+      <time title="创建时间：2020-04-22 00:00:00" itemprop="dateCreated datePublished" datetime="2020-04-22T00:00:00+08:00">2020-04-22</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -243,14 +243,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>4.5k</span>
+      <span>3k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>16 分钟</span>
+      <span>11 分钟</span>
     </span>
 </div>
 
@@ -261,10 +261,113 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta"># libavformat/avformat.h</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 读取多媒体文件头信息</span></span><br><span class="line"><span class="comment"> * 此时并未开始解码，开启的流通过avformat_close_input()关闭。</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * @param ps AVFormatContext (通过avformat_alloc_context创建)，可以传NULL。    </span></span><br><span class="line"><span class="comment"> * @param url 多媒体URL</span></span><br><span class="line"><span class="comment"> * @param fmt 指定解封装的格式，传NULL时将自动检测.</span></span><br><span class="line"><span class="comment"> * @param options  解封装参数自定义，可以传NULL</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * @return 0 成功</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">avformat_open_input</span><span class="params">(AVFormatContext **ps, <span class="type">const</span> <span class="type">char</span> *url, AVInputFormat *fmt, AVDictionary **options)</span>;</span><br></pre></td></tr></table></figure>
+          <h1 id="MediaCodec介绍"><a href="#MediaCodec介绍" class="headerlink" title="MediaCodec介绍"></a>MediaCodec介绍</h1><p>MediaCodec是Android平台上用来访问编码器和解码器的组件。</p>
+<h2 id="工作流程"><a href="#工作流程" class="headerlink" title="工作流程"></a>工作流程</h2><p><img src="/2020/04/22/av/Android%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81/mediacodec-processes.png" alt="mediacodec-processes"></p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2020/03/05/av/FFmpeg%E6%B7%B1%E5%85%A5%E4%B9%8Bavformat-open-input/#more" rel="contents">
+              <a class="btn" href="/2020/04/22/av/Android%E7%A1%AC%E4%BB%B6%E7%BC%96%E8%A7%A3%E7%A0%81/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://witgao.com/2020/04/12/av/Android%E7%A1%AC%E4%BB%B6%E8%A7%A3%E5%B0%81%E8%A3%85/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="高振宇">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 富贵山庄">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2020/04/12/av/Android%E7%A1%AC%E4%BB%B6%E8%A7%A3%E5%B0%81%E8%A3%85/" class="post-title-link" itemprop="url">Android硬件解封装</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-04-12 00:00:00" itemprop="dateCreated datePublished" datetime="2020-04-12T00:00:00+08:00">2020-04-12</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91/" itemprop="url" rel="index"><span itemprop="name">音视频</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.9k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>11 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="硬件解封装"><a href="#硬件解封装" class="headerlink" title="硬件解封装"></a>硬件解封装</h1><p>Android平台针对音视频封装提供了<strong>MediaMuxer API</strong>，支持.mp4格式的封装；针对解封装提供了<strong>MediaExtractor API</strong>，支持.mp4等格式。</p>
+<h1 id="API架构"><a href="#API架构" class="headerlink" title="API架构"></a>API架构</h1><p>在 <strong>frameworks&#x2F;base&#x2F;media</strong> 文件夹中提供了所有音视频相关的Java层API，本文中讲述的解封装API都定义在该处。而具体的服务实现都在 <strong>frameworks&#x2F;av</strong> 文件夹中</p>
+<p><img src="/2020/04/12/av/Android%E7%A1%AC%E4%BB%B6%E8%A7%A3%E5%B0%81%E8%A3%85/android_muxer_demuxer.jpg"></p>
+<p>自7.0开始，MediaService被拆分成多个服务，每个服务都运行在各自的进程中。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/04/12/av/Android%E7%A1%AC%E4%BB%B6%E8%A7%A3%E5%B0%81%E8%A3%85/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -516,13 +619,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">75k</span>
+    <span title="站点总字数">69k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">4:33</span>
+    <span title="站点阅读时长">4:12</span>
   </span>
 </div>
 
